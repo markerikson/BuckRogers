@@ -701,7 +701,8 @@ namespace BuckRogers
 			ma.Units.AddAllUnits(uc);
 			ma.Territories.Add(m_controller.Map["Near Moon Orbit"]);
 			ma.Territories.Add(m_controller.Map["Near Earth Orbit"]);
-			ma.Territories.Add(m_controller.Map["Independent Arcologies"]);
+			Territory arcologies = m_controller.Map["Independent Arcologies"];
+			ma.Territories.Add(arcologies);
 
 			m_controller.AddAction(ma);
 
@@ -712,7 +713,8 @@ namespace BuckRogers
 			ma.Owner = tranquility.Owner;
 			ma.StartingTerritory = tranquility;
 			ma.Units.AddAllUnits(uc);
-			ma.Territories.Add(m_controller.Map["Moscoviense"]);
+			Territory moscoviense = m_controller.Map["Moscoviense"];
+			ma.Territories.Add(moscoviense);
 
 			m_controller.AddAction(ma);
 
@@ -741,17 +743,63 @@ namespace BuckRogers
 			Player mark = m_controller.GetPlayer("Mark");
 			Unit battler = Unit.CreateNewUnit(mark, UnitType.Battler);
 			battler.CurrentTerritory = mercury.NearOrbit;
+			for(int i = 0; i < 5; i++)
+			{
+				Unit fighter = Unit.CreateNewUnit(mark, UnitType.Fighter);
+				fighter.CurrentTerritory = mercury.NearOrbit;
+			}
 
 			Hashlist battles = m_controller.FindBattles();
 
-			foreach(BattleInfo bi in battles)
+
+			Territory[] battleSites = {mercury.NearOrbit, mercury.NearOrbit, mercury.NearOrbit, mercuryOrbit1,
+										  antarctica, arcologies, moscoviense,  transMarsOrbit15};
+			BattleType[] battleTypes = {BattleType.KillerSatellite, BattleType.Bombing, BattleType.Normal, BattleType.Normal,
+										   BattleType.Normal, BattleType.Normal, BattleType.Normal, BattleType.Normal};
+			//foreach(BattleInfo bi in battles)
+			for(int i = 0; i < battles.Count; i++)
 			{
+				BattleInfo bi = (BattleInfo)battles[i];
 				Console.WriteLine(bi.ToString());
+				Assert.AreEqual(battleSites[i], bi.Territory);
+				Assert.AreEqual(battleTypes[i], bi.Type);
 			}
-			int i = 42;
-			int q = i;
+			
 
 
+		}
+
+		[Test]
+		public void KillerSatelliteBattle()
+		{
+			FindBattles();
+
+			//Unit leader = m_controller.GetPlayer("Stu").Units.GetUnits(UnitType.Leader)[0];
+			//leader.CurrentTerritory = m_controller.Map["Near Mercury Orbit"];
+			Hashlist battles = m_controller.Battles;
+
+			BattleInfo bi = (BattleInfo)battles[0];
+
+			UnitCollection units = bi.Territory.Units;
+			UnitCollection satellites = units.GetUnits(UnitType.KillerSatellite);
+
+			// Set up a predictable series of combat results
+			// Next six numbers are 4, 8, 10, 2, 8, 8
+			m_controller.Twister.Initialize(42);
+			CombatResult cr = m_controller.DoCombat(bi);
+
+			// TODO figure out what to actually test here to prove this works
+
+			Assert.AreEqual(4, cr.Casualties.Count);
+			Assert.AreEqual(2, cr.Survivors.Count);
+
+			Assert.AreEqual(UnitType.Battler, cr.Survivors[0].UnitType);
+			Assert.AreEqual(UnitType.Fighter, cr.Survivors[1].UnitType);
+
+			Assert.AreEqual(UnitType.Fighter, cr.Casualties[0].UnitType);
+			Assert.AreEqual(UnitType.Fighter, cr.Casualties[1].UnitType);
+			Assert.AreEqual(UnitType.Fighter, cr.Casualties[2].UnitType);
+			Assert.AreEqual(UnitType.Fighter, cr.Casualties[3].UnitType);
 		}
 	}
 }

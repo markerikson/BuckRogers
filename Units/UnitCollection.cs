@@ -287,6 +287,20 @@ namespace BuckRogers
 			}			
 		}
 
+		public UnitCollection GetOtherPlayersUnits(Player player)
+		{
+			UnitCollection uc = new UnitCollection();
+
+			foreach(Unit u in List)
+			{
+				if(u.Owner != player)
+				{
+					uc.AddUnit(u);
+				}
+			}
+			
+			return uc;
+		}
 
 		public Hashtable GetPlayersWithUnits()
 		{

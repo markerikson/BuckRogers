@@ -9,7 +9,15 @@ namespace BuckRogers
 	/// </summary>
 	public class GameController
 	{
+		
+		
 		#region Properties
+		public CenterSpace.Free.MersenneTwister Twister
+		{
+			get { return this.m_twister; }
+			set { this.m_twister = value; }
+		}
+
 		public BuckRogers.GameMap Map
 		{
 			get { return this.m_map; }
@@ -34,6 +42,12 @@ namespace BuckRogers
 			set { this.m_currentPlayerOrder = value; }
 		}
 
+		public BuckRogers.Hashlist Battles
+		{
+			get { return this.m_battles; }
+			set { this.m_battles = value; }
+		}
+
 		#endregion
 	
 		private GameMap m_map;
@@ -46,9 +60,13 @@ namespace BuckRogers
 		private ArrayList m_checkedActions;
 		private ArrayList m_undoneActions;
 		private int m_turnNumber;
+		private Hashlist m_battles;
+		private int[,] m_combatTable;
+		private const int NOTPOSSIBLE = 99;
 
 		// TODO Change this into a property or something		
 		public TurnRoll[] Rolls;
+
 
 		
 
@@ -121,6 +139,15 @@ namespace BuckRogers
 			m_twister = new MersenneTwister();
 			m_checkedActions = new ArrayList();
 			m_undoneActions = new ArrayList();
+
+			m_combatTable = new int[,]	{	{6, 8, 7, NOTPOSSIBLE, 6, NOTPOSSIBLE, 3},
+											{5, 6, 6, NOTPOSSIBLE, 5, NOTPOSSIBLE, 2},
+											{7, 7, 6, 8, 3, 7, 3},
+											{7, 7, 4, 6, 4, 6, NOTPOSSIBLE},
+											{9, 10, 8, 10, 6, 10, 9},
+											{NOTPOSSIBLE, NOTPOSSIBLE, 6, 7, 5, NOTPOSSIBLE, NOTPOSSIBLE},
+											{8, 9, 9, NOTPOSSIBLE, 7, NOTPOSSIBLE, NOTPOSSIBLE},
+										};
 
 			m_turnNumber = 0;			
 		}
@@ -706,7 +733,7 @@ namespace BuckRogers
 						BattleInfo bi = new BattleInfo();
 						bi.Type = BattleType.Normal;
 						bi.Territory = u.CurrentTerritory;
-						Console.WriteLine("Name: " + name + ", Unit: " + u.Info);
+						//Console.WriteLine("Name: " + name + ", Unit: " + u.Info);
 						if(!planetBattleList.ContainsKey(bi.ToString()))
 						{
 							
@@ -718,7 +745,7 @@ namespace BuckRogers
 			}
 
 			// Add the battles from each planet in the appropriate order
-			Hashlist battles = new Hashlist();
+			m_battles = new Hashlist();
 			for(int i = 0; i < searchOrder.Length; i++)
 			{
 				Hashlist planet = (Hashlist)planets[searchOrder[i]];
@@ -728,18 +755,128 @@ namespace BuckRogers
 					foreach(BattleInfo bi in planet)
 					{
 
-						battles.Add(bi.ToString(), bi);
+						m_battles.Add(bi.ToString(), bi);
 					}
 				}
 			}
 
-			return battles;
+			return m_battles;
 			
 		}
 
-		public void ExecuteAttack(Unit attacker, Unit defender, bool attackerLeader, bool defenderLeader)
+		public CombatResult DoCombat(BattleInfo bi)
 		{
+			CombatResult cr = null;
+			switch(bi.Type)
+			{
+				case BattleType.KillerSatellite:
+				{
+					UnitCollection units = bi.Territory.Units;
+					UnitCollection satellites = units.GetUnits(UnitType.KillerSatellite);
+					Unit satellite = satellites[0];
 
+					UnitCollection targets = units.GetOtherPlayersUnits(satellite.Owner);
+					UnitCollection leaders = units.GetUnits(UnitType.Leader);
+					UnitCollection attackerLeaders = leaders.GetUnits(satellite.Owner);
+
+					cr = new CombatResult();
+					UnitCollection individualTarget = new UnitCollection();
+					CombatInfo ci;
+					for(int i = 0; i < targets.Count; i++)
+					{
+						ci = new CombatInfo();
+						individualTarget.Clear();
+						individualTarget.AddUnit(targets[i]);
+						ci.Defenders.AddAllUnits(individualTarget);
+						ci.Attackers.AddAllUnits(satellites);
+						ci.AttackingLeader = !attackerLeaders.Empty;
+						
+						CombatResult individualCR = ExecuteAttack(ci);
+
+						if(!individualCR.Casualties.Empty)
+						{
+							cr.Casualties.AddAllUnits(individualCR.Casualties);
+						}
+
+						if(!individualCR.Survivors.Empty)
+						{
+							cr.Survivors.AddAllUnits(individualCR.Survivors);
+						}
+
+					}
+
+					cr.UsedAttackers.AddAllUnits(satellites);
+
+					break;
+				}
+			}
+
+			return cr;
+		}
+
+		public CombatResult ExecuteAttack(CombatInfo ci)
+		{
+			CombatResult cr = new CombatResult();
+
+			// it's basically a while loop - no incrementing of i, since this
+			// needs to go until all attackers are done or all defenders are destroyed, 
+			// and one unit will be removed from ci.Attackers each time through
+			for(int i = 0; i < ci.Attackers.Count;)
+			{
+				Unit attacker = (Unit)ci.Attackers[0];
+				Unit defender = (Unit)ci.Defenders[0];
+				int toHit = m_combatTable[(int)attacker.UnitType, (int)defender.UnitType];
+				if(toHit == NOTPOSSIBLE)
+				{
+					throw new Exception("Can't attack a " + defender.UnitType + " with a " + attacker.UnitType);
+				}
+
+				int roll = RollD10();
+
+				if(ci.AttackingLeader)
+				{
+					roll += 2;
+				}
+
+				if(roll > 10)
+				{
+					roll = 10;
+				}
+
+				ci.Attackers.RemoveUnit(attacker);
+				cr.UsedAttackers.AddUnit(attacker);
+
+				Console.WriteLine("To hit: " + toHit + ", roll: " + roll);
+				if(roll > toHit)
+				{
+					ci.Defenders.RemoveUnit(defender);
+					cr.Casualties.AddUnit(defender);
+
+					if(ci.Defenders.Count == 0)
+					{
+						break;
+					}
+				}
+
+				// TODO Maybe raise an event here that can pass the attack details back to the interface?
+
+				
+			}
+
+			cr.UnusedAttackers.AddAllUnits(ci.Attackers);
+			cr.Survivors.AddAllUnits(ci.Defenders);
+			/*
+			for(int i = 0; i < ci.Attackers.Count; i++)
+			{
+				cr.UnusedAttackers.AddUnit(ci.Attackers[i]);
+			}
+
+			for(int i = 0; i < ci.Defenders.Count; i++)
+			{
+				cr.Survivors.AddUnit(ci.Defenders[i]);
+			}*/
+			
+			return cr;
 		}
 	}
 }

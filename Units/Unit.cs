@@ -2,18 +2,20 @@ using System;
 
 namespace BuckRogers
 {
+	// This order is based on the combat table in the manual.
+	// Anything before Factory should not be moved.
 	public enum UnitType
 	{
-		None				= 0,
-		Trooper				= 1,
-		Gennie				= 2,
-		Transport			= 3,
-		Fighter				= 4,
-		Battler				= 5,
-		KillerSatellite		= 6,
-		Factory				= 7,
-		Marker				= 8,
-		Leader				= 9,
+		Trooper = 0,
+		Gennie,
+		Fighter,
+		Battler,
+		Transport,
+		KillerSatellite,
+		Marker,
+		Factory,
+		Leader,
+		None,
 	}
 
 	/// <summary>
