@@ -179,7 +179,7 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Data structures\MoveActkl .cs"
+                    RelPath = "Data structures\MoveAction.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
