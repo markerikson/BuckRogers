@@ -11,9 +11,6 @@ namespace BuckRogers
 	{
 		public Utility()
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 		}
 
 		static Random rng = new Random();

@@ -114,6 +114,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "BattleInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "ControllerTest.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -135,6 +140,11 @@
                 />
                 <File
                     RelPath = "GameMap.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Hashlist.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
@@ -205,16 +215,6 @@
                 />
                 <File
                     RelPath = "Territories\Planet.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Territories\PlanetArea.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Territories\PlanetCollection.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

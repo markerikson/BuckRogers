@@ -443,7 +443,8 @@ namespace BuckRogers
 
 					if(!t.AdjacentTo(previousTerritory))
 					{
-						throw new ActionException("Can't move between non-adjacent territories");
+						throw new ActionException("Can't move between non-adjacent territories (" 
+							+ previousTerritory.Name + " -> " + t.Name + ")");
 					}
 
 					if(t.Type == TerritoryType.Ground)//t.Owner != move.Owner)
@@ -606,7 +607,7 @@ namespace BuckRogers
 
 		#endregion
 
-		public ArrayList FindBattles()
+		public Hashlist FindBattles()
 		{
 			/* Two possible methods for finding battles.
 			 * 
@@ -618,7 +619,7 @@ namespace BuckRogers
 			 *    it.  Guaranteed to only search territories that already have units.  
 			 *
 			 */
-			string[] searchOrder = {"Mercury", "Mercury Orbit", "Venus", "Venus Orbit", "Earth", "Moon", 
+			string[] searchOrder = {"Mercury", "Mercury Orbit", "Venus", "Venus Orbit", "Earth", "Moon", "Earth Orbit",
 									"Trans-Earth Orbit", "Mars", "Trans-Mars Orbit", "Ceres", "Aurora", "Hygeia", "Juno", 
 									   "Vesta", "Fortuna", "Thule", "Psyche", "Pallas", "Asteroid Orbit"};
 
@@ -626,7 +627,58 @@ namespace BuckRogers
 			Hashtable planets = new Hashtable();
 			for(int i = 0; i < searchOrder.Length; i++)
 			{
-				planets[searchOrder[i]] =  new ArrayList();
+				planets[searchOrder[i]] =  new Hashlist();
+			}
+
+			foreach(OrbitalSystem os in m_map.Planets)
+			{
+				if(os.HasKillerSatellite)
+				{
+					if(os.NearOrbit.Units.HasUnitsFromMultiplePlayers)
+					{
+						Hashlist hl = (Hashlist)planets[os.Name];
+						// first time around, no need to check for contains
+						BattleInfo bi = new BattleInfo();
+						bi.Territory = os.NearOrbit;
+						bi.Type = BattleType.KillerSatellite;
+						hl.Add(bi.ToString(), bi);
+					}
+
+					UnitCollection uc = os.NearOrbit.Units.GetUnits(UnitType.Battler);
+					if(uc.Count > 0)
+					{
+						bool addBombing = false;
+						if(!os.IsControlled)
+						{
+							addBombing = true;
+						}
+						else
+						{
+							foreach(Unit u in uc)
+							{
+								if(u.Owner != os.Owner)
+								{
+									addBombing = true;
+									break;
+								}
+							}
+						}
+
+						if(addBombing)
+						{
+							// Note that this is based on the unit layout prior to any killer satellites 
+							// firing, and could be nullified if all battlers are wiped out.  
+							// TODO Make sure that the battle handling code double-checks these to make sure they're still valid
+							BattleInfo bi = new BattleInfo();
+							bi.Territory = os.NearOrbit;
+							bi.Type = BattleType.Bombing;
+
+							Hashlist hl = (Hashlist)planets[os.Name];
+							hl.Add(bi.ToString(), bi);
+						}
+						
+					}
+				}
 			}
 
 			for(int i = 0; i < m_players.Length; i++)
@@ -649,11 +701,16 @@ namespace BuckRogers
 						}
 
 						// Add to the appropriate planet/orbit's list of battles
-						ArrayList planetBattleList = (ArrayList)planets[name];
+						Hashlist planetBattleList = (Hashlist)planets[name];
+
+						BattleInfo bi = new BattleInfo();
+						bi.Type = BattleType.Normal;
+						bi.Territory = u.CurrentTerritory;
 						Console.WriteLine("Name: " + name + ", Unit: " + u.Info);
-						if(!planetBattleList.Contains(u.CurrentTerritory.Name))
+						if(!planetBattleList.ContainsKey(bi.ToString()))
 						{
-							planetBattleList.Add(u.CurrentTerritory.Name);
+							
+							planetBattleList.Add(bi.ToString(), bi);
 						}
 						
 					}
@@ -661,16 +718,17 @@ namespace BuckRogers
 			}
 
 			// Add the battles from each planet in the appropriate order
-			ArrayList battles = new ArrayList();
+			Hashlist battles = new Hashlist();
 			for(int i = 0; i < searchOrder.Length; i++)
 			{
-				ArrayList planet = (ArrayList)planets[searchOrder[i]];
+				Hashlist planet = (Hashlist)planets[searchOrder[i]];
 
 				if(planet.Count > 0)
 				{
-					foreach(string name in planet)
+					foreach(BattleInfo bi in planet)
 					{
-						battles.Add(name);
+
+						battles.Add(bi.ToString(), bi);
 					}
 				}
 			}

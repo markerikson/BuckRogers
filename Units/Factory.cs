@@ -16,9 +16,6 @@ namespace BuckRogers
 		public Factory(Player owner)
 			: base(owner, UnitType.Factory)
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 			m_productionType = UnitType.None;
 			m_canProduce = true;
 			

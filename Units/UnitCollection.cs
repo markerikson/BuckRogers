@@ -42,7 +42,6 @@ namespace BuckRogers
 		public void RemoveAllUnits(UnitCollection units)
 		{
 			//List.removeAll(units);
-			// TODO 
 			foreach(Unit unit in units.Units)
 			{
 				List.Remove(unit);

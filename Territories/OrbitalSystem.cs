@@ -10,35 +10,43 @@ namespace BuckRogers
 	/// </summary>
 	public class OrbitalSystem
 	{
+		
+	
 		public static OrbitalSystem NONE = new OrbitalSystem("NONE", null, null, 0, null, null, null, null);
 		private OrbitalPath orbitalPath;
-		private Hashtable ground;
-		private Hashtable space;
+		private Hashtable m_ground;
+		private Hashtable m_space;
 		private int currentOrbitIndex;
 		private bool m_HasKillerSatellite;
+		private Hashlist m_surface;
+		private Player m_owner;
 		
 		private string m_name;
 		
-		private Territory farOrbit;
+		private Territory m_nearOrbit;
 
 		/// <summary>
 		/// Property FarOrbit; (Node)
 		/// </summary>
-		public Territory FarOrbit
+		public Territory NearOrbit
 		{
 			get
 			{
-				return this.farOrbit;
+				return this.m_nearOrbit;
 			}
 			set
 			{
-				this.farOrbit = value;
+				this.m_nearOrbit = value;
 			}
 		}	
 
 		public bool HasKillerSatellite
 		{
-			get { return this.m_HasKillerSatellite; }
+			get 
+			{ 
+				//return this.m_HasKillerSatellite; 
+				return (this.NearOrbit.Units.GetUnits(UnitType.KillerSatellite).Count == 1);
+			}
 			set { this.m_HasKillerSatellite = value; }
 		}
 
@@ -50,11 +58,11 @@ namespace BuckRogers
 		{
 			get
 			{
-				return this.ground;
+				return this.m_ground;
 			}
 			set
 			{
-				this.ground = value;
+				this.m_ground = value;
 			}
 		}		
 
@@ -62,13 +70,20 @@ namespace BuckRogers
 		{
 			get
 			{
-				return this.space;
+				return this.m_space;
 			}
 			set
 			{
-				this.space = value;
+				this.m_space = value;
 			}
 		}
+
+		public BuckRogers.Hashlist Surface
+		{
+			get { return this.m_surface; }
+			set { this.m_surface = value; }
+		}
+
 		public BuckRogers.OrbitalPath OrbitalPath
 		{
 			get { return this.orbitalPath; }
@@ -87,6 +102,24 @@ namespace BuckRogers
 			set { this.m_name = value; }
 		}	
 
+		public bool IsControlled
+		{
+			get
+			{
+				return CheckControl();
+			}
+		}
+
+		public BuckRogers.Player Owner
+		{
+			get 
+			{ 
+				CheckControl();
+				return this.m_owner; 
+			}
+			set { this.m_owner = value; }
+		}
+
 		public OrbitalSystem(string name, Graph graph, OrbitalPath op, int startingOrbitIndex, 
 							string[] groundNames, string[] spaceNames, 
 							Territory[] groundVertices, Territory[] spaceVertices)
@@ -96,26 +129,34 @@ namespace BuckRogers
 				return;
 			}
 			m_name = name;
-			ground = new Hashtable();
-			space = new Hashtable();
+			m_ground = new Hashtable();
+			m_space = new Hashtable();
+			m_surface = new Hashlist();
+			this.Owner = Player.NONE;
 			this.OrbitalPath = op;
 
 			for(int i = 0; i < groundNames.Length; i++)
 			{
-				Territory newNode = new Territory(groundNames[i], TerritoryType.Ground);
+				string territoryName = groundNames[i];
+				Territory newNode = new Territory(territoryName, TerritoryType.Ground);
 				newNode.System = this;
-				ground.Add(groundNames[i], newNode);
+				m_ground.Add(territoryName, newNode);
 				graph.AddNode(newNode);
 				groundVertices[i] = newNode;
 			}
 
 			for(int i = 0; i < spaceNames.Length; i++)
 			{
-				Territory newNode = new Territory(spaceNames[i], TerritoryType.Space);
+				string territoryName = spaceNames[i];
+				Territory newNode = new Territory(territoryName, TerritoryType.Space);
 				newNode.System = this;
-				space.Add(spaceNames[i], newNode);
+				m_space.Add(territoryName, newNode);
 				graph.AddNode(newNode);
 				spaceVertices[i] = newNode;
+				if(territoryName.StartsWith("Near "))
+				{
+					this.NearOrbit = newNode;
+				}
 			}
 
 			currentOrbitIndex = startingOrbitIndex;
@@ -123,6 +164,42 @@ namespace BuckRogers
 
 		}
 
-		
+		public void CalculateSurfaceAreas()
+		{
+			foreach(Territory t in m_ground.Values)
+			//foreach(object o in m_ground.Values)
+			{
+				//object b = o;
+				
+				if(t.Neighbors.Count > 1)
+				{
+					m_surface.Add(t.Name, t);
+				}
+				
+				
+			}
+		}	
+
+		public bool CheckControl()
+		{
+			bool controlled = true;
+
+			Player first = ((Territory)m_surface[0]).Owner;
+
+			foreach(Territory t in m_surface)
+			{
+				if(t.Owner != first)
+				{
+					controlled = false;
+				}
+			}
+
+			if(controlled)
+			{
+				this.Owner = first;
+			}
+
+			return controlled;
+		}
 	}
 }

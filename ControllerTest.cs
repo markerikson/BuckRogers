@@ -13,9 +13,6 @@ namespace BuckRogers
 		private GameController m_controller;
 		public ControllerTest()
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 		}
 
 		[SetUp]
@@ -731,7 +728,28 @@ namespace BuckRogers
 			uc3[0].CurrentTerritory = mercuryOrbit1;
 			uc3[1].CurrentTerritory = transMarsOrbit15;
 
-			ArrayList battles = m_controller.FindBattles();
+			Player stu = m_controller.GetPlayer("Stu");
+			Planet mercury = (Planet)m_controller.Map.Planets["Mercury"];
+			foreach(Territory t in mercury.Surface)
+			{
+				t.Owner = stu;
+			}
+			mercury.CheckControl();
+			Unit satellite = Unit.CreateNewUnit(stu, UnitType.KillerSatellite);
+			satellite.CurrentTerritory = mercury.NearOrbit;
+			
+			Player mark = m_controller.GetPlayer("Mark");
+			Unit battler = Unit.CreateNewUnit(mark, UnitType.Battler);
+			battler.CurrentTerritory = mercury.NearOrbit;
+
+			Hashlist battles = m_controller.FindBattles();
+
+			foreach(BattleInfo bi in battles)
+			{
+				Console.WriteLine(bi.ToString());
+			}
+			int i = 42;
+			int q = i;
 
 
 		}

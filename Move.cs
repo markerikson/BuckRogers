@@ -23,11 +23,7 @@ namespace BuckRogers
 
 		public MoveAction()
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 			m_territories = new ArrayList();
-			
 		}
 
 		

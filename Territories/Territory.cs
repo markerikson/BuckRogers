@@ -69,9 +69,6 @@ namespace BuckRogers
 		public Territory(string name, TerritoryType type)
 			: base(name, null)
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 			this.Owner = Player.NONE;
 			m_units = new UnitCollection();
 			this.m_type = type;

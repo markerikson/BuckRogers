@@ -44,9 +44,6 @@ namespace BuckRogers
 		private UnitType m_unitType;
 		public TransportAction()
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 			m_maxTransfer = 0;
 		}
 

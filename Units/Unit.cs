@@ -37,12 +37,8 @@ namespace BuckRogers
 
 		public Unit(Player owner, UnitType unitType)
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 			this.Owner = owner;
 			this.CurrentTerritory = Territory.NONE;
-			Territory.NONE.Units.AddUnit(this);
 			m_unitType = unitType;
 			MovesLeft = MaxMoves;
 
@@ -135,11 +131,11 @@ namespace BuckRogers
 					case UnitType.Leader:
 					case UnitType.Fighter:
 					case UnitType.Transport:
+					case UnitType.KillerSatellite:
 						spaceCapable = true;
 						break;
 
 					case UnitType.Factory:
-					case UnitType.KillerSatellite:
 					case UnitType.Marker:
 					case UnitType.Gennie:
 					case UnitType.Trooper:

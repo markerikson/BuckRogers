@@ -13,9 +13,6 @@ namespace BuckRogers
 		public Transport(Player owner)
 			: base(owner, UnitType.Transport)
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 			Transportees = new UnitCollection();
 		}
 

@@ -11,7 +11,7 @@ namespace BuckRogers
 	{
 		//private string[] names;
 
-		private Territory nearOrbit;
+		private Territory m_farOrbit;
 		
 
 		
@@ -19,15 +19,15 @@ namespace BuckRogers
 		/// <summary>
 		/// Property NearOrbit (Node)
 		/// </summary>
-		public Territory NearOrbit
+		public Territory FarOrbit
 		{
 			get
 			{
-				return this.nearOrbit;
+				return this.m_farOrbit;
 			}
 			set
 			{
-				this.nearOrbit = value;
+				this.m_farOrbit = value;
 			}
 		}
 		/*

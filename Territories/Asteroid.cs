@@ -21,7 +21,7 @@ namespace BuckRogers
 					// ugly hack, but whatever
 					if(spaceNames[i].EndsWith("Orbit"))
 					{
-						this.FarOrbit = spaceVertices[i];
+						this.NearOrbit = spaceVertices[i];
 						break;
 					}
 				}

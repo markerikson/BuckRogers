@@ -38,10 +38,6 @@ namespace BuckRogers
 
 		public Player(string name)
 		{
-			//
-			// TODO: Add constructor logic here
-			//
-
 			m_name = name;
 			m_units = new UnitCollection();
 			m_territories = new Hashtable();

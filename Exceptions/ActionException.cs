@@ -10,9 +10,6 @@ namespace BuckRogers
 		public ActionException(string message)
 			: base(message)
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 		}
 	}
 }

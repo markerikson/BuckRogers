@@ -25,9 +25,6 @@ namespace BuckRogers
 
 		public TurnRoll()
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 		}
 		#region IComparable Members
 

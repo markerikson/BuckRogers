@@ -9,16 +9,16 @@ namespace BuckRogers
 	/// </summary>
 	public class GameMap
 	{
-		public System.Collections.Hashtable OrbitalPaths
+		public Hashlist OrbitalPaths
 		{
 			get { return this.orbitalPaths; }
 			set { this.orbitalPaths = value; }
 		}
 
-		public System.Collections.Hashtable Planets
+		public Hashlist Planets
 		{
-			get { return this.planets; }
-			set { this.planets = value; }
+			get { return this.m_planets; }
+			set { this.m_planets = value; }
 		}
 
 		public skmDataStructures.Graph.Graph Graph
@@ -46,15 +46,12 @@ namespace BuckRogers
 
 		public Graph m_graph;
 
-		private Hashtable planets;
-		private Hashtable orbitalPaths;
+		private Hashlist m_planets;
+		private Hashlist orbitalPaths;
 
 		
 		public GameMap()
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 			meo = new OrbitalPath("Mercury Orbit", 2);
 			vo = new OrbitalPath("Venus Orbit", 4);
 			eo = new OrbitalPath("Earth Orbit", 8);
@@ -63,8 +60,8 @@ namespace BuckRogers
 			teo = new OrbitalPath("Trans-Earth Orbit", 16);
 			tmo = new OrbitalPath("Trans-Mars Orbit", 32);
 
-			planets = new Hashtable();
-			orbitalPaths = new Hashtable();
+			m_planets = new Hashlist();
+			orbitalPaths = new Hashlist();
 			orbitalPaths.Add("Mercury Orbit", meo);
 			orbitalPaths.Add("Venus Orbit", vo);
 			orbitalPaths.Add("Earth Orbit", eo);
@@ -81,6 +78,80 @@ namespace BuckRogers
 
 		private void InitMap()
 		{
+			
+			
+			#region Mercury creation
+			string[] mng = new string[]{"The Warrens", 
+										   "Bach", 
+										   "Tolstoi", 
+										   "Sobkou Plains",
+										   "Mariposas",
+										   "Hielo"};
+
+			string[] mns = new string[]{"Near Mercury Orbit",
+										   "Far Mercury Orbit"};
+
+			Territory[] mngv = new Territory[mng.Length];
+			Territory[] mnsv = new Territory[mns.Length];
+
+			Planet mercury = new Planet("Mercury", m_graph, meo, 0, mng, mns, mngv, mnsv);
+			m_planets.Add(mercury.Name, mercury);
+
+			m_graph.AddUndirectedEdge(mngv[0], mngv[1]);
+			m_graph.AddUndirectedEdge(mngv[0], mngv[2]);
+			m_graph.AddUndirectedEdge(mngv[1], mngv[2]);
+			m_graph.AddUndirectedEdge(mngv[1], mngv[3]);
+			m_graph.AddUndirectedEdge(mngv[2], mngv[3]);
+
+			for(int i = 0; i < mngv.Length; i++)
+			{
+				m_graph.AddUndirectedEdge(mngv[i], mnsv[0]);
+			}
+
+			m_graph.AddUndirectedEdge(mnsv[0], mnsv[1]);
+			//m_graph.AddUndirectedEdge(mnsv[0], mngv[4]);
+			//m_graph.AddUndirectedEdge(mnsv[0], mngv[5]);
+			#endregion
+			
+			#region Venus creation
+			string[] vng = new string[]{"Aerostates", 
+										   "Mt. Maxwell", 
+										   "Lowlanders",
+										   "Elysium",
+										   "Beta Regio",
+										   "Aphrodite", 
+										   "Wreckers"};
+
+			string[] vns = new string[]{"Near Venus Orbit", "Far Venus Orbit"};
+
+			Territory[] vngv = new Territory[vng.Length];
+			Territory[] vnsv = new Territory[vns.Length];
+		
+		
+			Planet venus = new Planet("Venus", m_graph, vo, 2, vng, vns, vngv, vnsv);
+			m_planets.Add(venus.Name, venus);
+
+			m_graph.AddUndirectedEdge(vngv[0], vngv[1]);
+			m_graph.AddUndirectedEdge(vngv[0], vngv[2]);
+			m_graph.AddUndirectedEdge(vngv[1], vngv[2]);
+			m_graph.AddUndirectedEdge(vngv[1], vngv[3]);
+			m_graph.AddUndirectedEdge(vngv[2], vngv[3]);
+			m_graph.AddUndirectedEdge(vngv[2], vngv[4]);
+			m_graph.AddUndirectedEdge(vngv[2], vngv[5]);
+			m_graph.AddUndirectedEdge(vngv[3], vngv[5]);
+			m_graph.AddUndirectedEdge(vngv[3], vngv[6]);
+			m_graph.AddUndirectedEdge(vngv[4], vngv[5]);
+			m_graph.AddUndirectedEdge(vngv[5], vngv[6]);
+
+			for(int i = 0; i < vngv.Length; i++)
+			{
+				m_graph.AddUndirectedEdge(vngv[i], vnsv[0]);
+			}
+
+			m_graph.AddUndirectedEdge(vnsv[0], vnsv[1]);
+
+			#endregion
+
 			#region Earth/Moon creation
 			string[] eng = new string[]{"Independent Arcologies", 
 										   "American Regency", 
@@ -94,7 +165,7 @@ namespace BuckRogers
 
 			string[] ens = new String[]{"Near Earth Orbit",
 										   "Far Earth/Moon Orbit"
-										   };
+									   };
 
 			string[] mong = new string[]{"Moscoviense",
 											"Tranquility",
@@ -110,8 +181,8 @@ namespace BuckRogers
 			
 			Planet earth = new Planet("Earth", m_graph, eo, 0, eng, ens, engv, ensv);
 			Planet moon = new Planet("Moon", m_graph, eo, 0, mong, mons, mongv, monsv);
-			planets.Add(earth.Name, earth);
-			planets.Add(moon.Name, moon);
+			m_planets.Add(earth.Name, earth);
+			m_planets.Add(moon.Name, moon);
 			
 			// connect the Earth territories
 			
@@ -155,78 +226,6 @@ namespace BuckRogers
 			
 			#endregion
 			
-			#region Mercury creation
-			string[] mng = new string[]{"The Warrens", 
-										   "Bach", 
-										   "Tolstoi", 
-										   "Sobkou Plains",
-										   "Mariposas",
-										   "Hielo"};
-
-			string[] mns = new string[]{"Near Mercury Orbit",
-										   "Far Mercury Orbit"};
-
-			Territory[] mngv = new Territory[mng.Length];
-			Territory[] mnsv = new Territory[mns.Length];
-
-			Planet mercury = new Planet("Mercury", m_graph, meo, 0, mng, mns, mngv, mnsv);
-			planets.Add(mercury.Name, mercury);
-
-			m_graph.AddUndirectedEdge(mngv[0], mngv[1]);
-			m_graph.AddUndirectedEdge(mngv[0], mngv[2]);
-			m_graph.AddUndirectedEdge(mngv[1], mngv[2]);
-			m_graph.AddUndirectedEdge(mngv[1], mngv[3]);
-			m_graph.AddUndirectedEdge(mngv[2], mngv[3]);
-
-			for(int i = 0; i < mngv.Length; i++)
-			{
-				m_graph.AddUndirectedEdge(mngv[i], mnsv[0]);
-			}
-
-			m_graph.AddUndirectedEdge(mnsv[0], mnsv[1]);
-			m_graph.AddUndirectedEdge(mnsv[0], mngv[4]);
-			m_graph.AddUndirectedEdge(mnsv[0], mngv[5]);
-			#endregion
-			
-			#region Venus creation
-			string[] vng = new string[]{"Aerostates", 
-										   "Mt. Maxwell", 
-										   "Lowlanders",
-										   "Elysium",
-										   "Beta Regio",
-										   "Aphrodite", 
-										   "Wreckers"};
-
-			string[] vns = new string[]{"Near Venus Orbit", "Far Venus Orbit"};
-
-			Territory[] vngv = new Territory[vng.Length];
-			Territory[] vnsv = new Territory[vns.Length];
-		
-		
-			Planet venus = new Planet("Venus", m_graph, vo, 2, vng, vns, vngv, vnsv);
-			planets.Add(venus.Name, venus);
-
-			m_graph.AddUndirectedEdge(vngv[0], vngv[1]);
-			m_graph.AddUndirectedEdge(vngv[0], vngv[2]);
-			m_graph.AddUndirectedEdge(vngv[1], vngv[2]);
-			m_graph.AddUndirectedEdge(vngv[1], vngv[3]);
-			m_graph.AddUndirectedEdge(vngv[2], vngv[3]);
-			m_graph.AddUndirectedEdge(vngv[2], vngv[4]);
-			m_graph.AddUndirectedEdge(vngv[2], vngv[5]);
-			m_graph.AddUndirectedEdge(vngv[3], vngv[5]);
-			m_graph.AddUndirectedEdge(vngv[3], vngv[6]);
-			m_graph.AddUndirectedEdge(vngv[4], vngv[5]);
-			m_graph.AddUndirectedEdge(vngv[5], vngv[6]);
-
-			for(int i = 0; i < vngv.Length; i++)
-			{
-				m_graph.AddUndirectedEdge(vngv[i], vnsv[0]);
-			}
-
-			m_graph.AddUndirectedEdge(vnsv[0], vnsv[1]);
-
-			#endregion
-			
 			#region Mars creation
 			string[] mang = new string[]{"Boreal Sea",
 											"Coprates Chasm", 
@@ -243,7 +242,7 @@ namespace BuckRogers
 			Territory[] mansv = new Territory[mans.Length];
 
 			Planet mars = new Planet("Mars", m_graph, mao, 9, mang, mans, mangv, mansv);
-			planets.Add(mars.Name, mars);
+			m_planets.Add(mars.Name, mars);
 
 			m_graph.AddUndirectedEdge(mangv[0], mangv[1]);
 			m_graph.AddUndirectedEdge(mangv[0], mangv[2]);
@@ -267,11 +266,11 @@ namespace BuckRogers
 			#endregion
 			
 			#region Asteroid creation
-			string[] asteroidNames = new string[]{"Aurora", "Hygeia", "Juno", 
+			string[] asteroidNames = new string[]{"Ceres", "Aurora", "Hygeia", "Juno", 
 													 "Vesta", "Fortuna", "Thule", 
-													 "Psyche", "Pallas", "Ceres"};
+													 "Psyche", "Pallas"};
 
-			int[] asteroidLocations = {2, 5, 11, 13, 16, 19, 24, 28, 0};
+			int[] asteroidLocations = {0, 2, 5, 11, 13, 16, 19, 24, 28};
 			Territory[] asteroidOrbits = new Territory[asteroidNames.Length];
 
 			for(int i = 0; i < asteroidNames.Length; i++)
@@ -280,11 +279,13 @@ namespace BuckRogers
 				string[] ans = new string[]{asteroidNames[i] + " Orbit"};
 				Territory[] angv = new Territory[ang.Length];
 				Territory[] ansv = new Territory[ans.Length];
-				Asteroid asteroid = new Asteroid(ans[0], m_graph, ao, asteroidLocations[i], ang, ans, angv, ansv);	
+				Asteroid asteroid = new Asteroid(//ans[0], 
+												asteroidNames[i],
+												m_graph, ao, asteroidLocations[i], ang, ans, angv, ansv);	
 				asteroidOrbits[i] = ansv[0];
-				asteroid.FarOrbit = ansv[0];
+				asteroid.NearOrbit = ansv[0];
 				m_graph.AddUndirectedEdge(angv[0], ansv[0]);
-				planets.Add(asteroidNames[i], asteroid);
+				m_planets.Add(asteroidNames[i], asteroid);
 			}
 			
 			#endregion
@@ -293,9 +294,9 @@ namespace BuckRogers
 			InitOrbit(vo, "Venus", true);
 			InitOrbit(eo, "Earth", true);
 			InitOrbit(mao, "Mars", true);
-			InitOrbit(ao, "Asteroid", true);
 			InitOrbit(teo, "Trans-Earth", false);
 			InitOrbit(tmo, "Trans-Mars", false);
+			InitOrbit(ao, "Asteroid", true);
 
 			#region Inter-Orbit links
 
@@ -358,17 +359,17 @@ namespace BuckRogers
 			m_graph.AddUndirectedEdge(earth.FarOrbit, eo[0]);
 			m_graph.AddUndirectedEdge(mars.FarOrbit, mao[9]);
 
-			m_graph.AddUndirectedEdge(asteroidOrbits[0], ao[2]);
-			m_graph.AddUndirectedEdge(asteroidOrbits[1], ao[5]);
-			m_graph.AddUndirectedEdge(asteroidOrbits[2], ao[11]);
-			m_graph.AddUndirectedEdge(asteroidOrbits[3], ao[13]);
-			m_graph.AddUndirectedEdge(asteroidOrbits[4], ao[16]);
-			m_graph.AddUndirectedEdge(asteroidOrbits[5], ao[19]);
-			m_graph.AddUndirectedEdge(asteroidOrbits[6], ao[24]);
-			m_graph.AddUndirectedEdge(asteroidOrbits[7], ao[28]);
-			m_graph.AddUndirectedEdge(asteroidOrbits[8], ao[0]);
+			for(int i = 0; i < asteroidOrbits.Length; i++)
+			{
+				m_graph.AddUndirectedEdge(asteroidOrbits[i], ao[asteroidLocations[i]]);
+			}
 			
 			#endregion
+
+			foreach(OrbitalSystem os in m_planets)
+			{
+				os.CalculateSurfaceAreas();
+			}
 
 		}
 
@@ -396,20 +397,34 @@ namespace BuckRogers
 
 		public void AdvancePlanets()
 		{
-			foreach(string s in planets.Keys)
+			foreach(string s in m_planets.Keys)
 			{
 				if(s == "Moon")
 				{
 					continue;
 				}
 
-				OrbitalSystem os = (OrbitalSystem)planets[s];
+				OrbitalSystem os = (OrbitalSystem)m_planets[s];
 				OrbitalPath op = os.OrbitalPath;
 				Node currentSpaceLocation = op[os.CurrentOrbitIndex];
-				m_graph.RemoveUndirectedEdge(currentSpaceLocation, os.FarOrbit);
+
+				Territory outerOrbit;
+				if(os is Planet)
+				{
+					outerOrbit = ((Planet)os).FarOrbit;
+				}
+				else if(os is Asteroid)
+				{
+					outerOrbit = os.NearOrbit;
+				}
+				else
+				{
+					throw new Exception("Unknown OrbitalSystem type in AdvancePlanets()");
+				}
+				m_graph.RemoveUndirectedEdge(currentSpaceLocation, outerOrbit);
 				int newIndex = op.NextOrbitalNodeIndex(os.CurrentOrbitIndex);
 				Node newSpaceLocation = op[newIndex];
-				m_graph.AddUndirectedEdge(newSpaceLocation, os.FarOrbit);
+				m_graph.AddUndirectedEdge(newSpaceLocation, outerOrbit);
 				os.CurrentOrbitIndex = newIndex;
 			}
 

@@ -14,9 +14,6 @@ namespace BuckRogers
 
 		public Action()
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 			m_owner = Player.NONE;
 			m_units = new UnitCollection();
 		}

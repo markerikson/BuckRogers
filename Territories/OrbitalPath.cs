@@ -50,9 +50,6 @@ namespace BuckRogers
 
 		public OrbitalPath(string name, int size)
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 			m_territories = new Territory[size];
 			m_name = name;
 		}
