@@ -40,7 +40,8 @@ namespace BuckRogers
 		public ArrayList m_rollResults;
 		private MersenneTwister m_twister;
 		private ArrayList m_rollList;
-		private ArrayList m_pendingActions;
+		private ArrayList m_checkedActions;
+		private ArrayList m_undoneActions;
 		private int m_turnNumber;
 
 		public TurnRoll[] Rolls;
@@ -117,7 +118,8 @@ namespace BuckRogers
 			}
 
 			m_twister = new MersenneTwister();
-			m_pendingActions = new ArrayList();
+			m_checkedActions = new ArrayList();
+			m_undoneActions = new ArrayList();
 
 			m_turnNumber = 0;
 
@@ -317,8 +319,13 @@ namespace BuckRogers
 		}
 
 
-		public void LoadTransport(Transport transport, UnitCollection units, UnitType type)
+		//public void LoadTransport(Transport transport, UnitCollection units, UnitType type)
+		public void LoadTransport(TransportAction ta)
 		{
+			Transport transport = ta.Transport;
+			UnitCollection units = ta.Units;
+			UnitType type = ta.UnitType;
+
 			int numCurrent = transport.Transportees.Count;
 
 			switch(type)
@@ -372,8 +379,11 @@ namespace BuckRogers
 			
 		}
 
-		public void UnloadTransport(Transport tr, int max)
+		//public void UnloadTransport(Transport tr, int max)
+		public void UnloadTransport(TransportAction ta)
 		{
+			Transport tr = ta.Transport;
+			int max = ta.MaxTransfer;
 			Territory t = tr.CurrentTerritory;
 
 			if(t.Type != TerritoryType.Ground)
@@ -381,11 +391,21 @@ namespace BuckRogers
 				throw new ActionException("Transports can only be unloaded in ground territories");
 			}
 
+			if(tr.Transportees.Count == 0)
+			{
+				throw new ActionException("Can't unload an empty transport");
+			}
+
 			int numToUnload = max;
 			if(tr.Transportees.Count < numToUnload)
 			{
 				numToUnload = tr.Transportees.Count;
 			}
+
+			ta.Units = new UnitCollection();
+
+			// we've got at least one unit, and they're guaranteed to be all the same type
+			ta.UnitType = tr.Transportees[0].UnitType;
 
 			for(int i = 0; i < numToUnload; i++)
 			{
@@ -396,6 +416,9 @@ namespace BuckRogers
 				// Removes the unit from the old territory, assigns the unit to the new territory, and 
 				// adds the unit to the new territory's unit collection
 				u.CurrentTerritory = t;
+
+				// need to make sure we've got the right units for undoing the move
+				ta.Units.AddUnit(u);
 			}
 
 		}
@@ -456,7 +479,7 @@ namespace BuckRogers
 							throw new ActionException("Can't move a ground unit into space");
 						}
 
-						if(t.Type == TerritoryType.Ground && u.UnitType == UnitType.Battler)
+						if(u.UnitType == UnitType.Battler && t.Type == TerritoryType.Ground )
 						{
 							throw new ActionException("Can't move a battler onto the ground");
 						}
@@ -466,24 +489,122 @@ namespace BuckRogers
 							throw new ActionException("Unit has no moves left.  Unit: " + u.Info);
 						}
 
+						u.CurrentTerritory = t;
 						u.MovesLeft--;
 
 					}
 
 					previousTerritory = t;
 				}
-				m_pendingActions.Add(move);
 			}
+			else if(action is TransportAction)
+			{
+				TransportAction ta = (TransportAction)action;
+				if(ta.Load)
+				{
+					//LoadTransport(ta.Transport, ta.Units, ta.UnitType);
+					LoadTransport(ta);
+				}
+				else
+				{
+					//UnloadTransport(ta.Transport, ta.MaxTransfer);
+					UnloadTransport(ta);
+				}
+					
+			}
+			else
+			{
+				throw new ActionException("Unknown Action type in ExecuteActions");
+			}
+			m_checkedActions.Add(action);
 			
 		}
 
+		public void UndoAction()
+		{
+			if(m_checkedActions.Count == 0)
+			{
+				throw new ActionException("No actions to undo");
+			}
+
+			Action action = (Action)m_checkedActions[m_checkedActions.Count - 1];
+
+			if(action is MoveAction)
+			{
+				MoveAction ma = (MoveAction)action;
+
+				for(int i = ma.Territories.Count - 1; i >= 0; i--)
+				{
+					Territory t = (Territory)ma.Territories[i];
+					foreach(Unit u in ma.Units)
+					{
+						u.CurrentTerritory = t;
+						u.MovesLeft++;
+					}
+				}
+
+				foreach(Unit u in ma.Units)
+				{
+					u.CurrentTerritory = ma.StartingTerritory;
+					u.MovesLeft++;
+				}
+			}
+			else if(action is TransportAction)
+			{
+				TransportAction ta = (TransportAction)action;
+
+				if(ta.Load)
+				{
+					UnloadTransport(ta);
+				}
+				else
+				{
+					LoadTransport(ta);
+				}
+			}
+			else
+			{
+				throw new ActionException("Unknown Action type in UndoAction");
+			}
+
+			m_checkedActions.Remove(action);
+			m_undoneActions.Add(action);
+
+		}
+
+		public void RedoAction()
+		{
+
+		}
+
+		public void EndPhase()
+		{
+			foreach(Action a in m_checkedActions)
+			{
+				if(a is MoveAction)
+				{
+					MoveAction ma = (MoveAction)a;
+
+					foreach(Unit u in ma.Units)
+					{
+						u.MovesLeft = u.MaxMoves;
+					}
+				}
+			}
+
+			m_checkedActions.Clear();
+
+		}
+
+		/*
 		public void ExecuteActions()
 		{
+			
 			ArrayList completedMoves = new ArrayList();
 
-			for(int i = 0; i < m_pendingActions.Count; i++)
+			for(int i = 0; i < m_checkedActions.Count; i++)
 			{
-				Action a = (Action)m_pendingActions[0];
+				Action a = (Action)m_checkedActions[0];
 				if(a is MoveAction)
 				{
 					MoveAction m = (MoveAction)a;
@@ -526,6 +647,7 @@ namespace BuckRogers
 			}
 
 		}
+		*/
 
 		public void ExecuteAttack(Unit attacker, Unit defender, bool attackerLeader, bool defenderLeader)
 		{

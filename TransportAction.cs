@@ -9,7 +9,14 @@ namespace BuckRogers
 	{
 		public int MaxTransfer
 		{
-			get { return this.m_maxTransfer; }
+			get 
+			{ 
+				if(m_maxTransfer == 0)
+				{
+					return m_transport.Transportees.Count;
+				}
+				return this.m_maxTransfer; 
+			}
 			set { this.m_maxTransfer = value; }
 		}
 	
@@ -40,6 +47,8 @@ namespace BuckRogers
 			//
 			// TODO: Add constructor logic here
 			//
+			m_maxTransfer = 0;
 		}
+
 	}
 }

@@ -360,14 +360,29 @@ namespace BuckRogers
 			Transport transport = thule.Units.GetUnits(UnitType.Transport)[0] as Transport;
 
 			UnitCollection troopers = thule.Units.GetUnits(UnitType.Trooper);
-			m_controller.LoadTransport(transport, troopers, UnitType.Trooper);
+			TransportAction ta = new TransportAction();
+			ta.Transport = transport;
+			ta.Owner = transport.Owner;
+			ta.Units = troopers;
+			ta.UnitType = UnitType.Trooper;
+			ta.Load = true;
+			m_controller.AddAction(ta);
+			//m_controller.LoadTransport(transport, troopers, UnitType.Trooper);
 
 			Assert.AreEqual(transport.Transportees.Count, 4);
 
 			Territory arcadia = m_controller.Map["Arcadia"];
 			transport.CurrentTerritory = arcadia;
 
-			m_controller.UnloadTransport(transport, 5);
+
+			ta = new TransportAction();
+			ta.Transport = transport;
+			ta.Owner = transport.Owner;
+			//ta.Units = factories;
+			//ta.UnitType = UnitType.Factory;
+			ta.Load = false;
+			m_controller.AddAction(ta);
+			//m_controller.UnloadTransport(transport, 5);
 
 
 			Assert.AreEqual(0, transport.Transportees.Count );
@@ -384,13 +399,28 @@ namespace BuckRogers
 			transport.CurrentTerritory = deimos;
 
 			UnitCollection factories = deimos.Units.GetUnits(UnitType.Factory);
-			m_controller.LoadTransport(transport, factories, UnitType.Factory);
+			TransportAction ta = new TransportAction();
+			ta.Transport = transport;
+			ta.Owner = transport.Owner;
+			ta.Units = factories;
+			ta.UnitType = UnitType.Factory;
+			ta.Load = true;
+			m_controller.AddAction(ta);
+			//m_controller.LoadTransport(transport, factories, UnitType.Factory);
 
 			Assert.AreEqual(transport.Transportees.Count, 1);
 			Territory arcadia = m_controller.Map["Arcadia"];
 			transport.CurrentTerritory = arcadia;
 
-			m_controller.UnloadTransport(transport, 5);
+
+			ta = new TransportAction();
+			ta.Transport = transport;
+			ta.Owner = transport.Owner;
+			//ta.Units = factories;
+			//ta.UnitType = UnitType.Factory;
+			ta.Load = false;
+			m_controller.AddAction(ta);
+			//m_controller.UnloadTransport(transport, 5);
 
 			Assert.AreEqual(0, transport.Transportees.Count );
 			Assert.AreEqual(arcadia.Units.Count, 2);
@@ -404,12 +434,30 @@ namespace BuckRogers
 			Transport transport = thule.Units.GetUnits(UnitType.Transport)[0] as Transport;
 
 			UnitCollection troopers = thule.Units.GetUnits(UnitType.Trooper);
-			m_controller.LoadTransport(transport, troopers, UnitType.Trooper);
+
+			TransportAction ta = new TransportAction();
+			ta.Transport = transport;
+			ta.Owner = transport.Owner;
+			ta.Units = troopers;
+			ta.UnitType = UnitType.Trooper;
+			ta.Load = true;
+
+			m_controller.AddAction(ta);
+			//m_controller.LoadTransport(transport, troopers, UnitType.Trooper);
 
 			transport.CurrentTerritory = deimos;
 
 			UnitCollection factories = deimos.Units.GetUnits(UnitType.Factory);
-			m_controller.LoadTransport(transport, factories, UnitType.Factory);
+			
+			ta = new TransportAction();
+			ta.Transport = transport;
+			ta.Owner = transport.Owner;
+			ta.Units = factories;
+			ta.UnitType = UnitType.Factory;
+			ta.Load = true;
+
+			m_controller.AddAction(ta);
+			//m_controller.LoadTransport(transport, factories, UnitType.Factory);
 		}
 
 		[Test, ExpectedException(typeof(ActionException))]
@@ -420,12 +468,28 @@ namespace BuckRogers
 			Transport transport = thule.Units.GetUnits(UnitType.Transport)[0] as Transport;
 
 			UnitCollection troopers = thule.Units.GetUnits(UnitType.Trooper);
-			m_controller.LoadTransport(transport, troopers, UnitType.Trooper);
+			TransportAction ta = new TransportAction();
+			ta.Units = troopers;
+			ta.Transport = transport;
+			ta.Owner = transport.Owner;
+			ta.UnitType = UnitType.Trooper;
+			ta.Load = true;
+			//m_controller.LoadTransport(transport, troopers, UnitType.Trooper);
+			//m_controller.LoadTransport(ta);
+			m_controller.AddAction(ta);
 
 			transport.CurrentTerritory = elevator;
 
 			UnitCollection factories = elevator.Units.GetUnits(UnitType.Trooper);
-			m_controller.LoadTransport(transport, factories, UnitType.Trooper);
+			ta = new TransportAction();
+			ta.Owner = transport.Owner;
+			ta.Transport = transport;
+			ta.Units = factories;
+			ta.UnitType = UnitType.Trooper;
+			ta.Load = true;
+
+			m_controller.AddAction(ta);
+			//m_controller.LoadTransport(transport, factories, UnitType.Trooper);
 		}
 
 		[Test, ExpectedException(typeof(ActionException))]
@@ -519,6 +583,7 @@ namespace BuckRogers
 			Player mark = m_controller.GetPlayer("Mark");
 
 			UnitCollection troopers = thule.Units.GetUnits(UnitType.Trooper);
+			Unit leader = thule.Units.GetUnits(UnitType.Leader)[0] as Unit;
 			Transport transport = thule.Units.GetUnits(UnitType.Transport)[0] as Transport;
 			TransportAction ta = new TransportAction();
 			ta.Transport = transport;
@@ -544,7 +609,7 @@ namespace BuckRogers
 			
 			m_controller.AddAction(move);
 
-			m_controller.ExecuteActions();
+			
 
 			for(int i = 0; i < move.Units.Count; i++)
 			{
@@ -552,6 +617,57 @@ namespace BuckRogers
 				//Console.WriteLine("Current territory: " + u.CurrentTerritory.Name);
 				Assert.AreEqual(tmo20, u.CurrentTerritory);
 			}
+
+			m_controller.EndPhase();
+			m_controller.Map.AdvancePlanets();
+
+			move = new MoveAction();
+			move.Owner = mark;
+			move.StartingTerritory = tmo20;
+			move.Units.AddAllUnits(tmo20.Units);
+			move.Territories.Add(m_controller.Map["Mars Orbit: 10"]);
+			Territory farOrbit = m_controller.Map["Far Mars Orbit"];
+			move.Territories.Add(farOrbit);
+			Territory deimos = m_controller.Map["Deimos"];
+			move.Territories.Add(deimos);
+
+			m_controller.AddAction(move);
+
+			ta = new TransportAction();
+			ta.Owner = mark;
+			ta.MaxTransfer = 3;
+			ta.Load = false;
+			ta.Transport = deimos.Units.GetUnits(UnitType.Transport)[0] as Transport;
+			ta.StartingTerritory = deimos;
+
+			m_controller.AddAction(ta);
+
+			move = new MoveAction();
+			move.Owner = mark;
+			move.StartingTerritory = deimos;
+			UnitCollection fighters = deimos.Units.GetUnits(UnitType.Fighter);
+			move.Units.AddUnit(fighters[0]);
+			UnitCollection transports = deimos.Units.GetUnits(UnitType.Transport);
+			move.Units.AddUnit(transports[0]);
+			move.Territories.Add(farOrbit);
+
+			m_controller.AddAction(move);
+			
+
+			Assert.AreEqual(transport.CurrentTerritory, farOrbit);
+			Assert.AreEqual(1, transport.Transportees.Count);
+			Assert.AreEqual(deimos, leader.CurrentTerritory);
+
+			m_controller.UndoAction();
+			m_controller.UndoAction();
+			m_controller.UndoAction();
+
+			Console.WriteLine("Expecting Trans-Mars Orbit: 20, got: " + leader.CurrentTerritory.Name);
+			Assert.AreEqual(tmo20, leader.CurrentTerritory);
+			Assert.AreEqual(tmo20, transport.CurrentTerritory);
+			Assert.AreEqual(4, transport.Transportees.Count);
+			Assert.AreEqual(4, deimos.Units.GetUnits(UnitType.Fighter).Count);
+
 		}
 
 		#endregion

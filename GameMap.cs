@@ -336,7 +336,7 @@ namespace BuckRogers
 			// Mars - Trans-Mars orbit links
 
 			int maoIdx = 0;
-			for(int i = 0; i < 16; i++)
+			for(int i = 0; i < 32; i++)
 			{
 				m_graph.AddUndirectedEdge(mao[maoIdx], tmo[i]);
 				if(i % 2 == 1)
