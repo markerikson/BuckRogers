@@ -98,6 +98,7 @@ namespace BuckRogers
 		private System.Windows.Forms.Button m_btnProduce;
 		private System.Windows.Forms.Label label17;
 		private System.Windows.Forms.Label label18;
+		private System.Windows.Forms.TabPage tabPage3;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -259,6 +260,7 @@ namespace BuckRogers
 			this.columnHeader22 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader20 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader21 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader29 = new System.Windows.Forms.ColumnHeader();
 			this.m_btnContinue = new System.Windows.Forms.Button();
 			this.m_btnAttack = new System.Windows.Forms.Button();
 			this.m_labBattleType = new System.Windows.Forms.Label();
@@ -277,6 +279,9 @@ namespace BuckRogers
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this.label18 = new System.Windows.Forms.Label();
+			this.label17 = new System.Windows.Forms.Label();
+			this.m_btnProduce = new System.Windows.Forms.Button();
 			this.m_btnSetupProduction = new System.Windows.Forms.Button();
 			this.m_cbNeighbors = new System.Windows.Forms.ComboBox();
 			this.m_cbUnitTypes = new System.Windows.Forms.ComboBox();
@@ -289,10 +294,7 @@ namespace BuckRogers
 			this.columnHeader28 = new System.Windows.Forms.ColumnHeader();
 			this.label16 = new System.Windows.Forms.Label();
 			this.m_lbProductionOrder = new System.Windows.Forms.ListBox();
-			this.columnHeader29 = new System.Windows.Forms.ColumnHeader();
-			this.m_btnProduce = new System.Windows.Forms.Button();
-			this.label17 = new System.Windows.Forms.Label();
-			this.label18 = new System.Windows.Forms.Label();
+			this.tabPage3 = new System.Windows.Forms.TabPage();
 			((System.ComponentModel.ISupportInitialize)(this.m_udSkipBattles)).BeginInit();
 			this.tabControl1.SuspendLayout();
 			this.tabPage1.SuspendLayout();
@@ -670,6 +672,11 @@ namespace BuckRogers
 			// 
 			this.columnHeader21.Text = "Leader";
 			// 
+			// columnHeader29
+			// 
+			this.columnHeader29.Text = "Hit";
+			this.columnHeader29.Width = 35;
+			// 
 			// m_btnContinue
 			// 
 			this.m_btnContinue.Location = new System.Drawing.Point(120, 432);
@@ -793,6 +800,7 @@ namespace BuckRogers
 			// 
 			// tabControl1
 			// 
+			this.tabControl1.Controls.Add(this.tabPage3);
 			this.tabControl1.Controls.Add(this.tabPage1);
 			this.tabControl1.Controls.Add(this.tabPage2);
 			this.tabControl1.Location = new System.Drawing.Point(0, 0);
@@ -865,6 +873,30 @@ namespace BuckRogers
 			this.tabPage2.Size = new System.Drawing.Size(964, 634);
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "Production";
+			// 
+			// label18
+			// 
+			this.label18.Location = new System.Drawing.Point(652, 84);
+			this.label18.Name = "label18";
+			this.label18.Size = new System.Drawing.Size(100, 16);
+			this.label18.TabIndex = 10;
+			this.label18.Text = "Place unit in:";
+			// 
+			// label17
+			// 
+			this.label17.Location = new System.Drawing.Point(652, 32);
+			this.label17.Name = "label17";
+			this.label17.Size = new System.Drawing.Size(100, 16);
+			this.label17.TabIndex = 9;
+			this.label17.Text = "Unit to produce:";
+			// 
+			// m_btnProduce
+			// 
+			this.m_btnProduce.Location = new System.Drawing.Point(652, 132);
+			this.m_btnProduce.Name = "m_btnProduce";
+			this.m_btnProduce.TabIndex = 8;
+			this.m_btnProduce.Text = "Produce";
+			this.m_btnProduce.Click += new System.EventHandler(this.m_btnProduce_Click);
 			// 
 			// m_btnSetupProduction
 			// 
@@ -966,34 +998,13 @@ namespace BuckRogers
 			this.m_lbProductionOrder.Size = new System.Drawing.Size(120, 82);
 			this.m_lbProductionOrder.TabIndex = 0;
 			// 
-			// columnHeader29
+			// tabPage3
 			// 
-			this.columnHeader29.Text = "Hit";
-			this.columnHeader29.Width = 35;
-			// 
-			// m_btnProduce
-			// 
-			this.m_btnProduce.Location = new System.Drawing.Point(652, 132);
-			this.m_btnProduce.Name = "m_btnProduce";
-			this.m_btnProduce.TabIndex = 8;
-			this.m_btnProduce.Text = "Produce";
-			this.m_btnProduce.Click += new System.EventHandler(this.m_btnProduce_Click);
-			// 
-			// label17
-			// 
-			this.label17.Location = new System.Drawing.Point(652, 32);
-			this.label17.Name = "label17";
-			this.label17.Size = new System.Drawing.Size(100, 16);
-			this.label17.TabIndex = 9;
-			this.label17.Text = "Unit to produce:";
-			// 
-			// label18
-			// 
-			this.label18.Location = new System.Drawing.Point(652, 84);
-			this.label18.Name = "label18";
-			this.label18.Size = new System.Drawing.Size(100, 16);
-			this.label18.TabIndex = 10;
-			this.label18.Text = "Place unit in:";
+			this.tabPage3.Location = new System.Drawing.Point(4, 22);
+			this.tabPage3.Name = "tabPage3";
+			this.tabPage3.Size = new System.Drawing.Size(964, 634);
+			this.tabPage3.TabIndex = 2;
+			this.tabPage3.Text = "Movement";
 			// 
 			// CombatTestForm
 			// 
