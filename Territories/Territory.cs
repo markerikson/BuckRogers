@@ -54,10 +54,13 @@ namespace BuckRogers
 			set { this.m_system = value; }
 		}
 
+		
+
 		private TerritoryType m_type;
 		private Player owner;
 		private UnitCollection m_units;
 		private OrbitalSystem m_system;
+		private OrbitalPath m_orbit;
 
 		public static Territory NONE = new Territory("NONE", TerritoryType.Space);
 
@@ -73,6 +76,13 @@ namespace BuckRogers
 			m_units = new UnitCollection();
 			this.m_type = type;
 			m_system = OrbitalSystem.NONE;
+			m_orbit = OrbitalPath.NONE;
+		}
+
+		public BuckRogers.OrbitalPath Orbit
+		{
+			get { return this.m_orbit; }
+			set { this.m_orbit = value; }
 		}
 
 		

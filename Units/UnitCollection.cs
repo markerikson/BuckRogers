@@ -183,7 +183,6 @@ namespace BuckRogers
 			return uc;
 		}
 
-		// TODO Refactor these to call the multi-param version
 		public UnitCollection GetUnits(Territory t)
 		{
 			return GetUnits(UnitType.None, null, t);

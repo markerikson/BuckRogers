@@ -55,13 +55,13 @@ namespace BuckRogers
 			//
 			// TODO: Add constructor logic here
 			//
-			meo = new OrbitalPath(2);
-			vo = new OrbitalPath(4);
-			eo = new OrbitalPath(8);
-			mao = new OrbitalPath(16);
-			ao = new OrbitalPath(32);
-			teo = new OrbitalPath(16);
-			tmo = new OrbitalPath(32);
+			meo = new OrbitalPath("Mercury Orbit", 2);
+			vo = new OrbitalPath("Venus Orbit", 4);
+			eo = new OrbitalPath("Earth Orbit", 8);
+			mao = new OrbitalPath("Mars Orbit", 16);
+			ao = new OrbitalPath("Asteroid Orbit", 32);
+			teo = new OrbitalPath("Trans-Earth Orbit", 16);
+			tmo = new OrbitalPath("Trans-Mars Orbit", 32);
 
 			planets = new Hashtable();
 			orbitalPaths = new Hashtable();
@@ -377,6 +377,7 @@ namespace BuckRogers
 			for(int i = 0; i < orbit.Length; i++)
 			{
 				orbit[i] = new Territory(orbitName + " Orbit: " + i.ToString(), TerritoryType.Space);
+				orbit[i].Orbit = orbit;
 				m_graph.AddNode(orbit[i]);
 			}
 

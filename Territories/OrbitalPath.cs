@@ -9,6 +9,8 @@ namespace BuckRogers
 	/// </summary>
 	public class OrbitalPath
 	{
+		public static OrbitalPath NONE = new OrbitalPath("NONE", 0);
+
 		public Territory[] Territories
 		{
 			get { return this.m_territories; }
@@ -34,16 +36,25 @@ namespace BuckRogers
 				return m_territories.Length;
 			}
 		}
+
+		public string Name
+		{
+			get { return this.m_name; }
+			set { this.m_name = value; }
+		}
+
 		
 	
 		private Territory[] m_territories;
+		private string m_name;
 
-		public OrbitalPath(int size)
+		public OrbitalPath(string name, int size)
 		{
 			//
 			// TODO: Add constructor logic here
 			//
 			m_territories = new Territory[size];
+			m_name = name;
 		}
 
 		public int NextOrbitalNodeIndex(Node current)
@@ -75,5 +86,7 @@ namespace BuckRogers
 			currentIndex++;
 			return currentIndex;
 		}
+
+		
 	}
 }

@@ -284,7 +284,7 @@ namespace BuckRogers
 			Territory australia = m_controller.Map["Australian Development Facility"];
 
 			Player kathryn = m_controller.Players[5];
-			uc = kathryn.Units;
+			units = kathryn.Units;
 
 			uc = units.GetUnits(UnitType.Leader);
 			uc[0].CurrentTerritory = farside;
@@ -618,7 +618,7 @@ namespace BuckRogers
 				Assert.AreEqual(tmo20, u.CurrentTerritory);
 			}
 
-			m_controller.EndPhase();
+			m_controller.EndMovePhase();
 			m_controller.Map.AdvancePlanets();
 
 			move = new MoveAction();
@@ -678,5 +678,62 @@ namespace BuckRogers
 		}
 
 		#endregion
+
+		[Test]
+		public void FindBattles()
+		{
+			Territory africa = m_controller.Map["African Regency"];
+			Territory antarctica = m_controller.Map["Antarctic Testing Zone"];
+			UnitCollection uc = africa.Units.GetUnits(UnitType.Fighter);
+			
+            MoveAction ma = new MoveAction();
+			ma.Owner = africa.Owner;
+			ma.StartingTerritory = africa;
+			ma.Territories.Add(antarctica);
+			ma.Units.AddAllUnits(uc);
+
+			m_controller.AddAction(ma);
+
+
+			Territory farside = m_controller.Map["Farside"];
+			uc = farside.Units.GetUnits(UnitType.Fighter);
+
+			ma = new MoveAction();
+			ma.Owner = farside.Owner;
+			ma.StartingTerritory = farside;
+			ma.Units.AddAllUnits(uc);
+			ma.Territories.Add(m_controller.Map["Near Moon Orbit"]);
+			ma.Territories.Add(m_controller.Map["Near Earth Orbit"]);
+			ma.Territories.Add(m_controller.Map["Independent Arcologies"]);
+
+			m_controller.AddAction(ma);
+
+			Territory tranquility = m_controller.Map["Tranquility"];
+			uc = tranquility.Units;
+
+			ma = new MoveAction();
+			ma.Owner = tranquility.Owner;
+			ma.StartingTerritory = tranquility;
+			ma.Units.AddAllUnits(uc);
+			ma.Territories.Add(m_controller.Map["Moscoviense"]);
+
+			m_controller.AddAction(ma);
+
+			Territory mercuryOrbit1 = m_controller.Map["Mercury Orbit: 1"];
+			Territory transMarsOrbit15 = m_controller.Map["Trans-Mars Orbit: 15"];
+
+			UnitCollection uc2 = m_controller.Map["Deimos"].Units.GetUnits(UnitType.Fighter);
+			UnitCollection uc3 = m_controller.Map["Hielo"].Units.GetUnits(UnitType.Fighter);
+
+			uc2[0].CurrentTerritory = mercuryOrbit1;
+			uc2[1].CurrentTerritory = transMarsOrbit15;
+
+			uc3[0].CurrentTerritory = mercuryOrbit1;
+			uc3[1].CurrentTerritory = transMarsOrbit15;
+
+			ArrayList battles = m_controller.FindBattles();
+
+
+		}
 	}
 }

@@ -9,6 +9,7 @@ namespace BuckRogers
 	/// </summary>
 	public class GameController
 	{
+		#region Properties
 		public BuckRogers.GameMap Map
 		{
 			get { return this.m_map; }
@@ -32,6 +33,8 @@ namespace BuckRogers
 			get { return this.m_currentPlayerOrder; }
 			set { this.m_currentPlayerOrder = value; }
 		}
+
+		#endregion
 	
 		private GameMap m_map;
 		// Player list assumes players in clockwise order
@@ -44,6 +47,7 @@ namespace BuckRogers
 		private ArrayList m_undoneActions;
 		private int m_turnNumber;
 
+		// TODO Change this into a property or something		
 		public TurnRoll[] Rolls;
 
 		
@@ -106,9 +110,6 @@ namespace BuckRogers
 
 		public GameController(string[] playerNames)
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 			m_map = new GameMap();
 			m_players = new Player[playerNames.Length];
 
@@ -121,9 +122,7 @@ namespace BuckRogers
 			m_checkedActions = new ArrayList();
 			m_undoneActions = new ArrayList();
 
-			m_turnNumber = 0;
-
-			
+			m_turnNumber = 0;			
 		}
 
 		public Player GetPlayer(string name)
@@ -142,22 +141,13 @@ namespace BuckRogers
 			return result;
 		}
 
-		public void SetTerritoryOwner(Territory territory, Player player)
-		{
-
-		}
-
-		public Player GetTerritoryOwner(Territory territory)
-		{
-			return null;
-		}
-
-		
 
 		public int RollD10()
 		{
 			return m_twister.Next(1, 10);
 		}
+
+		#region Setup functions
 
 		public void AssignTerritories()
 		{
@@ -213,9 +203,11 @@ namespace BuckRogers
 
 				u = Unit.CreateNewUnit(p, UnitType.Transport);
 			}
-
-
 		}
+
+		#endregion
+
+		#region Initiative functions
 
 		public void RollForInitiative()
 		{
@@ -318,6 +310,9 @@ namespace BuckRogers
 			}
 		}
 
+		#endregion
+
+		#region Transport functions
 
 		//public void LoadTransport(Transport transport, UnitCollection units, UnitType type)
 		public void LoadTransport(TransportAction ta)
@@ -423,6 +418,10 @@ namespace BuckRogers
 			}
 
 		}
+
+		#endregion 
+
+		#region Action functions
 
 		public void AddAction(Action action)
 		{
@@ -581,7 +580,8 @@ namespace BuckRogers
 
 		}
 
-		public void EndPhase()
+		// Ends the current player's move phase
+		public void EndMovePhase()
 		{
 			foreach(Action a in m_checkedActions)
 			{
@@ -598,60 +598,86 @@ namespace BuckRogers
 
 			m_checkedActions.Clear();
 
+			// TODO Change the active player
+
+			// TODO Raise an event here for end of all movement?
+
 		}
 
-		/*
-		public void ExecuteActions()
+		#endregion
+
+		public ArrayList FindBattles()
 		{
+			/* Two possible methods for finding battles.
+			 * 
+			 * 1) Brute force.  Search every single territory for multiple units.  Ugly and time-consuming, but will work.
+			 * 2) Scan through the players and use the units list to calculate it somehow.  Don't know an algorithm
+			 *    yet, but should be shorter.
+			 *    
+			 *    Hah!  Solution: Scan through each player's units and check if the territory has multiple players in
+			 *    it.  Guaranteed to only search territories that already have units.  
+			 *
+			 */
+			string[] searchOrder = {"Mercury", "Mercury Orbit", "Venus", "Venus Orbit", "Earth", "Moon", 
+									"Trans-Earth Orbit", "Mars", "Trans-Mars Orbit", "Ceres", "Aurora", "Hygeia", "Juno", 
+									   "Vesta", "Fortuna", "Thule", "Psyche", "Pallas", "Asteroid Orbit"};
+
+
+			Hashtable planets = new Hashtable();
+			for(int i = 0; i < searchOrder.Length; i++)
+			{
+				planets[searchOrder[i]] =  new ArrayList();
+			}
+
+			for(int i = 0; i < m_players.Length; i++)
+			{
+				Player player = m_players[i];
+				foreach(Unit u in player.Units)
+				{
+					if(u.CurrentTerritory.Units.HasUnitsFromMultiplePlayers)
+					{
+						string name;
+						//if(u.CurrentTerritory.Type == TerritoryType.Ground)
+						
+						if(u.CurrentTerritory.System != OrbitalSystem.NONE)
+						{
+							name = u.CurrentTerritory.System.Name;
+						}
+						else
+						{
+							name = u.CurrentTerritory.Orbit	.Name;
+						}
+
+						// Add to the appropriate planet/orbit's list of battles
+						ArrayList planetBattleList = (ArrayList)planets[name];
+						Console.WriteLine("Name: " + name + ", Unit: " + u.Info);
+						if(!planetBattleList.Contains(u.CurrentTerritory.Name))
+						{
+							planetBattleList.Add(u.CurrentTerritory.Name);
+						}
+						
+					}
+				}
+			}
+
+			// Add the battles from each planet in the appropriate order
+			ArrayList battles = new ArrayList();
+			for(int i = 0; i < searchOrder.Length; i++)
+			{
+				ArrayList planet = (ArrayList)planets[searchOrder[i]];
+
+				if(planet.Count > 0)
+				{
+					foreach(string name in planet)
+					{
+						battles.Add(name);
+					}
+				}
+			}
+
+			return battles;
 			
-			ArrayList completedMoves = new ArrayList();
-
-			for(int i = 0; i < m_checkedActions.Count; i++)
-			{
-				Action a = (Action)m_checkedActions[0];
-				if(a is MoveAction)
-				{
-					MoveAction m = (MoveAction)a;
-					int index = m.Territories.Count - 1;
-					Territory finalTerritory = (Territory)m.Territories[index];
-					foreach(Unit u in m.Units)
-					{
-						u.CurrentTerritory = finalTerritory;
-					}
-					completedMoves.Add(m);
-					
-				}
-				else if(a is TransportAction)
-				{
-					TransportAction ta = (TransportAction)a;
-					if(ta.Load)
-					{
-						LoadTransport(ta.Transport, ta.Units, ta.UnitType);
-					}
-					else
-					{
-						UnloadTransport(ta.Transport, ta.MaxTransfer);
-					}
-					
-				}
-				else
-				{
-					throw new Exception("Unknown Action type in ExecuteActions");
-				}
-				m_pendingActions.Remove(a);
-				
-			}
-
-			foreach(MoveAction m in completedMoves)
-			{
-				foreach(Unit u in m.Units)
-				{
-					u.MovesLeft = u.MaxMoves;
-				}
-			}
-
 		}
-		*/
 
 		public void ExecuteAttack(Unit attacker, Unit defender, bool attackerLeader, bool defenderLeader)
 		{
