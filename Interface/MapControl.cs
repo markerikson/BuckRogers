@@ -13,6 +13,7 @@ using UMD.HCIL.PiccoloX;
 using UMD.HCIL.PiccoloX.Nodes;
 using UMD.HCIL.PiccoloX.Components;
 
+
 namespace BuckRogers
 {
 	/// <summary>
@@ -154,85 +155,34 @@ namespace BuckRogers
 		
 		private void AddPlanets()
 		{
-			#region Earth regions
-			PointF[][] earthPoints = new PointF[][]
-								{
+			float scaleFactor = 6.0f;
 
-									new PointF[] 
-									{
-										new PointF(0, 0), new PointF(160, 0), new PointF(160, 30f), 
-										new PointF(0, 30f),
-								},
-
-									new PointF[] 
-									{
-										new PointF(0, 30f), new PointF(80, 30), new PointF(80, 65f), 
-										new PointF(0, 65f),
-								},
-
-									new PointF[] 
-									{
-										new PointF(0, 65), new PointF(80, 65), new PointF(80, 115f), 
-										new PointF(50, 115), new PointF(0, 85),
-								},
-
-									new PointF[] 
-									{
-										new PointF(0, 85), new PointF(50, 115), new PointF(70, 115), 
-										new PointF(70, 160), new PointF(0, 160)
-									},
-
-									new PointF[] 
-									{
-										new PointF(70, 115), new PointF(160, 115), new PointF(160, 160), 
-										new PointF(70, 160),
-								},
-
-									new PointF[] 
-									{
-										new PointF(160, 115), new PointF(80, 115), new PointF(80, 75), 
-										new PointF(100, 75),new PointF(160, 45)
-									},
-
-									new PointF[] 
-									{
-										new PointF(160, 30), new PointF(80, 30), new PointF(80, 75), 
-										new PointF(100, 75f), new PointF(160, 45)
-									},
-			};
-
-			string[] earthNames = {"Independent Arcologies", "American Regency", "Urban Reservations", 
-									  "Australian Development Facility", "Antarctic Testing Zone",
-									  "African Regency", "Eurasian Regency"};
-
-			#endregion
-			
 			#region Mercury regions
 			PointF[][] mercuryPoints = new PointF[][]
-								{
+			{
 
-									new PointF[] 
-									{
-										new PointF(0, 0), new PointF(85, 85), new PointF(0, 120), 
-								},
+				new PointF[] 
+				{
+					new PointF(0, 0), new PointF(85, 85), new PointF(0, 120), 
+				},
 
-									new PointF[] 
-									{
-										new PointF(0, 0), new PointF(80, 80), new PointF(115, 0), 
-								},
+				new PointF[] 
+				{
+					new PointF(0, 0), new PointF(80, 80), new PointF(115, 0), 
+				},
 
-									new PointF[] 
-									{
-										new PointF(115, 0), new PointF(80, 80), new PointF(140, 140), 
-										new PointF(140, 0),
-								},
+				new PointF[] 
+				{
+					new PointF(115, 0), new PointF(80, 80), new PointF(140, 140), 
+					new PointF(140, 0),
+				},
 
-									new PointF[] 
-									{
-										new PointF(0, 120), new PointF(85, 85), new PointF(140, 140), 
-										new PointF(0, 140), 
-								},
-		};
+				new PointF[] 
+				{
+					new PointF(0, 120), new PointF(85, 85), new PointF(140, 140), 
+					new PointF(0, 140), 
+				},
+			};
 			string[] mercuryNames = {"Bach", "The Warrens", "Tolstoi", "Sobkou Plains"};
 
 			#endregion
@@ -290,80 +240,137 @@ namespace BuckRogers
 
 			#endregion
 
-			#region Mars regions
-			PointF[][] marsPoints = new PointF[][]
-								{
-									new PointF[] 
-									{
-										new PointF(0, 0), new PointF(40, 0), new PointF(40, 150), 
-										new PointF(0, 150),
-								},
-
-									new PointF[] 
-									{
-										new PointF(40, 0), new PointF(40, 40), new PointF(110, 40), 
-										new PointF(110, 0),
-								},
-
-									new PointF[] 
-									{
-										new PointF(40, 40), new PointF(75, 40), new PointF(75, 150), 
-										new PointF(40, 150),
-								},
-
-									new PointF[] 
-									{
-										new PointF(75, 40), new PointF(110, 40), new PointF(110, 150), 
-										new PointF(75, 150), 
-								},
-
-									new PointF[] 
-									{
-										new PointF(110, 0), new PointF(150, 0), new PointF(150, 150), 
-										new PointF(110, 150),
-								},
-		};
-
-			string[] marsNames = {"Coprates Chasm", "Boreal Sea", "Ram HQ", 
-									 "Arcadia", "Pavonis"};
-
-			#endregion
-
 			#region Moon regions
 			PointF[][] moonPoints = new PointF[][]
-								{
+			{
 
-									new PointF[] 
-									{
-										new PointF(0, 0), new PointF(0, 10), new PointF(50, 50), 
-										new PointF(110, 15), new PointF(110, 0)
-									},
+				new PointF[] 
+				{
+					new PointF(0, 0), new PointF(0, 10), new PointF(50, 50), 
+					new PointF(110, 15), new PointF(110, 0)
+				},
 
-									new PointF[] 
-									{
-										new PointF(0, 10), new PointF(50, 50), new PointF(55, 55), 
-										new PointF(50, 60), new PointF(0, 105)
-									},
+				new PointF[] 
+				{
+					new PointF(110, 15), new PointF(50, 50), new PointF(55, 55), 
+					new PointF(50, 60), new PointF(110, 95), 
+				},
 
-									new PointF[] 
-									{
-										new PointF(0, 110), new PointF(0, 105), new PointF(50, 60),  
-										new PointF(110, 95), new PointF(110, 110), 
-								},
+				new PointF[] 
+				{
+					new PointF(0, 110), new PointF(0, 105), new PointF(50, 60),  
+					new PointF(110, 95), new PointF(110, 110), 
+				},
 
-									new PointF[] 
-									{
-										new PointF(110, 15), new PointF(50, 50), new PointF(55, 55), 
-										new PointF(50, 60), new PointF(110, 95), 
-								},
+				new PointF[] 
+				{
+					new PointF(0, 10), new PointF(50, 50), new PointF(55, 55), 
+					new PointF(50, 60), new PointF(0, 105)
+				},
+			};
 
-		};
-
-			string[] moonNames = {"Moscoviense", "Tranquility", "Tycho","Farside"};
+			string[] moonNames = {"Moscoviense", "Farside", "Tycho", "Tranquility" };
 
 			#endregion
 
-			float scaleFactor = 6.0f;
+			#region Earth regions
+			PointF[][] earthPoints = new PointF[][]
+			{
+
+				new PointF[] 
+				{
+					new PointF(0, 0), new PointF(160, 0), new PointF(160, 30f), 
+					new PointF(0, 30f),
+				},
+
+				new PointF[] 
+				{
+					new PointF(160, 30), new PointF(80, 30), new PointF(80, 75), 
+					new PointF(100, 75f), new PointF(160, 45)
+				},
+
+				new PointF[] 
+				{
+					new PointF(160, 115), new PointF(80, 115), new PointF(80, 75), 
+					new PointF(100, 75),new PointF(160, 45)
+				},
+
+				new PointF[] 
+				{
+					new PointF(70, 115), new PointF(160, 115), new PointF(160, 160), 
+					new PointF(70, 160),
+				},
+
+				new PointF[] 
+				{
+					new PointF(0, 85), new PointF(50, 115), new PointF(70, 115), 
+					new PointF(70, 160), new PointF(0, 160)
+				},
+
+				new PointF[] 
+				{
+					new PointF(0, 65), new PointF(80, 65), new PointF(80, 115f), 
+					new PointF(50, 115), new PointF(0, 85),
+				},
+	
+				new PointF[] 
+				{
+					new PointF(0, 30f), new PointF(80, 30), new PointF(80, 65f), 
+					new PointF(0, 65f),
+				},
+
+				
+
+				
+			};
+
+			string[] earthNames = {"Independent Arcologies", "Eurasian Regency", "African Regency", 
+									"Antarctic Testing Zone",  "Australian Development Facility", 
+									"Urban Reservations",	"American Regency"};
+
+			#endregion
+
+			#region Mars regions
+			PointF[][] marsPoints = new PointF[][]
+			{
+				
+
+				new PointF[] 
+				{
+					new PointF(40, 0), new PointF(40, 40), new PointF(110, 40), 
+					new PointF(110, 0),
+				},
+
+				new PointF[] 
+				{
+					new PointF(110, 0), new PointF(150, 0), new PointF(150, 150), 
+					new PointF(110, 150),
+				},
+
+				new PointF[] 
+				{
+					new PointF(75, 40), new PointF(110, 40), new PointF(110, 150), 
+					new PointF(75, 150), 
+				},
+
+				new PointF[] 
+				{
+					new PointF(40, 40), new PointF(75, 40), new PointF(75, 150), 
+					new PointF(40, 150),
+				},
+
+				new PointF[] 
+				{
+					new PointF(0, 0), new PointF(40, 0), new PointF(40, 150), 
+					new PointF(0, 150),
+				},
+			};
+
+			string[] marsNames = { "Boreal Sea", "Pavonis", "Arcadia", 
+									"Ram HQ", "Coprates Chasm"};
+
+			#endregion
+			
 	
 			#region Mercury orbit
 
@@ -631,12 +638,35 @@ namespace BuckRogers
 
 			#endregion
 
+			#region Territory centers
+
+			PointF[] mercuryCenters = new PointF[] {new PointF(27.41f, 67.41f), new PointF(64.1f, 25.74f),
+												  new PointF(105f, 67f), new PointF(75f, 110f)}; 
+
+			PointF[] venusCenters = new PointF[] {new PointF(38f, 30f), new PointF(85f, 28f),
+													 new PointF(114f, 65f), new PointF(130f, 110f),
+												new PointF(83f, 120f), new PointF(40f, 125f), new PointF(35f, 79f)}; 
+
+			PointF[] moonCenters = new PointF[] {new PointF(53f, 20f), new PointF(80f, 55f),
+												new PointF(53f, 90f), new PointF(25f, 55f)}; 
+
+			PointF[] earthCenters = new PointF[] {new PointF(79f, 14f), new PointF(105f, 50f),
+													 new PointF(105f, 90f), new PointF(95f, 130f),
+													 new PointF(40f, 120f), new PointF(45f, 85f), new PointF(45f, 45f)}; 
+
+
+			
+			PointF[] marsCenters = new PointF[] {new PointF(75f, 19f), new PointF(129f, 74f),
+													 new PointF(91.5f, 94f), new PointF(56.5f, 94f),
+													 new PointF(19f, 74f)};
+			#endregion
+
 			#region Draw planets and planetary orbits
-			AddPlanet(70, mercuryPoints, mercuryNames, Brushes.Goldenrod, scaleFactor, -2600, -800);
-			AddPlanet(80, venusPoints, venusNames, Brushes.LightGreen, scaleFactor, -2600, 1000);
-			AddPlanet(80, earthPoints, earthNames, Brushes.LightBlue, scaleFactor, 1900, 1100);
-			AddPlanet(55, moonPoints, moonNames, Brushes.LightGray, scaleFactor, 1100, 1300);
-			AddPlanet(75, marsPoints, marsNames, Brushes.OrangeRed, scaleFactor, 1800, -550);
+			AddPlanet(70, mercuryPoints, mercuryNames, mercuryCenters, Brushes.Goldenrod, scaleFactor, -2600, -800);
+			AddPlanet(80, venusPoints, venusNames, venusCenters, Brushes.LightGreen, scaleFactor, -2600, 1000);
+			AddPlanet(80, earthPoints, earthNames, earthCenters, Brushes.LightBlue, scaleFactor, 1900, 1100);
+			AddPlanet(55, moonPoints, moonNames, moonCenters, Brushes.LightGray, scaleFactor, 1100, 1300);
+			AddPlanet(75, marsPoints, marsNames, marsCenters, Brushes.OrangeRed, scaleFactor, 1800, -550);
 
 			DrawOrbit(mercuryNearOrbitPoints, Color.Yellow, scaleFactor, -2700, -1100, true);
 			DrawOrbit(mercuryFarOrbitPoints, Color.Yellow, scaleFactor, -2700, -1100, true);
@@ -651,26 +681,26 @@ namespace BuckRogers
 			DrawOrbit(marsNearOrbitPoints, Color.Red, scaleFactor, 1000, -1300, true);
 			DrawOrbit(marsFarOrbitPoints, Color.Red, scaleFactor, 1000, -1300, true);
 
-			DrawAsteroid(75, 75, scaleFactor, Color.Gray, 30, 40, -200, 1150);
-			DrawAsteroid(65, 55, scaleFactor, Color.Gray, -20, 20, 450, 1000);
-			DrawAsteroid(70, 45, scaleFactor, Color.LightSteelBlue, 40, 10, 500, 1350);
-			DrawAsteroid(70, 60, scaleFactor, Color.MediumSlateBlue, 35, 30, 500, 1650);
-			DrawAsteroid(60, 60, scaleFactor, Color.Goldenrod, 40, 25, 0, 1700);
-			DrawAsteroid(60, 70, scaleFactor, Color.Gainsboro, 20, -15, -500, 1650);
-			DrawAsteroid(60, 60, scaleFactor, Color.LightSteelBlue, 30, 30, -1000, 1650);
-			DrawAsteroid(60, 60, scaleFactor, Color.Gold, -25, 15, -800, 1300);
-			DrawAsteroid(85, 50, scaleFactor, Color.LightGray, -10, -5, -800, 1000);
+			DrawAsteroid(75, 75, scaleFactor, "Ceres", Color.Gray, 30, 40, -200, 1150);
+			DrawAsteroid(65, 55, scaleFactor, "Pallas", Color.Gray, -20, 20, 450, 1000);
+			DrawAsteroid(70, 45, scaleFactor, "Psyche", Color.LightSteelBlue, 40, 10, 500, 1350);
+			DrawAsteroid(70, 60, scaleFactor, "Thule", Color.MediumSlateBlue, 35, 30, 500, 1650);
+			DrawAsteroid(60, 60, scaleFactor, "Fortuna", Color.Goldenrod, 40, 25, 0, 1700);
+			DrawAsteroid(60, 70, scaleFactor, "Vesta", Color.Gainsboro, 20, -15, -500, 1650);
+			DrawAsteroid(60, 60, scaleFactor, "Juno", Color.LightSteelBlue, 30, 30, -1000, 1650);
+			DrawAsteroid(60, 60, scaleFactor, "Hygeia", Color.Gold, -25, 15, -800, 1300);
+			DrawAsteroid(85, 50, scaleFactor, "Aurora", Color.LightGray, -10, -5, -800, 1000);
 
-			// Hielo and Mariposaas
-			DrawObject(60, 60, scaleFactor, Color.Yellow, -1600, -350);
-			DrawObject(85, 35, scaleFactor, Color.Yellow, -1700, -750);
+			// Hielo and Mariposas
+			DrawObject(60, 60, scaleFactor, "Hielo", Color.Yellow, -1600, -350);
+			DrawObject(85, 35, scaleFactor, "Mariposas", Color.Yellow, -1700, -750);
 
 			// Deimos
-			DrawObject(100, 100, scaleFactor, Color.Gray, 1100, -1000);
+			DrawObject(100, 100, scaleFactor, "Deimos", Color.Gray, 1100, -1000);
 
 			// L4 and L5 colonies
-			DrawObject(65, 50, scaleFactor, Color.CornflowerBlue, 1350, 600);
-			DrawObject(80, 50, scaleFactor, Color.CornflowerBlue, 2100, 650);
+			DrawObject(65, 50, scaleFactor, "L4 Colony", Color.CornflowerBlue, 1350, 600);
+			DrawObject(80, 50, scaleFactor, "L5 Colony", Color.CornflowerBlue, 2100, 650);
 
 			#endregion
 
@@ -681,21 +711,27 @@ namespace BuckRogers
 				m_planets[i].MoveToFront();
 			}
 
-			PPath upperElevator = DrawObject(90, 65, scaleFactor, Color.DarkRed, 2200, -1000, false);
-			PPath lowerElevator = DrawObject(40, 75, scaleFactor, Color.DarkRed, 2450, -800, true);
+			PPath upperElevator = DrawObject(90, 65, scaleFactor, "", Color.DarkRed, 2200, -1000, false);
+			PPath lowerElevator = DrawObject(40, 75, scaleFactor, "", Color.DarkRed, 2450, -800, false);
 
 			PComposite elevator = new PComposite();
 			elevator.AddChild(upperElevator);
 			elevator.AddChild(lowerElevator);
 
+			DrawLabelAndOwner(upperElevator, "Space Elevator", 2200, -1000);
+
 			Canvas.Layer.AddChild(elevator);
 			
 		}
 
-		private void DrawAsteroid(float width, float height, float scaleFactor, Color color, 
+		private void DrawAsteroid(float width, float height, float scaleFactor, string name, Color color, 
 			int orbitX, int orbitY, int shiftX, int shiftY)
 		{
-			DrawObject(width, height, scaleFactor, color, shiftX, shiftY);
+			PPath asteroid = DrawObject(width, height, scaleFactor, name, color, shiftX, shiftY);
+
+
+			float centerX = (width / 2) * scaleFactor;
+			float centerY = (height / 2) * scaleFactor;
 
 			float orbitDiameter = scaleFactor * 40;
 			PPath orbit = PPath.CreateEllipse(0, 0, orbitDiameter, orbitDiameter);
@@ -707,15 +743,16 @@ namespace BuckRogers
 			orbit.Y += shiftY + (orbitY * scaleFactor);
 
 			
+			
 			Canvas.Layer.AddChild(orbit);
 
 		}
 
-		private PPath DrawObject(float width, float height, float scaleFactor, Color color, int shiftX, int shiftY)
+		private PPath DrawObject(float width, float height, float scaleFactor, string name, Color color, int shiftX, int shiftY)
 		{
-			return DrawObject(width, height, scaleFactor, color, shiftX, shiftY, true);
+			return DrawObject(width, height, scaleFactor, name, color, shiftX, shiftY, true);
 		}
-		private PPath DrawObject(float width, float height, float scaleFactor, Color color, int shiftX, int shiftY, bool addChild)
+		private PPath DrawObject(float width, float height, float scaleFactor, string name, Color color, int shiftX, int shiftY, bool addChild)
 		{
 			width *= scaleFactor;
 			height *= scaleFactor;
@@ -727,16 +764,45 @@ namespace BuckRogers
 			obj.X += shiftX;
 			obj.Y += shiftY;
 
+			
+
 			if(addChild)
 			{
+				DrawLabelAndOwner(obj, name, shiftX, shiftY);
 				Canvas.Layer.AddChild(obj);
 			}
 			
 			return obj;
 		}
 
-		private void AddPlanet(float radius, PointF[][] polygons, string[] names, Brush color, 
-			float scaleFactor, int shiftX, int shiftY)
+		private void DrawLabelAndOwner(PPath parent, string name, int shiftX, int shiftY)
+		{
+			PPath center = PPath.CreateEllipse(0, 0, 20, 20);
+			center.Brush = Brushes.White;
+			Pen p = new Pen(Color.Black, 3.0f);
+			center.Pen = p;
+
+			float centerX = parent.Width / 2;
+			float centerY = parent.Height / 2;
+
+			PointF unshiftedCenter = new PointF();
+			unshiftedCenter.X = centerX - (center.Width / 2);
+			unshiftedCenter.Y = centerY;
+
+			center.X = centerX + shiftX;
+			center.Y = centerY + shiftY;
+
+			PText text = new PText(name);//names[i]);
+			text.X = centerX - (text.Width / 2) + shiftX;
+			text.Y = centerY - (text.Height) + shiftY;
+			text.TextBrush = Brushes.Black;
+
+			parent.AddChild(center);
+			parent.AddChild(text);
+		}
+
+		private void AddPlanet(float radius, PointF[][] polygons, string[] names, PointF[] territoryCenters, 
+								Brush color, float scaleFactor, int shiftX, int shiftY)
 		{
 			//float clipRadius = 80;
 			float clipDiameter = 2 * radius;
@@ -749,6 +815,40 @@ namespace BuckRogers
 			Canvas.Layer.AddChild(planet);
 			m_planets[m_idxPlanets] = planet;
 			m_idxPlanets++;
+
+
+			
+			/*
+			cVertexList clc = new cVertexList();
+			float deg = 1.0f;
+
+			for(int i = 0; i < 360; i++)
+			{
+				
+				float numDegrees = i * deg - 90;
+
+				float x = -GetCos(numDegrees) * radius;
+				float y = GetSin(numDegrees) * radius;
+				clc.SetVertex((int)x, (int)y);
+			}
+
+			*/
+
+			/*
+			PolyDefault pdc = new PolyDefault();
+			float deg = 1.0f;
+			for(int i = 0; i < 360; i++)
+			{
+				
+				float numDegrees = i * deg - 90;
+
+				float x = -GetCos(numDegrees) * radius;
+				float y = GetSin(numDegrees) * radius;
+				pdc.add(x, y);
+			}
+			*/
+
+
 
 			for(int i = 0; i < polygons.Length; i++)
 			{
@@ -768,32 +868,93 @@ namespace BuckRogers
 				float totalX = 0.0f;
 				float totalY = 0.0f;
 
+				/*
+				ConvConv cc = new ConvConv();
+				cVertexList clt = new cVertexList();
+				
+				foreach(PointF p in points)
+				{
+					clt.SetVertex((int)p.X, (int)p.Y);
+				}
+
+				cc.Start(clt, clc);
+
+				cVertexList intersectedPolygon = cc.IntersectedPolygon;
+
+				for(int j = 0; j < intersectedPolygon.Count; j++)//points.Length; j++)
+				{
+					cPointi circlePoint = intersectedPolygon.GetElement(j).v;
+					totalX += circlePoint.x;//.points[j].X;
+					totalY += circlePoint.y;//points[j].Y;
+				}
+
+				centerX = totalX / intersectedPolygon.Count;//points.Length;
+				centerY = totalY / intersectedPolygon.Count;//points.Length;
+				*/
+
+				/*
+				PolyDefault pdt = new PolyDefault();
+				foreach(PointF p in points)
+				{
+					pdt.add(p);
+				}
+
+				Poly result = Clip.intersection(pdc, pdt);
+
+				for(int j = 0; j < result.NumPoints; j++)
+				{
+					totalX += (float)result.getX(j);
+					totalY += (float)result.getY(j);
+				}
+
+				centerX = totalX / result.NumPoints;
+				centerY = totalY / result.NumPoints;
+				*/
+
+				/*
 				for(int j = 0; j < points.Length; j++)
 				{
 					totalX += points[j].X;
 					totalY += points[j].Y;
 				}
+				*/
 
-				centerX = totalX / points.Length;
-				centerY = totalY / points.Length;
+				//centerX = totalX / points.Length;
+				//centerY = totalY / points.Length;
+				
+				centerX = territoryCenters[i].X;
+				centerY = territoryCenters[i].Y;
 
+				centerX *= scaleFactor;
+				centerY *= scaleFactor;
 
 				PPath territory = PPath.CreatePolygon(points);
 				territory.Brush = color;
 				territory.Pen = Pens.White;
 
-				PPath center = PPath.CreateEllipse(0, 0, 10, 10);
-				center.Brush = Brushes.Red;
 
-				center.X = centerX - (center.Width / 2) + shiftX;
-				center.Y = centerY - (center.Width / 2) + shiftY;
+				PPath center = PPath.CreateEllipse(0, 0, 20, 20);
+				center.Brush = Brushes.White;
+				Pen p = new Pen(Color.Black, 3.0f);
+				center.Pen = p;
+
+				PointF unshiftedCenter = new PointF();
+				unshiftedCenter.X = centerX - (center.Width / 2);
+				unshiftedCenter.Y = centerY;// - (center.Height / 2);
+
+				center.X = unshiftedCenter.X + shiftX;
+				center.Y = unshiftedCenter.Y + shiftY;
+
+				//center.X = centerX - (center.Width / 2) + shiftX;
+				//center.Y = centerY - (center.Width / 2) + shiftY;
 
 				territory.AddChild(center);
 
+				string label = names[i];// + "\r\n(x: " + (unshiftedCenter.X / scaleFactor)  + ", y: " + (unshiftedCenter.Y / scaleFactor) + ")";
 				
-				PText text = new PText(names[i]);
+				PText text = new PText(label);//names[i]);
 				text.X = centerX - (text.Width / 2) + shiftX;
-				text.Y = centerY - (text.Height / 2) + shiftY;
+				text.Y = centerY - (text.Height) + shiftY;
 
 				text.TextBrush = Brushes.Black;
 				territory.AddChild(text);
@@ -1192,5 +1353,28 @@ namespace BuckRogers
 			set { this.m_scroller = value; }
 		}
 
+	}
+
+	class BlackLayer : PLayer 
+	{
+		public BlackLayer() 
+		{
+		}
+		protected override void Paint(PPaintContext paintContext) 
+		{
+			// make sure grid gets drawn on snap to grid boundaries. And 
+			// expand a little to make sure that entire view is filled.
+			/*
+			float bx = (X - (X % gridSpacing)) - gridSpacing;
+			float by = (Y - (Y % gridSpacing)) - gridSpacing;
+			float rightBorder = X + Width + gridSpacing;
+			float bottomBorder = Y + Height + gridSpacing;
+			*/
+
+			Graphics g = paintContext.Graphics;
+			RectangleF clip = paintContext.LocalClip;
+
+			g.FillRectangle(Brushes.Black, clip);
+		}
 	}
 }

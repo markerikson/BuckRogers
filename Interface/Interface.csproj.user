@@ -1,7 +1,7 @@
 <VisualStudioProject>
     <CSHARP LastOpenVersion = "7.10.3077" >
         <Build>
-            <Settings ReferencePath = "C:\Projects\BuckRogers\;C:\toolkits\Piccolo.NET\Bin\" >
+            <Settings ReferencePath = "C:\Projects\BuckRogers\;C:\toolkits\Piccolo.NET\Bin\;C:\Projects\temp\PolyBoolean\" >
                 <Config
                     Name = "Debug"
                     EnableASPDebugging = "false"

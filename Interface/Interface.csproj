@@ -99,6 +99,11 @@
                     AssemblyName = "UMD.HCIL.Piccolo"
                     HintPath = "..\..\UMD.HCIL.Piccolo.dll"
                 />
+                <Reference
+                    Name = "ComplexA5.PolyBoolean.c20"
+                    AssemblyName = "ComplexA5.PolyBoolean.c20"
+                    HintPath = "..\..\..\temp\PolyBoolean\ComplexA5.PolyBoolean.c20.dll"
+                />
             </References>
         </Build>
         <Files>
@@ -125,7 +130,7 @@
                 <File
                     RelPath = "BuckRogersMapForm.cs"
                     SubType = "Form"
-                    BuildAction = "Compile"
+                    BuildAction = "None"
                 />
                 <File
                     RelPath = "BuckRogersMapForm.resx"
