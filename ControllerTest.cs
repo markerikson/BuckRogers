@@ -762,14 +762,18 @@ namespace BuckRogers
 			Planet mars = (Planet)m_controller.Map.Planets["Mars"];
 			battler4.CurrentTerritory = mars.FarOrbit;
 
+			Unit battler5 = Unit.CreateNewUnit(chris, UnitType.Battler);
+			battler5.CurrentTerritory = earth.NearOrbit;
+
 			Hashlist battles = m_controller.FindBattles();
 
 
 			Territory[] battleSites = {mercury.NearOrbit, mercury.NearOrbit, mercury.NearOrbit, mercuryOrbit1,
-										  venus.NearOrbit, earth.NearOrbit, antarctica, 
+										  venus.NearOrbit, earth.NearOrbit, earth.NearOrbit, earth.NearOrbit, antarctica, 
 										  arcologies, moscoviense,  mars.FarOrbit, transMarsOrbit15};
 			BattleType[] battleTypes = {BattleType.KillerSatellite, BattleType.Bombing, BattleType.Normal, BattleType.Normal,
-										   BattleType.Bombing, BattleType.Bombing, BattleType.Normal, 
+										   BattleType.Bombing, BattleType.Bombing, BattleType.Bombing, BattleType.Normal, 
+										   BattleType.Normal, 
 										   BattleType.Normal, BattleType.Normal, BattleType.Bombing, BattleType.Normal};
 			//foreach(BattleInfo bi in battles)
 			for(int i = 0; i < battles.Count; i++)

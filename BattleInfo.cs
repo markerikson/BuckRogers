@@ -14,6 +14,12 @@ namespace BuckRogers
 	/// </summary>
 	public class BattleInfo
 	{
+		public BuckRogers.Player Player
+		{
+			get { return this.m_player; }
+			set { this.m_player = value; }
+		}
+	
 		public BuckRogers.BattleType Type
 		{
 			get { return this.m_type; }
@@ -29,16 +35,17 @@ namespace BuckRogers
 		public override string ToString()
 		{
 			//return base.ToString ();
-			return m_territory.Name + " - " + m_type.ToString();
+			return m_territory.Name + " - " + m_type.ToString() + " - " + m_player.Name;
 		}
 
-	
+		private Player m_player;
 		private BattleType m_type;
 		private Territory m_territory;
 		public BattleInfo()
 		{
 			m_type = BattleType.None;
 			m_territory = Territory.NONE;
+			m_player = Player.NONE;
 		}
 	}
 }

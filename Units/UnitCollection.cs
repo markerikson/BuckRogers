@@ -302,6 +302,21 @@ namespace BuckRogers
 			return uc;
 		}
 
+		public ArrayList GetUnitTerritories()
+		{
+			ArrayList al = new ArrayList();
+
+			foreach(Unit u in List)
+			{
+				if(!al.Contains(u.CurrentTerritory))
+				{
+					al.Add(u.CurrentTerritory);
+				}
+			}
+
+			return al;
+		}
+
 		public Hashtable GetPlayersWithUnits()
 		{
 			//note nulls are handled by PlayerID.NULL_PLAYERID

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using CenterSpace.Free;
+using skmDataStructures.Graph;
 
 namespace BuckRogers
 {
@@ -477,7 +478,7 @@ namespace BuckRogers
 					if(t.Type == TerritoryType.Ground)//t.Owner != move.Owner)
 					{
 						Hashtable players = t.Units.GetPlayersWithUnits();
-						Console.WriteLine("Players: " + players.Count);
+						//Console.WriteLine("Players: " + players.Count);
 
 						if(players.Count > 0)
 						{
@@ -670,36 +671,31 @@ namespace BuckRogers
 						bi.Type = BattleType.KillerSatellite;
 						hl.Add(bi.ToString(), bi);
 					}
+				}				
+			}
+
+			foreach(Player p in m_players)
+			{
+				UnitCollection battlers = p.Units.GetUnits(UnitType.Battler);
+				if(battlers.Count == 0)
+				{
+					continue;
 				}
 
-				// TODO Need to special-case Mars, since the Space Elevator can be bombed from far orbit
-				if(CheckForBombing(os))
+				ArrayList battlerTerritories = battlers.GetUnitTerritories();
+				foreach(Territory t in battlerTerritories)
 				{
-					// Note that this is based on the unit layout prior to any killer satellites 
-					// firing, and could be nullified if all battlers are wiped out.  
-					// TODO Make sure that the battle handling code double-checks these to make sure they're still valid
-					BattleInfo bi = new BattleInfo();
-					bi.Territory = os.NearOrbit;
-					bi.Type = BattleType.Bombing;
-
-					Hashlist hl = (Hashlist)planets[os.Name];
-					hl.Add(bi.ToString(), bi);
-				}
-
-				if(os.Name == "Mars")
-				{
-					if(CheckForBombing(os, true))
+					if(CheckForBombing(t, p))
 					{
 						BattleInfo bi = new BattleInfo();
-						Planet mars = (Planet)os;
-						bi.Territory = mars.FarOrbit;
+						bi.Territory =t;
 						bi.Type = BattleType.Bombing;
+						bi.Player = p;
 
-						Hashlist hl = (Hashlist)planets[os.Name];
+						Hashlist hl = (Hashlist)planets[t.System.Name];
 						hl.Add(bi.ToString(), bi);
 					}
 				}
-				
 			}
 
 			for(int i = 0; i < m_players.Length; i++)
@@ -758,33 +754,44 @@ namespace BuckRogers
 			
 		}
 
-		public bool CheckForBombing(OrbitalSystem os)
+		public bool CheckForBombing(Territory t)
 		{
-			return CheckForBombing(os, false);
+			return CheckForBombing(t, Player.NONE);
 		}
 
-		public bool CheckForBombing(OrbitalSystem os, bool isMars)
+		public bool CheckForBombing(Territory t, Player player)
 		{
 			bool addBombing = false;
 			UnitCollection battlers; 
 			UnitCollection surfaceUnits = new UnitCollection();
 
-			if(!isMars)
+			if(t.Type != TerritoryType.Space)
 			{
-				battlers = os.NearOrbit.Units.GetUnits(UnitType.Battler);
-				foreach(Territory t in os.Surface)
+				throw new Exception("Can't bomb from a non-Space territory");
+			}
+
+			battlers = t.Units.GetUnits(UnitType.Battler);
+
+			if(player != Player.NONE)
+			{
+				battlers = battlers.GetUnits(player);
+			}
+
+			ArrayList surfaceTerritories = new ArrayList();
+			// TODO I really hate having to use EdgeToNeighbor here... can I have Neighbors return a Node?
+			foreach(EdgeToNeighbor etn in t.Neighbors)
+			{
+				Territory neighbor = (Territory)etn.Neighbor;
+				if(neighbor.Type == TerritoryType.Ground)
 				{
-					surfaceUnits.AddAllUnits(t.Units);
+					surfaceTerritories.Add(neighbor);
 				}
 			}
-			else
+
+			foreach(Territory surface in surfaceTerritories)
 			{
-				Planet mars = (Planet)os;
-				battlers = mars.FarOrbit.Units.GetUnits(UnitType.Battler);
-				Territory elevator = m_map["Space Elevator"];
-				surfaceUnits.AddAllUnits(elevator.Units);
-			}
-			
+				surfaceUnits.AddAllUnits(surface.Units);
+			}			
 
 			if(battlers.Count > 0)
 			{
@@ -822,7 +829,8 @@ namespace BuckRogers
 					CombatInfo ci;
 
 					// Since ExecuteCombat() ends when all attacking units have fired, and there's
-					// only one attacking unit, we need to 
+					// only one attacking unit, we need to do a separate combat for each
+					// defending unit
 					for(int i = 0; i < targets.Count; i++)
 					{
 						ci = new CombatInfo();
@@ -855,11 +863,13 @@ namespace BuckRogers
 					// Need to make sure this is still valid, since it's possible that a 
 					// killer satellite wiped out all battlers in the territory
 
+					/*
 					OrbitalSystem os = bi.Territory.System;
 					if(!CheckForBombing(os))
 					{
 						
 					}
+					*/
 					break;
 				}
 			}
@@ -874,7 +884,8 @@ namespace BuckRogers
 			// it's basically a while loop - no incrementing of i, since this
 			// needs to go until all attackers are done or all defenders are destroyed, 
 			// and one unit will be removed from ci.Attackers each time through
-			for(int i = 0; i < ci.Attackers.Count;)
+			//for(int i = 0; i < ci.Attackers.Count;)
+			while(ci.Attackers.Count > 0)
 			{
 				Unit attacker = (Unit)ci.Attackers[0];
 				Unit defender = (Unit)ci.Defenders[0];
