@@ -668,6 +668,13 @@ namespace BuckRogers
 			Assert.AreEqual(4, transport.Transportees.Count);
 			Assert.AreEqual(4, deimos.Units.GetUnits(UnitType.Fighter).Count);
 
+			m_controller.RedoAction();
+			m_controller.RedoAction();
+			m_controller.RedoAction();
+
+			Assert.AreEqual(transport.CurrentTerritory, farOrbit);
+			Assert.AreEqual(1, transport.Transportees.Count);
+			Assert.AreEqual(deimos, leader.CurrentTerritory);
 		}
 
 		#endregion

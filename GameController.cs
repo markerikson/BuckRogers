@@ -413,6 +413,7 @@ namespace BuckRogers
 				// so the index needs to stay at zero
 				Unit u = tr.Transportees[0];
 				u.TransportingUnit = Unit.NONE;
+
 				// Removes the unit from the old territory, assigns the unit to the new territory, and 
 				// adds the unit to the new territory's unit collection
 				u.CurrentTerritory = t;
@@ -425,11 +426,6 @@ namespace BuckRogers
 
 		public void AddAction(Action action)
 		{
-			//throw new NotImplementedException();
-			// Check whether player owns territory
-			// Check number of moves
-			// Check ground/space issues
-			// 
 			if(action is MoveAction)
 			{
 				MoveAction move = (MoveAction)action;
@@ -574,6 +570,14 @@ namespace BuckRogers
 
 		public void RedoAction()
 		{
+			if(m_undoneActions.Count == 0)
+			{
+				throw new ActionException("No undone actions to redo");
+			}
+
+			Action a = (Action)m_undoneActions[m_undoneActions.Count - 1];
+			AddAction(a);
+			m_undoneActions.Remove(a);
 
 		}
 
