@@ -136,6 +136,14 @@ namespace BuckRogers
 			m_oValues.Remove(oKey);
 			m_oKeys.Remove(oKey);
 		}
+
+		public void Remove(int idx)
+		{
+			object oKey = m_oKeys[idx];
+
+			m_oValues.Remove(oKey);
+			m_oKeys.Remove(oKey);
+		}
 		/// <summary>
 		/// 
 		/// </summary>

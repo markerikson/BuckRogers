@@ -812,7 +812,7 @@ namespace BuckRogers
 			{
 				foreach(Unit u in battlers)
 				{
-					UnitCollection otherPlayersUnits = surfaceUnits.GetOtherPlayersUnits(u.Owner);
+					UnitCollection otherPlayersUnits = surfaceUnits.GetNonMatchingUnits(u.Owner);
 					if(otherPlayersUnits.Count > 0)
 					{
 						addBombing = true;
@@ -832,7 +832,7 @@ namespace BuckRogers
 
 			foreach(Territory surface in GetSurfaceTerritories(t))
 			{
-				UnitCollection otherUnits = surface.Units.GetOtherPlayersUnits(p);
+				UnitCollection otherUnits = surface.Units.GetNonMatchingUnits(p);
 				
 				nearbyUnits.AddAllUnits(otherUnits);
 			}			
@@ -858,7 +858,7 @@ namespace BuckRogers
 			UnitCollection satellites = units.GetUnits(UnitType.KillerSatellite);
 			Unit satellite = satellites[0];
 
-			UnitCollection targets = units.GetOtherPlayersUnits(satellite.Owner);
+			UnitCollection targets = units.GetNonMatchingUnits(satellite.Owner);
 			UnitCollection leaders = units.GetUnits(UnitType.Leader);
 			UnitCollection attackerLeaders = leaders.GetUnits(satellite.Owner);
 
@@ -922,7 +922,7 @@ namespace BuckRogers
 					UnitCollection satellites = units.GetUnits(UnitType.KillerSatellite);
 					Unit satellite = satellites[0];
 
-					UnitCollection targets = units.GetOtherPlayersUnits(satellite.Owner);
+					UnitCollection targets = units.GetNonMatchingUnits(satellite.Owner);
 					UnitCollection leaders = units.GetUnits(UnitType.Leader);
 					UnitCollection attackerLeaders = leaders.GetUnits(satellite.Owner);
 

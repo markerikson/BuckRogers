@@ -81,6 +81,10 @@ namespace BuckRogers
 		private System.Windows.Forms.Label m_labSeed;
 		private System.Windows.Forms.ColumnHeader columnHeader23;
 		private System.Windows.Forms.ColumnHeader columnHeader24;
+		private System.Windows.Forms.Label m_labBattlesLeft;
+		private System.Windows.Forms.Label label15;
+		private System.Windows.Forms.NumericUpDown m_udSkipBattles;
+		private System.Windows.Forms.Label label14;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -241,6 +245,11 @@ namespace BuckRogers
 			this.m_labSeed = new System.Windows.Forms.Label();
 			this.columnHeader23 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader24 = new System.Windows.Forms.ColumnHeader();
+			this.m_labBattlesLeft = new System.Windows.Forms.Label();
+			this.label15 = new System.Windows.Forms.Label();
+			this.m_udSkipBattles = new System.Windows.Forms.NumericUpDown();
+			this.label14 = new System.Windows.Forms.Label();
+			((System.ComponentModel.ISupportInitialize)(this.m_udSkipBattles)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// m_lvAttUnused
@@ -279,9 +288,9 @@ namespace BuckRogers
 			// 
 			// label1
 			// 
-			this.label1.Location = new System.Drawing.Point(256, 524);
+			this.label1.Location = new System.Drawing.Point(704, 432);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(84, 16);
+			this.label1.Size = new System.Drawing.Size(88, 16);
 			this.label1.TabIndex = 1;
 			this.label1.Text = "Current Player:";
 			// 
@@ -296,9 +305,9 @@ namespace BuckRogers
 																   "Jake",
 																   "Kathryn",
 																   "An extremely long name"});
-			this.m_lbCurrentPlayer.Location = new System.Drawing.Point(256, 544);
+			this.m_lbCurrentPlayer.Location = new System.Drawing.Point(704, 452);
 			this.m_lbCurrentPlayer.Name = "m_lbCurrentPlayer";
-			this.m_lbCurrentPlayer.Size = new System.Drawing.Size(52, 18);
+			this.m_lbCurrentPlayer.Size = new System.Drawing.Size(156, 116);
 			this.m_lbCurrentPlayer.TabIndex = 2;
 			// 
 			// label2
@@ -701,10 +710,44 @@ namespace BuckRogers
 			this.columnHeader24.Text = "Territory";
 			this.columnHeader24.Width = 100;
 			// 
+			// m_labBattlesLeft
+			// 
+			this.m_labBattlesLeft.Location = new System.Drawing.Point(608, 436);
+			this.m_labBattlesLeft.Name = "m_labBattlesLeft";
+			this.m_labBattlesLeft.Size = new System.Drawing.Size(44, 16);
+			this.m_labBattlesLeft.TabIndex = 35;
+			// 
+			// label15
+			// 
+			this.label15.Location = new System.Drawing.Point(544, 436);
+			this.label15.Name = "label15";
+			this.label15.Size = new System.Drawing.Size(60, 16);
+			this.label15.TabIndex = 34;
+			this.label15.Text = "Battles left:";
+			// 
+			// m_udSkipBattles
+			// 
+			this.m_udSkipBattles.Location = new System.Drawing.Point(460, 468);
+			this.m_udSkipBattles.Name = "m_udSkipBattles";
+			this.m_udSkipBattles.Size = new System.Drawing.Size(36, 20);
+			this.m_udSkipBattles.TabIndex = 36;
+			// 
+			// label14
+			// 
+			this.label14.Location = new System.Drawing.Point(380, 472);
+			this.label14.Name = "label14";
+			this.label14.Size = new System.Drawing.Size(68, 16);
+			this.label14.TabIndex = 37;
+			this.label14.Text = "Skip battles:";
+			// 
 			// CombatTestForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(992, 666);
+			this.Controls.Add(this.label14);
+			this.Controls.Add(this.m_udSkipBattles);
+			this.Controls.Add(this.m_labBattlesLeft);
+			this.Controls.Add(this.label15);
 			this.Controls.Add(this.m_labSeed);
 			this.Controls.Add(this.label13);
 			this.Controls.Add(this.m_btnNextBattle);
@@ -741,6 +784,7 @@ namespace BuckRogers
 			this.Controls.Add(this.m_lvAttUnused);
 			this.Name = "CombatTestForm";
 			this.Text = "CombatTestForm";
+			((System.ComponentModel.ISupportInitialize)(this.m_udSkipBattles)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -884,6 +928,8 @@ namespace BuckRogers
 			m_controller.AssignTerritories();
 			m_controller.CreateInitialUnits();
 
+			// should set up Stu as the first player
+			m_controller.Twister.Initialize(8);
 			m_controller.RollForInitiative(false);
 
 			string[,] territories = { {"Deimos", "Psyche", "Urban Reservations", "Space Elevator", 
@@ -1311,6 +1357,7 @@ namespace BuckRogers
 
 				m_labBattleType.Text = m_currentBattle.Type.ToString();				
 				m_labLocation.Text = m_currentBattle.Territory.Name;
+				m_labBattlesLeft.Text = m_battles.Count.ToString();
 
 				m_btnContinue.Enabled = false;
 				m_btnNextPlayer.Enabled = false;
@@ -1330,7 +1377,15 @@ namespace BuckRogers
 
 				CheckPlayerOrder();
 
+				m_lbCurrentPlayer.Items.Clear();
+
+				foreach(Player p in m_playerOrder)
+				{
+					m_lbCurrentPlayer.Items.Add(p.Name);
+				}
+
 				m_currentPlayer = (Player)m_playerOrder[0];
+				m_lbCurrentPlayer.SelectedIndex = 0;
 				m_labCurrentPlayer.Text = m_currentPlayer.Name;
 				m_currentUnused = new UnitCollection();
 				
@@ -1342,7 +1397,7 @@ namespace BuckRogers
 					{
 						UnitCollection satellites = t.Units.GetUnits(UnitType.KillerSatellite);
 						m_currentUnused.AddAllUnits(satellites);
-						UnitCollection defenders = t.Units.GetOtherPlayersUnits(m_currentBattle.Player);
+						UnitCollection defenders = t.Units.GetNonMatchingUnits(m_currentBattle.Player);
 
 						UnitCollection uc = null;
 
@@ -1364,7 +1419,7 @@ namespace BuckRogers
 					}
 					case BattleType.Bombing:
 					{
-						UnitCollection attackers = t.Units.GetUnits(m_currentPlayer).GetUnits(UnitType.Battler);
+						UnitCollection attackers = t.Units.GetUnits(UnitType.Battler, m_currentPlayer, null);//).GetUnits(UnitType.Battler);
 						UnitCollection defenders = m_controller.GetBombingTargets(t, m_currentPlayer);
 
 						m_currentUnused.AddAllUnits(attackers);
@@ -1517,18 +1572,21 @@ namespace BuckRogers
 				}
 				case BattleType.Normal:
 				{
+					CombatInfo ci = null;
 					try
 					{
-						CombatInfo ci = SetUpCombat();
+						ci = SetUpCombat();
 						ci.Type = BattleType.Normal;
 
 						UnitCollection leaders = m_currentBattle.Territory.Units.GetUnits(UnitType.Leader);
 						ci.AttackingLeader = (leaders.GetUnits(m_currentPlayer).Count > 0);
 
 						cr = m_controller.ExecuteCombat(ci);
+					
 					}
 					catch(Exception ex)
 					{
+						//m_currentUnused.AddAllUnits(ci.Attackers);
 						MessageBox.Show(ex.Message);
 						m_btnAttack.Enabled = true;
 						return;
@@ -1567,8 +1625,17 @@ namespace BuckRogers
 			UnitCollection attackers = GetListedUnits(m_lvAttackers, true);
 			ci.Attackers.AddAllUnits(attackers);
 
-			UnitCollection defenders = GetListedUnits(m_lvDefenders, false);
-			ci.Defenders.AddAllUnits(defenders);
+			try
+			{
+				UnitCollection defenders = GetListedUnits(m_lvDefenders, false);
+				ci.Defenders.AddAllUnits(defenders);
+			}
+			catch(Exception ex)
+			{
+				m_currentUnused.AddAllUnits(attackers);
+				throw ex;
+			}
+			
 			
 			/*
 			foreach(ListViewItem lvi in m_lvAttackers.Items)
@@ -1622,13 +1689,29 @@ namespace BuckRogers
 				
 					if(ut == UnitType.Transport)
 					{
-						if(playerUnits.GetUnitTypeCount().Count > 1)
+						int numTransports = playerUnits.GetUnits(UnitType.Transport).Count;
+						UnitCollection otherUnits = playerUnits.GetNonMatchingUnits(UnitType.Transport);
+						//int numOtherUnits = .Count;
+						//int numPlayerOtherUnitsAdded = allMatches.GetUnits(p).GetNonMatchingUnits(UnitType.Transport).Count;
+						UnitCollection otherUnitsAdded = allMatches.GetUnits(p).GetNonMatchingUnits(UnitType.Transport);
+
+						
+						
+						
+						/*
+						if( (m_lvEnemyLive.Items.Count > 0)
+							(i != (lv.Items.Count -1)) 
+							&& (playerUnits.GetUnitTypeCount().Count > 1))
+						*/
+						if(otherUnits.Count != otherUnitsAdded.Count)
 						{
+
 							throw new Exception("Can't attack transports if other units are still alive");
 						}
 					}
 				
 					UnitCollection matchesType = playerUnits.GetUnits(ut);
+					matchesType.RemoveAllUnits(allMatches);
 
 					//matches = playerUnits.GetUnits(ut, numUnits);
 
@@ -1693,6 +1776,8 @@ namespace BuckRogers
 		private void m_btnNextPlayer_Click(object sender, System.EventArgs e)
 		{
 			m_btnNextPlayer.Enabled = false;
+
+			
 
 			switch(m_currentBattle.Type)
 			{
@@ -1763,6 +1848,9 @@ namespace BuckRogers
 
 			m_currentUnused.AddAllUnits(survivors);
 			m_currentUnused.AddAllUnits(casualties);
+
+			m_labCurrentPlayer.Text = m_currentPlayer.Name;
+			m_lbCurrentPlayer.SelectedIndex = m_playerOrder.IndexOf(m_currentPlayer);
 		}
 		
 		// Returns true if there is another turn after this one
@@ -1772,6 +1860,8 @@ namespace BuckRogers
 			{
 				u.Destroy();
 			}
+
+			m_currentUnused.RemoveAllUnits(m_turnResult.Casualties);
 
 			if( (m_currentBattle.Type == BattleType.KillerSatellite)
 				|| (m_currentBattle.Type == BattleType.Bombing))
@@ -1833,6 +1923,16 @@ namespace BuckRogers
 
 		private void m_btnNextBattle_Click(object sender, System.EventArgs e)
 		{
+			int battlesToSkip = Convert.ToInt32(m_udSkipBattles.Value);
+
+			if(battlesToSkip >= (m_battles.Count -1))
+			{
+				battlesToSkip = m_battles.Count - 1;
+			}
+			for(int i = 0; i < battlesToSkip; i++)
+			{
+				m_battles.Remove(0);
+			}
 			if(!NextBattle())
 			{
 				// TODO Initiate production here

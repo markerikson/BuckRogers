@@ -150,6 +150,11 @@ namespace BuckRogers
 		}
 		*/
 
+		public UnitCollection GetUnits(UnitType ut, Player p, Territory t)
+		{
+			return GetUnits(ut, p, t, List.Count);
+		}
+
 		public UnitCollection GetUnits(UnitType ut, Player p, Territory t, int max)
 		{
 			UnitCollection uc = new UnitCollection();
@@ -338,7 +343,8 @@ namespace BuckRogers
 			}			
 		}
 
-		public UnitCollection GetOtherPlayersUnits(Player player)
+		/*
+		public UnitCollection GetNonMatchingUnits(UnitType ut, Player p, Territory t, int max)
 		{
 			UnitCollection uc = new UnitCollection();
 
@@ -351,6 +357,85 @@ namespace BuckRogers
 			}
 			
 			return uc;
+		}
+		*/
+
+		
+		public UnitCollection GetNonMatchingUnits(UnitType ut, Player p, Territory t, int max)
+		{
+			UnitCollection uc = new UnitCollection();
+
+			int numAdded = 0;
+			if(List.Count < max)
+			{
+				max = List.Count;
+			}
+			for (int i = 0; i < List.Count && numAdded < max; i++)
+			{
+				Unit current = (Unit)List[i];
+
+				bool addUnit = true;
+				bool doesntMatchType = true;
+				bool doesntMatchOwner = true;
+				bool doesntMatchTerritory = true;
+
+				
+				if (ut != UnitType.None && current.UnitType == ut)
+				{
+					doesntMatchType = false;
+				}
+
+				if (p != null && current.Owner == p)
+				{
+					doesntMatchOwner = false;
+				}
+
+				if (t != null && current.CurrentTerritory == t)
+				{
+					doesntMatchTerritory = false;
+				}
+
+				addUnit = (doesntMatchType && doesntMatchOwner && doesntMatchTerritory);
+				
+
+				if (addUnit)
+				{
+					uc.AddUnit(current);
+					numAdded++;
+				}
+			}
+
+			return uc;
+		}
+
+		public UnitCollection GetNonMatchingUnits(Territory t)
+		{
+			return GetNonMatchingUnits(UnitType.None, null, t, List.Count);
+		}
+
+		public UnitCollection GetNonMatchingUnits(UnitType type)
+		{
+			return GetNonMatchingUnits(type, null, null, List.Count);
+		}
+
+		public UnitCollection GetNonMatchingUnits(Player p)
+		{
+			return GetNonMatchingUnits(UnitType.None, p, null, List.Count);
+		}
+
+		public UnitCollection GetNonMatchingUnits(Territory t, int max)
+		{
+			return GetNonMatchingUnits(UnitType.None, null, t, max);
+		}
+
+		public UnitCollection GetNonMatchingUnits(UnitType type, int max)
+		{
+			return GetNonMatchingUnits(type, null, null, max);
+		}
+
+		public UnitCollection GetNonMatchingUnits(Player p, int max)
+		{
+			return GetNonMatchingUnits(UnitType.None, p, null, max);
 		}
 
 		public ArrayList GetUnitTerritories()
