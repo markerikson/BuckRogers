@@ -783,9 +783,6 @@ namespace BuckRogers
 				Assert.AreEqual(battleSites[i], bi.Territory);
 				Assert.AreEqual(battleTypes[i], bi.Type);
 			}
-			
-
-
 		}
 
 		[Test]
@@ -863,14 +860,7 @@ namespace BuckRogers
 						CombatInfo ci = new CombatInfo();
 						ci.Type = bi.Type;
 
-						UnitCollection factories = targets.GetUnits(UnitType.Factory);
-						ci.Defenders.AddAllUnits(factories);
-						UnitCollection fighters = targets.GetUnits(UnitType.Fighter);
-						ci.Defenders.AddAllUnits(fighters);
-						UnitCollection gennies = targets.GetUnits(UnitType.Gennie);
-						ci.Defenders.AddAllUnits(gennies);
-						UnitCollection troopers = targets.GetUnits(UnitType.Trooper);
-						ci.Defenders.AddAllUnits(troopers);
+						ci.Defenders.AddAllUnits(targets);
 
 						UnitCollection battlers = bi.Territory.Units.GetUnits(UnitType.Battler);
 						UnitCollection playerBattlers = battlers.GetUnits(bi.Player);
@@ -881,6 +871,28 @@ namespace BuckRogers
 						cr = m_controller.DoBombingCombat(ci);
 
 						results.Add(cr);
+
+						break;
+					}
+					case BattleType.Normal:
+					{
+						// Need to get the combatants in current turn order
+						ArrayList combatants = new ArrayList();
+						ArrayList al = bi.Territory.Units.GetPlayersWithUnits();
+						
+						CombatResult finalResult = new CombatResult();
+						CombatResult turnResult = new CombatResult();
+
+						foreach(Player p in m_controller.PlayerOrder)
+						{
+							if(al.Contains(p))
+							{
+								combatants.Add(p);
+							}
+						}
+
+
+
 
 						break;
 					}

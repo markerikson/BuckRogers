@@ -477,7 +477,7 @@ namespace BuckRogers
 
 					if(t.Type == TerritoryType.Ground)//t.Owner != move.Owner)
 					{
-						Hashtable players = t.Units.GetPlayersWithUnits();
+						ArrayList players = t.Units.GetPlayersWithUnits();
 						//Console.WriteLine("Players: " + players.Count);
 
 						if(players.Count > 0)
@@ -662,12 +662,15 @@ namespace BuckRogers
 			{
 				if(os.HasKillerSatellite)
 				{
-					if(os.NearOrbit.Units.HasUnitsFromMultiplePlayers)
+					if(os.NearOrbit.Units.HasUnitsFromMultiplePlayers  
+						// TODO Remove this comment && os.IsControlled)
+						)
 					{
 						Hashlist hl = (Hashlist)planets[os.Name];
 						// first time around, no need to check for contains
 						BattleInfo bi = new BattleInfo();
 						bi.Territory = os.NearOrbit;
+						bi.Player = os.Owner;
 						bi.Type = BattleType.KillerSatellite;
 						hl.Add(bi.ToString(), bi);
 					}
@@ -754,6 +757,22 @@ namespace BuckRogers
 			
 		}
 
+		private ArrayList GetSurfaceTerritories(Territory t)
+		{
+			ArrayList surfaceTerritories = new ArrayList();
+			// TODO I really hate having to use EdgeToNeighbor here... can I have Neighbors return a Node?
+			foreach(EdgeToNeighbor etn in t.Neighbors)
+			{
+				Territory neighbor = (Territory)etn.Neighbor;
+				if(neighbor.Type == TerritoryType.Ground)
+				{
+					surfaceTerritories.Add(neighbor);
+				}
+			}
+
+			return surfaceTerritories;
+		}
+
 		public bool CheckForBombing(Territory t)
 		{
 			return CheckForBombing(t, Player.NONE);
@@ -777,18 +796,9 @@ namespace BuckRogers
 				battlers = battlers.GetUnits(player);
 			}
 
-			ArrayList surfaceTerritories = new ArrayList();
-			// TODO I really hate having to use EdgeToNeighbor here... can I have Neighbors return a Node?
-			foreach(EdgeToNeighbor etn in t.Neighbors)
-			{
-				Territory neighbor = (Territory)etn.Neighbor;
-				if(neighbor.Type == TerritoryType.Ground)
-				{
-					surfaceTerritories.Add(neighbor);
-				}
-			}
+			
 
-			foreach(Territory surface in surfaceTerritories)
+			foreach(Territory surface in GetSurfaceTerritories(t))
 			{
 				surfaceUnits.AddAllUnits(surface.Units);
 			}			
@@ -813,17 +823,9 @@ namespace BuckRogers
 		{
 			ArrayList surfaceTerritories = new ArrayList();
 			UnitCollection nearbyUnits = new UnitCollection();
-			// TODO I really hate having to use EdgeToNeighbor here... can I have Neighbors return a Node?
-			foreach(EdgeToNeighbor etn in t.Neighbors)
-			{
-				Territory neighbor = (Territory)etn.Neighbor;
-				if(neighbor.Type == TerritoryType.Ground)
-				{
-					surfaceTerritories.Add(neighbor);
-				}
-			}
 
-			foreach(Territory surface in surfaceTerritories)
+
+			foreach(Territory surface in GetSurfaceTerritories(t))
 			{
 				UnitCollection otherUnits = surface.Units.GetOtherPlayersUnits(p);
 				

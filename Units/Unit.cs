@@ -233,5 +233,19 @@ namespace BuckRogers
 			}
 		}
 
+		public void Destroy()
+		{
+			if(m_transported)
+			{
+				TransportingUnit = Unit.NONE;
+			}
+			
+			m_owner.Units.RemoveUnit(this);
+			m_currentTerritory.Units.RemoveUnit(this);
+
+			m_currentTerritory = null;
+			m_owner = null;
+		}
+
 	}
 }

@@ -29,7 +29,12 @@ namespace BuckRogers
 			//List.AddRange(collection.Units);
 			for(int i = 0; i < collection.Count; i++)
 			{
-				List.Add(collection[i]);
+				Unit u = collection[i];
+				if(!List.Contains(u))
+				{
+				List.Add(u);
+				}
+				
 			}
 			//m_holder.notifyChanged();
 		}
@@ -141,11 +146,15 @@ namespace BuckRogers
 		}
 		*/
 
-		public UnitCollection GetUnits(UnitType ut, Player p, Territory t)
+		public UnitCollection GetUnits(UnitType ut, Player p, Territory t, int max)
 		{
 			UnitCollection uc = new UnitCollection();
 
-			for (int i = 0; i < List.Count; i++)
+			if(List.Count < max)
+			{
+				max = List.Count;
+			}
+			for (int i = 0; i < max; i++)
 			{
 				Unit current = (Unit)List[i];
 
@@ -184,20 +193,56 @@ namespace BuckRogers
 
 		public UnitCollection GetUnits(Territory t)
 		{
-			return GetUnits(UnitType.None, null, t);
+			return GetUnits(UnitType.None, null, t, List.Count);
 		}
 
 		public UnitCollection GetUnits(UnitType type)
 		{
-			return GetUnits(type, null, null);
+			return GetUnits(type, null, null, List.Count);
 		}
 
 		public UnitCollection GetUnits(Player p)
 		{
-			return GetUnits(UnitType.None, p, null);
+			return GetUnits(UnitType.None, p, null, List.Count);
 		}
 
-		
+		public UnitCollection GetUnits(Territory t, int max)
+		{
+			return GetUnits(UnitType.None, null, t, max);
+		}
+
+		public UnitCollection GetUnits(UnitType type, int max)
+		{
+			return GetUnits(type, null, null, max);
+		}
+
+		public UnitCollection GetUnits(Player p, int max)
+		{
+			return GetUnits(UnitType.None, p, null, max);
+		}
+
+		public UnitCollection GetCombatUnits()
+		{
+			UnitCollection uc = new UnitCollection();
+			foreach(Unit u in List)
+			{
+				switch(u.UnitType)
+				{
+					case UnitType.Trooper:
+					case UnitType.Gennie:
+					case UnitType.Fighter:
+					case UnitType.Battler:
+					case UnitType.Transport:
+					case UnitType.KillerSatellite:
+					{
+						uc.AddUnit(u);
+						break;
+					}
+				}
+			}
+
+			return uc;
+		}
 
 		/**
 		* Returns a map of UnitType -> int.
@@ -317,19 +362,22 @@ namespace BuckRogers
 			return al;
 		}
 
-		public Hashtable GetPlayersWithUnits()
+		public ArrayList GetPlayersWithUnits()
 		{
 			//note nulls are handled by PlayerID.NULL_PLAYERID
-			Hashtable ht = new Hashtable();
+			//Hashtable ht = new Hashtable();
+			ArrayList al = new ArrayList();
 
 			foreach(Unit unit in List)
 			{
-				if(!ht.ContainsKey(unit.Owner))
+				//if(!ht.ContainsKey(unit.Owner))
+				if(!al.Contains(unit.Owner))
 				{
-					ht[unit.Owner] = "";
+					//ht[unit.Owner] = "";
+					al.Add(unit.Owner);
 				}
 			}
-			return ht;
+			return al;
 		}
 
 		public Hashtable GetPlayerUnitCounts()

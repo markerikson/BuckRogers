@@ -75,9 +75,6 @@ namespace BuckRogers
 			comboBox1.SelectedIndex = 0;
 			comboBox2.SelectedIndex = 0;
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
 		}
 
 		/// <summary>
@@ -364,12 +361,13 @@ namespace BuckRogers
 			*/
 			
 		}
-		
+		/*
 		[STAThread]
 		public static void Main(String[] args)
 		{
-			Application.Run(new Form1());
+			//Application.Run(new Form1());
 		}
+		*/
 
 		private void listBox1_SelectedIndexChanged(object sender, System.EventArgs e)
 		{

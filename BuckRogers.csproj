@@ -100,11 +100,6 @@
         <Files>
             <Include>
                 <File
-                    RelPath = "Action.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "App.ico"
                     BuildAction = "Content"
                 />
@@ -114,24 +109,14 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "AttackResult.cs"
-                    SubType = "Code"
+                    RelPath = "CombatTestForm.cs"
+                    SubType = "Form"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "BattleInfo.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "CombatInfo.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "CombatResult.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
+                    RelPath = "CombatTestForm.resx"
+                    DependentUpon = "CombatTestForm.cs"
+                    BuildAction = "EmbeddedResource"
                 />
                 <File
                     RelPath = "ControllerTest.cs"
@@ -159,27 +144,52 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Hashlist.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Move.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "Player.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TransportAction.cs"
+                    RelPath = "Data structures\Action.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TurnRoll.cs"
+                    RelPath = "Data structures\AttackResult.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data structures\BattleInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data structures\CombatInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data structures\CombatResult.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data structures\Hashlist.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data structures\MoveActkl .cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data structures\TransportAction.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data structures\TurnRoll.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
