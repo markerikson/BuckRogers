@@ -53,17 +53,6 @@ namespace BuckRogers
 
 		private GameController m_controller;
 		private BattleController m_battleController;
-		//private Hashlist m_battles;
-		/*
-		private BattleInfo m_battleController.CurrentBattle;
-		private CombatResult m_battleController.LastResult;
-		private CombatResult m_turnResult;
-		private CombatResult m_cumulativeResult;
-		private ArrayList m_battleController.BattleOrder;
-		private Hashtable m_battleController.SurvivingUnits;
-		private UnitCollection m_battleController.CurrentUnused;
-		private Player m_battleController.CurrentPlayer;
-		*/
 
 		private System.Windows.Forms.ColumnHeader columnHeader18;
 		private System.Windows.Forms.ColumnHeader columnHeader19;
@@ -101,7 +90,6 @@ namespace BuckRogers
 			InitializeComponent();
 
 			m_cbNumUnits.SelectedIndex = 0;
-			//m_cbNumUnits.DropDownStyle = ComboBoxStyle.DropDownList;
 
 			m_lvAttackers.Items.Clear();
 			m_lvDefenders.Items.Clear();
@@ -110,7 +98,6 @@ namespace BuckRogers
 
 			this.Init();
 			this.SetupBattles();
-			//this.Battles = m_controller.Battles;
 			m_battleController.Battles = m_controller.Battles;
 			m_battleController.UnitsToDisplay +=new DisplayUnitsHandler(DisplayUnits);
 
@@ -931,6 +918,7 @@ namespace BuckRogers
 			EnableAttack();
 		}
 
+		#region Battle setup code
 		public void Init()
 		{
 			string[] players = {"Mark", "Chris", "Stu", "Hannah", "Jake", "Kathryn"};
@@ -1360,159 +1348,7 @@ namespace BuckRogers
 		}
 
 
-		/*
-		private bool NextBattle()
-		{
-			if(m_battleController.Battles != null && m_battleController.Battles.Count > 0)
-			{
-				m_battleController.CurrentBattle = (BattleInfo)m_battleController.Battles[0];
-				m_battleController.Battles.Remove(m_battleController.CurrentBattle.ToString());
-
-				m_labBattleType.Text = m_battleController.CurrentBattle.Type.ToString();				
-				m_labLocation.Text = m_battleController.CurrentBattle.Territory.Name;
-				m_labBattlesLeft.Text = m_battleController.Battles.Count.ToString();
-
-				m_btnContinue.Enabled = false;
-				m_btnNextPlayer.Enabled = false;
-				m_btnNextBattle.Enabled = false;
-				m_btnAttack.Enabled = false;
-
-				m_lvAttUsed.Items.Clear();
-				m_lvAttUnused.Items.Clear();
-				m_lvAttackers.Items.Clear();
-				m_lvDefenders.Items.Clear();
-				m_lvEnemyLive.Items.Clear();
-				m_lvEnemyDead.Items.Clear();
-
-				m_cumulativeResult = new CombatResult();
-				m_turnResult = new CombatResult();				
-				m_battleController.SurvivingUnits = new Hashtable();
-
-				CheckPlayerOrder();
-
-				m_lbCurrentPlayer.Items.Clear();
-
-				foreach(Player p in m_battleController.BattleOrder)
-				{
-					m_lbCurrentPlayer.Items.Add(p.Name);
-				}
-
-				m_battleController.CurrentPlayer = (Player)m_battleController.BattleOrder[0];
-				m_lbCurrentPlayer.SelectedIndex = 0;
-				m_labCurrentPlayer.Text = m_battleController.CurrentPlayer.Name;
-				m_battleController.CurrentUnused = new UnitCollection();
-				
-				Territory t = m_battleController.CurrentBattle.Territory;
-
-				switch(m_battleController.CurrentBattle.Type)
-				{
-					case BattleType.KillerSatellite:
-					{
-						UnitCollection satellites = t.Units.GetUnits(UnitType.KillerSatellite);
-						m_battleController.CurrentUnused.AddAllUnits(satellites);
-						UnitCollection defenders = t.Units.GetNonMatchingUnits(m_battleController.CurrentBattle.Player);
-
-						UnitCollection uc = null;
-
-						uc = (UnitCollection)m_battleController.SurvivingUnits[m_battleController.CurrentPlayer];
-						uc.AddAllUnits(satellites);
-
-						foreach(Player p in defenders.GetPlayersWithUnits())
-						{
-							uc = (UnitCollection)m_battleController.SurvivingUnits[p];
-							uc.AddAllUnits(defenders.GetUnits(p));
-						}
-
-						AddUnitsToListView(satellites, m_lvAttackers, false);
-						AddUnitsToListView(defenders, m_lvDefenders, true);
-
-						EnableAttack();
-
-						break;
-					}
-					case BattleType.Bombing:
-					{
-						UnitCollection attackers = t.Units.GetUnits(UnitType.Battler, m_battleController.CurrentPlayer, null);//).GetUnits(UnitType.Battler);
-						UnitCollection defenders = m_controller.GetBombingTargets(t, m_battleController.CurrentPlayer);
-
-						m_battleController.CurrentUnused.AddAllUnits(attackers);
-
-						UnitCollection uc = null;
-
-						uc = (UnitCollection)m_battleController.SurvivingUnits[m_battleController.CurrentPlayer];
-						uc.AddAllUnits(attackers);
-
-						foreach(Player p in defenders.GetPlayersWithUnits())
-						{
-							uc = (UnitCollection)m_battleController.SurvivingUnits[p];
-							UnitCollection playerUnits = defenders.GetUnits(p);
-							uc.AddAllUnits(playerUnits);
-						}
-
-						AddUnitsToListView(attackers, m_lvAttUnused, false);
-						AddUnitsToListView(defenders, m_lvEnemyLive, true);
-						break;
-					}
-					case BattleType.Normal:
-					{
-						foreach(Player p in m_battleController.BattleOrder)
-						{
-							UnitCollection uc = (UnitCollection)m_battleController.SurvivingUnits[p];
-							UnitCollection playerUnits = t.Units.GetUnits(p);
-							uc.AddAllUnits(playerUnits.GetCombatUnits());
-						}
-
-						m_battleController.UpdateUnusedUnits();
-						//DisplayUnits();
-						m_battleController.DisplayUnits();
-						break;
-					}
-				}
-				return true;
-			}
-
-			return false;
-		}
-		*/
-
-		/*
-		private void CheckPlayerOrder()
-		{
-			m_battleController.BattleOrder = new ArrayList();
-			ArrayList al;
-			
-			if(m_battleController.CurrentBattle.Type == BattleType.Bombing)
-			{
-				al = m_controller.GetBombingTargets(m_battleController.CurrentBattle.Territory, m_battleController.CurrentBattle.Player).GetPlayersWithUnits();
-				al.Add(m_battleController.CurrentBattle.Player);
-			}
-			else
-			{
-				al = m_battleController.CurrentBattle.Territory.Units.GetPlayersWithUnits();
-			}
-
-			foreach(Player p in m_controller.PlayerOrder)
-			{
-				if(al.Contains(p))
-				{
-					m_battleController.BattleOrder.Add(p);
-					m_battleController.SurvivingUnits[p] = new UnitCollection();
-				}
-			}
-
-			switch(m_battleController.CurrentBattle.Type)
-			{
-				case BattleType.KillerSatellite:
-				case BattleType.Bombing:
-				{
-					Player p = m_battleController.CurrentBattle.Player;
-					m_battleController.BattleOrder.Remove(p);
-					m_battleController.BattleOrder.Insert(0, p);
-					break;
-				}
-			}
-		}
-		*/
+		#endregion
 
 		public void DisplayUnits(object sender, DisplayUnitsEventArgs duea)
 		{
@@ -1594,6 +1430,9 @@ namespace BuckRogers
 			}			
 		}
 
+
+
+		#region Combat button handlers
 		private void m_btnAttack_Click(object sender, System.EventArgs e)
 		{
 			CombatResult cr = null;
@@ -1670,6 +1509,127 @@ namespace BuckRogers
 			m_btnContinue.Enabled = true;
 		}
 
+		private void m_btnContinue_Click(object sender, System.EventArgs e)
+		{
+			m_btnContinue.Enabled = false;
+
+			m_lvAttackers.Items.Clear();
+			m_lvDefenders.Items.Clear();
+			m_lvResults.Items.Clear();
+
+			m_battleController.TurnResult.Casualties.AddAllUnits(m_battleController.LastResult.Casualties);
+			
+			foreach(Player p in m_battleController.LastResult.Casualties.GetPlayersWithUnits())
+			{
+				UnitCollection uc = (UnitCollection)m_battleController.SurvivingUnits[p];
+				uc.RemoveAllUnits(m_battleController.LastResult.Casualties.GetUnits(p));
+			}
+
+			m_battleController.CurrentUnused.AddAllUnits(m_battleController.LastResult.UnusedAttackers);
+			m_battleController.CurrentUnused.RemoveAllUnits(m_battleController.LastResult.UsedAttackers);
+
+			
+			if(m_battleController.CurrentUnused.Count == 0)
+			{
+				m_btnNextPlayer.Enabled = true;
+			}
+			else
+			{
+				m_lvAttUnused.Items.Clear();
+				AddUnitsToListView(m_battleController.CurrentUnused, m_lvAttUnused, false);
+			}
+
+			m_lvAttUnused.Items.Clear();
+			m_lvEnemyLive.Items.Clear();
+			m_battleController.DisplayUnits();
+
+			if(m_lvEnemyLive.Items.Count == 0)
+			{
+				m_btnNextPlayer.Enabled = true;
+			}
+		}
+
+		private void m_btnNextPlayer_Click(object sender, System.EventArgs e)
+		{
+			m_btnNextPlayer.Enabled = false;
+
+			switch(m_battleController.CurrentBattle.Type)
+			{
+				// only one turn / player for these types
+				case BattleType.KillerSatellite:
+				case BattleType.Bombing:
+				{
+					m_battleController.NextTurn();
+					m_battleController.DisplaySurvivingEnemies();
+					m_btnNextBattle.Enabled = true;
+					break;
+				}
+				case BattleType.Normal:
+				{
+					int index = m_battleController.BattleOrder.IndexOf(m_battleController.CurrentPlayer);
+
+					bool anotherTurn = false;
+
+					if( (index == (m_battleController.BattleOrder.Count - 1)))
+					{
+						anotherTurn = m_battleController.NextTurn();
+						if(anotherTurn)
+						{
+							m_battleController.CurrentPlayer = (Player)m_battleController.BattleOrder[0];
+							m_battleController.UpdateUnusedUnits();
+							m_labCurrentPlayer.Text = m_battleController.CurrentPlayer.Name;
+							m_lbCurrentPlayer.SelectedIndex = m_battleController.BattleOrder.IndexOf(m_battleController.CurrentPlayer);
+						}
+						else
+						{
+							m_btnNextBattle.Enabled = true;
+						}
+					}
+					else
+					{
+						m_battleController.CurrentPlayer = (Player)m_battleController.BattleOrder[index + 1];
+						m_battleController.UpdateUnusedUnits();
+					}
+
+					m_lvAttUnused.Items.Clear();
+					m_lvEnemyLive.Items.Clear();
+					m_battleController.DisplayUnits();
+					break;
+				}
+			}
+		}
+
+		private void m_btnNextBattle_Click(object sender, System.EventArgs e)
+		{
+			int battlesToSkip = Convert.ToInt32(m_udSkipBattles.Value);
+
+			if(battlesToSkip >= (m_battleController.Battles.Count -1))
+			{
+				battlesToSkip = m_battleController.Battles.Count - 1;
+			}
+			for(int i = 0; i < battlesToSkip; i++)
+			{
+				m_battleController.Battles.Remove(0);
+			}
+
+			m_lvAttUnused.Items.Clear();
+			m_lvEnemyLive.Items.Clear();
+			m_lvAttackers.Items.Clear();
+			m_lvEnemyLive.Items.Clear();
+			if(!m_battleController.NextBattle())
+			{
+				// TODO Initiate production here
+				MessageBox.Show("Done with battles");
+			}
+			else
+			{
+				UpdateCombatInformation();
+			}
+		}
+
+		#endregion
+
+		
 		private CombatInfo SetUpCombat()
 		{
 			CombatInfo ci = new CombatInfo();
@@ -1687,26 +1647,10 @@ namespace BuckRogers
 				m_battleController.CurrentUnused.AddAllUnits(attackers);
 				throw ex;
 			}
-			
-			
-			/*
-			foreach(ListViewItem lvi in m_lvAttackers.Items)
-			{
-				UnitCollection uc = GetListedUnits(lvi, true);
-				ci.Attackers.AddAllUnits(uc);
-			}
-
-			foreach(ListViewItem lvi in m_lvDefenders.Items)
-			{
-				UnitCollection uc = GetListedUnits(lvi, false);
-				ci.Defenders.AddAllUnits(uc);
-			}
-			*/
 
 			return ci;
 		}
 
-		//private UnitCollection GetListedUnits(ListViewItem lvi, bool attacking)
 		private UnitCollection GetListedUnits(ListView lv, bool attacking)
 		{
 			UnitCollection allMatches = new UnitCollection();
@@ -1762,236 +1706,6 @@ namespace BuckRogers
 			return allMatches;
 		}
 
-		private void m_btnContinue_Click(object sender, System.EventArgs e)
-		{
-			m_btnContinue.Enabled = false;
-
-			m_lvAttackers.Items.Clear();
-			m_lvDefenders.Items.Clear();
-			m_lvResults.Items.Clear();
-
-			m_battleController.TurnResult.Casualties.AddAllUnits(m_battleController.LastResult.Casualties);
-			
-			foreach(Player p in m_battleController.LastResult.Casualties.GetPlayersWithUnits())
-			{
-				UnitCollection uc = (UnitCollection)m_battleController.SurvivingUnits[p];
-				uc.RemoveAllUnits(m_battleController.LastResult.Casualties.GetUnits(p));
-			}
-
-			m_battleController.CurrentUnused.AddAllUnits(m_battleController.LastResult.UnusedAttackers);
-			m_battleController.CurrentUnused.RemoveAllUnits(m_battleController.LastResult.UsedAttackers);
-
-			
-			if(m_battleController.CurrentUnused.Count == 0)
-			{
-				m_btnNextPlayer.Enabled = true;
-			}
-			else
-			{
-				m_lvAttUnused.Items.Clear();
-				AddUnitsToListView(m_battleController.CurrentUnused, m_lvAttUnused, false);
-			}
-
-			//DisplayUnits();
-
-			m_lvAttUnused.Items.Clear();
-			m_lvEnemyLive.Items.Clear();
-			m_battleController.DisplayUnits();
-
-			if(m_lvEnemyLive.Items.Count == 0)
-			{
-				m_btnNextPlayer.Enabled = true;
-			}
-		}
-
-		private void m_btnNextPlayer_Click(object sender, System.EventArgs e)
-		{
-			m_btnNextPlayer.Enabled = false;
-
-			
-
-			switch(m_battleController.CurrentBattle.Type)
-			{
-				// only one turn / player for these types
-				case BattleType.KillerSatellite:
-				case BattleType.Bombing:
-				{
-					m_battleController.NextTurn();
-					m_battleController.DisplaySurvivingEnemies();
-					m_btnNextBattle.Enabled = true;
-					break;
-				}
-				case BattleType.Normal:
-				{
-					int index = m_battleController.BattleOrder.IndexOf(m_battleController.CurrentPlayer);
-
-					bool anotherTurn = false;
-
-					//bool allOtherUnitsDead = true;
-					/*
-					foreach(Player p in m_battleController.BattleOrder)
-					{
-						if(p == m_battleController.CurrentPlayer)
-						{
-							continue;
-						}
-
-						UnitCollection uc = (UnitCollection)m_battleController.SurvivingUnits[p];
-						if(uc.Count > 0)
-						{
-							allOtherUnitsDead = false;
-						}
-					}
-					*/
-
-					if( (index == (m_battleController.BattleOrder.Count - 1)))
-					{
-						anotherTurn = m_battleController.NextTurn();
-						if(anotherTurn)
-						{
-							m_battleController.CurrentPlayer = (Player)m_battleController.BattleOrder[0];
-							m_battleController.UpdateUnusedUnits();
-							m_labCurrentPlayer.Text = m_battleController.CurrentPlayer.Name;
-							m_lbCurrentPlayer.SelectedIndex = m_battleController.BattleOrder.IndexOf(m_battleController.CurrentPlayer);
-						}
-						else
-						{
-							m_btnNextBattle.Enabled = true;
-						}
-					}
-					else
-					{
-						m_battleController.CurrentPlayer = (Player)m_battleController.BattleOrder[index + 1];
-						m_battleController.UpdateUnusedUnits();
-					}
-
-					//DisplayUnits();
-					m_lvAttUnused.Items.Clear();
-					m_lvEnemyLive.Items.Clear();
-					m_battleController.DisplayUnits();
-					break;
-				}
-			}
-		}
-
-		/*
-		private void UpdateUnusedUnits()
-		{
-			m_battleController.CurrentUnused.Clear();
-			UnitCollection survivors = (UnitCollection)m_battleController.SurvivingUnits[m_battleController.CurrentPlayer];
-
-			// if there's anything here, it's been killed this turn and can still shoot
-			UnitCollection casualties = m_turnResult.Casualties.GetUnits(m_battleController.CurrentPlayer);
-
-			m_battleController.CurrentUnused.AddAllUnits(survivors);
-			m_battleController.CurrentUnused.AddAllUnits(casualties);
-
-			m_labCurrentPlayer.Text = m_battleController.CurrentPlayer.Name;
-			m_lbCurrentPlayer.SelectedIndex = m_battleController.BattleOrder.IndexOf(m_battleController.CurrentPlayer);
-		}
-		*/
-		
-
-		/*
-		// Returns true if there is another turn after this one
-		private bool NextTurn()
-		{
-			foreach(Unit u in m_turnResult.Casualties)
-			{
-				u.Destroy();
-			}
-
-			m_battleController.CurrentUnused.RemoveAllUnits(m_turnResult.Casualties);
-
-			if( (m_battleController.CurrentBattle.Type == BattleType.KillerSatellite)
-				|| (m_battleController.CurrentBattle.Type == BattleType.Bombing))
-			{
-				m_battleController.BattleOrder.Clear();
-				return false;
-			}
-			else
-			{
-				Territory t = m_battleController.CurrentBattle.Territory;
-				ArrayList playersToRemove = new ArrayList();
-				foreach(Player p in m_battleController.BattleOrder)
-				{
-					UnitCollection uc = (UnitCollection)m_battleController.SurvivingUnits[p];
-
-					if(uc.Count == 0)
-					{
-						playersToRemove.Add(p);
-					}				
-				}
-
-				foreach(Player p in playersToRemove)
-				{
-					m_battleController.BattleOrder.Remove(p);
-				}
-
-				// TODO Could just clear out everything instead...
-				m_turnResult = new CombatResult();
-
-				// only one player left?
-				return (m_battleController.BattleOrder.Count > 1);
-			}
-			
-		}
-		*/
-
-		/*
-		private void DisplayUnits()
-		{
-			m_lvAttUnused.Items.Clear();
-			m_lvEnemyLive.Items.Clear();
-
-            AddUnitsToListView(m_battleController.CurrentUnused, m_lvAttUnused, false);
-
-			DisplaySurvivingEnemies();			
-		}
-
-		private void DisplaySurvivingEnemies()
-		{
-			foreach(Player p in m_battleController.BattleOrder)
-			{
-				if(p == m_battleController.CurrentPlayer)
-				{
-					continue;
-				}
-
-				UnitCollection enemySurvivors = (UnitCollection)m_battleController.SurvivingUnits[p];
-				AddUnitsToListView(enemySurvivors, m_lvEnemyLive, true);
-			}
-		}
-		*/
-
-		private void m_btnNextBattle_Click(object sender, System.EventArgs e)
-		{
-			int battlesToSkip = Convert.ToInt32(m_udSkipBattles.Value);
-
-			if(battlesToSkip >= (m_battleController.Battles.Count -1))
-			{
-				battlesToSkip = m_battleController.Battles.Count - 1;
-			}
-			for(int i = 0; i < battlesToSkip; i++)
-			{
-				m_battleController.Battles.Remove(0);
-			}
-
-			m_lvAttUnused.Items.Clear();
-			m_lvEnemyLive.Items.Clear();
-			m_lvAttackers.Items.Clear();
-			m_lvEnemyLive.Items.Clear();
-			if(!m_battleController.NextBattle())
-			{
-				// TODO Initiate production here
-				MessageBox.Show("Done with battles");
-			}
-			else
-			{
-				UpdateCombatInformation();
-			}
-		}
-
 		private void UpdateCombatInformation()
 		{
 			m_labBattleType.Text = m_battleController.CurrentBattle.Type.ToString();				
@@ -2002,15 +1716,6 @@ namespace BuckRogers
 			m_btnNextPlayer.Enabled = false;
 			m_btnNextBattle.Enabled = false;
 			m_btnAttack.Enabled = false;
-
-			/*
-			m_lvAttUsed.Items.Clear();
-			m_lvAttUnused.Items.Clear();
-			m_lvAttackers.Items.Clear();
-			m_lvDefenders.Items.Clear();
-			m_lvEnemyLive.Items.Clear();
-			m_lvEnemyDead.Items.Clear();
-			*/
 
 			m_lbCurrentPlayer.Items.Clear();
 
@@ -2031,12 +1736,5 @@ namespace BuckRogers
 			set { this.m_controller = value; }
 		}
 
-		/*
-		public Hashlist Battles
-		{
-			get { return this.m_battles; }
-			set { this.m_battles = value; }
-		}
-		*/
 	}
 }
