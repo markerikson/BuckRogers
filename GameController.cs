@@ -46,11 +46,13 @@ namespace BuckRogers
 		}
 
 		// TODO Remove this when it's not needed for testing
+		
 		public BuckRogers.Hashlist Battles
 		{
 			get { return this.m_battles; }
 			set { this.m_battles = value; }
 		}
+		
 		
 
 		#endregion
@@ -65,9 +67,12 @@ namespace BuckRogers
 		private ArrayList m_checkedActions;
 		private ArrayList m_undoneActions;
 		private int m_turnNumber;
+		
 		private Hashlist m_battles;
+		/*
 		private int[,] m_combatTable;
 		private const int NOTPOSSIBLE = 99;
+		*/
 
 		// TODO Change this into a property or something		
 		public TurnRoll[] Rolls;
@@ -145,6 +150,7 @@ namespace BuckRogers
 			m_checkedActions = new ArrayList();
 			m_undoneActions = new ArrayList();
 
+			/*
 			m_combatTable = new int[,]	{	{6, 8, 7, NOTPOSSIBLE, 6, NOTPOSSIBLE, 3}, // Trooper
 											{5, 6, 6, NOTPOSSIBLE, 5, NOTPOSSIBLE, 2}, // Gennie
 											{7, 7, 6, 8, 3, 7, 3}, // Fighter
@@ -153,6 +159,7 @@ namespace BuckRogers
 											{NOTPOSSIBLE, NOTPOSSIBLE, 6, 7, 5, NOTPOSSIBLE, NOTPOSSIBLE}, // Killer Satellite
 											{8, 9, 9, NOTPOSSIBLE, 7, NOTPOSSIBLE, NOTPOSSIBLE}, // Control marker
 										};
+			*/
 
 			m_turnNumber = 0;			
 		}
@@ -645,6 +652,7 @@ namespace BuckRogers
 
 		#endregion
 
+		// TODO Move this to BattleController?
 		public Hashlist FindBattles()
 		{
 			/* Two possible methods for finding battles.
@@ -853,6 +861,21 @@ namespace BuckRogers
 			targets.AddAllUnits(fighters);
 			targets.AddAllUnits(factories);
 			return targets;
+		}
+
+		public void ExecuteProduction(Hashtable productionChoices)
+		{
+			foreach(Factory f in productionChoices.Keys)
+			{
+				UnitType ut = (UnitType)productionChoices[f];
+
+				if(!f.UnitHalfProduced)
+				{
+					f.StartProduction(ut);
+				}
+
+				f.ExecuteProduction();
+			}
 		}
 
 	}

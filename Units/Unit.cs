@@ -32,6 +32,7 @@ namespace BuckRogers
 
 		private static int m_nextUnitID = 0;
 		
+		
 
 		private UnitType m_unitType;
 		protected Player m_owner;
@@ -76,32 +77,30 @@ namespace BuckRogers
 			}
 		}
 
-		/*
-		public int Cost
+		
+		public static int GetCost(UnitType ut)
 		{
-			get
+			int cost = 0;
+			switch(ut)
 			{
-				int cost = 1;
-				switch(m_unitType)
-				{
-					case UnitType.Trooper:
-					case UnitType.Gennie:
-						// half a turn = 1
-						break;
-					case UnitType.Fighter:
-					case UnitType.Transport:
-						cost = 2;
-						break;
-					case UnitType.Battler:
-					case UnitType.KillerSatellite:
-					case UnitType.Factory:
-						cost = 4;
-						break;
-				}
-				return cost;
+				case UnitType.Trooper:
+				case UnitType.Gennie:
+					// half a turn = 1
+					cost = 1;
+					break;
+				case UnitType.Fighter:
+				case UnitType.Transport:
+					cost = 2;
+					break;
+				case UnitType.Battler:
+				case UnitType.KillerSatellite:
+				case UnitType.Factory:
+					cost = 4;
+					break;
 			}
+			return cost;
 		}
-		*/
+		
 
 		public int MaxMoves
 		{

@@ -77,6 +77,15 @@ namespace BuckRogers
 		private System.Windows.Forms.Label label15;
 		private System.Windows.Forms.NumericUpDown m_udSkipBattles;
 		private System.Windows.Forms.Label label14;
+		private System.Windows.Forms.TabControl tabControl1;
+		private System.Windows.Forms.TabPage tabPage1;
+		private System.Windows.Forms.TabPage tabPage2;
+		private System.Windows.Forms.ListBox m_lbProductionOrder;
+		private System.Windows.Forms.Label label16;
+		private System.Windows.Forms.ListView m_lvFactories;
+		private System.Windows.Forms.ColumnHeader columnHeader25;
+		private System.Windows.Forms.ColumnHeader columnHeader26;
+		private System.Windows.Forms.ColumnHeader columnHeader27;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -200,6 +209,7 @@ namespace BuckRogers
 			this.columnHeader5 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader6 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader7 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader23 = new System.Windows.Forms.ColumnHeader();
 			this.label4 = new System.Windows.Forms.Label();
 			this.label5 = new System.Windows.Forms.Label();
 			this.m_lvEnemyDead = new System.Windows.Forms.ListView();
@@ -218,6 +228,7 @@ namespace BuckRogers
 			this.columnHeader15 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader16 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader17 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader24 = new System.Windows.Forms.ColumnHeader();
 			this.m_butAddAttackers = new System.Windows.Forms.Button();
 			this.m_butRemAttackers = new System.Windows.Forms.Button();
 			this.m_butRemDefenders = new System.Windows.Forms.Button();
@@ -241,13 +252,23 @@ namespace BuckRogers
 			this.m_btnNextBattle = new System.Windows.Forms.Button();
 			this.label13 = new System.Windows.Forms.Label();
 			this.m_labSeed = new System.Windows.Forms.Label();
-			this.columnHeader23 = new System.Windows.Forms.ColumnHeader();
-			this.columnHeader24 = new System.Windows.Forms.ColumnHeader();
 			this.m_labBattlesLeft = new System.Windows.Forms.Label();
 			this.label15 = new System.Windows.Forms.Label();
 			this.m_udSkipBattles = new System.Windows.Forms.NumericUpDown();
 			this.label14 = new System.Windows.Forms.Label();
+			this.tabControl1 = new System.Windows.Forms.TabControl();
+			this.tabPage1 = new System.Windows.Forms.TabPage();
+			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this.m_lvFactories = new System.Windows.Forms.ListView();
+			this.label16 = new System.Windows.Forms.Label();
+			this.m_lbProductionOrder = new System.Windows.Forms.ListBox();
+			this.columnHeader25 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader26 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader27 = new System.Windows.Forms.ColumnHeader();
 			((System.ComponentModel.ISupportInitialize)(this.m_udSkipBattles)).BeginInit();
+			this.tabControl1.SuspendLayout();
+			this.tabPage1.SuspendLayout();
+			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// m_lvAttUnused
@@ -257,6 +278,7 @@ namespace BuckRogers
 																							this.columnHeader1,
 																							this.columnHeader2});
 			this.m_lvAttUnused.FullRowSelect = true;
+			this.m_lvAttUnused.HideSelection = false;
 			this.m_lvAttUnused.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
 																						  listViewItem1,
 																						  listViewItem2,
@@ -318,7 +340,7 @@ namespace BuckRogers
 			// 
 			// label3
 			// 
-			this.label3.Location = new System.Drawing.Point(92, 532);
+			this.label3.Location = new System.Drawing.Point(528, 468);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(64, 16);
 			this.label3.TabIndex = 5;
@@ -335,7 +357,7 @@ namespace BuckRogers
 																						listViewItem8,
 																						listViewItem9,
 																						listViewItem10});
-			this.m_lvAttUsed.Location = new System.Drawing.Point(92, 552);
+			this.m_lvAttUsed.Location = new System.Drawing.Point(528, 488);
 			this.m_lvAttUsed.Name = "m_lvAttUsed";
 			this.m_lvAttUsed.Size = new System.Drawing.Size(52, 36);
 			this.m_lvAttUsed.TabIndex = 4;
@@ -358,6 +380,7 @@ namespace BuckRogers
 																							this.columnHeader7,
 																							this.columnHeader23});
 			this.m_lvEnemyLive.FullRowSelect = true;
+			this.m_lvEnemyLive.HideSelection = false;
 			this.m_lvEnemyLive.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
 																						  listViewItem11,
 																						  listViewItem12,
@@ -383,6 +406,11 @@ namespace BuckRogers
 			this.columnHeader7.Text = "Count";
 			this.columnHeader7.Width = 45;
 			// 
+			// columnHeader23
+			// 
+			this.columnHeader23.Text = "Territory";
+			this.columnHeader23.Width = 100;
+			// 
 			// label4
 			// 
 			this.label4.Location = new System.Drawing.Point(4, 220);
@@ -393,7 +421,7 @@ namespace BuckRogers
 			// 
 			// label5
 			// 
-			this.label5.Location = new System.Drawing.Point(188, 528);
+			this.label5.Location = new System.Drawing.Point(624, 464);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(48, 16);
 			this.label5.TabIndex = 9;
@@ -405,7 +433,7 @@ namespace BuckRogers
 																							this.columnHeader8,
 																							this.columnHeader9,
 																							this.columnHeader10});
-			this.m_lvEnemyDead.Location = new System.Drawing.Point(188, 544);
+			this.m_lvEnemyDead.Location = new System.Drawing.Point(624, 480);
 			this.m_lvEnemyDead.Name = "m_lvEnemyDead";
 			this.m_lvEnemyDead.Size = new System.Drawing.Size(52, 44);
 			this.m_lvEnemyDead.TabIndex = 8;
@@ -432,6 +460,7 @@ namespace BuckRogers
 																							this.columnHeader13,
 																							this.columnHeader14});
 			this.m_lvAttackers.FullRowSelect = true;
+			this.m_lvAttackers.HideSelection = false;
 			this.m_lvAttackers.Location = new System.Drawing.Point(356, 68);
 			this.m_lvAttackers.MultiSelect = false;
 			this.m_lvAttackers.Name = "m_lvAttackers";
@@ -499,6 +528,7 @@ namespace BuckRogers
 																							this.columnHeader17,
 																							this.columnHeader24});
 			this.m_lvDefenders.FullRowSelect = true;
+			this.m_lvDefenders.HideSelection = false;
 			this.m_lvDefenders.Location = new System.Drawing.Point(356, 236);
 			this.m_lvDefenders.MultiSelect = false;
 			this.m_lvDefenders.Name = "m_lvDefenders";
@@ -519,6 +549,11 @@ namespace BuckRogers
 			// 
 			this.columnHeader17.Text = "Count";
 			this.columnHeader17.Width = 45;
+			// 
+			// columnHeader24
+			// 
+			this.columnHeader24.Text = "Territory";
+			this.columnHeader24.Width = 100;
 			// 
 			// m_butAddAttackers
 			// 
@@ -578,6 +613,7 @@ namespace BuckRogers
 																						  this.columnHeader22,
 																						  this.columnHeader20,
 																						  this.columnHeader21});
+			this.m_lvResults.HideSelection = false;
 			this.m_lvResults.Location = new System.Drawing.Point(580, 68);
 			this.m_lvResults.Name = "m_lvResults";
 			this.m_lvResults.Size = new System.Drawing.Size(292, 348);
@@ -698,16 +734,6 @@ namespace BuckRogers
 			this.m_labSeed.Size = new System.Drawing.Size(44, 12);
 			this.m_labSeed.TabIndex = 33;
 			// 
-			// columnHeader23
-			// 
-			this.columnHeader23.Text = "Territory";
-			this.columnHeader23.Width = 100;
-			// 
-			// columnHeader24
-			// 
-			this.columnHeader24.Text = "Territory";
-			this.columnHeader24.Width = 100;
-			// 
 			// m_labBattlesLeft
 			// 
 			this.m_labBattlesLeft.Location = new System.Drawing.Point(608, 436);
@@ -738,51 +764,135 @@ namespace BuckRogers
 			this.label14.TabIndex = 37;
 			this.label14.Text = "Skip battles:";
 			// 
+			// tabControl1
+			// 
+			this.tabControl1.Controls.Add(this.tabPage1);
+			this.tabControl1.Controls.Add(this.tabPage2);
+			this.tabControl1.Location = new System.Drawing.Point(0, 0);
+			this.tabControl1.Name = "tabControl1";
+			this.tabControl1.SelectedIndex = 0;
+			this.tabControl1.Size = new System.Drawing.Size(972, 660);
+			this.tabControl1.TabIndex = 38;
+			// 
+			// tabPage1
+			// 
+			this.tabPage1.Controls.Add(this.label14);
+			this.tabPage1.Controls.Add(this.m_udSkipBattles);
+			this.tabPage1.Controls.Add(this.m_labBattlesLeft);
+			this.tabPage1.Controls.Add(this.label15);
+			this.tabPage1.Controls.Add(this.m_labSeed);
+			this.tabPage1.Controls.Add(this.label13);
+			this.tabPage1.Controls.Add(this.m_btnNextBattle);
+			this.tabPage1.Controls.Add(this.m_btnNextPlayer);
+			this.tabPage1.Controls.Add(this.label10);
+			this.tabPage1.Controls.Add(this.m_labLocation);
+			this.tabPage1.Controls.Add(this.label12);
+			this.tabPage1.Controls.Add(this.m_labBattleType);
+			this.tabPage1.Controls.Add(this.label11);
+			this.tabPage1.Controls.Add(this.m_btnAttack);
+			this.tabPage1.Controls.Add(this.m_btnContinue);
+			this.tabPage1.Controls.Add(this.m_lvResults);
+			this.tabPage1.Controls.Add(this.m_labCurrentPlayer);
+			this.tabPage1.Controls.Add(this.label9);
+			this.tabPage1.Controls.Add(this.m_butRemDefenders);
+			this.tabPage1.Controls.Add(this.m_butAddDefenders);
+			this.tabPage1.Controls.Add(this.m_butRemAttackers);
+			this.tabPage1.Controls.Add(this.m_butAddAttackers);
+			this.tabPage1.Controls.Add(this.label8);
+			this.tabPage1.Controls.Add(this.m_lvDefenders);
+			this.tabPage1.Controls.Add(this.label7);
+			this.tabPage1.Controls.Add(this.m_cbNumUnits);
+			this.tabPage1.Controls.Add(this.label6);
+			this.tabPage1.Controls.Add(this.m_lvAttackers);
+			this.tabPage1.Controls.Add(this.label5);
+			this.tabPage1.Controls.Add(this.m_lvEnemyDead);
+			this.tabPage1.Controls.Add(this.label4);
+			this.tabPage1.Controls.Add(this.m_lvEnemyLive);
+			this.tabPage1.Controls.Add(this.label3);
+			this.tabPage1.Controls.Add(this.m_lvAttUsed);
+			this.tabPage1.Controls.Add(this.label2);
+			this.tabPage1.Controls.Add(this.m_lbCurrentPlayer);
+			this.tabPage1.Controls.Add(this.label1);
+			this.tabPage1.Controls.Add(this.m_lvAttUnused);
+			this.tabPage1.Location = new System.Drawing.Point(4, 23);
+			this.tabPage1.Name = "tabPage1";
+			this.tabPage1.Size = new System.Drawing.Size(964, 633);
+			this.tabPage1.TabIndex = 0;
+			this.tabPage1.Text = "CombatTestForm";
+			// 
+			// tabPage2
+			// 
+			this.tabPage2.Controls.Add(this.m_lvFactories);
+			this.tabPage2.Controls.Add(this.label16);
+			this.tabPage2.Controls.Add(this.m_lbProductionOrder);
+			this.tabPage2.Location = new System.Drawing.Point(4, 23);
+			this.tabPage2.Name = "tabPage2";
+			this.tabPage2.Size = new System.Drawing.Size(964, 633);
+			this.tabPage2.TabIndex = 1;
+			this.tabPage2.Text = "Production";
+			// 
+			// m_lvFactories
+			// 
+			this.m_lvFactories.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+																							this.columnHeader25,
+																							this.columnHeader26,
+																							this.columnHeader27});
+			this.m_lvFactories.HideSelection = false;
+			this.m_lvFactories.Location = new System.Drawing.Point(180, 24);
+			this.m_lvFactories.MultiSelect = false;
+			this.m_lvFactories.Name = "m_lvFactories";
+			this.m_lvFactories.Size = new System.Drawing.Size(304, 260);
+			this.m_lvFactories.TabIndex = 2;
+			this.m_lvFactories.View = System.Windows.Forms.View.Details;
+			// 
+			// label16
+			// 
+			this.label16.Location = new System.Drawing.Point(4, 8);
+			this.label16.Name = "label16";
+			this.label16.Size = new System.Drawing.Size(100, 16);
+			this.label16.TabIndex = 1;
+			this.label16.Text = "Current player:";
+			// 
+			// m_lbProductionOrder
+			// 
+			this.m_lbProductionOrder.ItemHeight = 14;
+			this.m_lbProductionOrder.Items.AddRange(new object[] {
+																	 "Mark",
+																	 "Chris",
+																	 "Stu",
+																	 "Hannah",
+																	 "Jake",
+																	 "Kathryn"});
+			this.m_lbProductionOrder.Location = new System.Drawing.Point(4, 24);
+			this.m_lbProductionOrder.Name = "m_lbProductionOrder";
+			this.m_lbProductionOrder.RightToLeft = System.Windows.Forms.RightToLeft.No;
+			this.m_lbProductionOrder.Size = new System.Drawing.Size(120, 88);
+			this.m_lbProductionOrder.TabIndex = 0;
+			// 
+			// columnHeader25
+			// 
+			this.columnHeader25.Text = "Territory";
+			this.columnHeader25.Width = 141;
+			// 
+			// columnHeader26
+			// 
+			this.columnHeader26.Text = "Producing";
+			this.columnHeader26.Width = 70;
+			// 
+			// columnHeader27
+			// 
+			this.columnHeader27.Text = "Number";
+			// 
 			// CombatTestForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(992, 666);
-			this.Controls.Add(this.label14);
-			this.Controls.Add(this.m_udSkipBattles);
-			this.Controls.Add(this.m_labBattlesLeft);
-			this.Controls.Add(this.label15);
-			this.Controls.Add(this.m_labSeed);
-			this.Controls.Add(this.label13);
-			this.Controls.Add(this.m_btnNextBattle);
-			this.Controls.Add(this.m_btnNextPlayer);
-			this.Controls.Add(this.label10);
-			this.Controls.Add(this.m_labLocation);
-			this.Controls.Add(this.label12);
-			this.Controls.Add(this.m_labBattleType);
-			this.Controls.Add(this.label11);
-			this.Controls.Add(this.m_btnAttack);
-			this.Controls.Add(this.m_btnContinue);
-			this.Controls.Add(this.m_lvResults);
-			this.Controls.Add(this.m_labCurrentPlayer);
-			this.Controls.Add(this.label9);
-			this.Controls.Add(this.m_butRemDefenders);
-			this.Controls.Add(this.m_butAddDefenders);
-			this.Controls.Add(this.m_butRemAttackers);
-			this.Controls.Add(this.m_butAddAttackers);
-			this.Controls.Add(this.label8);
-			this.Controls.Add(this.m_lvDefenders);
-			this.Controls.Add(this.label7);
-			this.Controls.Add(this.m_cbNumUnits);
-			this.Controls.Add(this.label6);
-			this.Controls.Add(this.m_lvAttackers);
-			this.Controls.Add(this.label5);
-			this.Controls.Add(this.m_lvEnemyDead);
-			this.Controls.Add(this.label4);
-			this.Controls.Add(this.m_lvEnemyLive);
-			this.Controls.Add(this.label3);
-			this.Controls.Add(this.m_lvAttUsed);
-			this.Controls.Add(this.label2);
-			this.Controls.Add(this.m_lbCurrentPlayer);
-			this.Controls.Add(this.label1);
-			this.Controls.Add(this.m_lvAttUnused);
+			this.Controls.Add(this.tabControl1);
 			this.Name = "CombatTestForm";
-			this.Text = "CombatTestForm";
 			((System.ComponentModel.ISupportInitialize)(this.m_udSkipBattles)).EndInit();
+			this.tabControl1.ResumeLayout(false);
+			this.tabPage1.ResumeLayout(false);
+			this.tabPage2.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}

@@ -390,10 +390,6 @@ namespace BuckRogers
 						break;
 					}
 				}
-
-				// TODO Maybe raise an event here that can pass the attack details back to the interface?
-
-				
 			}
 
 			cr.UnusedAttackers.AddAllUnits(ci.Attackers);

@@ -678,6 +678,7 @@ namespace BuckRogers
 
 		#endregion
 
+		#region Combat tests
 		[Test]
 		public void FindBattles()
 		{
@@ -806,8 +807,6 @@ namespace BuckRogers
 			Utility.Twister.Initialize(42);
 			CombatResult cr = m_battleController.DoCombat(bi);
 
-			// TODO figure out what to actually test here to prove this works
-
 			Assert.AreEqual(4, cr.Casualties.Count);
 			Assert.AreEqual(2, cr.Survivors.Count);
 
@@ -912,5 +911,67 @@ namespace BuckRogers
 			
 		}
 
+		#endregion
+
+		[Test]
+		public void TestProduction()
+		{
+			Player hannah = m_controller.GetPlayer("Hannah");
+			UnitCollection factories = hannah.Units.GetUnits(UnitType.Factory);
+			Territory lowlanders = m_controller.Map["Lowlanders"];
+			Territory beta = m_controller.Map["Beta Regio"];
+			Territory orbit = m_controller.Map["Near Venus Orbit"];
+			Territory wreckers = m_controller.Map["Wreckers"];
+
+			Factory lf = (Factory)factories.GetUnits(lowlanders)[0];
+			Factory bf = (Factory)factories.GetUnits(beta)[0];
+
+			lf.StartProduction(UnitType.Trooper);
+			bf.StartProduction(UnitType.Fighter);
+
+			int startingTroopers = lowlanders.Units.GetUnits(UnitType.Trooper).Count;
+			int startingFighters = beta.Units.GetUnits(UnitType.Fighter).Count;
+
+			lf.ExecuteProduction();
+			bf.ExecuteProduction();
+
+			int currentTroopers = lowlanders.Units.GetUnits(UnitType.Trooper).Count;
+			int currentFighters = beta.Units.GetUnits(UnitType.Fighter).Count;
+
+			Assert.AreEqual(startingTroopers + 2, currentTroopers);
+			Assert.AreEqual(startingFighters + 1, currentFighters);
+
+			lf.StartProduction(UnitType.Battler, orbit);
+			bf.StartProduction(UnitType.KillerSatellite, orbit);
+	
+			lf.ExecuteProduction();
+			bf.ExecuteProduction();
+
+			Assert.AreEqual(true, lf.UnitHalfProduced);
+			Assert.AreEqual(true, bf.UnitHalfProduced);
+
+			lf.ExecuteProduction();
+			bf.ExecuteProduction();
+
+			Assert.AreEqual(1, orbit.Units.GetUnits(UnitType.Battler).Count);
+			Assert.AreEqual(1, orbit.Units.GetUnits(UnitType.KillerSatellite).Count);
+
+			startingFighters = currentFighters;
+			startingTroopers = currentTroopers;
+
+			Factory.ProductionPerTurn = 4;
+
+			lf.StartProduction(UnitType.Trooper);
+			bf.StartProduction(UnitType.Fighter);
+
+			lf.ExecuteProduction();
+			bf.ExecuteProduction();
+
+			currentTroopers = lowlanders.Units.GetUnits(UnitType.Trooper).Count;
+			currentFighters = beta.Units.GetUnits(UnitType.Fighter).Count;
+
+			Assert.AreEqual(startingTroopers + 4, currentTroopers);
+			Assert.AreEqual(startingFighters + 2, currentFighters);
+		}
 	}
 }
