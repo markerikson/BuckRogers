@@ -820,5 +820,80 @@ namespace BuckRogers
 			Assert.AreEqual(UnitType.Fighter, cr.Casualties[2].UnitType);
 			Assert.AreEqual(UnitType.Fighter, cr.Casualties[3].UnitType);
 		}
+
+		[Test]
+		public void BombingAttacks()
+		{
+			//KillerSatelliteBattle();
+
+			FindBattles();
+
+			Hashlist battles = m_controller.Battles;
+
+			m_controller.Twister.Initialize(5);
+
+			ArrayList results = new ArrayList();
+
+			for(int i = 0; i < battles.Count; i++)
+			{
+				BattleInfo bi = (BattleInfo)battles[i];
+
+				CombatResult cr = null;
+				switch(bi.Type)
+				{
+					case BattleType.KillerSatellite:
+					{
+						cr = m_controller.DoKillerSatelliteCombat(bi);
+						results.Add(cr);
+						break;
+					}
+					case BattleType.Bombing:
+					{
+						if(!m_controller.CheckForBombing(bi.Territory, bi.Player))
+						{
+							continue;
+						}
+
+						UnitCollection targets = m_controller.GetBombingTargets(bi.Territory, bi.Player);
+
+						ArrayList territories = targets.GetUnitTerritories();
+
+						// Give the user a chance to select his targets here
+
+						CombatInfo ci = new CombatInfo();
+						ci.Type = bi.Type;
+
+						UnitCollection factories = targets.GetUnits(UnitType.Factory);
+						ci.Defenders.AddAllUnits(factories);
+						UnitCollection fighters = targets.GetUnits(UnitType.Fighter);
+						ci.Defenders.AddAllUnits(fighters);
+						UnitCollection gennies = targets.GetUnits(UnitType.Gennie);
+						ci.Defenders.AddAllUnits(gennies);
+						UnitCollection troopers = targets.GetUnits(UnitType.Trooper);
+						ci.Defenders.AddAllUnits(troopers);
+
+						UnitCollection battlers = bi.Territory.Units.GetUnits(UnitType.Battler);
+						UnitCollection playerBattlers = battlers.GetUnits(bi.Player);
+
+						ci.Attackers.AddAllUnits(playerBattlers);
+						ci.AttackingLeader = false;
+
+						cr = m_controller.DoBombingCombat(ci);
+
+						results.Add(cr);
+
+						break;
+					}
+				}
+			}
+
+			foreach(CombatResult cr in results)
+			{
+				int q = 42;
+				int z = q;
+			}
+			
+		}
+
 	}
 }

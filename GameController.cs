@@ -141,13 +141,13 @@ namespace BuckRogers
 			m_checkedActions = new ArrayList();
 			m_undoneActions = new ArrayList();
 
-			m_combatTable = new int[,]	{	{6, 8, 7, NOTPOSSIBLE, 6, NOTPOSSIBLE, 3},
-											{5, 6, 6, NOTPOSSIBLE, 5, NOTPOSSIBLE, 2},
-											{7, 7, 6, 8, 3, 7, 3},
-											{7, 7, 4, 6, 4, 6, NOTPOSSIBLE},
-											{9, 10, 8, 10, 6, 10, 9},
-											{NOTPOSSIBLE, NOTPOSSIBLE, 6, 7, 5, NOTPOSSIBLE, NOTPOSSIBLE},
-											{8, 9, 9, NOTPOSSIBLE, 7, NOTPOSSIBLE, NOTPOSSIBLE},
+			m_combatTable = new int[,]	{	{6, 8, 7, NOTPOSSIBLE, 6, NOTPOSSIBLE, 3}, // Trooper
+											{5, 6, 6, NOTPOSSIBLE, 5, NOTPOSSIBLE, 2}, // Gennie
+											{7, 7, 6, 8, 3, 7, 3}, // Fighter
+											{7, 7, 4, 6, 4, 6, NOTPOSSIBLE}, // Battler
+											{9, 10, 8, 10, 6, 10, 9}, // Transport
+											{NOTPOSSIBLE, NOTPOSSIBLE, 6, 7, 5, NOTPOSSIBLE, NOTPOSSIBLE}, // Killer Satellite
+											{8, 9, 9, NOTPOSSIBLE, 7, NOTPOSSIBLE, NOTPOSSIBLE}, // Control marker
 										};
 
 			m_turnNumber = 0;			
@@ -809,6 +809,99 @@ namespace BuckRogers
 			return addBombing;
 		}
 
+		public UnitCollection GetBombingTargets(Territory t, Player p)
+		{
+			ArrayList surfaceTerritories = new ArrayList();
+			UnitCollection nearbyUnits = new UnitCollection();
+			// TODO I really hate having to use EdgeToNeighbor here... can I have Neighbors return a Node?
+			foreach(EdgeToNeighbor etn in t.Neighbors)
+			{
+				Territory neighbor = (Territory)etn.Neighbor;
+				if(neighbor.Type == TerritoryType.Ground)
+				{
+					surfaceTerritories.Add(neighbor);
+				}
+			}
+
+			foreach(Territory surface in surfaceTerritories)
+			{
+				UnitCollection otherUnits = surface.Units.GetOtherPlayersUnits(p);
+				
+				nearbyUnits.AddAllUnits(otherUnits);
+			}			
+
+			UnitCollection troopers = nearbyUnits.GetUnits(UnitType.Trooper);
+			UnitCollection gennies = nearbyUnits.GetUnits(UnitType.Factory);
+			UnitCollection fighters = nearbyUnits.GetUnits(UnitType.Fighter);
+			UnitCollection factories = nearbyUnits.GetUnits(UnitType.Factory);
+
+			UnitCollection targets = new UnitCollection();
+			targets.AddAllUnits(troopers);
+			targets.AddAllUnits(gennies);
+			targets.AddAllUnits(fighters);
+			targets.AddAllUnits(factories);
+			return targets;
+		}
+
+		public CombatResult DoKillerSatelliteCombat(BattleInfo bi)
+		{
+			CombatResult cr = new CombatResult();
+
+			UnitCollection units = bi.Territory.Units;
+			UnitCollection satellites = units.GetUnits(UnitType.KillerSatellite);
+			Unit satellite = satellites[0];
+
+			UnitCollection targets = units.GetOtherPlayersUnits(satellite.Owner);
+			UnitCollection leaders = units.GetUnits(UnitType.Leader);
+			UnitCollection attackerLeaders = leaders.GetUnits(satellite.Owner);
+
+			cr = new CombatResult();
+			UnitCollection individualTarget = new UnitCollection();
+			CombatInfo ci;
+
+			// Since ExecuteCombat() ends when all attacking units have fired, and there's
+			// only one attacking unit, we need to do a separate combat for each
+			// defending unit
+			for(int i = 0; i < targets.Count; i++)
+			{
+				ci = new CombatInfo();
+				individualTarget.Clear();
+				individualTarget.AddUnit(targets[i]);
+				ci.Defenders.AddAllUnits(individualTarget);
+				ci.Attackers.AddAllUnits(satellites);
+				ci.AttackingLeader = !attackerLeaders.Empty;
+						
+				CombatResult individualCR = ExecuteCombat(ci);
+
+				cr.AttackResults.AddRange(individualCR.AttackResults);
+				if(!individualCR.Casualties.Empty)
+				{
+					cr.Casualties.AddAllUnits(individualCR.Casualties);
+				}
+
+				if(!individualCR.Survivors.Empty)
+				{
+					cr.Survivors.AddAllUnits(individualCR.Survivors);
+				}
+
+			}
+
+			cr.UsedAttackers.AddAllUnits(satellites);
+
+			return cr;
+		}
+
+		public CombatResult DoBombingCombat(CombatInfo ci)
+		{
+			//CombatResult cr = new CombatResult();
+
+			return ExecuteCombat(ci);
+
+
+			//return cr;
+		}
+
+
 		public CombatResult DoCombat(BattleInfo bi)
 		{
 			CombatResult cr = null;
@@ -863,13 +956,6 @@ namespace BuckRogers
 					// Need to make sure this is still valid, since it's possible that a 
 					// killer satellite wiped out all battlers in the territory
 
-					/*
-					OrbitalSystem os = bi.Territory.System;
-					if(!CheckForBombing(os))
-					{
-						
-					}
-					*/
 					break;
 				}
 			}
@@ -889,7 +975,17 @@ namespace BuckRogers
 			{
 				Unit attacker = (Unit)ci.Attackers[0];
 				Unit defender = (Unit)ci.Defenders[0];
-				int toHit = m_combatTable[(int)attacker.UnitType, (int)defender.UnitType];
+
+				int toHit = NOTPOSSIBLE;
+				if(!(ci.Type == BattleType.Bombing))
+				{
+					toHit = m_combatTable[(int)attacker.UnitType, (int)defender.UnitType];
+				}
+				else
+				{
+					toHit = 7;
+				}
+				
 				if(toHit == NOTPOSSIBLE)
 				{
 					throw new Exception("Can't attack a " + defender.UnitType + " with a " + attacker.UnitType);
@@ -910,8 +1006,16 @@ namespace BuckRogers
 				ci.Attackers.RemoveUnit(attacker);
 				cr.UsedAttackers.AddUnit(attacker);
 
+				bool attackHit = (roll > toHit);
+				AttackResult ar = new AttackResult();
+				ar.Attacker = attacker;
+				ar.Defender = defender;
+				ar.Roll = roll;
+				ar.Hit = attackHit;
+				cr.AttackResults.Add(ar);
+
 				Console.WriteLine("To hit: " + toHit + ", roll: " + roll);
-				if(roll > toHit)
+				if(attackHit)
 				{
 					ci.Defenders.RemoveUnit(defender);
 					cr.Casualties.AddUnit(defender);

@@ -8,6 +8,12 @@ namespace BuckRogers
 	/// </summary>
 	public class CombatResult
 	{
+		public System.Collections.ArrayList AttackResults
+		{
+			get { return this.m_attackResults; }
+			set { this.m_attackResults = value; }
+		}
+	
 		public UnitCollection UnusedAttackers
 		{
 			get { return this.m_unusedAttackers; }
@@ -36,6 +42,7 @@ namespace BuckRogers
 		private UnitCollection m_casualties;
 		private UnitCollection m_usedAttackers;
 		private UnitCollection m_unusedAttackers;
+		private ArrayList m_attackResults;
 
 		public CombatResult()
 		{
@@ -43,6 +50,7 @@ namespace BuckRogers
 			m_casualties = new UnitCollection();
 			m_usedAttackers = new UnitCollection();
 			m_unusedAttackers = new UnitCollection();
+			m_attackResults = new ArrayList();
 		}
 	}
 }

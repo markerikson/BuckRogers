@@ -23,7 +23,14 @@ namespace BuckRogers
 	/// </summary>
 	public class Unit
 	{
+		public int ID
+		{
+			get { return this.m_id; }
+		}
+	
 		public static Unit NONE = new Unit(Player.NONE, UnitType.None);
+
+		private static int m_nextUnitID = 0;
 		
 
 		private UnitType m_unitType;
@@ -33,6 +40,7 @@ namespace BuckRogers
 		//private UnitCollection m_units;
 		private bool m_transported;
 		private Unit m_transportingUnit;
+		private int m_id;
 
 		
 			
@@ -43,6 +51,9 @@ namespace BuckRogers
 			this.CurrentTerritory = Territory.NONE;
 			m_unitType = unitType;
 			MovesLeft = MaxMoves;
+
+			m_id = Unit.m_nextUnitID;
+			Unit.m_nextUnitID++;
 
 			/*
 			if(m_unitType == UnitType.Transport)
@@ -196,7 +207,7 @@ namespace BuckRogers
 		{
 			get
 			{
-				return UnitType.ToString() + " - " + Owner.Name + " - " + CurrentTerritory.Name;
+				return ID + " - " + UnitType.ToString() + " - " + Owner.Name + " - " + CurrentTerritory.Name;
 			}
 			//return base.ToString ();
 			
