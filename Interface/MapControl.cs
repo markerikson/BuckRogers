@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
+using System.Data;
 using System.Windows.Forms;
 using System.Text;
 
@@ -10,12 +11,19 @@ using UMD.HCIL.Piccolo.Nodes;
 using UMD.HCIL.Piccolo.Util;
 using UMD.HCIL.PiccoloX;
 using UMD.HCIL.PiccoloX.Nodes;
+using UMD.HCIL.PiccoloX.Components;
 
-namespace BuckRogers 
+namespace BuckRogers
 {
-	public class BuckRogersMapForm : UMD.HCIL.PiccoloX.PForm 
+	/// <summary>
+	/// Summary description for MapControl.
+	/// </summary>
+	public class MapControl : System.Windows.Forms.Control
 	{
-		private System.ComponentModel.IContainer components = null;
+		/// <summary>
+		/// Required designer variable.
+		/// </summary>
+		private System.ComponentModel.Container components = null;
 
 		private PNode[] m_meo;
 		private PNode[] m_vo;
@@ -29,13 +37,38 @@ namespace BuckRogers
 		private int m_idxPlanets;
 		private PClip[] m_planets;
 
-		public BuckRogersMapForm() {
-			// This call is required by the Windows Form Designer.
-			InitializeComponent();
-		}
+		private PCanvas m_canvas;
+		private PScrollableControl m_scroller;
 
-		public override void Initialize() 
+		public MapControl()
 		{
+			// This call is required by the Windows.Forms Form Designer.
+			InitializeComponent();
+
+			m_canvas = new PCanvas();
+
+			m_canvas.Focus();
+
+			m_scroller = new PScrollableControl(m_canvas);
+			m_scroller.Scrollable = true;
+
+			this.SuspendLayout();
+
+			//m_canvas.Size = ClientSize;
+			//m_scroller.Size = ClientSize;
+			//m_scroller.Location = new Point(0, 0);
+			this.Controls.Add(m_scroller);
+
+			m_scroller.Anchor = 
+				AnchorStyles.Bottom |
+				AnchorStyles.Top |
+				AnchorStyles.Left |
+				AnchorStyles.Right;
+
+			this.ResumeLayout(false);
+
+
+
 			PRoot root = Canvas.Root;
 			PCamera camera = Canvas.Camera;
 			root.RemoveChild(camera.GetLayer(0));
@@ -92,12 +125,33 @@ namespace BuckRogers
 			DrawConnectors();
 
 			AddPlanets();
-
-			this.AutoScrollCanvas = true;
-			
-			base.Initialize ();
 		}
 
+		/// <summary>
+		/// Clean up any resources being used.
+		/// </summary>
+		protected override void Dispose( bool disposing )
+		{
+			if( disposing )
+			{
+				if( components != null )
+					components.Dispose();
+			}
+			base.Dispose( disposing );
+		}
+
+		#region Component Designer generated code
+		/// <summary>
+		/// Required method for Designer support - do not modify 
+		/// the contents of this method with the code editor.
+		/// </summary>
+		private void InitializeComponent()
+		{
+			components = new System.ComponentModel.Container();
+		}
+		#endregion
+
+		
 		private void AddPlanets()
 		{
 			#region Earth regions
@@ -160,25 +214,25 @@ namespace BuckRogers
 									new PointF[] 
 									{
 										new PointF(0, 0), new PointF(85, 85), new PointF(0, 120), 
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(0, 0), new PointF(80, 80), new PointF(115, 0), 
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(115, 0), new PointF(80, 80), new PointF(140, 140), 
 										new PointF(140, 0),
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(0, 120), new PointF(85, 85), new PointF(140, 140), 
 										new PointF(0, 140), 
-									},
-								};
+								},
+		};
 			string[] mercuryNames = {"Bach", "The Warrens", "Tolstoi", "Sobkou Plains"};
 
 			#endregion
@@ -191,44 +245,44 @@ namespace BuckRogers
 									{
 										new PointF(0, 0), new PointF(65, 0), new PointF(65, 58.5f), 
 										new PointF(0, 40f),
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(65, 0), new PointF(65, 58.5f), new PointF(70, 60), 
 										new PointF(160, 0),
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(160, 0), new PointF(70, 60), new PointF(70, 90), 
 										new PointF(160, 90),
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(160, 90), new PointF(110, 90), new PointF(110, 160), 
 										new PointF(160, 160), 
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(110, 160), new PointF(110, 90), new PointF(70, 90), 
 										new PointF(60, 98.5f), new PointF(60, 160),
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(60, 160), new PointF(60, 98.5f), new PointF(0, 135), 
 										new PointF(0, 160),
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(0, 40), new PointF(65, 58.5f), new PointF(70, 60), 
 										new PointF(70, 90), new PointF(60, 98.5f), new PointF(0, 135),
-									},
-								};
+								},
+		};
 
 			string[] venusNames = {"Aerostates", "Mt. Maxwell", "Elysium,", 
 									  "Wreckers", "Aphrodite",
@@ -243,35 +297,35 @@ namespace BuckRogers
 									{
 										new PointF(0, 0), new PointF(40, 0), new PointF(40, 150), 
 										new PointF(0, 150),
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(40, 0), new PointF(40, 40), new PointF(110, 40), 
 										new PointF(110, 0),
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(40, 40), new PointF(75, 40), new PointF(75, 150), 
 										new PointF(40, 150),
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(75, 40), new PointF(110, 40), new PointF(110, 150), 
 										new PointF(75, 150), 
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(110, 0), new PointF(150, 0), new PointF(150, 150), 
 										new PointF(110, 150),
-									},
-								};
+								},
+		};
 
 			string[] marsNames = {"Coprates Chasm", "Boreal Sea", "Ram HQ", 
-									  "Arcadia", "Pavonis"};
+									 "Arcadia", "Pavonis"};
 
 			#endregion
 
@@ -295,15 +349,15 @@ namespace BuckRogers
 									{
 										new PointF(0, 110), new PointF(0, 105), new PointF(50, 60),  
 										new PointF(110, 95), new PointF(110, 110), 
-									},
+								},
 
 									new PointF[] 
 									{
 										new PointF(110, 15), new PointF(50, 50), new PointF(55, 55), 
 										new PointF(50, 60), new PointF(110, 95), 
-									},
+								},
 
-								};
+		};
 
 			string[] moonNames = {"Moscoviense", "Tranquility", "Tycho","Farside"};
 
@@ -396,8 +450,8 @@ namespace BuckRogers
 				new PointF[]
 				{
 					new PointF(185, 230), new PointF(150, 230), new PointF(100, 230), new PointF(0, 230),
-				},
-			};
+			},
+		};
 
 			PointF[][] venusFarOrbitPoints = new PointF[][]
 			{
@@ -441,7 +495,7 @@ namespace BuckRogers
 			{
 				new PointF[] 
 				{
-						new PointF(10, 340), new PointF(0, 270), new PointF(0, 190), new PointF(20, 110)
+					new PointF(10, 340), new PointF(0, 270), new PointF(0, 190), new PointF(20, 110)
 				},
 				new PointF[] 
 				{
@@ -577,57 +631,58 @@ namespace BuckRogers
 
 			#endregion
 
-			AddPlanet(70, mercuryPoints, mercuryNames, Brushes.Goldenrod, scaleFactor, -2400, -700);
-			AddPlanet(80, venusPoints, venusNames, Brushes.LightGreen, scaleFactor, -2400, 1100);
-			AddPlanet(80, earthPoints, earthNames, Brushes.LightBlue, scaleFactor, 2100, 1200);
-			AddPlanet(55, moonPoints, moonNames, Brushes.LightGray, scaleFactor, 1300, 1400);
-			AddPlanet(75, marsPoints, marsNames, Brushes.OrangeRed, scaleFactor, 2100, -450);
+			#region Draw planets and planetary orbits
+			AddPlanet(70, mercuryPoints, mercuryNames, Brushes.Goldenrod, scaleFactor, -2600, -800);
+			AddPlanet(80, venusPoints, venusNames, Brushes.LightGreen, scaleFactor, -2600, 1000);
+			AddPlanet(80, earthPoints, earthNames, Brushes.LightBlue, scaleFactor, 1900, 1100);
+			AddPlanet(55, moonPoints, moonNames, Brushes.LightGray, scaleFactor, 1100, 1300);
+			AddPlanet(75, marsPoints, marsNames, Brushes.OrangeRed, scaleFactor, 1800, -550);
 
-			DrawOrbit(mercuryNearOrbitPoints, Color.Yellow, scaleFactor, -2500, -1000, true);
-			DrawOrbit(mercuryFarOrbitPoints, Color.Yellow, scaleFactor, -2500, -1000, true);
+			DrawOrbit(mercuryNearOrbitPoints, Color.Yellow, scaleFactor, -2700, -1100, true);
+			DrawOrbit(mercuryFarOrbitPoints, Color.Yellow, scaleFactor, -2700, -1100, true);
 
-			DrawOrbit(venusNearOrbitPoints, Color.Green, scaleFactor, -2500, 800, true);
-			DrawOrbit(venusFarOrbitPoints, Color.Green, scaleFactor, -2500, 800, true);
+			DrawOrbit(venusNearOrbitPoints, Color.Green, scaleFactor, -2700, 700, true);
+			DrawOrbit(venusFarOrbitPoints, Color.Green, scaleFactor, -2700, 700, true);
 
-			DrawOrbit(moonNearOrbitPoints, Color.Blue, scaleFactor, 1200, 150, true);
-			DrawOrbit(earthNearOrbitPoints, Color.Blue, scaleFactor, 1200, 150, true);
-			DrawOrbit(earthFarOrbitPoints, Color.Blue, scaleFactor, 1200, 150, true);
+			DrawOrbit(moonNearOrbitPoints, Color.Blue, scaleFactor, 1000, 50, true);
+			DrawOrbit(earthNearOrbitPoints, Color.Blue, scaleFactor, 1000, 50, true);
+			DrawOrbit(earthFarOrbitPoints, Color.Blue, scaleFactor, 1000, 50, true);
 
-			DrawOrbit(marsNearOrbitPoints, Color.Red, scaleFactor, 1200, -1200, true);
-			DrawOrbit(marsFarOrbitPoints, Color.Red, scaleFactor, 1200, -1200, true);
+			DrawOrbit(marsNearOrbitPoints, Color.Red, scaleFactor, 1000, -1300, true);
+			DrawOrbit(marsFarOrbitPoints, Color.Red, scaleFactor, 1000, -1300, true);
 
-			DrawAsteroid(75, 75, scaleFactor, Color.Gray, 30, 40, 0, 1250);
-			DrawAsteroid(65, 55, scaleFactor, Color.Gray, -20, 20, 650, 1100);
-			DrawAsteroid(70, 45, scaleFactor, Color.LightSteelBlue, 40, 10, 700, 1450);
-			DrawAsteroid(70, 60, scaleFactor, Color.MediumSlateBlue, 35, 30, 700, 1750);
-			DrawAsteroid(60, 60, scaleFactor, Color.Goldenrod, 40, 25, 200, 1800);
-			DrawAsteroid(60, 70, scaleFactor, Color.Gainsboro, 20, -15, -300, 1750);
-			DrawAsteroid(60, 60, scaleFactor, Color.LightSteelBlue, 30, 30, -800, 1750);
-			DrawAsteroid(60, 60, scaleFactor, Color.Gold, -25, 15, -600, 1400);
-			DrawAsteroid(85, 50, scaleFactor, Color.LightGray, -10, -5, -800, 1100);
+			DrawAsteroid(75, 75, scaleFactor, Color.Gray, 30, 40, -200, 1150);
+			DrawAsteroid(65, 55, scaleFactor, Color.Gray, -20, 20, 450, 1000);
+			DrawAsteroid(70, 45, scaleFactor, Color.LightSteelBlue, 40, 10, 500, 1350);
+			DrawAsteroid(70, 60, scaleFactor, Color.MediumSlateBlue, 35, 30, 500, 1650);
+			DrawAsteroid(60, 60, scaleFactor, Color.Goldenrod, 40, 25, 0, 1700);
+			DrawAsteroid(60, 70, scaleFactor, Color.Gainsboro, 20, -15, -500, 1650);
+			DrawAsteroid(60, 60, scaleFactor, Color.LightSteelBlue, 30, 30, -1000, 1650);
+			DrawAsteroid(60, 60, scaleFactor, Color.Gold, -25, 15, -800, 1300);
+			DrawAsteroid(85, 50, scaleFactor, Color.LightGray, -10, -5, -800, 1000);
 
 			// Hielo and Mariposaas
-			DrawObject(60, 60, scaleFactor, Color.Yellow, -1400, -250);
-			DrawObject(85, 35, scaleFactor, Color.Yellow, -1500, -650);
+			DrawObject(60, 60, scaleFactor, Color.Yellow, -1600, -350);
+			DrawObject(85, 35, scaleFactor, Color.Yellow, -1700, -750);
 
 			// Deimos
-			DrawObject(100, 100, scaleFactor, Color.Gray, 1300, -900);
+			DrawObject(100, 100, scaleFactor, Color.Gray, 1100, -1000);
 
 			// L4 and L5 colonies
-			DrawObject(65, 50, scaleFactor, Color.CornflowerBlue, 1550, 700);
-			DrawObject(80, 50, scaleFactor, Color.CornflowerBlue, 2300, 750);
+			DrawObject(65, 50, scaleFactor, Color.CornflowerBlue, 1350, 600);
+			DrawObject(80, 50, scaleFactor, Color.CornflowerBlue, 2100, 650);
+
+			#endregion
 
 			
 
-			
-
-            for(int i = 0; i < m_planets.Length; i++)
+			for(int i = 0; i < m_planets.Length; i++)
 			{
 				m_planets[i].MoveToFront();
 			}
 
-			PPath upperElevator = DrawObject(90, 65, scaleFactor, Color.DarkRed, 2500, -900, false);
-			PPath lowerElevator = DrawObject(40, 75, scaleFactor, Color.DarkRed, 2750, -700, true);
+			PPath upperElevator = DrawObject(90, 65, scaleFactor, Color.DarkRed, 2200, -1000, false);
+			PPath lowerElevator = DrawObject(40, 75, scaleFactor, Color.DarkRed, 2450, -800, true);
 
 			PComposite elevator = new PComposite();
 			elevator.AddChild(upperElevator);
@@ -638,7 +693,7 @@ namespace BuckRogers
 		}
 
 		private void DrawAsteroid(float width, float height, float scaleFactor, Color color, 
-									int orbitX, int orbitY, int shiftX, int shiftY)
+			int orbitX, int orbitY, int shiftX, int shiftY)
 		{
 			DrawObject(width, height, scaleFactor, color, shiftX, shiftY);
 
@@ -681,7 +736,7 @@ namespace BuckRogers
 		}
 
 		private void AddPlanet(float radius, PointF[][] polygons, string[] names, Brush color, 
-								float scaleFactor, int shiftX, int shiftY)
+			float scaleFactor, int shiftX, int shiftY)
 		{
 			//float clipRadius = 80;
 			float clipDiameter = 2 * radius;
@@ -755,13 +810,13 @@ namespace BuckRogers
 
 
 		private void DrawNodeCircle(PNode[] nodes, string prefix, int numNodes, int radius, 
-									Color color, bool drawConnector, bool isTransOrbit)
+			Color color, bool drawConnector, bool isTransOrbit)
 		{
 			DrawNodeCircle(nodes, prefix, numNodes, radius, color, false, drawConnector, isTransOrbit);
 		}
 
 		private void DrawNodeCircle(PNode[] nodes, string prefix, int numNodes, int radius, 
-									Color color, bool rotate45, bool drawConnector, bool isTransOrbit)
+			Color color, bool rotate45, bool drawConnector, bool isTransOrbit)
 		{
 			PPath circle;
 			PText text;
@@ -881,7 +936,7 @@ namespace BuckRogers
 			orbit.OffsetX = shiftX;
 			orbit.OffsetY = shiftY;
 
-			orbit.MouseUp += new PInputEventHandler(orbit_MouseUp);
+			//orbit.MouseUp += new PInputEventHandler(orbit_MouseUp);
 
 			Canvas.Layer.AddChild(orbit);
 
@@ -1021,57 +1076,8 @@ namespace BuckRogers
 			return (float) Math.Cos(Math.PI * degAngle / 180);
 		}
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing ) {
-			if( disposing ) {
-				if (components != null) {
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
-
-		#region Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent() {
-			// 
-			// HelloWorldExample
-			// 
-			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.ClientSize = new System.Drawing.Size(392, 373);
-			this.Location = new System.Drawing.Point(0, 0);
-			this.Name = "Buck Rogers Interface Test";
-			this.Text = "Buck Rogers Interface Test";
-
-		}
-		#endregion
-
-		/*
-		public static void Main(string[] args)
-		{
-			Application.Run(new BuckRogersMapForm());
-		}
-		*/
-
 		private void text_Click(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
 		{
-			/*
-			if(e.IsMouseEvent)
-			{
-				MessageBox.Show("IsMouseEvent");
-			}
-			else
-			{
-				MessageBox.Show("Not IsMouseEvent");
-			}
-			*/
-			
-			
 			if(e.Button != MouseButtons.Left)
 			{
 				return;
@@ -1107,8 +1113,6 @@ namespace BuckRogers
 				float scale = Canvas.Camera.ViewScale;
 				MessageBox.Show("Scale: " + scale + ", x: " + path.Bounds.X + ", y: " + path.Bounds.Y);
 			}
-			
-			
 		}
 
 		private void center_MouseUp(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
@@ -1175,28 +1179,18 @@ namespace BuckRogers
 
 			MessageBox.Show(sb.ToString());
 		}
-	}
 
-	class BlackLayer : PLayer 
-	{
-		public BlackLayer() 
+		public UMD.HCIL.Piccolo.PCanvas Canvas
 		{
+			get { return this.m_canvas; }
+			set { this.m_canvas = value; }
 		}
-		protected override void Paint(PPaintContext paintContext) 
+
+		public UMD.HCIL.PiccoloX.Components.PScrollableControl ScrollControl
 		{
-			// make sure grid gets drawn on snap to grid boundaries. And 
-			// expand a little to make sure that entire view is filled.
-			/*
-			float bx = (X - (X % gridSpacing)) - gridSpacing;
-			float by = (Y - (Y % gridSpacing)) - gridSpacing;
-			float rightBorder = X + Width + gridSpacing;
-			float bottomBorder = Y + Height + gridSpacing;
-			*/
-
-			Graphics g = paintContext.Graphics;
-			RectangleF clip = paintContext.LocalClip;
-
-			g.FillRectangle(Brushes.Black, clip);
+			get { return this.m_scroller; }
+			set { this.m_scroller = value; }
 		}
+
 	}
 }
