@@ -749,13 +749,28 @@ namespace BuckRogers
 				fighter.CurrentTerritory = mercury.NearOrbit;
 			}
 
+			Unit battler2 = Unit.CreateNewUnit(mark, UnitType.Battler);
+			Planet venus = (Planet)m_controller.Map.Planets["Venus"];
+			battler2.CurrentTerritory = venus.NearOrbit;
+
+			Unit battler3 = Unit.CreateNewUnit(mark, UnitType.Battler);
+			Planet earth = (Planet)m_controller.Map.Planets["Earth"];
+			battler3.CurrentTerritory = earth.NearOrbit;
+
+			Player chris = m_controller.GetPlayer("Chris");
+			Unit battler4 = Unit.CreateNewUnit(chris, UnitType.Battler);
+			Planet mars = (Planet)m_controller.Map.Planets["Mars"];
+			battler4.CurrentTerritory = mars.FarOrbit;
+
 			Hashlist battles = m_controller.FindBattles();
 
 
 			Territory[] battleSites = {mercury.NearOrbit, mercury.NearOrbit, mercury.NearOrbit, mercuryOrbit1,
-										  antarctica, arcologies, moscoviense,  transMarsOrbit15};
+										  venus.NearOrbit, earth.NearOrbit, antarctica, 
+										  arcologies, moscoviense,  mars.FarOrbit, transMarsOrbit15};
 			BattleType[] battleTypes = {BattleType.KillerSatellite, BattleType.Bombing, BattleType.Normal, BattleType.Normal,
-										   BattleType.Normal, BattleType.Normal, BattleType.Normal, BattleType.Normal};
+										   BattleType.Bombing, BattleType.Bombing, BattleType.Normal, 
+										   BattleType.Normal, BattleType.Normal, BattleType.Bombing, BattleType.Normal};
 			//foreach(BattleInfo bi in battles)
 			for(int i = 0; i < battles.Count; i++)
 			{

@@ -670,42 +670,36 @@ namespace BuckRogers
 						bi.Type = BattleType.KillerSatellite;
 						hl.Add(bi.ToString(), bi);
 					}
+				}
 
-					UnitCollection uc = os.NearOrbit.Units.GetUnits(UnitType.Battler);
-					if(uc.Count > 0)
+				// TODO Need to special-case Mars, since the Space Elevator can be bombed from far orbit
+				if(CheckForBombing(os))
+				{
+					// Note that this is based on the unit layout prior to any killer satellites 
+					// firing, and could be nullified if all battlers are wiped out.  
+					// TODO Make sure that the battle handling code double-checks these to make sure they're still valid
+					BattleInfo bi = new BattleInfo();
+					bi.Territory = os.NearOrbit;
+					bi.Type = BattleType.Bombing;
+
+					Hashlist hl = (Hashlist)planets[os.Name];
+					hl.Add(bi.ToString(), bi);
+				}
+
+				if(os.Name == "Mars")
+				{
+					if(CheckForBombing(os, true))
 					{
-						bool addBombing = false;
-						if(!os.IsControlled)
-						{
-							addBombing = true;
-						}
-						else
-						{
-							foreach(Unit u in uc)
-							{
-								if(u.Owner != os.Owner)
-								{
-									addBombing = true;
-									break;
-								}
-							}
-						}
+						BattleInfo bi = new BattleInfo();
+						Planet mars = (Planet)os;
+						bi.Territory = mars.FarOrbit;
+						bi.Type = BattleType.Bombing;
 
-						if(addBombing)
-						{
-							// Note that this is based on the unit layout prior to any killer satellites 
-							// firing, and could be nullified if all battlers are wiped out.  
-							// TODO Make sure that the battle handling code double-checks these to make sure they're still valid
-							BattleInfo bi = new BattleInfo();
-							bi.Territory = os.NearOrbit;
-							bi.Type = BattleType.Bombing;
-
-							Hashlist hl = (Hashlist)planets[os.Name];
-							hl.Add(bi.ToString(), bi);
-						}
-						
+						Hashlist hl = (Hashlist)planets[os.Name];
+						hl.Add(bi.ToString(), bi);
 					}
 				}
+				
 			}
 
 			for(int i = 0; i < m_players.Length; i++)
@@ -764,6 +758,50 @@ namespace BuckRogers
 			
 		}
 
+		public bool CheckForBombing(OrbitalSystem os)
+		{
+			return CheckForBombing(os, false);
+		}
+
+		public bool CheckForBombing(OrbitalSystem os, bool isMars)
+		{
+			bool addBombing = false;
+			UnitCollection battlers; 
+			UnitCollection surfaceUnits = new UnitCollection();
+
+			if(!isMars)
+			{
+				battlers = os.NearOrbit.Units.GetUnits(UnitType.Battler);
+				foreach(Territory t in os.Surface)
+				{
+					surfaceUnits.AddAllUnits(t.Units);
+				}
+			}
+			else
+			{
+				Planet mars = (Planet)os;
+				battlers = mars.FarOrbit.Units.GetUnits(UnitType.Battler);
+				Territory elevator = m_map["Space Elevator"];
+				surfaceUnits.AddAllUnits(elevator.Units);
+			}
+			
+
+			if(battlers.Count > 0)
+			{
+				foreach(Unit u in battlers)
+				{
+					UnitCollection otherPlayersUnits = surfaceUnits.GetOtherPlayersUnits(u.Owner);
+					if(otherPlayersUnits.Count > 0)
+					{
+						addBombing = true;
+						break;
+					}
+				}
+			}
+
+			return addBombing;
+		}
+
 		public CombatResult DoCombat(BattleInfo bi)
 		{
 			CombatResult cr = null;
@@ -782,6 +820,9 @@ namespace BuckRogers
 					cr = new CombatResult();
 					UnitCollection individualTarget = new UnitCollection();
 					CombatInfo ci;
+
+					// Since ExecuteCombat() ends when all attacking units have fired, and there's
+					// only one attacking unit, we need to 
 					for(int i = 0; i < targets.Count; i++)
 					{
 						ci = new CombatInfo();
@@ -791,7 +832,7 @@ namespace BuckRogers
 						ci.Attackers.AddAllUnits(satellites);
 						ci.AttackingLeader = !attackerLeaders.Empty;
 						
-						CombatResult individualCR = ExecuteAttack(ci);
+						CombatResult individualCR = ExecuteCombat(ci);
 
 						if(!individualCR.Casualties.Empty)
 						{
@@ -809,12 +850,24 @@ namespace BuckRogers
 
 					break;
 				}
+				case BattleType.Bombing:
+				{
+					// Need to make sure this is still valid, since it's possible that a 
+					// killer satellite wiped out all battlers in the territory
+
+					OrbitalSystem os = bi.Territory.System;
+					if(!CheckForBombing(os))
+					{
+						
+					}
+					break;
+				}
 			}
 
 			return cr;
 		}
 
-		public CombatResult ExecuteAttack(CombatInfo ci)
+		public CombatResult ExecuteCombat(CombatInfo ci)
 		{
 			CombatResult cr = new CombatResult();
 
@@ -865,16 +918,6 @@ namespace BuckRogers
 
 			cr.UnusedAttackers.AddAllUnits(ci.Attackers);
 			cr.Survivors.AddAllUnits(ci.Defenders);
-			/*
-			for(int i = 0; i < ci.Attackers.Count; i++)
-			{
-				cr.UnusedAttackers.AddUnit(ci.Attackers[i]);
-			}
-
-			for(int i = 0; i < ci.Defenders.Count; i++)
-			{
-				cr.Survivors.AddUnit(ci.Defenders[i]);
-			}*/
 			
 			return cr;
 		}
