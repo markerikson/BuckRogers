@@ -11,6 +11,7 @@ namespace BuckRogers
 	public class ControllerTest
 	{
 		private GameController m_controller;
+		private BattleController m_battleController;
 		public ControllerTest()
 		{
 		}
@@ -20,6 +21,7 @@ namespace BuckRogers
 		{
 			string[] players = {"Mark", "Chris", "Stu", "Hannah", "Jake", "Kathryn"};
 			m_controller = new GameController(players);
+			m_battleController = new BattleController();
 
 			m_controller.AssignTerritories();
 			m_controller.CreateInitialUnits();
@@ -801,8 +803,8 @@ namespace BuckRogers
 
 			// Set up a predictable series of combat results
 			// Next six numbers are 4, 8, 10, 2, 8, 8
-			m_controller.Twister.Initialize(42);
-			CombatResult cr = m_controller.DoCombat(bi);
+			Utility.Twister.Initialize(42);
+			CombatResult cr = m_battleController.DoCombat(bi);
 
 			// TODO figure out what to actually test here to prove this works
 
@@ -827,7 +829,7 @@ namespace BuckRogers
 
 			Hashlist battles = m_controller.Battles;
 
-			m_controller.Twister.Initialize(5);
+			Utility.Twister.Initialize(5);
 
 			ArrayList results = new ArrayList();
 
@@ -840,7 +842,7 @@ namespace BuckRogers
 				{
 					case BattleType.KillerSatellite:
 					{
-						cr = m_controller.DoKillerSatelliteCombat(bi);
+						cr = m_battleController.DoKillerSatelliteCombat(bi);
 						results.Add(cr);
 						break;
 					}
@@ -868,7 +870,7 @@ namespace BuckRogers
 						ci.Attackers.AddAllUnits(playerBattlers);
 						ci.AttackingLeader = false;
 
-						cr = m_controller.DoBombingCombat(ci);
+						cr = m_battleController.DoBombingCombat(ci);
 
 						results.Add(cr);
 
@@ -900,11 +902,13 @@ namespace BuckRogers
 				}
 			}
 
+			/*
 			foreach(CombatResult cr in results)
 			{
 				int q = 42;
 				int z = q;
 			}
+			*/
 			
 		}
 

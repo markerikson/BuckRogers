@@ -52,6 +52,7 @@ namespace BuckRogers
 		private System.Windows.Forms.Label m_labCurrentPlayer;
 
 		private GameController m_controller;
+		private BattleController m_battleController;
 		private Hashlist m_battles;
 		private BattleInfo m_currentBattle;
 		private CombatResult m_lastResult;
@@ -104,9 +105,9 @@ namespace BuckRogers
 			this.SetupBattles();
 			this.Battles = m_controller.Battles;
 
-			m_controller.Twister.Initialize(696);
+			Utility.Twister.Initialize(696);
 
-			m_labSeed.Text = m_controller.Twister.Seed.ToString();
+			m_labSeed.Text = Utility.Twister.Seed.ToString();
 			
 			NextBattle();
 
@@ -924,12 +925,13 @@ namespace BuckRogers
 		{
 			string[] players = {"Mark", "Chris", "Stu", "Hannah", "Jake", "Kathryn"};
 			m_controller = new GameController(players);
+			m_battleController = new BattleController();
 
 			m_controller.AssignTerritories();
 			m_controller.CreateInitialUnits();
 
 			// should set up Stu as the first player
-			m_controller.Twister.Initialize(8);
+			Utility.Twister.Initialize(8);
 			m_controller.RollForInitiative(false);
 
 			string[,] territories = { {"Deimos", "Psyche", "Urban Reservations", "Space Elevator", 
@@ -1556,7 +1558,7 @@ namespace BuckRogers
 			{
 				case BattleType.KillerSatellite:
 				{
-					cr = m_controller.DoKillerSatelliteCombat(m_currentBattle);
+					cr = m_battleController.DoKillerSatelliteCombat(m_currentBattle);
 					break;
 				}
 				case BattleType.Bombing:
@@ -1567,7 +1569,7 @@ namespace BuckRogers
 					UnitCollection leaders = m_currentBattle.Territory.Units.GetUnits(UnitType.Leader);
 					ci.AttackingLeader = (leaders.GetUnits(m_currentPlayer).Count > 0);
 
-					cr = m_controller.DoBombingCombat(ci);
+					cr = m_battleController.DoBombingCombat(ci);
 					break;
 				}
 				case BattleType.Normal:
@@ -1581,7 +1583,7 @@ namespace BuckRogers
 						UnitCollection leaders = m_currentBattle.Territory.Units.GetUnits(UnitType.Leader);
 						ci.AttackingLeader = (leaders.GetUnits(m_currentPlayer).Count > 0);
 
-						cr = m_controller.ExecuteCombat(ci);
+						cr = m_battleController.ExecuteCombat(ci);
 					
 					}
 					catch(Exception ex)
@@ -1682,27 +1684,14 @@ namespace BuckRogers
 				}
 				else
 				{
-				
-					UnitCollection playerUnits = ((UnitCollection)m_survivingUnits[p]);//.GetUnits(p);
-
-					// TODO Figure out how to check for transports only targetable last
+					UnitCollection playerUnits = ((UnitCollection)m_survivingUnits[p]);
 				
 					if(ut == UnitType.Transport)
 					{
 						int numTransports = playerUnits.GetUnits(UnitType.Transport).Count;
 						UnitCollection otherUnits = playerUnits.GetNonMatchingUnits(UnitType.Transport);
-						//int numOtherUnits = .Count;
-						//int numPlayerOtherUnitsAdded = allMatches.GetUnits(p).GetNonMatchingUnits(UnitType.Transport).Count;
 						UnitCollection otherUnitsAdded = allMatches.GetUnits(p).GetNonMatchingUnits(UnitType.Transport);
 
-						
-						
-						
-						/*
-						if( (m_lvEnemyLive.Items.Count > 0)
-							(i != (lv.Items.Count -1)) 
-							&& (playerUnits.GetUnitTypeCount().Count > 1))
-						*/
 						if(otherUnits.Count != otherUnitsAdded.Count)
 						{
 
@@ -1712,26 +1701,14 @@ namespace BuckRogers
 				
 					UnitCollection matchesType = playerUnits.GetUnits(ut);
 					matchesType.RemoveAllUnits(allMatches);
-
-					//matches = playerUnits.GetUnits(ut, numUnits);
-
 				
-					if(attacking)
-					{
-						matches = matchesType;
-					}
-					else
-					{
-						Territory t = m_controller.Map[territory];
-						matches = matchesType.GetUnits(t, numUnits);
-					}
-				
+					Territory t = m_controller.Map[territory];
+					matches = matchesType.GetUnits(t, numUnits);				
 				}
 
 				allMatches.AddAllUnits(matches);
 			}
 			
-
 			return allMatches;
 		}
 

@@ -9,6 +9,7 @@ namespace BuckRogers
 	/// </summary>
 	public class Utility
 	{
+
 		public Utility()
 		{
 		}
@@ -42,6 +43,19 @@ namespace BuckRogers
 
 			return rand;
 
+		}
+
+		public static int RollD10()
+		{
+			return m_twister.Next(1, 10);
+		}
+
+		public static MersenneTwister Twister
+		{
+			get
+			{
+				return m_twister;
+			}
 		}
 	}
 }

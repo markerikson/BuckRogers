@@ -13,11 +13,13 @@ namespace BuckRogers
 		
 		
 		#region Properties
+		/*
 		public CenterSpace.Free.MersenneTwister Twister
 		{
 			get { return this.m_twister; }
 			set { this.m_twister = value; }
 		}
+		*/
 
 		public BuckRogers.GameMap Map
 		{
@@ -56,7 +58,7 @@ namespace BuckRogers
 		private Player[] m_players;
 		private ArrayList m_currentPlayerOrder;
 		public ArrayList m_rollResults;
-		private MersenneTwister m_twister;
+		//private MersenneTwister m_twister;
 		private ArrayList m_rollList;
 		private ArrayList m_checkedActions;
 		private ArrayList m_undoneActions;
@@ -137,7 +139,7 @@ namespace BuckRogers
 				m_players[i] = new Player(playerNames[i]);
 			}
 
-			m_twister = new MersenneTwister();
+			//m_twister = new MersenneTwister();
 			m_checkedActions = new ArrayList();
 			m_undoneActions = new ArrayList();
 
@@ -170,10 +172,12 @@ namespace BuckRogers
 		}
 
 
+		/*
 		public int RollD10()
 		{
 			return m_twister.Next(1, 10);
 		}
+		*/
 
 		#region Setup functions
 
@@ -194,7 +198,7 @@ namespace BuckRogers
 				// TODO Technically supposed to be 6 territories apiece
 				for(int i = 0; i < 7; i++)
 				{
-					int idx = m_twister.Next(ground.Count - 1);
+					int idx = Utility.Twister.Next(ground.Count - 1);
 					Territory t = (Territory)ground[idx];
 					t.Owner = p;
 					ground.Remove(t);
@@ -289,7 +293,7 @@ namespace BuckRogers
 			for(int i = 0; i < players.Count; i++)
 			{
 				rolls[i] = new TurnRoll();
-				rolls[i].Roll = RollD10();
+				rolls[i].Roll = Utility.RollD10();
 				rolls[i].Player = (Player)players[i];				
 			}
 
@@ -342,7 +346,6 @@ namespace BuckRogers
 
 		#region Transport functions
 
-		//public void LoadTransport(Transport transport, UnitCollection units, UnitType type)
 		public void LoadTransport(TransportAction ta)
 		{
 			Transport transport = ta.Transport;
@@ -714,7 +717,7 @@ namespace BuckRogers
 					if(u.CurrentTerritory.Units.HasUnitsFromMultiplePlayers)
 					{
 						string name;
-						//if(u.CurrentTerritory.Type == TerritoryType.Ground)
+
 						
 						if(u.CurrentTerritory.System != OrbitalSystem.NONE)
 						{
@@ -731,7 +734,7 @@ namespace BuckRogers
 						BattleInfo bi = new BattleInfo();
 						bi.Type = BattleType.Normal;
 						bi.Territory = u.CurrentTerritory;
-						//Console.WriteLine("Name: " + name + ", Unit: " + u.Info);
+
 						if(!planetBattleList.ContainsKey(bi.ToString()))
 						{
 							
@@ -850,200 +853,5 @@ namespace BuckRogers
 			return targets;
 		}
 
-		public CombatResult DoKillerSatelliteCombat(BattleInfo bi)
-		{
-			CombatResult cr = new CombatResult();
-
-			UnitCollection units = bi.Territory.Units;
-			UnitCollection satellites = units.GetUnits(UnitType.KillerSatellite);
-			Unit satellite = satellites[0];
-
-			UnitCollection targets = units.GetNonMatchingUnits(satellite.Owner);
-			UnitCollection leaders = units.GetUnits(UnitType.Leader);
-			UnitCollection attackerLeaders = leaders.GetUnits(satellite.Owner);
-
-			cr = new CombatResult();
-			UnitCollection individualTarget = new UnitCollection();
-			CombatInfo ci;
-
-			// Since ExecuteCombat() ends when all attacking units have fired, and there's
-			// only one attacking unit, we need to do a separate combat for each
-			// defending unit
-			for(int i = 0; i < targets.Count; i++)
-			{
-				ci = new CombatInfo();
-				individualTarget.Clear();
-				individualTarget.AddUnit(targets[i]);
-				ci.Defenders.AddAllUnits(individualTarget);
-				ci.Attackers.AddAllUnits(satellites);
-				ci.AttackingLeader = !attackerLeaders.Empty;
-						
-				CombatResult individualCR = ExecuteCombat(ci);
-
-				cr.AttackResults.AddRange(individualCR.AttackResults);
-				if(!individualCR.Casualties.Empty)
-				{
-					cr.Casualties.AddAllUnits(individualCR.Casualties);
-				}
-
-				if(!individualCR.Survivors.Empty)
-				{
-					cr.Survivors.AddAllUnits(individualCR.Survivors);
-				}
-
-			}
-
-			cr.UsedAttackers.AddAllUnits(satellites);
-
-			return cr;
-		}
-
-		public CombatResult DoBombingCombat(CombatInfo ci)
-		{
-			//CombatResult cr = new CombatResult();
-
-			
-
-			return ExecuteCombat(ci);
-
-
-			//return cr;
-		}
-
-
-		public CombatResult DoCombat(BattleInfo bi)
-		{
-			CombatResult cr = null;
-			switch(bi.Type)
-			{
-				case BattleType.KillerSatellite:
-				{
-					UnitCollection units = bi.Territory.Units;
-					UnitCollection satellites = units.GetUnits(UnitType.KillerSatellite);
-					Unit satellite = satellites[0];
-
-					UnitCollection targets = units.GetNonMatchingUnits(satellite.Owner);
-					UnitCollection leaders = units.GetUnits(UnitType.Leader);
-					UnitCollection attackerLeaders = leaders.GetUnits(satellite.Owner);
-
-					cr = new CombatResult();
-					UnitCollection individualTarget = new UnitCollection();
-					CombatInfo ci;
-
-					// Since ExecuteCombat() ends when all attacking units have fired, and there's
-					// only one attacking unit, we need to do a separate combat for each
-					// defending unit
-					for(int i = 0; i < targets.Count; i++)
-					{
-						ci = new CombatInfo();
-						individualTarget.Clear();
-						individualTarget.AddUnit(targets[i]);
-						ci.Defenders.AddAllUnits(individualTarget);
-						ci.Attackers.AddAllUnits(satellites);
-						ci.AttackingLeader = !attackerLeaders.Empty;
-						
-						CombatResult individualCR = ExecuteCombat(ci);
-
-						if(!individualCR.Casualties.Empty)
-						{
-							cr.Casualties.AddAllUnits(individualCR.Casualties);
-						}
-
-						if(!individualCR.Survivors.Empty)
-						{
-							cr.Survivors.AddAllUnits(individualCR.Survivors);
-						}
-
-					}
-
-					cr.UsedAttackers.AddAllUnits(satellites);
-
-					break;
-				}
-				case BattleType.Bombing:
-				{
-					// Need to make sure this is still valid, since it's possible that a 
-					// killer satellite wiped out all battlers in the territory
-
-					break;
-				}
-			}
-
-			return cr;
-		}
-
-		public CombatResult ExecuteCombat(CombatInfo ci)
-		{
-			CombatResult cr = new CombatResult();
-
-			// it's basically a while loop - no incrementing of i, since this
-			// needs to go until all attackers are done or all defenders are destroyed, 
-			// and one unit will be removed from ci.Attackers each time through
-			//for(int i = 0; i < ci.Attackers.Count;)
-			while(ci.Attackers.Count > 0)
-			{
-				Unit attacker = (Unit)ci.Attackers[0];
-				Unit defender = (Unit)ci.Defenders[0];
-
-				int toHit = NOTPOSSIBLE;
-				if(!(ci.Type == BattleType.Bombing))
-				{
-					toHit = m_combatTable[(int)attacker.UnitType, (int)defender.UnitType];
-				}
-				else
-				{
-					toHit = 7;
-				}
-				
-				if(toHit == NOTPOSSIBLE)
-				{
-					throw new Exception("Can't attack a " + defender.UnitType + " with a " + attacker.UnitType);
-				}
-
-				int roll = RollD10();
-
-				if(ci.AttackingLeader)
-				{
-					roll += 2;
-				}
-
-				if(roll > 10)
-				{
-					roll = 10;
-				}
-
-				ci.Attackers.RemoveUnit(attacker);
-				cr.UsedAttackers.AddUnit(attacker);
-
-				bool attackHit = (roll >= toHit);
-				AttackResult ar = new AttackResult();
-				ar.Attacker = attacker;
-				ar.Defender = defender;
-				ar.Roll = roll;
-				ar.Hit = attackHit;
-				cr.AttackResults.Add(ar);
-
-				Console.WriteLine("To hit: " + toHit + ", roll: " + roll);
-				if(attackHit)
-				{
-					ci.Defenders.RemoveUnit(defender);
-					cr.Casualties.AddUnit(defender);
-
-					if(ci.Defenders.Count == 0)
-					{
-						break;
-					}
-				}
-
-				// TODO Maybe raise an event here that can pass the attack details back to the interface?
-
-				
-			}
-
-			cr.UnusedAttackers.AddAllUnits(ci.Attackers);
-			cr.Survivors.AddAllUnits(ci.Defenders);
-			
-			return cr;
-		}
 	}
 }
