@@ -45,11 +45,13 @@ namespace BuckRogers
 			set { this.m_currentPlayerOrder = value; }
 		}
 
+		// TODO Remove this when it's not needed for testing
 		public BuckRogers.Hashlist Battles
 		{
 			get { return this.m_battles; }
 			set { this.m_battles = value; }
 		}
+		
 
 		#endregion
 	

@@ -179,6 +179,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Data structures\DisplayUnitsEventArgs.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Data structures\Hashlist.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

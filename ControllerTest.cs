@@ -21,7 +21,7 @@ namespace BuckRogers
 		{
 			string[] players = {"Mark", "Chris", "Stu", "Hannah", "Jake", "Kathryn"};
 			m_controller = new GameController(players);
-			m_battleController = new BattleController();
+			m_battleController = new BattleController(m_controller);
 
 			m_controller.AssignTerritories();
 			m_controller.CreateInitialUnits();
