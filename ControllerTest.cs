@@ -950,6 +950,9 @@ namespace BuckRogers
 			Assert.AreEqual(true, lf.UnitHalfProduced);
 			Assert.AreEqual(true, bf.UnitHalfProduced);
 
+			Assert.AreEqual(0, orbit.Units.GetUnits(UnitType.Battler).Count);
+			Assert.AreEqual(0, orbit.Units.GetUnits(UnitType.KillerSatellite).Count);
+
 			lf.ExecuteProduction();
 			bf.ExecuteProduction();
 

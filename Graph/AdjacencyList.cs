@@ -27,5 +27,49 @@ namespace skmDataStructures.Graph
 			get { return (EdgeToNeighbor) base.InnerList[index]; }
 			set { base.InnerList[index] = value; }
 		}
+
+		public new IEnumerator GetEnumerator()
+		{
+			return new AdjacencyEnumerator(this);
+		}
+
+		private class AdjacencyEnumerator : IEnumerator
+		{
+			private int m_index;
+			private AdjacencyList m_list;
+
+			public AdjacencyEnumerator(AdjacencyList list)
+			{
+				m_list = list;
+				Reset();
+			}
+
+			#region IEnumerator Members
+
+
+			public void Reset()
+			{
+				m_index = -1;
+			}
+
+			public object Current
+			{
+				get
+				{
+					EdgeToNeighbor etn = m_list[m_index];
+					return etn.Neighbor;
+				}
+			}
+
+			public bool MoveNext()
+			{
+				m_index++;
+				return (m_index < m_list.Count);
+			}
+
+			#endregion
+
+		}
+
 	}
 }

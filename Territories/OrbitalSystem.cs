@@ -12,7 +12,7 @@ namespace BuckRogers
 	{
 		
 	
-		public static OrbitalSystem NONE = new OrbitalSystem("NONE", null, null, 0, null, null, null, null);
+		public static OrbitalSystem NONE = new OrbitalSystem("None", null, null, 0, null, null, null, null);
 		private OrbitalPath orbitalPath;
 		private Hashtable m_ground;
 		private Hashtable m_space;
@@ -124,7 +124,7 @@ namespace BuckRogers
 							string[] groundNames, string[] spaceNames, 
 							Territory[] groundVertices, Territory[] spaceVertices)
 		{
-			if(name == "NONE")
+			if(name == "None")
 			{
 				return;
 			}

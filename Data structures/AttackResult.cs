@@ -30,11 +30,18 @@ namespace BuckRogers
 			get { return this.m_attacker; }
 			set { this.m_attacker = value; }
 		}
+
+		public bool Leader
+		{
+			get { return this.m_leader; }
+			set { this.m_leader = value; }
+		}
 	
 		private Unit m_attacker;
 		private Unit m_defender;
 		private int m_roll;
 		private bool m_hit;
+		private bool m_leader;
 
 		public AttackResult()
 		{
@@ -42,6 +49,7 @@ namespace BuckRogers
 			m_attacker = Unit.NONE;
 			m_roll = 0;
 			m_hit = false;
+			m_leader = false;
 			
 		}
 	}

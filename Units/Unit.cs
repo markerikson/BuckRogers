@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 namespace BuckRogers
 {
@@ -100,7 +101,20 @@ namespace BuckRogers
 			}
 			return cost;
 		}
-		
+
+		public static ArrayList GetBuildableTypes()
+		{
+			ArrayList al = new ArrayList();
+			al.Add(UnitType.Trooper);
+			al.Add(UnitType.Gennie);
+			al.Add(UnitType.Fighter);
+			al.Add(UnitType.Battler);
+			al.Add(UnitType.Transport);
+			al.Add(UnitType.KillerSatellite);
+			al.Add(UnitType.Factory);
+
+			return al;
+		}		
 
 		public int MaxMoves
 		{

@@ -9,7 +9,7 @@ namespace BuckRogers
 	/// </summary>
 	public class OrbitalPath
 	{
-		public static OrbitalPath NONE = new OrbitalPath("NONE", 0);
+		public static OrbitalPath NONE = new OrbitalPath("None", 0);
 
 		public Territory[] Territories
 		{

@@ -10,7 +10,7 @@ namespace BuckRogers
 		//private Unit m_producing;
 		private UnitType m_productionType;
 		private bool m_canProduce;
-		private bool m_unitHalfProduced;
+		//private bool m_unitHalfProduced;
 		private Territory m_outputTerritory;
 		private static int m_productionPerTurn = 2;
 		private int m_partialProduction;
@@ -21,10 +21,10 @@ namespace BuckRogers
 			m_productionType = UnitType.None;
 			m_canProduce = true;
 			m_partialProduction = 0;
+			m_outputTerritory = Territory.NONE;
 			
 		}
 
-		// TODO Base production off of unit costs (needed for double production)
 		public bool StartProduction(UnitType unitType)
 		{
 			return StartProduction(unitType, this.CurrentTerritory);
@@ -32,41 +32,31 @@ namespace BuckRogers
 
 		public bool StartProduction(UnitType unitType, Territory outputTerritory)
 		{
-			bool startedProduction = true;
+			bool startedProduction = false;
 
 			if(m_canProduce)
 			{
+				/*
+				if(m_partialProduction == 0)
+				{
+					throw new Exception("Can't change production while a unit is partially produced");
+				}
+				*/
 
-				switch(unitType)
-				{
-					case UnitType.KillerSatellite:
-					case UnitType.Battler:
-					{
-						// TODO Return a bool or throw an exception, not both
-						if(outputTerritory == this.CurrentTerritory)
-						{
-							startedProduction = false;
-							throw new Exception("Can't produce a satellite or battler and put it on the ground");
-						}
-						break;
-					}
-				}
-				if(startedProduction)
-				{
-					m_productionType = unitType;
-					m_unitHalfProduced = false;
-					m_outputTerritory = outputTerritory;
-				}
+				m_productionType = unitType;
+				m_outputTerritory = outputTerritory;
+				startedProduction = true;
 			}			
 
 			return startedProduction;
 		}
 
-		public void CancelProduction()
+		public void ClearProduction()
 		{
 			m_productionType = UnitType.None;
-			m_unitHalfProduced = false;
+			//m_unitHalfProduced = false;
 			m_partialProduction = 0;
+			m_outputTerritory = Territory.NONE;
 		}
 
 		public void ExecuteProduction()
@@ -88,7 +78,8 @@ namespace BuckRogers
 
 			if(m_partialProduction == 0)
 			{
-				m_productionType = UnitType.None;
+				//m_productionType = UnitType.None;
+				ClearProduction();
 			}
 			
 		}
@@ -136,6 +127,28 @@ namespace BuckRogers
 		{
 			get { return m_productionPerTurn; }
 			set { m_productionPerTurn = value; }
+		}
+
+		public Territory DestinationTerritory
+		{
+			get
+			{
+				return m_outputTerritory;
+			}
+		}
+
+		public float AmountProduced
+		{
+			get
+			{
+				if(m_productionType == UnitType.None)
+				{
+					return 0.0f;
+				}
+				
+				float amount = (m_productionPerTurn + m_partialProduction) / (float)Unit.GetCost(m_productionType);
+				return amount;
+			}
 		}
 	}
 }

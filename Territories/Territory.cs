@@ -62,7 +62,7 @@ namespace BuckRogers
 		private OrbitalSystem m_system;
 		private OrbitalPath m_orbit;
 
-		public static Territory NONE = new Territory("NONE", TerritoryType.Space);
+		public static Territory NONE = new Territory("None", TerritoryType.Space);
 
 
 

@@ -342,9 +342,10 @@ namespace BuckRogers
 			*/
 			Node urbres = gm.m_graph.Nodes["Urban Reservations"];
 			StringBuilder sb = new StringBuilder();
-			foreach(EdgeToNeighbor en in urbres.Neighbors)
+			//foreach(EdgeToNeighbor en in urbres.Neighbors)
+			foreach(Node neighbor in urbres.Neighbors)
 			{
-				Node neighbor = en.Neighbor;
+				//Node neighbor = en.Neighbor;
 				sb.Append(neighbor.Key);
 				sb.Append("\n");
 			}
@@ -377,9 +378,10 @@ namespace BuckRogers
 			Node node = gm.m_graph.Nodes[item];
 
 			ArrayList names = new ArrayList();
-			foreach(EdgeToNeighbor etn in node.Neighbors)
+			//foreach(EdgeToNeighbor etn in node.Neighbors)
+			foreach(Node neighbor in node.Neighbors)
 			{
-				Node neighbor = etn.Neighbor;
+				//Node neighbor = etn.Neighbor;
 				names.Add(neighbor.Key);
 			}
 

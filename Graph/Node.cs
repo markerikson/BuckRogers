@@ -92,9 +92,10 @@ namespace skmDataStructures.Graph
 		{
 			bool adjacent = false;
 
-			foreach(EdgeToNeighbor etn in neighbors)
+			//foreach(EdgeToNeighbor etn in neighbors)
+			foreach(Node neighbor in neighbors)
 			{
-				Node neighbor = etn.Neighbor;
+				//Node neighbor = etn.Neighbor;
 				if(n == neighbor)
 				{
 					adjacent = true;

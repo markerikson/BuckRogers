@@ -12,6 +12,31 @@ namespace BuckRogers
 
 	public class Player
 	{
+		
+
+		
+
+		public static Player NONE = new Player("None");
+	
+		private UnitCollection m_units;
+		private string m_name;
+		private Hashtable m_territories;
+		private bool m_disabled;
+
+		public Player(string name)
+		{
+			m_name = name;
+			m_units = new UnitCollection();
+			m_territories = new Hashtable();
+			m_disabled = false;
+		}
+
+		public bool Disabled
+		{
+			get { return this.m_disabled; }
+			set { this.m_disabled = value; }
+		}
+
 		public Hashtable Territories
 		{
 			get { return this.m_territories; }
@@ -28,19 +53,6 @@ namespace BuckRogers
 		{
 			get { return this.m_units; }
 			set { this.m_units = value; }
-		}
-
-		public static Player NONE = new Player("None");
-	
-		private UnitCollection m_units;
-		private string m_name;
-		private Hashtable m_territories;
-
-		public Player(string name)
-		{
-			m_name = name;
-			m_units = new UnitCollection();
-			m_territories = new Hashtable();
 		}
 	}
 }

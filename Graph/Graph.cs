@@ -313,9 +313,10 @@ namespace skmDataStructures.Graph
 				{
 					visited.Add(node);
 					
-					foreach(EdgeToNeighbor etn in node.Neighbors)
+					//foreach(EdgeToNeighbor etn in node.Neighbors)
+					foreach(Node neighbor in node.Neighbors)
 					{
-						Node neighbor = etn.Neighbor;
+						//Node neighbor = etn.Neighbor;
 						if(!queue.Contains(neighbor) &&
 							!visited.Contains(neighbor))
 						{

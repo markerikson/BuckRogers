@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.Text;
 
 namespace BuckRogers
 {
@@ -53,6 +54,7 @@ namespace BuckRogers
 
 		private GameController m_controller;
 		private BattleController m_battleController;
+		private int m_productionIndex;
 
 		private System.Windows.Forms.ColumnHeader columnHeader18;
 		private System.Windows.Forms.ColumnHeader columnHeader19;
@@ -86,6 +88,16 @@ namespace BuckRogers
 		private System.Windows.Forms.ColumnHeader columnHeader25;
 		private System.Windows.Forms.ColumnHeader columnHeader26;
 		private System.Windows.Forms.ColumnHeader columnHeader27;
+		private System.Windows.Forms.ColumnHeader columnHeader28;
+		private System.Windows.Forms.Button m_btnNextProduction;
+		private System.Windows.Forms.ComboBox m_cbUnitTypes;
+		private System.Windows.Forms.ComboBox m_cbNeighbors;
+		private System.Windows.Forms.Button m_btnSetupProduction;
+		private System.Windows.Forms.ColumnHeader columnHeader29;
+		private System.Windows.Forms.Button m_btnFinishProduction;
+		private System.Windows.Forms.Button m_btnProduce;
+		private System.Windows.Forms.Label label17;
+		private System.Windows.Forms.Label label18;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -98,7 +110,13 @@ namespace BuckRogers
 			//
 			InitializeComponent();
 
-			m_cbNumUnits.SelectedIndex = 0;
+			foreach(UnitType ut in Unit.GetBuildableTypes())
+			{
+				m_cbUnitTypes.Items.Add(ut.ToString());
+			}
+
+			m_cbUnitTypes.SelectedIndex = 0;
+            m_cbNumUnits.SelectedIndex = 0;
 
 			m_lvAttackers.Items.Clear();
 			m_lvDefenders.Items.Clear();
@@ -259,12 +277,22 @@ namespace BuckRogers
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this.m_btnSetupProduction = new System.Windows.Forms.Button();
+			this.m_cbNeighbors = new System.Windows.Forms.ComboBox();
+			this.m_cbUnitTypes = new System.Windows.Forms.ComboBox();
+			this.m_btnFinishProduction = new System.Windows.Forms.Button();
+			this.m_btnNextProduction = new System.Windows.Forms.Button();
 			this.m_lvFactories = new System.Windows.Forms.ListView();
-			this.label16 = new System.Windows.Forms.Label();
-			this.m_lbProductionOrder = new System.Windows.Forms.ListBox();
 			this.columnHeader25 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader26 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader27 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader28 = new System.Windows.Forms.ColumnHeader();
+			this.label16 = new System.Windows.Forms.Label();
+			this.m_lbProductionOrder = new System.Windows.Forms.ListBox();
+			this.columnHeader29 = new System.Windows.Forms.ColumnHeader();
+			this.m_btnProduce = new System.Windows.Forms.Button();
+			this.label17 = new System.Windows.Forms.Label();
+			this.label18 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.m_udSkipBattles)).BeginInit();
 			this.tabControl1.SuspendLayout();
 			this.tabPage1.SuspendLayout();
@@ -316,7 +344,6 @@ namespace BuckRogers
 			// 
 			// m_lbCurrentPlayer
 			// 
-			this.m_lbCurrentPlayer.ItemHeight = 14;
 			this.m_lbCurrentPlayer.Items.AddRange(new object[] {
 																   "Mark",
 																   "Chris",
@@ -327,7 +354,7 @@ namespace BuckRogers
 																   "An extremely long name"});
 			this.m_lbCurrentPlayer.Location = new System.Drawing.Point(704, 452);
 			this.m_lbCurrentPlayer.Name = "m_lbCurrentPlayer";
-			this.m_lbCurrentPlayer.Size = new System.Drawing.Size(156, 116);
+			this.m_lbCurrentPlayer.Size = new System.Drawing.Size(156, 108);
 			this.m_lbCurrentPlayer.TabIndex = 2;
 			// 
 			// label2
@@ -501,7 +528,7 @@ namespace BuckRogers
 															  "100"});
 			this.m_cbNumUnits.Location = new System.Drawing.Point(228, 208);
 			this.m_cbNumUnits.Name = "m_cbNumUnits";
-			this.m_cbNumUnits.Size = new System.Drawing.Size(116, 22);
+			this.m_cbNumUnits.Size = new System.Drawing.Size(116, 21);
 			this.m_cbNumUnits.TabIndex = 12;
 			// 
 			// label7
@@ -612,11 +639,12 @@ namespace BuckRogers
 																						  this.columnHeader19,
 																						  this.columnHeader22,
 																						  this.columnHeader20,
-																						  this.columnHeader21});
+																						  this.columnHeader21,
+																						  this.columnHeader29});
 			this.m_lvResults.HideSelection = false;
 			this.m_lvResults.Location = new System.Drawing.Point(580, 68);
 			this.m_lvResults.Name = "m_lvResults";
-			this.m_lvResults.Size = new System.Drawing.Size(292, 348);
+			this.m_lvResults.Size = new System.Drawing.Size(352, 348);
 			this.m_lvResults.TabIndex = 22;
 			this.m_lvResults.View = System.Windows.Forms.View.Details;
 			// 
@@ -640,8 +668,7 @@ namespace BuckRogers
 			// 
 			// columnHeader21
 			// 
-			this.columnHeader21.Text = "Hit";
-			this.columnHeader21.Width = 35;
+			this.columnHeader21.Text = "Leader";
 			// 
 			// m_btnContinue
 			// 
@@ -814,60 +841,88 @@ namespace BuckRogers
 			this.tabPage1.Controls.Add(this.m_lbCurrentPlayer);
 			this.tabPage1.Controls.Add(this.label1);
 			this.tabPage1.Controls.Add(this.m_lvAttUnused);
-			this.tabPage1.Location = new System.Drawing.Point(4, 23);
+			this.tabPage1.Location = new System.Drawing.Point(4, 22);
 			this.tabPage1.Name = "tabPage1";
-			this.tabPage1.Size = new System.Drawing.Size(964, 633);
+			this.tabPage1.Size = new System.Drawing.Size(964, 634);
 			this.tabPage1.TabIndex = 0;
 			this.tabPage1.Text = "CombatTestForm";
 			// 
 			// tabPage2
 			// 
+			this.tabPage2.Controls.Add(this.label18);
+			this.tabPage2.Controls.Add(this.label17);
+			this.tabPage2.Controls.Add(this.m_btnProduce);
+			this.tabPage2.Controls.Add(this.m_btnSetupProduction);
+			this.tabPage2.Controls.Add(this.m_cbNeighbors);
+			this.tabPage2.Controls.Add(this.m_cbUnitTypes);
+			this.tabPage2.Controls.Add(this.m_btnFinishProduction);
+			this.tabPage2.Controls.Add(this.m_btnNextProduction);
 			this.tabPage2.Controls.Add(this.m_lvFactories);
 			this.tabPage2.Controls.Add(this.label16);
 			this.tabPage2.Controls.Add(this.m_lbProductionOrder);
-			this.tabPage2.Location = new System.Drawing.Point(4, 23);
+			this.tabPage2.Location = new System.Drawing.Point(4, 22);
 			this.tabPage2.Name = "tabPage2";
-			this.tabPage2.Size = new System.Drawing.Size(964, 633);
+			this.tabPage2.Size = new System.Drawing.Size(964, 634);
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "Production";
+			// 
+			// m_btnSetupProduction
+			// 
+			this.m_btnSetupProduction.Location = new System.Drawing.Point(12, 116);
+			this.m_btnSetupProduction.Name = "m_btnSetupProduction";
+			this.m_btnSetupProduction.TabIndex = 7;
+			this.m_btnSetupProduction.Text = "Setup";
+			this.m_btnSetupProduction.Click += new System.EventHandler(this.m_btnSetupProduction_Click);
+			// 
+			// m_cbNeighbors
+			// 
+			this.m_cbNeighbors.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.m_cbNeighbors.Location = new System.Drawing.Point(652, 100);
+			this.m_cbNeighbors.Name = "m_cbNeighbors";
+			this.m_cbNeighbors.Size = new System.Drawing.Size(196, 21);
+			this.m_cbNeighbors.TabIndex = 6;
+			// 
+			// m_cbUnitTypes
+			// 
+			this.m_cbUnitTypes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.m_cbUnitTypes.Location = new System.Drawing.Point(652, 48);
+			this.m_cbUnitTypes.Name = "m_cbUnitTypes";
+			this.m_cbUnitTypes.Size = new System.Drawing.Size(121, 21);
+			this.m_cbUnitTypes.TabIndex = 5;
+			// 
+			// m_btnFinishProduction
+			// 
+			this.m_btnFinishProduction.Location = new System.Drawing.Point(12, 172);
+			this.m_btnFinishProduction.Name = "m_btnFinishProduction";
+			this.m_btnFinishProduction.TabIndex = 4;
+			this.m_btnFinishProduction.Text = "Finish";
+			this.m_btnFinishProduction.Click += new System.EventHandler(this.m_btnFinishProduction_Click);
+			// 
+			// m_btnNextProduction
+			// 
+			this.m_btnNextProduction.Location = new System.Drawing.Point(12, 144);
+			this.m_btnNextProduction.Name = "m_btnNextProduction";
+			this.m_btnNextProduction.Size = new System.Drawing.Size(76, 23);
+			this.m_btnNextProduction.TabIndex = 3;
+			this.m_btnNextProduction.Text = "Next player";
+			this.m_btnNextProduction.Click += new System.EventHandler(this.m_btnNextProduction_Click);
 			// 
 			// m_lvFactories
 			// 
 			this.m_lvFactories.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
 																							this.columnHeader25,
 																							this.columnHeader26,
-																							this.columnHeader27});
+																							this.columnHeader27,
+																							this.columnHeader28});
+			this.m_lvFactories.FullRowSelect = true;
 			this.m_lvFactories.HideSelection = false;
 			this.m_lvFactories.Location = new System.Drawing.Point(180, 24);
 			this.m_lvFactories.MultiSelect = false;
 			this.m_lvFactories.Name = "m_lvFactories";
-			this.m_lvFactories.Size = new System.Drawing.Size(304, 260);
+			this.m_lvFactories.Size = new System.Drawing.Size(424, 260);
 			this.m_lvFactories.TabIndex = 2;
 			this.m_lvFactories.View = System.Windows.Forms.View.Details;
-			// 
-			// label16
-			// 
-			this.label16.Location = new System.Drawing.Point(4, 8);
-			this.label16.Name = "label16";
-			this.label16.Size = new System.Drawing.Size(100, 16);
-			this.label16.TabIndex = 1;
-			this.label16.Text = "Current player:";
-			// 
-			// m_lbProductionOrder
-			// 
-			this.m_lbProductionOrder.ItemHeight = 14;
-			this.m_lbProductionOrder.Items.AddRange(new object[] {
-																	 "Mark",
-																	 "Chris",
-																	 "Stu",
-																	 "Hannah",
-																	 "Jake",
-																	 "Kathryn"});
-			this.m_lbProductionOrder.Location = new System.Drawing.Point(4, 24);
-			this.m_lbProductionOrder.Name = "m_lbProductionOrder";
-			this.m_lbProductionOrder.RightToLeft = System.Windows.Forms.RightToLeft.No;
-			this.m_lbProductionOrder.Size = new System.Drawing.Size(120, 88);
-			this.m_lbProductionOrder.TabIndex = 0;
+			this.m_lvFactories.SelectedIndexChanged += new System.EventHandler(this.m_lvFactories_SelectedIndexChanged);
 			// 
 			// columnHeader25
 			// 
@@ -883,12 +938,70 @@ namespace BuckRogers
 			// 
 			this.columnHeader27.Text = "Number";
 			// 
+			// columnHeader28
+			// 
+			this.columnHeader28.Text = "Destination";
+			this.columnHeader28.Width = 120;
+			// 
+			// label16
+			// 
+			this.label16.Location = new System.Drawing.Point(4, 8);
+			this.label16.Name = "label16";
+			this.label16.Size = new System.Drawing.Size(100, 16);
+			this.label16.TabIndex = 1;
+			this.label16.Text = "Current player:";
+			// 
+			// m_lbProductionOrder
+			// 
+			this.m_lbProductionOrder.Items.AddRange(new object[] {
+																	 "Mark",
+																	 "Chris",
+																	 "Stu",
+																	 "Hannah",
+																	 "Jake",
+																	 "Kathryn"});
+			this.m_lbProductionOrder.Location = new System.Drawing.Point(4, 24);
+			this.m_lbProductionOrder.Name = "m_lbProductionOrder";
+			this.m_lbProductionOrder.RightToLeft = System.Windows.Forms.RightToLeft.No;
+			this.m_lbProductionOrder.Size = new System.Drawing.Size(120, 82);
+			this.m_lbProductionOrder.TabIndex = 0;
+			// 
+			// columnHeader29
+			// 
+			this.columnHeader29.Text = "Hit";
+			this.columnHeader29.Width = 35;
+			// 
+			// m_btnProduce
+			// 
+			this.m_btnProduce.Location = new System.Drawing.Point(652, 132);
+			this.m_btnProduce.Name = "m_btnProduce";
+			this.m_btnProduce.TabIndex = 8;
+			this.m_btnProduce.Text = "Produce";
+			this.m_btnProduce.Click += new System.EventHandler(this.m_btnProduce_Click);
+			// 
+			// label17
+			// 
+			this.label17.Location = new System.Drawing.Point(652, 32);
+			this.label17.Name = "label17";
+			this.label17.Size = new System.Drawing.Size(100, 16);
+			this.label17.TabIndex = 9;
+			this.label17.Text = "Unit to produce:";
+			// 
+			// label18
+			// 
+			this.label18.Location = new System.Drawing.Point(652, 84);
+			this.label18.Name = "label18";
+			this.label18.Size = new System.Drawing.Size(100, 16);
+			this.label18.TabIndex = 10;
+			this.label18.Text = "Place unit in:";
+			// 
 			// CombatTestForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(992, 666);
 			this.Controls.Add(this.tabControl1);
 			this.Name = "CombatTestForm";
+			this.Text = "Buck Rogers Combat Test Program";
 			((System.ComponentModel.ISupportInitialize)(this.m_udSkipBattles)).EndInit();
 			this.tabControl1.ResumeLayout(false);
 			this.tabPage1.ResumeLayout(false);
@@ -1367,6 +1480,8 @@ namespace BuckRogers
 			ma.Owner = farside.Owner;
 			ma.StartingTerritory = farside;
 			ma.Units.AddAllUnits(uc);
+			uc = farside.Units.GetUnits(UnitType.Leader);
+			ma.Units.AddAllUnits(uc);
 			ma.Territories.Add(m_controller.Map["Near Moon Orbit"]);
 			ma.Territories.Add(m_controller.Map["Near Earth Orbit"]);
 			Territory arcologies = m_controller.Map["Independent Arcologies"];
@@ -1606,8 +1721,11 @@ namespace BuckRogers
 					lvi.SubItems.Add(ar.Defender.UnitType.ToString());
 					lvi.SubItems.Add(ar.Defender.Owner.Name);
 					lvi.SubItems.Add(ar.Roll.ToString());
+					string leader = ar.Leader ? "Yes" : "No";
+					lvi.SubItems.Add(leader);
 					string hitResult = ar.Hit ? "Yes" : "No";
 					lvi.SubItems.Add(hitResult);
+					
 
 					m_lvResults.Items.Add(lvi);
 
@@ -1726,6 +1844,30 @@ namespace BuckRogers
 			m_lvEnemyLive.Items.Clear();
 			m_lvAttackers.Items.Clear();
 			m_lvEnemyLive.Items.Clear();
+
+			CombatResult cr = m_battleController.BattleResult;
+
+			StringBuilder sb = new StringBuilder();
+
+			foreach(Player p in cr.Casualties.GetPlayersWithUnits())
+			{
+				UnitCollection playerUnits = cr.Casualties.GetUnits(p);
+
+				foreach(UnitType ut in playerUnits.GetUnitTypeCount().Keys)
+				{
+					UnitCollection types = playerUnits.GetUnits(ut);
+
+					sb.Append(p.Name);
+					sb.Append(" - ");
+					sb.Append(ut.ToString());
+					sb.Append(" - ");
+					sb.Append(types.Count.ToString());
+					sb.Append("\r\n");
+				}
+			}
+
+			MessageBox.Show(sb.ToString(), "Combat Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
+			//MessageBox.Show()
 			if(!m_battleController.NextBattle())
 			{
 				// TODO Initiate production here
@@ -1838,6 +1980,166 @@ namespace BuckRogers
 			m_labCurrentPlayer.Text = m_battleController.CurrentPlayer.Name;
 
 			EnableAttack();
+		}
+
+		private void m_btnNextProduction_Click(object sender, System.EventArgs e)
+		{
+			m_lvFactories.Items.Clear();
+			NextProduction();
+		}
+
+		private void m_btnSetupProduction_Click(object sender, System.EventArgs e)
+		{
+			m_lbProductionOrder.Items.Clear();
+
+			foreach(Player p in m_controller.PlayerOrder)
+			{
+				m_lbProductionOrder.Items.Add(p.Name);
+			}
+
+			m_productionIndex = -1;
+
+			m_btnProduce.Enabled = false;
+			m_btnNextProduction.Enabled = true;
+
+			NextProduction();
+
+
+		}
+
+		private void NextProduction()
+		{
+			m_productionIndex++;
+
+			if(m_productionIndex < m_lbProductionOrder.Items.Count)
+			{
+				m_lbProductionOrder.SelectedIndex = m_productionIndex;
+				string playerName = (string)m_lbProductionOrder.SelectedItem;
+				Player p = m_controller.GetPlayer(playerName);
+
+				UnitCollection allFactories = p.Units.GetUnits(UnitType.Factory);
+
+				UnitCollection usableFactories = new UnitCollection();
+
+				foreach(Factory f in allFactories)
+				{
+					if(f.CanProduce)
+					{
+						usableFactories.AddUnit(f);
+					}
+				}
+
+				foreach(Factory f in usableFactories)
+				{
+					ListViewItem lvi = new ListViewItem();
+
+					lvi.Text = f.CurrentTerritory.Name;
+					lvi.SubItems.Add(f.ProductionType.ToString());
+					lvi.SubItems.Add(f.AmountProduced.ToString());
+					lvi.SubItems.Add(f.DestinationTerritory.Name);
+
+					m_lvFactories.Items.Add(lvi);
+				}
+			}
+			else
+			{
+				m_btnNextProduction.Enabled = false;
+				m_btnProduce.Enabled = true;
+			}
+			
+		}
+
+		private void m_lvFactories_SelectedIndexChanged(object sender, System.EventArgs e)
+		{
+			if(m_lvFactories.SelectedIndices.Count > 0)
+			{
+				int idxUnused = m_lvFactories.SelectedIndices[0];
+				ListViewItem lvi = m_lvFactories.Items[idxUnused];
+
+				string territoryName = lvi.Text;
+				Territory t = m_controller.Map[territoryName];
+				string playerName = (string)m_lbProductionOrder.SelectedItem;
+				Player p = m_controller.GetPlayer(playerName);
+
+				ArrayList names = new ArrayList();
+				//foreach(EdgeToNeighbor etn in t.Neighbors)
+				foreach(Territory neighbor in t.Neighbors)
+				{
+					//Node neighbor = etn.Neighbor;
+					if(   (neighbor.Owner == p) 
+					   || (neighbor.Type == TerritoryType.Space) )
+					{
+						names.Add(neighbor.Key);
+					}
+					
+				}
+
+				string[] namearray = (string[])names.ToArray(typeof(string));
+				Array.Sort(namearray);
+
+				m_cbNeighbors.Items.Clear();
+
+				m_cbNeighbors.Items.Add(territoryName);
+				foreach(string Name in namearray)
+				{
+					m_cbNeighbors.Items.Add(Name);
+				}
+
+				m_cbNeighbors.SelectedIndex = 0;
+
+				m_btnProduce.Enabled = true;
+			}
+			
+		}
+
+		private void m_btnProduce_Click(object sender, System.EventArgs e)
+		{
+			if(m_lvFactories.SelectedIndices.Count > 0)
+			{
+				int idxUnused = m_lvFactories.SelectedIndices[0];
+				ListViewItem lvi = m_lvFactories.Items[idxUnused];
+
+				string territoryName = lvi.Text;
+				string typeName = (string)m_cbUnitTypes.SelectedItem;
+				string destinationName = (string)m_cbNeighbors.SelectedItem;
+
+				Territory t = m_controller.Map[territoryName];
+				Territory destination = m_controller.Map[destinationName];
+				UnitType ut = (UnitType)Enum.Parse(typeof(UnitType), typeName);
+				UnitCollection factories = t.Units.GetUnits(UnitType.Factory);
+
+				Factory f = (Factory)factories[0];
+
+				ProductionInfo pi = new ProductionInfo();
+				pi.Factory = f;
+				pi.Type = ut;
+				pi.DestinationTerritory = destination;
+
+				try
+				{
+					if(m_controller.CheckProduction(pi))
+					{
+						f.StartProduction(ut, destination);
+
+						lvi.SubItems[1].Text = typeName;
+						lvi.SubItems[2].Text = f.AmountProduced.ToString();
+						lvi.SubItems[3].Text = destinationName;
+					}
+				}
+				catch(Exception ex)
+				{
+					MessageBox.Show(ex.Message, "Production Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				}
+				
+				
+
+
+			}
+		}
+
+		private void m_btnFinishProduction_Click(object sender, System.EventArgs e)
+		{
+			m_controller.ExecuteProduction();
 		}
 
 		public BuckRogers.GameController Controller

@@ -779,9 +779,10 @@ namespace BuckRogers
 		{
 			ArrayList surfaceTerritories = new ArrayList();
 			// TODO I really hate having to use EdgeToNeighbor here... can I have Neighbors return a Node?
-			foreach(EdgeToNeighbor etn in t.Neighbors)
+			//foreach(EdgeToNeighbor etn in t.Neighbors)
+			foreach(Territory neighbor in t.Neighbors)
 			{
-				Territory neighbor = (Territory)etn.Neighbor;
+				//Territory neighbor = (Territory)etn.Neighbor;
 				if(neighbor.Type == TerritoryType.Ground)
 				{
 					surfaceTerritories.Add(neighbor);
@@ -863,18 +864,90 @@ namespace BuckRogers
 			return targets;
 		}
 
-		public void ExecuteProduction(Hashtable productionChoices)
+		public bool CheckProduction(ProductionInfo pi)//(Factory f, UnitType ut, Territory t)
 		{
-			foreach(Factory f in productionChoices.Keys)
+			bool validProduction = true;
+
+			if(!pi.Factory.CanProduce)
 			{
-				UnitType ut = (UnitType)productionChoices[f];
+				throw new Exception("Factory is currently not able to produce");
+			}
 
-				if(!f.UnitHalfProduced)
+			if(pi.Factory.UnitHalfProduced)
+			{
+				throw new Exception("Can't change production while a unit is half-produced");
+			}
+
+			//if(pi.DestinationTerritory != null)
+			//{
+			OrbitalSystem os = pi.DestinationTerritory.System;
+			Territory orbit = os.NearOrbit;
+
+			switch(pi.Type)
+			{
+				case UnitType.KillerSatellite:
 				{
-					f.StartProduction(ut);
-				}
+					UnitCollection otherUnits = orbit.Units.GetNonMatchingUnits(pi.Factory.Owner);
 
-				f.ExecuteProduction();
+					if(!(os.Owner == pi.Factory.Owner))
+					{
+						throw new Exception("Can't start a Killer Satellite if you don't own the planet");
+					}
+
+					
+					if(otherUnits.Count > 0)
+					{
+						throw new Exception("Can't start a Killer Satellite if enemy units are in Near Orbit");
+					}
+
+					if(pi.DestinationTerritory != orbit)
+					{
+						throw new Exception("Must place a Killer Satellite in Near Orbit");
+					}
+					
+					goto case UnitType.Battler;
+				}
+				case UnitType.Battler:
+				{
+					if(pi.DestinationTerritory.Type != TerritoryType.Space)
+					{
+						throw new Exception("Must deploy Battlers into space");
+					}
+					break;
+				}
+				case UnitType.Trooper:
+				case UnitType.Gennie:
+				case UnitType.Fighter:
+				case UnitType.Transport:
+				{
+					if(pi.DestinationTerritory != pi.Factory.CurrentTerritory)
+					{
+						throw new Exception("Must build this unit in the same territory as the factory");
+					}
+					break;
+				}
+			}
+			//}
+
+			return validProduction;
+		}
+
+		public void ExecuteProduction()
+		{
+			foreach(Player p in m_currentPlayerOrder)
+			{
+				if(!p.Disabled)
+				{
+					UnitCollection factories = p.Units.GetUnits(UnitType.Factory);
+
+					foreach(Factory f in factories)
+					{
+						if(f.CanProduce)
+						{
+							f.ExecuteProduction();
+						}
+					}
+				}
 			}
 		}
 

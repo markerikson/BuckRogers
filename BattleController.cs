@@ -40,6 +40,7 @@ namespace BuckRogers
 		public BattleController(GameController gc)
 		{
 			m_controller = gc;
+			m_cumulativeResult = new CombatResult();
 		}
 
 		private void CheckPlayerOrder()
@@ -81,6 +82,12 @@ namespace BuckRogers
 
 		public bool NextBattle()
 		{
+			foreach(Unit u in m_cumulativeResult.Casualties)
+			{
+				//m_cumulativeResult.Casualties.AddUnit(u);
+				u.Destroy();
+			}
+
 			if(m_battles != null && m_battles.Count > 0)
 			{
 				m_currentBattle = (BattleInfo)m_battles[0];
@@ -286,10 +293,39 @@ namespace BuckRogers
 		{
 			foreach(Unit u in m_turnResult.Casualties)
 			{
-				u.Destroy();
+				m_cumulativeResult.Casualties.AddUnit(u);
+				//u.Destroy();
 			}
 
 			m_currentUnused.RemoveAllUnits(m_turnResult.Casualties);
+
+			Territory t = m_currentBattle.Territory;
+			ArrayList playersToRemove = new ArrayList();
+
+			foreach(Player p in m_playerOrder)
+			{
+				UnitCollection uc = (UnitCollection)m_survivingUnits[p];
+
+				if(uc.Count == 0)
+				{
+					playersToRemove.Add(p);
+				}				
+			}
+
+			foreach(Player p in playersToRemove)
+			{
+				UnitCollection leaders = t.Units.GetUnits(UnitType.Leader, p, null);
+
+				if( (leaders.Count > 0) && (t.Units.GetNonMatchingUnits(p).Count > 0))
+				{
+					Unit leader = leaders[0];
+					m_cumulativeResult.Casualties.AddUnit(leader);
+					p.Disabled = true;
+					//leader.Destroy();
+				}
+
+				m_playerOrder.Remove(p);
+			}
 
 			if( (m_currentBattle.Type == BattleType.KillerSatellite)
 				|| (m_currentBattle.Type == BattleType.Bombing))
@@ -299,23 +335,6 @@ namespace BuckRogers
 			}
 			else
 			{
-				Territory t = m_currentBattle.Territory;
-				ArrayList playersToRemove = new ArrayList();
-				foreach(Player p in m_playerOrder)
-				{
-					UnitCollection uc = (UnitCollection)m_survivingUnits[p];
-
-					if(uc.Count == 0)
-					{
-						playersToRemove.Add(p);
-					}				
-				}
-
-				foreach(Player p in playersToRemove)
-				{
-					m_playerOrder.Remove(p);
-				}
-
 				// TODO Could just clear out everything instead...
 				m_turnResult = new CombatResult();
 
@@ -377,6 +396,7 @@ namespace BuckRogers
 				ar.Defender = defender;
 				ar.Roll = roll;
 				ar.Hit = attackHit;
+				ar.Leader = ci.AttackingLeader;
 				cr.AttackResults.Add(ar);
 
 				Console.WriteLine("To hit: " + toHit + ", roll: " + roll);
@@ -569,6 +589,12 @@ namespace BuckRogers
 		{
 			get { return this.m_turnResult; }
 			set { this.m_turnResult = value; }
+		}
+
+		public BuckRogers.CombatResult BattleResult
+		{
+			get { return this.m_cumulativeResult; }
+			set { this.m_cumulativeResult = value; }
 		}
 	}
 }
