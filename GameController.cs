@@ -486,6 +486,11 @@ namespace BuckRogers
 						}						
 					
 					}
+
+					if(t.Type == TerritoryType.Space && t.Units.GetUnits(UnitType.KillerSatellite).Count > 0)
+					{
+						alreadyInEnemyTerritory = true;
+					}
 			
 					for(int j = 0; j < move.Units.Count; j++)
 					{
@@ -896,6 +901,8 @@ namespace BuckRogers
 		public CombatResult DoBombingCombat(CombatInfo ci)
 		{
 			//CombatResult cr = new CombatResult();
+
+			
 
 			return ExecuteCombat(ci);
 

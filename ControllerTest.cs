@@ -877,6 +877,7 @@ namespace BuckRogers
 					case BattleType.Normal:
 					{
 						// Need to get the combatants in current turn order
+
 						ArrayList combatants = new ArrayList();
 						ArrayList al = bi.Territory.Units.GetPlayersWithUnits();
 						

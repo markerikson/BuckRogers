@@ -89,6 +89,8 @@ namespace CenterSpace.Free
     // mti==N+1 means mt[N] is not initialized
     private int    mti = N+1;
 
+	private uint m_seed;
+
     #endregion Instance Variables
 
     #region Constructors ----------------------------------------------------
@@ -140,6 +142,12 @@ namespace CenterSpace.Free
         return 0x7fffffff;
       }
     }
+
+	public uint Seed
+	{
+		get { return this.m_seed; }
+		//set { this.m_seed = value; }
+	} 
 
     #endregion Properties
 
@@ -321,6 +329,8 @@ namespace CenterSpace.Free
     // initializes mt[N] with a seed
     private void init_genrand( uint s)
     {
+		m_seed = s;
+
       mt[0]= s & 0xffffffffU;
       for (mti=1; mti<N; mti++) 
       {
@@ -433,7 +443,8 @@ namespace CenterSpace.Free
     { 
       uint a=genrand_int32()>>5, b=genrand_int32()>>6; 
       return(a*67108864.0+b)*(1.0/9007199254740992.0); 
-    } 
+    }
+
     // These real versions are due to Isaku Wada, 2002/01/09 added
 
     #endregion Methods ported from C
