@@ -49,7 +49,11 @@ namespace BuckRogers
 			//List.removeAll(units);
 			foreach(Unit unit in units.Units)
 			{
-				List.Remove(unit);
+				if(List.Contains(unit))
+				{
+					List.Remove(unit);
+				}
+				
 			}
 			//m_holder.notifyChanged();
 		}
@@ -150,11 +154,12 @@ namespace BuckRogers
 		{
 			UnitCollection uc = new UnitCollection();
 
+			int numAdded = 0;
 			if(List.Count < max)
 			{
 				max = List.Count;
 			}
-			for (int i = 0; i < max; i++)
+			for (int i = 0; i < List.Count && numAdded < max; i++)
 			{
 				Unit current = (Unit)List[i];
 
@@ -185,6 +190,7 @@ namespace BuckRogers
 				if (addUnit)
 				{
 					uc.AddUnit(current);
+					numAdded++;
 				}
 			}
 

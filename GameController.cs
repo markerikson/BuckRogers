@@ -1008,7 +1008,7 @@ namespace BuckRogers
 				ci.Attackers.RemoveUnit(attacker);
 				cr.UsedAttackers.AddUnit(attacker);
 
-				bool attackHit = (roll > toHit);
+				bool attackHit = (roll >= toHit);
 				AttackResult ar = new AttackResult();
 				ar.Attacker = attacker;
 				ar.Defender = defender;
