@@ -3,7 +3,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuckRogers", "BuckRogers.cs
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngineTest", "..\EngineTest\EngineTest.csproj", "{C555D7E6-48C5-45B4-A7E2-B5CAFBBC4827}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngineTest", "EngineTest\EngineTest.csproj", "{C555D7E6-48C5-45B4-A7E2-B5CAFBBC4827}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
