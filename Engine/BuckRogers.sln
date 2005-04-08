@@ -3,6 +3,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuckRogers", "BuckRogers.cs
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngineTest", "..\EngineTest\EngineTest.csproj", "{C555D7E6-48C5-45B4-A7E2-B5CAFBBC4827}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -13,6 +17,10 @@ Global
 		{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}.Debug.Build.0 = Debug|.NET
 		{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}.Release.ActiveCfg = Release|.NET
 		{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}.Release.Build.0 = Release|.NET
+		{C555D7E6-48C5-45B4-A7E2-B5CAFBBC4827}.Debug.ActiveCfg = Debug|.NET
+		{C555D7E6-48C5-45B4-A7E2-B5CAFBBC4827}.Debug.Build.0 = Debug|.NET
+		{C555D7E6-48C5-45B4-A7E2-B5CAFBBC4827}.Release.ActiveCfg = Release|.NET
+		{C555D7E6-48C5-45B4-A7E2-B5CAFBBC4827}.Release.Build.0 = Release|.NET
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
