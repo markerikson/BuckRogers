@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Data;
 using System.Windows.Forms;
 using System.Text;
@@ -48,6 +49,16 @@ namespace BuckRogers
 
 			m_canvas = new PCanvas();
 
+			PRoot r = new ScreenshotRoot();
+			PLayer l = new BlackLayer();
+			PCamera c = new PCamera();
+		
+			r.AddChild(c); 
+			r.AddChild(l); 
+			c.AddLayer(l);
+
+			Canvas.Camera = c;
+
 			m_canvas.Focus();
 
 			m_scroller = new PScrollableControl(m_canvas);
@@ -69,14 +80,20 @@ namespace BuckRogers
 			this.ResumeLayout(false);
 
 
+			
 
-			PRoot root = Canvas.Root;
-			PCamera camera = Canvas.Camera;
-			root.RemoveChild(camera.GetLayer(0));
-			camera.RemoveLayer(0);
-			BlackLayer bl = new BlackLayer();
-			root.AddChild(bl);
-			camera.AddLayer(bl);
+			/*
+			//PRoot root = Canvas.Root;
+			
+			//root.RemoveChild(camera.GetLayer(0));
+			//camera.RemoveLayer(0);
+			//BlackLayer bl = new BlackLayer();
+
+			Canvas.Root.AddChild(bl);
+			Canvas.Camera.AddLayer(bl);
+			//root.AddChild(bl);
+			//camera.AddLayer(bl);
+			*/
 
 			m_orbits = new PNode[7][];
 			m_planets = new PClip[5];
@@ -1341,6 +1358,19 @@ namespace BuckRogers
 			MessageBox.Show(sb.ToString());
 		}
 
+		public void DrawScreenshot()
+		{
+			float oldScale = m_canvas.Camera.ViewScale;
+			m_canvas.Camera.ViewScale = 1.0f;
+
+			ScreenshotRoot sr = (ScreenshotRoot)m_canvas.Camera.Root;
+
+			RectangleF shotSize = new RectangleF(0, 0, m_scroller.ViewSize.Width, m_scroller.ViewSize.Height);
+			Bitmap b = sr.Screenshot(shotSize);
+
+			b.Save("c:\\temp\\brmap.png", ImageFormat.Png);
+		}
+
 		public UMD.HCIL.Piccolo.PCanvas Canvas
 		{
 			get { return this.m_canvas; }
@@ -1375,6 +1405,19 @@ namespace BuckRogers
 			RectangleF clip = paintContext.LocalClip;
 
 			g.FillRectangle(Brushes.Black, clip);
+		}
+	}
+
+	class ScreenshotRoot : PRoot
+	{
+		public Bitmap Screenshot(RectangleF displayRect)
+		{
+			Bitmap b = new Bitmap((int)displayRect.Width, (int)displayRect.Height);
+			Graphics g = Graphics.FromImage(b);
+			
+			ScaleAndDraw(g, this.UnionOfChildrenBounds, displayRect);
+
+			return b;
 		}
 	}
 }
