@@ -136,32 +136,34 @@ namespace BuckRogers
 			
 		}
 
+		public GameController()
+		{
+			Init();
+		}
+
 		public GameController(string[] playerNames)
 		{
+			Init();
+			SetPlayers(playerNames);
+		}
+
+		private void Init()
+		{
 			m_map = new GameMap();
+
+			m_checkedActions = new ArrayList();
+			m_undoneActions = new ArrayList();
+			m_turnNumber = 0;	
+		}
+
+		public void SetPlayers(string[] playerNames)
+		{
 			m_players = new Player[playerNames.Length];
 
 			for(int i = 0; i < playerNames.Length; i++)
 			{
 				m_players[i] = new Player(playerNames[i]);
 			}
-
-			//m_twister = new MersenneTwister();
-			m_checkedActions = new ArrayList();
-			m_undoneActions = new ArrayList();
-
-			/*
-			m_combatTable = new int[,]	{	{6, 8, 7, NOTPOSSIBLE, 6, NOTPOSSIBLE, 3}, // Trooper
-											{5, 6, 6, NOTPOSSIBLE, 5, NOTPOSSIBLE, 2}, // Gennie
-											{7, 7, 6, 8, 3, 7, 3}, // Fighter
-											{7, 7, 4, 6, 4, 6, NOTPOSSIBLE}, // Battler
-											{9, 10, 8, 10, 6, 10, 9}, // Transport
-											{NOTPOSSIBLE, NOTPOSSIBLE, 6, 7, 5, NOTPOSSIBLE, NOTPOSSIBLE}, // Killer Satellite
-											{8, 9, 9, NOTPOSSIBLE, 7, NOTPOSSIBLE, NOTPOSSIBLE}, // Control marker
-										};
-			*/
-
-			m_turnNumber = 0;			
 		}
 
 		public Player GetPlayer(string name)

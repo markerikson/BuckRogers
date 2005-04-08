@@ -99,6 +99,11 @@
                     AssemblyName = "UMD.HCIL.Piccolo"
                     HintPath = "..\..\UMD.HCIL.Piccolo.dll"
                 />
+                <Reference
+                    Name = "BuckRogers"
+                    Project = "{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}"
+                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
+                />
             </References>
         </Build>
         <Files>

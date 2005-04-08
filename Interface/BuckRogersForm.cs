@@ -30,6 +30,8 @@ namespace BuckRogers
 		private System.Windows.Forms.Button m_btnZoomOut;
 		private System.Windows.Forms.Button m_btnDefaultZoom;
 
+		private GameController m_controller;
+
 		private MapControl m_map;
 		private MovePanel m_movePanel;
 		private System.Windows.Forms.Button m_btnCenterCamera;
@@ -52,7 +54,9 @@ namespace BuckRogers
 			//
 			InitializeComponent();
 
-			//m_movePanel = new MovePanel();
+			m_controller = new GameController();
+
+			
 
 			m_zoomFactors = new float[]{0.1f, 0.175f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 5.0f};
 																		   

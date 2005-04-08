@@ -19,7 +19,7 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.Button m_btnRedoMove;
 
 		private MoveListBox m_listbox;
-		//private GameController m_controller;
+		private GameController m_controller;
 
 		/// <summary> 
 		/// Required designer variable.
