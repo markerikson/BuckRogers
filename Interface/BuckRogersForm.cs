@@ -37,7 +37,6 @@ namespace BuckRogers
 		private System.Windows.Forms.Button m_btnCenterCamera;
 		private System.Windows.Forms.ComboBox m_cbCenterLocations;
 		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.TabControl tabControl1;
 		private System.Windows.Forms.TabPage m_pgAction;
 		private System.Windows.Forms.TabPage m_pgTerritory;
@@ -54,6 +53,9 @@ namespace BuckRogers
 			//
 			InitializeComponent();
 
+
+			movePanel1.Height = m_pgAction.ClientSize.Height;
+
 			m_controller = new GameController();
 
 			
@@ -65,6 +67,8 @@ namespace BuckRogers
 			m_map = new MapControl();
 
 			m_map.Size = new Size(this.ClientSize.Width - tabControl1.Right - 4, this.ClientSize.Height - 30);
+
+			m_map.TerritoryClicked +=new TerritoryClickedHandler(OnTerritoryClicked);
 
 			//this.SuspendLayout();
 
@@ -129,7 +133,6 @@ namespace BuckRogers
 			this.m_btnCenterCamera = new System.Windows.Forms.Button();
 			this.m_cbCenterLocations = new System.Windows.Forms.ComboBox();
 			this.label1 = new System.Windows.Forms.Label();
-			this.button1 = new System.Windows.Forms.Button();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.m_pgAction = new System.Windows.Forms.TabPage();
 			this.movePanel1 = new BuckRogers.Interface.MovePanel();
@@ -204,14 +207,6 @@ namespace BuckRogers
 			this.label1.TabIndex = 5;
 			this.label1.Text = "Center camera on:";
 			// 
-			// button1
-			// 
-			this.button1.Location = new System.Drawing.Point(276, 672);
-			this.button1.Name = "button1";
-			this.button1.TabIndex = 6;
-			this.button1.Text = "button1";
-			this.button1.Click += new System.EventHandler(this.button1_Click);
-			// 
 			// tabControl1
 			// 
 			this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -227,6 +222,7 @@ namespace BuckRogers
 			// m_pgAction
 			// 
 			this.m_pgAction.Controls.Add(this.movePanel1);
+			this.m_pgAction.DockPadding.Top = 10;
 			this.m_pgAction.Location = new System.Drawing.Point(4, 22);
 			this.m_pgAction.Name = "m_pgAction";
 			this.m_pgAction.Size = new System.Drawing.Size(232, 510);
@@ -235,9 +231,13 @@ namespace BuckRogers
 			// 
 			// movePanel1
 			// 
-			this.movePanel1.Location = new System.Drawing.Point(0, 0);
+			this.movePanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+			this.movePanel1.DockPadding.Bottom = 4;
+			this.movePanel1.DockPadding.Right = 8;
+			this.movePanel1.DockPadding.Top = 92;
+			this.movePanel1.Location = new System.Drawing.Point(0, 5);
 			this.movePanel1.Name = "movePanel1";
-			this.movePanel1.Size = new System.Drawing.Size(240, 400);
+			this.movePanel1.Size = new System.Drawing.Size(236, 400);
 			this.movePanel1.TabIndex = 0;
 			// 
 			// m_pgTerritory
@@ -271,7 +271,6 @@ namespace BuckRogers
 			this.ClientSize = new System.Drawing.Size(1016, 696);
 			this.Controls.Add(this.pictureBox1);
 			this.Controls.Add(this.tabControl1);
-			this.Controls.Add(this.button1);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.m_cbCenterLocations);
 			this.Controls.Add(this.m_btnCenterCamera);
@@ -293,6 +292,13 @@ namespace BuckRogers
 		public static void Main(string[] args)
 		{
 			Application.Run(new BuckRogersForm());
+		}
+
+		public void OnTerritoryClicked(object sender, TerritoryClickEventArgs tcea)
+		{
+			string name = tcea.Name;
+
+			MessageBox.Show("Territory clicked: " + name);
 		}
 
 		private void m_btnZoomIn_Click(object sender, System.EventArgs e)

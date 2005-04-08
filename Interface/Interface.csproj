@@ -148,6 +148,11 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "TerritoryClickEventArgs.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "TerritoryPanel.cs"
                     SubType = "UserControl"
                     BuildAction = "Compile"

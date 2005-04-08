@@ -13,10 +13,15 @@ using UMD.HCIL.Piccolo.Util;
 using UMD.HCIL.PiccoloX;
 using UMD.HCIL.PiccoloX.Nodes;
 using UMD.HCIL.PiccoloX.Components;
+using UMD.HCIL.Piccolo.Event;
 
+using BuckRogers.Interface;
 
 namespace BuckRogers
 {
+
+	public delegate void TerritoryClickedHandler(object sender, TerritoryClickEventArgs e);
+
 	/// <summary>
 	/// Summary description for MapControl.
 	/// </summary>
@@ -26,6 +31,8 @@ namespace BuckRogers
 		/// Required designer variable.
 		/// </summary>
 		private System.ComponentModel.Container components = null;
+
+		public event TerritoryClickedHandler TerritoryClicked;
 
 		private PNode[] m_meo;
 		private PNode[] m_vo;
@@ -58,6 +65,9 @@ namespace BuckRogers
 			c.AddLayer(l);
 
 			Canvas.Camera = c;
+
+			Canvas.PanEventHandler = new PPanEventHandler();
+			Canvas.ZoomEventHandler = new PZoomEventHandler();
 
 			m_canvas.Focus();
 
@@ -117,13 +127,13 @@ namespace BuckRogers
 
 			int orbitRadiusUnit = 28;
 
-			DrawNodeCircle(m_ao, "AO: ", 32, /*600*/ 36 * orbitRadiusUnit, Color.Gray, false, false, false);
-			DrawNodeCircle(m_tmo, "TMO: ", 32, /*525*/  32 * orbitRadiusUnit, Color.White, false, true, true);
-			DrawNodeCircle(m_mao,"MaO: ", 16, /*450*/ 28 * orbitRadiusUnit, Color.Red, false, true, false);
-			DrawNodeCircle(m_teo, "TEO: ", 16, /*375*/ 24 * orbitRadiusUnit, Color.White, false, true, true);
-			DrawNodeCircle(m_eo, "EO", 8, /*300*/ 19 * orbitRadiusUnit, Color.Blue, false, true, false);
-			DrawNodeCircle(m_vo, "VO: ", 4, /*200*/ 12 * orbitRadiusUnit, Color.Green, true, true, false);
-			DrawNodeCircle(m_meo, "MeO: ", 2, /*100*/ 5 * orbitRadiusUnit, Color.Yellow, false, true, false);
+			DrawSolarOrbit(m_ao, "AO: ", "Asteroid", 32, /*600*/ 36 * orbitRadiusUnit, Color.Gray, false, false, false);
+			DrawSolarOrbit(m_tmo, "TMO: ", "Trans-Mars", 32, /*525*/  32 * orbitRadiusUnit, Color.White, false, true, true);
+			DrawSolarOrbit(m_mao,"MaO: ", "Mars", 16, /*450*/ 28 * orbitRadiusUnit, Color.Red, false, true, false);
+			DrawSolarOrbit(m_teo, "TEO: ", "Trans-Earth", 16, /*375*/ 24 * orbitRadiusUnit, Color.White, false, true, true);
+			DrawSolarOrbit(m_eo, "EO",  "Earth", 8,/*300*/ 19 * orbitRadiusUnit, Color.Blue, false, true, false);
+			DrawSolarOrbit(m_vo, "VO: ", "Venus", 4, /*200*/ 12 * orbitRadiusUnit, Color.Green, true, true, false);
+			DrawSolarOrbit(m_meo, "MeO: ", "Mercury", 2, /*100*/ 5 * orbitRadiusUnit, Color.Yellow, false, true, false);
 			
 			
 			PPath center = PPath.CreateEllipse(0, 0, 10f, 10f);
@@ -685,18 +695,18 @@ namespace BuckRogers
 			AddPlanet(55, moonPoints, moonNames, moonCenters, Brushes.LightGray, scaleFactor, 1100, 1300);
 			AddPlanet(75, marsPoints, marsNames, marsCenters, Brushes.OrangeRed, scaleFactor, 1800, -550);
 
-			DrawOrbit(mercuryNearOrbitPoints, Color.Yellow, scaleFactor, -2700, -1100, true);
-			DrawOrbit(mercuryFarOrbitPoints, Color.Yellow, scaleFactor, -2700, -1100, true);
+			DrawPlanetaryOrbit(mercuryNearOrbitPoints, Color.Yellow, scaleFactor, -2700, -1100, true);
+			DrawPlanetaryOrbit(mercuryFarOrbitPoints, Color.Yellow, scaleFactor, -2700, -1100, true);
 
-			DrawOrbit(venusNearOrbitPoints, Color.Green, scaleFactor, -2700, 700, true);
-			DrawOrbit(venusFarOrbitPoints, Color.Green, scaleFactor, -2700, 700, true);
+			DrawPlanetaryOrbit(venusNearOrbitPoints, Color.Green, scaleFactor, -2700, 700, true);
+			DrawPlanetaryOrbit(venusFarOrbitPoints, Color.Green, scaleFactor, -2700, 700, true);
 
-			DrawOrbit(moonNearOrbitPoints, Color.Blue, scaleFactor, 1000, 50, true);
-			DrawOrbit(earthNearOrbitPoints, Color.Blue, scaleFactor, 1000, 50, true);
-			DrawOrbit(earthFarOrbitPoints, Color.Blue, scaleFactor, 1000, 50, true);
+			DrawPlanetaryOrbit(moonNearOrbitPoints, Color.Blue, scaleFactor, 1000, 50, true);
+			DrawPlanetaryOrbit(earthNearOrbitPoints, Color.Blue, scaleFactor, 1000, 50, true);
+			DrawPlanetaryOrbit(earthFarOrbitPoints, Color.Blue, scaleFactor, 1000, 50, true);
 
-			DrawOrbit(marsNearOrbitPoints, Color.Red, scaleFactor, 1000, -1300, true);
-			DrawOrbit(marsFarOrbitPoints, Color.Red, scaleFactor, 1000, -1300, true);
+			DrawPlanetaryOrbit(marsNearOrbitPoints, Color.Red, scaleFactor, 1000, -1300, true);
+			DrawPlanetaryOrbit(marsFarOrbitPoints, Color.Red, scaleFactor, 1000, -1300, true);
 
 			DrawAsteroid(75, 75, scaleFactor, "Ceres", Color.Gray, 30, 40, -200, 1150);
 			DrawAsteroid(65, 55, scaleFactor, "Pallas", Color.Gray, -20, 20, 450, 1000);
@@ -734,6 +744,8 @@ namespace BuckRogers
 			PComposite elevator = new PComposite();
 			elevator.AddChild(upperElevator);
 			elevator.AddChild(lowerElevator);
+
+			elevator.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
 
 			DrawLabelAndOwner(upperElevator, "Space Elevator", 2200, -1000);
 
@@ -786,6 +798,8 @@ namespace BuckRogers
 			if(addChild)
 			{
 				DrawLabelAndOwner(obj, name, shiftX, shiftY);
+
+				obj.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
 				Canvas.Layer.AddChild(obj);
 			}
 			
@@ -806,8 +820,8 @@ namespace BuckRogers
 			unshiftedCenter.X = centerX - (center.Width / 2);
 			unshiftedCenter.Y = centerY;
 
-			center.X = centerX + shiftX;
-			center.Y = centerY + shiftY;
+			center.X = unshiftedCenter.X + shiftX;
+			center.Y = unshiftedCenter.Y + shiftY;
 
 			PText text = new PText(name);//names[i]);
 			text.X = centerX - (text.Width / 2) + shiftX;
@@ -976,7 +990,7 @@ namespace BuckRogers
 				text.TextBrush = Brushes.Black;
 				territory.AddChild(text);
 				
-				
+				territory.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
 
 
 				territory.X += shiftX;
@@ -987,13 +1001,13 @@ namespace BuckRogers
 		}
 
 
-		private void DrawNodeCircle(PNode[] nodes, string prefix, int numNodes, int radius, 
+		private void DrawSolarOrbit(PNode[] nodes, string prefix, string orbitName, int numNodes, int radius, 
 			Color color, bool drawConnector, bool isTransOrbit)
 		{
-			DrawNodeCircle(nodes, prefix, numNodes, radius, color, false, drawConnector, isTransOrbit);
+			DrawSolarOrbit(nodes, prefix, orbitName, numNodes, radius, color, false, drawConnector, isTransOrbit);
 		}
 
-		private void DrawNodeCircle(PNode[] nodes, string prefix, int numNodes, int radius, 
+		private void DrawSolarOrbit(PNode[] nodes, string prefix, string orbitName, int numNodes, int radius, 
 			Color color, bool rotate45, bool drawConnector, bool isTransOrbit)
 		{
 			PPath circle;
@@ -1032,6 +1046,8 @@ namespace BuckRogers
 				circle = PPath.CreateEllipse(0f, 0f, 10f, 10f);
 				circle.Brush = new SolidBrush(color);//Brushes.Black;
 
+				circle.Tag = orbitName + " Orbit: " + i.ToString();
+
 				nodes[i] = circle;
 
 				composite.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
@@ -1056,7 +1072,7 @@ namespace BuckRogers
 				compositeBounds.Y = centerY + y;
 				composite.Bounds = compositeBounds;
 
-				composite.AddChild(text);
+				circle.AddChild(text);
 				composite.AddChild(circle);
 				
 				
@@ -1080,7 +1096,7 @@ namespace BuckRogers
 		}
 
 
-		private void DrawOrbit(PointF[][] polygons, Color color, float scaleFactor, int shiftX, int shiftY, bool closeOrbit)
+		private void DrawPlanetaryOrbit(PointF[][] polygons, Color color, float scaleFactor, int shiftX, int shiftY, bool closeOrbit)
 		{
 			PPath orbit = new PPath();
 
@@ -1262,6 +1278,8 @@ namespace BuckRogers
 			}
 			//PText picked = (PText)e.PickedNode;
 			PNode picked = e.PickedNode;
+
+			PPath path = null;
 			
 			if(picked is PComposite)
 			{
@@ -1278,7 +1296,7 @@ namespace BuckRogers
 					}
 				}
 				*/
-				PPath path = null;
+				
 				foreach(PNode node in comp)
 				{
 					if(node is PPath)
@@ -1287,10 +1305,57 @@ namespace BuckRogers
 						break;
 					}
 				}
+			}
+			else if(picked is PPath)
+			{
+				path = (PPath)picked;
+			}
 
+			if(path == null)
+			{
+				return;
+			}
+
+			string territoryName = null;
+
+			if(path.Tag != null)
+			{
+				territoryName = (string)path.Tag;
+			}
+			else
+			{
+				PText text = null;
+
+				foreach(PNode node in path)
+				{
+					if(node is PText)
+					{
+						text = (PText)node;
+						break;
+					}
+				}
+
+				if(text == null)
+				{
+					return;
+				}
+
+				//MessageBox.Show(text.Text);
+
+				territoryName = text.Text;
+			}
+			
+			if(TerritoryClicked != null)
+			{
+				TerritoryClickEventArgs tcea = new TerritoryClickEventArgs(territoryName);
+
+				TerritoryClicked(this, tcea);
+			}
+				/*
 				float scale = Canvas.Camera.ViewScale;
 				MessageBox.Show("Scale: " + scale + ", x: " + path.Bounds.X + ", y: " + path.Bounds.Y);
-			}
+				*/
+			
 		}
 
 		private void center_MouseUp(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
