@@ -738,18 +738,20 @@ namespace BuckRogers
 				m_planets[i].MoveToFront();
 			}
 
-			PPath upperElevator = DrawObject(90, 65, scaleFactor, "", Color.DarkRed, 2200, -1000, false);
-			PPath lowerElevator = DrawObject(40, 75, scaleFactor, "", Color.DarkRed, 2450, -800, false);
+			PPath upperElevator = DrawObject(90, 65, scaleFactor, "Space Elevator", Color.DarkRed, 2200, -1000, false);
+			PPath lowerElevator = DrawObject(40, 75, scaleFactor, "Space Elevator", Color.DarkRed, 2450, -800, false);
 
 			PComposite elevator = new PComposite();
-			elevator.AddChild(upperElevator);
-			elevator.AddChild(lowerElevator);
+			
 
 			elevator.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
 
-			DrawLabelAndOwner(upperElevator, "Space Elevator", 2200, -1000);
+			PComposite upperElevatorComposite = DrawLabelAndOwner(upperElevator, "Space Elevator", 2200, -1000);
 
 			Canvas.Layer.AddChild(elevator);
+
+			elevator.AddChild(upperElevatorComposite);
+			elevator.AddChild(lowerElevator);
 			
 		}
 
@@ -794,19 +796,23 @@ namespace BuckRogers
 			obj.Y += shiftY;
 
 			
+			obj.Tag = name;
 
 			if(addChild)
 			{
-				DrawLabelAndOwner(obj, name, shiftX, shiftY);
+				PComposite composite = DrawLabelAndOwner(obj, name, shiftX, shiftY);
 
-				obj.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
-				Canvas.Layer.AddChild(obj);
+				//obj.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
+				//Canvas.Layer.AddChild(obj);
+
+				composite.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
+				Canvas.Layer.AddChild(composite);
 			}
 			
 			return obj;
 		}
 
-		private void DrawLabelAndOwner(PPath parent, string name, int shiftX, int shiftY)
+		private PComposite DrawLabelAndOwner(PPath parent, string name, int shiftX, int shiftY)
 		{
 			PPath center = PPath.CreateEllipse(0, 0, 20, 20);
 			center.Brush = Brushes.White;
@@ -828,8 +834,19 @@ namespace BuckRogers
 			text.Y = centerY - (text.Height) + shiftY;
 			text.TextBrush = Brushes.Black;
 
-			parent.AddChild(center);
-			parent.AddChild(text);
+
+			//parent.AddChild(center);
+			//parent.AddChild(text);
+
+			PComposite composite = new PComposite();
+
+			
+
+			composite.AddChild(parent);
+			composite.AddChild(text);
+			composite.AddChild(center);
+
+			return composite;
 		}
 
 		private void AddPlanet(float radius, PointF[][] polygons, string[] names, PointF[] territoryCenters, 

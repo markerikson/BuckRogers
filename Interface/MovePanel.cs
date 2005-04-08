@@ -93,7 +93,7 @@ namespace BuckRogers.Interface
 			// 
 			// m_btnAddMove
 			// 
-			this.m_btnAddMove.Location = new System.Drawing.Point(4, 4);
+			this.m_btnAddMove.Location = new System.Drawing.Point(0, 4);
 			this.m_btnAddMove.Name = "m_btnAddMove";
 			this.m_btnAddMove.Size = new System.Drawing.Size(72, 23);
 			this.m_btnAddMove.TabIndex = 0;
@@ -101,7 +101,7 @@ namespace BuckRogers.Interface
 			// 
 			// m_btnUndoMove
 			// 
-			this.m_btnUndoMove.Location = new System.Drawing.Point(84, 4);
+			this.m_btnUndoMove.Location = new System.Drawing.Point(80, 4);
 			this.m_btnUndoMove.Name = "m_btnUndoMove";
 			this.m_btnUndoMove.Size = new System.Drawing.Size(72, 23);
 			this.m_btnUndoMove.TabIndex = 2;
@@ -109,7 +109,7 @@ namespace BuckRogers.Interface
 			// 
 			// m_btnRedoMove
 			// 
-			this.m_btnRedoMove.Location = new System.Drawing.Point(164, 4);
+			this.m_btnRedoMove.Location = new System.Drawing.Point(160, 4);
 			this.m_btnRedoMove.Name = "m_btnRedoMove";
 			this.m_btnRedoMove.Size = new System.Drawing.Size(72, 23);
 			this.m_btnRedoMove.TabIndex = 3;
@@ -117,7 +117,7 @@ namespace BuckRogers.Interface
 			// 
 			// m_btnDone
 			// 
-			this.m_btnDone.Location = new System.Drawing.Point(84, 32);
+			this.m_btnDone.Location = new System.Drawing.Point(80, 32);
 			this.m_btnDone.Name = "m_btnDone";
 			this.m_btnDone.TabIndex = 4;
 			this.m_btnDone.Text = "Done";
