@@ -142,5 +142,31 @@ namespace BuckRogers.Interface
 
 		}
 		#endregion
+
+		public void DisplayUnits(Territory t)
+		{
+			m_lvUnits.Items.Clear();
+
+			m_labTerritoryName.Text = t.Name;
+			m_labTerritoryOwner.Text = t.Owner.Name;
+
+			foreach(Player p in t.Units.GetPlayersWithUnits())
+			{
+				UnitCollection uc = t.Units.GetUnits(p);
+
+				foreach(DictionaryEntry de in uc.GetUnitTypeCount())
+				{
+					ListViewItem lvi = new ListViewItem();
+					UnitType ut = (UnitType)de.Key;
+					int numUnits = (int)de.Value;
+
+					lvi.Text = p.Name;
+					lvi.SubItems.Add(ut.ToString());
+					lvi.SubItems.Add(numUnits.ToString());
+
+					m_lvUnits.Items.Add(lvi);
+				}
+			}
+		}
 	}
 }

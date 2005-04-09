@@ -48,10 +48,6 @@ namespace BuckRogers.Interface
 			this.DockPadding.Bottom = 4;
 
 			m_listbox.Dock = DockStyle.Fill;
-			
-			//m_listbox.Anchor = AnchorStyles.Bottom;
-			//m_listbox.Dock = DockStyle.Bottom;
-			// TODO: Add any initialization after the InitializeComponent call
 
 			m_listbox.Items.Add("Title 1", "Testing some text\nwith several lines in it\nto see what happens");
 			m_listbox.Items.Add("Move #6", "From: American Regency\nTo: Urban Reservations\nUnits: 1 Gennie, 2 Troopers, 2 Fighters, 1 Killer Satellite, 15 Battlers, 3 Transports, and various other stuff\nYou know, that's a lot of stuff to move");

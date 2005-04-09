@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Drawing;
 
 namespace BuckRogers
 {
@@ -12,16 +13,13 @@ namespace BuckRogers
 
 	public class Player
 	{
-		
-
-		
-
 		public static Player NONE = new Player("None");
 	
 		private UnitCollection m_units;
 		private string m_name;
 		private Hashtable m_territories;
 		private bool m_disabled;
+		private Color m_color;
 
 		public Player(string name)
 		{
@@ -53,6 +51,12 @@ namespace BuckRogers
 		{
 			get { return this.m_units; }
 			set { this.m_units = value; }
+		}
+
+		public Color Color
+		{
+			get { return this.m_color; }
+			set { this.m_color = value; }
 		}
 	}
 }

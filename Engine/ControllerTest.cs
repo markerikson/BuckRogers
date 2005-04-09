@@ -976,5 +976,17 @@ namespace BuckRogers
 			Assert.AreEqual(startingTroopers + 4, currentTroopers);
 			Assert.AreEqual(startingFighters + 2, currentFighters);
 		}
+
+		public BuckRogers.BattleController BattleController
+		{
+			get { return this.m_battleController; }
+			set { this.m_battleController = value; }
+		}
+
+		public BuckRogers.GameController GameController
+		{
+			get { return this.m_controller; }
+			set { this.m_controller = value; }
+		}
 	}
 }

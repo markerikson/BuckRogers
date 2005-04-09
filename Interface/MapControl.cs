@@ -46,6 +46,8 @@ namespace BuckRogers
 		private int m_idxPlanets;
 		private PClip[] m_planets;
 
+		private float[] m_zoomFactors;
+
 		private PCanvas m_canvas;
 		private PScrollableControl m_scroller;
 
@@ -53,6 +55,8 @@ namespace BuckRogers
 		{
 			// This call is required by the Windows.Forms Form Designer.
 			InitializeComponent();
+
+			m_zoomFactors = new float[]{0.1f, 0.175f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 5.0f};
 
 			m_canvas = new PCanvas();
 
@@ -261,7 +265,7 @@ namespace BuckRogers
 								},
 		};
 
-			string[] venusNames = {"Aerostates", "Mt. Maxwell", "Elysium,", 
+			string[] venusNames = {"Aerostates", "Mt. Maxwell", "Elysium", 
 									  "Wreckers", "Aphrodite",
 									  "Beta Regio", "Lowlanders"};
 
@@ -913,8 +917,9 @@ namespace BuckRogers
 				float centerX = 0.0f;
 				float centerY = 0.0f;
 
-				float totalX = 0.0f;
-				float totalY = 0.0f;
+
+				//float totalX = 0.0f;
+				//float totalY = 0.0f;
 
 				/*
 				ConvConv cc = new ConvConv();
@@ -1438,6 +1443,126 @@ namespace BuckRogers
 			}
 
 			MessageBox.Show(sb.ToString());
+		}
+
+		public void ZoomIn()
+		{
+			float currentZoom = Canvas.Camera.ViewScale;
+			Point originalPosition = ScrollControl.ViewPosition;
+			Size originalSize = ScrollControl.ViewSize;
+
+			float previousZoom = 0.0f;
+			float newZoom = 0.0f;
+			bool foundZoom = false;
+
+			foreach(float zoom in m_zoomFactors)
+			{
+				if(zoom > currentZoom)
+				{
+					newZoom = zoom;
+					foundZoom = true;
+					break;
+				}
+				previousZoom = zoom;
+			}
+
+			if(foundZoom)
+			{
+				Canvas.Camera.ViewScale = newZoom;
+			}
+			else
+			{
+				//Canvas.Camera.ViewScale += 1.0f;
+			}
+		
+			CenterZoomedMap(originalPosition, originalSize);
+		}
+
+		public void ZoomOut()
+		{
+			Point originalPosition = ScrollControl.ViewPosition;
+			Size originalSize = ScrollControl.ViewSize;
+			float currentZoom = Canvas.Camera.ViewScale;
+
+			float previousZoom = 0.0f;
+			float newZoom = 0.0f;
+			bool foundZoom = false;
+
+			
+			for(int i = m_zoomFactors.Length - 1; i >= 0; i--)
+			{
+				float zoom = m_zoomFactors[i];
+
+				if(currentZoom > zoom)
+				{			
+					newZoom = zoom;
+					foundZoom = true;
+					break;
+				}
+			}
+			
+			/*
+						foreach(float zoom in m_zoomFactors)
+						{
+							if(currentZoom > zoom)
+							{
+								newZoom = zoom;
+								foundZoom = true;
+								break;
+							}
+							previousZoom = zoom;
+						}
+			*/
+			if(!foundZoom)
+			{
+				//newZoom -= 1.0f;
+				newZoom = currentZoom;
+			}
+			/*
+			else
+			{
+				Canvas.Camera.ViewScale -= 1.0f;
+			}
+			*/
+
+			Canvas.Camera.ViewScale = newZoom;
+			
+			CenterZoomedMap(originalPosition, originalSize);
+		}
+
+		public void DefaultZoom()
+		{
+			Canvas.Camera.ViewScale = 0.25f;
+		}
+
+		private void CenterZoomedMap(Point originalPosition, Size originalSize)
+		{
+			Size mapSize = ClientSize;
+			
+			float oldCenterX = originalPosition.X  + (float)(mapSize.Width / 2);
+			float oldXPercent = (float)(oldCenterX / (float)originalSize.Width);
+			//(originalPosition.X  + mapSize.Width / 2)/ (float)originalSize.Width;
+			float oldCenterY = originalPosition.Y + (float)(mapSize.Height / 2);
+			float oldYPercent = (float)(oldCenterY / (float)originalSize.Height);
+			//float oldYPercent = (float)(originalPosition.Y + mapSize.Height / 2)/ (float)originalSize.Height;
+
+			Size newSize = ScrollControl.ViewSize;
+
+			int newCenterX = (int)(oldXPercent * newSize.Width);
+			int newXPos = newCenterX - (mapSize.Width / 2);
+			int newCenterY = (int)(oldYPercent * newSize.Height);
+			int newYPos = newCenterY - (mapSize.Height / 2);
+			//int newXPos = (int)(oldXPercent * newSize.Width) - (mapSize.Width / 2);
+			//int newYPos = (int)(oldYPercent * newSize.Height) - (mapSize.Height / 2);
+
+			
+			//newXPos += (int)((mapSize.Width / 2) * oldXPercent);
+			//newYPos += (int)((mapSize.Height / 2) * oldYPercent);
+
+			ScrollControl.ViewPosition = new Point(newXPos, newYPos);
+			//ScrollControl.UpdateScrollbars();
+
+			Point newPosition = ScrollControl.ViewPosition;
 		}
 
 		public void DrawScreenshot()

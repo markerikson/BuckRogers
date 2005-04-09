@@ -43,7 +43,6 @@ namespace BuckRogers
 		private TerritoryPanel territoryPanel1;
 		private BuckRogers.Interface.MovePanel movePanel1;
 		private System.Windows.Forms.PictureBox pictureBox1;
-		private float[] m_zoomFactors;
 
 
 		public BuckRogersForm()
@@ -56,11 +55,14 @@ namespace BuckRogers
 
 			movePanel1.Height = m_pgAction.ClientSize.Height;
 
-			m_controller = new GameController();
+			ControllerTest ct = new ControllerTest();
+
+			ct.Init();
+			m_controller = ct.GameController;
 
 			
 
-			m_zoomFactors = new float[]{0.1f, 0.175f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 5.0f};
+			
 																		   
 
 			//this.Size = new Size(1024, 730);
@@ -298,132 +300,31 @@ namespace BuckRogers
 		{
 			string name = tcea.Name;
 
-			MessageBox.Show("Territory clicked: " + name);
+			Territory t = m_controller.Map[name];
+
+			if(t != null)
+			{
+				territoryPanel1.DisplayUnits(t);
+				//MessageBox.Show("Territory: " + name + ", owner: " + t.Owner.Name);
+			}
+
+			//MessageBox.Show("Territory clicked: " + name);
 		}
 
 		private void m_btnZoomIn_Click(object sender, System.EventArgs e)
 		{
-			float currentZoom = m_map.Canvas.Camera.ViewScale;
-			Point originalPosition = m_map.ScrollControl.ViewPosition;
-			Size originalSize = m_map.ScrollControl.ViewSize;
-
-			float previousZoom = 0.0f;
-			float newZoom = 0.0f;
-			bool foundZoom = false;
-
-			foreach(float zoom in m_zoomFactors)
-			{
-				if(zoom > currentZoom)
-				{
-					newZoom = zoom;
-					foundZoom = true;
-					break;
-				}
-				previousZoom = zoom;
-			}
-
-			if(foundZoom)
-			{
-				m_map.Canvas.Camera.ViewScale = newZoom;
-			}
-			else
-			{
-				//m_map.Canvas.Camera.ViewScale += 1.0f;
-			}
-		
-			CenterZoomedMap(originalPosition, originalSize);
+			m_map.ZoomIn();
 		}
 
 		private void m_btnZoomOut_Click(object sender, System.EventArgs e)
 		{
-			Point originalPosition = m_map.ScrollControl.ViewPosition;
-			Size originalSize = m_map.ScrollControl.ViewSize;
-			float currentZoom = m_map.Canvas.Camera.ViewScale;
-
-			float previousZoom = 0.0f;
-			float newZoom = 0.0f;
-			bool foundZoom = false;
-
-			
-			for(int i = m_zoomFactors.Length - 1; i >= 0; i--)
-			{
-				float zoom = m_zoomFactors[i];
-
-				if(currentZoom > zoom)
-				{			
-					newZoom = zoom;
-					foundZoom = true;
-					break;
-				}
-			}
-			
-/*
-			foreach(float zoom in m_zoomFactors)
-			{
-				if(currentZoom > zoom)
-				{
-					newZoom = zoom;
-					foundZoom = true;
-					break;
-				}
-				previousZoom = zoom;
-			}
-*/
-			if(!foundZoom)
-			{
-				//newZoom -= 1.0f;
-				newZoom = currentZoom;
-			}
-			/*
-			else
-			{
-				m_map.Canvas.Camera.ViewScale -= 1.0f;
-			}
-			*/
-
-			m_map.Canvas.Camera.ViewScale = newZoom;
-			
-			CenterZoomedMap(originalPosition, originalSize);
-
-			//StringBuilder sb = new StringBuilder();
-			//sb.AppendFormat("{0}:{1} = {2}:{3}", originalPosition.X, originalSize.Width, newXPos, newSize.Width);
-
-			//MessageBox.Show(sb.ToString());
+			m_map.ZoomOut();
 		}
 
-		private void CenterZoomedMap(Point originalPosition, Size originalSize)
-		{
-			Size mapSize = m_map.ClientSize;
-			
-			float oldCenterX = originalPosition.X  + (float)(mapSize.Width / 2);
-			float oldXPercent = (float)(oldCenterX / (float)originalSize.Width);
-			//(originalPosition.X  + mapSize.Width / 2)/ (float)originalSize.Width;
-			float oldCenterY = originalPosition.Y + (float)(mapSize.Height / 2);
-			float oldYPercent = (float)(oldCenterY / (float)originalSize.Height);
-			//float oldYPercent = (float)(originalPosition.Y + mapSize.Height / 2)/ (float)originalSize.Height;
-
-			Size newSize = m_map.ScrollControl.ViewSize;
-
-			int newCenterX = (int)(oldXPercent * newSize.Width);
-			int newXPos = newCenterX - (mapSize.Width / 2);
-			int newCenterY = (int)(oldYPercent * newSize.Height);
-			int newYPos = newCenterY - (mapSize.Height / 2);
-			//int newXPos = (int)(oldXPercent * newSize.Width) - (mapSize.Width / 2);
-			//int newYPos = (int)(oldYPercent * newSize.Height) - (mapSize.Height / 2);
-
-			
-			//newXPos += (int)((mapSize.Width / 2) * oldXPercent);
-			//newYPos += (int)((mapSize.Height / 2) * oldYPercent);
-
-			m_map.ScrollControl.ViewPosition = new Point(newXPos, newYPos);
-			//m_map.ScrollControl.UpdateScrollbars();
-
-			Point newPosition = m_map.ScrollControl.ViewPosition;
-		}
 
 		private void m_btnDefaultZoom_Click(object sender, System.EventArgs e)
 		{
-			m_map.Canvas.Camera.ViewScale = 0.25f;
+			m_map.DefaultZoom();
 		}
 
 		private void m_btnCenterCamera_Click(object sender, System.EventArgs e)
