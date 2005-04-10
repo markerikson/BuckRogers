@@ -33,15 +33,15 @@ namespace BuckRogers
 		private GameController m_controller;
 
 		private MapControl m_map;
-		private MovePanel m_movePanel;
+		//private MovePanel m_movePanel;
 		private System.Windows.Forms.Button m_btnCenterCamera;
 		private System.Windows.Forms.ComboBox m_cbCenterLocations;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.TabControl tabControl1;
 		private System.Windows.Forms.TabPage m_pgAction;
 		private System.Windows.Forms.TabPage m_pgTerritory;
-		private TerritoryPanel territoryPanel1;
-		private BuckRogers.Interface.MovePanel movePanel1;
+		private BuckRogers.Interface.MovePanel m_movePanel;
+		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
 		private System.Windows.Forms.PictureBox pictureBox1;
 
 
@@ -53,7 +53,7 @@ namespace BuckRogers
 			InitializeComponent();
 
 
-			movePanel1.Height = m_pgAction.ClientSize.Height;
+			m_movePanel.Height = m_pgAction.ClientSize.Height;
 
 			ControllerTest ct = new ControllerTest();
 
@@ -137,9 +137,9 @@ namespace BuckRogers
 			this.label1 = new System.Windows.Forms.Label();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.m_pgAction = new System.Windows.Forms.TabPage();
-			this.movePanel1 = new BuckRogers.Interface.MovePanel();
+			this.m_movePanel = new BuckRogers.Interface.MovePanel();
 			this.m_pgTerritory = new System.Windows.Forms.TabPage();
-			this.territoryPanel1 = new BuckRogers.Interface.TerritoryPanel();
+			this.m_territoryPanel = new BuckRogers.Interface.TerritoryPanel();
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.tabControl1.SuspendLayout();
 			this.m_pgAction.SuspendLayout();
@@ -223,7 +223,7 @@ namespace BuckRogers
 			// 
 			// m_pgAction
 			// 
-			this.m_pgAction.Controls.Add(this.movePanel1);
+			this.m_pgAction.Controls.Add(this.m_movePanel);
 			this.m_pgAction.DockPadding.Top = 10;
 			this.m_pgAction.Location = new System.Drawing.Point(4, 22);
 			this.m_pgAction.Name = "m_pgAction";
@@ -231,32 +231,32 @@ namespace BuckRogers
 			this.m_pgAction.TabIndex = 0;
 			this.m_pgAction.Text = "Actions";
 			// 
-			// movePanel1
+			// m_movePanel
 			// 
-			this.movePanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
-			this.movePanel1.DockPadding.Bottom = 4;
-			this.movePanel1.DockPadding.Right = 8;
-			this.movePanel1.DockPadding.Top = 92;
-			this.movePanel1.Location = new System.Drawing.Point(0, 5);
-			this.movePanel1.Name = "movePanel1";
-			this.movePanel1.Size = new System.Drawing.Size(236, 400);
-			this.movePanel1.TabIndex = 0;
+			this.m_movePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+			this.m_movePanel.DockPadding.Bottom = 4;
+			this.m_movePanel.DockPadding.Right = 8;
+			this.m_movePanel.DockPadding.Top = 92;
+			this.m_movePanel.Location = new System.Drawing.Point(0, 5);
+			this.m_movePanel.Name = "m_movePanel";
+			this.m_movePanel.Size = new System.Drawing.Size(236, 400);
+			this.m_movePanel.TabIndex = 0;
 			// 
 			// m_pgTerritory
 			// 
-			this.m_pgTerritory.Controls.Add(this.territoryPanel1);
+			this.m_pgTerritory.Controls.Add(this.m_territoryPanel);
 			this.m_pgTerritory.Location = new System.Drawing.Point(4, 22);
 			this.m_pgTerritory.Name = "m_pgTerritory";
 			this.m_pgTerritory.Size = new System.Drawing.Size(232, 510);
 			this.m_pgTerritory.TabIndex = 1;
 			this.m_pgTerritory.Text = "Territory";
 			// 
-			// territoryPanel1
+			// m_territoryPanel
 			// 
-			this.territoryPanel1.Location = new System.Drawing.Point(0, 0);
-			this.territoryPanel1.Name = "territoryPanel1";
-			this.territoryPanel1.Size = new System.Drawing.Size(240, 400);
-			this.territoryPanel1.TabIndex = 0;
+			this.m_territoryPanel.Location = new System.Drawing.Point(0, 0);
+			this.m_territoryPanel.Name = "m_territoryPanel";
+			this.m_territoryPanel.Size = new System.Drawing.Size(240, 400);
+			this.m_territoryPanel.TabIndex = 0;
 			// 
 			// pictureBox1
 			// 
@@ -296,7 +296,7 @@ namespace BuckRogers
 			Application.Run(new BuckRogersForm());
 		}
 
-		public void OnTerritoryClicked(object sender, TerritoryClickEventArgs tcea)
+		public void OnTerritoryClicked(object sender, TerritoryEventArgs tcea)
 		{
 			string name = tcea.Name;
 
@@ -304,7 +304,7 @@ namespace BuckRogers
 
 			if(t != null)
 			{
-				territoryPanel1.DisplayUnits(t);
+				m_territoryPanel.DisplayUnits(t);
 				//MessageBox.Show("Territory: " + name + ", owner: " + t.Owner.Name);
 			}
 

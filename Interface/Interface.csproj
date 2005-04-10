@@ -9,7 +9,7 @@
             <Settings
                 ApplicationIcon = "App.ico"
                 AssemblyKeyContainerName = ""
-                AssemblyName = "Interface"
+                AssemblyName = "BuckRogers"
                 AssemblyOriginatorKeyFile = ""
                 DefaultClientScript = "JScript"
                 DefaultHTMLPageLayout = "Grid"
@@ -18,7 +18,7 @@
                 OutputType = "WinExe"
                 PreBuildEvent = ""
                 PostBuildEvent = ""
-                RootNamespace = "Interface"
+                RootNamespace = "BuckRogers.Interface"
                 RunPostBuildEvent = "OnBuildSuccess"
                 StartupObject = ""
             >
@@ -146,11 +146,6 @@
                     RelPath = "MovePanel.resx"
                     DependentUpon = "MovePanel.cs"
                     BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "TerritoryClickEventArgs.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
                 />
                 <File
                     RelPath = "TerritoryPanel.cs"

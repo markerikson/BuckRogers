@@ -20,7 +20,7 @@ using BuckRogers.Interface;
 namespace BuckRogers
 {
 
-	public delegate void TerritoryClickedHandler(object sender, TerritoryClickEventArgs e);
+	public delegate void TerritoryClickedHandler(object sender, TerritoryEventArgs e);
 
 	/// <summary>
 	/// Summary description for MapControl.
@@ -72,6 +72,7 @@ namespace BuckRogers
 
 			Canvas.PanEventHandler = new PPanEventHandler();
 			Canvas.ZoomEventHandler = new PZoomEventHandler();
+			
 
 			m_canvas.Focus();
 
@@ -699,18 +700,18 @@ namespace BuckRogers
 			AddPlanet(55, moonPoints, moonNames, moonCenters, Brushes.LightGray, scaleFactor, 1100, 1300);
 			AddPlanet(75, marsPoints, marsNames, marsCenters, Brushes.OrangeRed, scaleFactor, 1800, -550);
 
-			DrawPlanetaryOrbit(mercuryNearOrbitPoints, Color.Yellow, scaleFactor, -2700, -1100, true);
-			DrawPlanetaryOrbit(mercuryFarOrbitPoints, Color.Yellow, scaleFactor, -2700, -1100, true);
+			DrawPlanetaryOrbit(mercuryNearOrbitPoints, "Near Mercury Orbit", Color.Yellow, scaleFactor, -2700, -1100, true);
+			DrawPlanetaryOrbit(mercuryFarOrbitPoints, "Far Mercury Orbit", Color.Yellow, scaleFactor, -2700, -1100, true);
 
-			DrawPlanetaryOrbit(venusNearOrbitPoints, Color.Green, scaleFactor, -2700, 700, true);
-			DrawPlanetaryOrbit(venusFarOrbitPoints, Color.Green, scaleFactor, -2700, 700, true);
+			DrawPlanetaryOrbit(venusNearOrbitPoints, "Near Venus Orbit", Color.Green, scaleFactor, -2700, 700, true);
+			DrawPlanetaryOrbit(venusFarOrbitPoints, "Far Venus Orbit", Color.Green, scaleFactor, -2700, 700, true);
 
-			DrawPlanetaryOrbit(moonNearOrbitPoints, Color.Blue, scaleFactor, 1000, 50, true);
-			DrawPlanetaryOrbit(earthNearOrbitPoints, Color.Blue, scaleFactor, 1000, 50, true);
-			DrawPlanetaryOrbit(earthFarOrbitPoints, Color.Blue, scaleFactor, 1000, 50, true);
+			DrawPlanetaryOrbit(moonNearOrbitPoints, "Near Moon Orbit", Color.Blue, scaleFactor, 1000, 50, true);
+			DrawPlanetaryOrbit(earthNearOrbitPoints, "Near Earth Orbit", Color.Blue, scaleFactor, 1000, 50, true);
+			DrawPlanetaryOrbit(earthFarOrbitPoints, "Far Earth/Moon Orbit", Color.Blue, scaleFactor, 1000, 50, true);
 
-			DrawPlanetaryOrbit(marsNearOrbitPoints, Color.Red, scaleFactor, 1000, -1300, true);
-			DrawPlanetaryOrbit(marsFarOrbitPoints, Color.Red, scaleFactor, 1000, -1300, true);
+			DrawPlanetaryOrbit(marsNearOrbitPoints, "Near Mars Orbit", Color.Red, scaleFactor, 1000, -1300, true);
+			DrawPlanetaryOrbit(marsFarOrbitPoints, "Far Mars Orbit", Color.Red, scaleFactor, 1000, -1300, true);
 
 			DrawAsteroid(75, 75, scaleFactor, "Ceres", Color.Gray, 30, 40, -200, 1150);
 			DrawAsteroid(65, 55, scaleFactor, "Pallas", Color.Gray, -20, 20, 450, 1000);
@@ -770,6 +771,11 @@ namespace BuckRogers
 
 			float orbitDiameter = scaleFactor * 40;
 			PPath orbit = PPath.CreateEllipse(0, 0, orbitDiameter, orbitDiameter);
+
+			orbit.Tag = name + " Orbit";
+			orbit.MouseUp += new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
+
+
 
 			orbit.Brush = Brushes.Black;
 			orbit.Pen = Pens.White;
@@ -1118,7 +1124,7 @@ namespace BuckRogers
 		}
 
 
-		private void DrawPlanetaryOrbit(PointF[][] polygons, Color color, float scaleFactor, int shiftX, int shiftY, bool closeOrbit)
+		private void DrawPlanetaryOrbit(PointF[][] polygons, string name, Color color, float scaleFactor, int shiftX, int shiftY, bool closeOrbit)
 		{
 			PPath orbit = new PPath();
 
@@ -1152,7 +1158,10 @@ namespace BuckRogers
 			orbit.OffsetX = shiftX;
 			orbit.OffsetY = shiftY;
 
+			orbit.Tag = name;
+
 			//orbit.MouseUp += new PInputEventHandler(orbit_MouseUp);
+			orbit.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
 
 			Canvas.Layer.AddChild(orbit);
 
@@ -1296,7 +1305,7 @@ namespace BuckRogers
 		{
 			if(e.Button != MouseButtons.Left)
 			{
-				return;
+				//return;
 			}
 			//PText picked = (PText)e.PickedNode;
 			PNode picked = e.PickedNode;
@@ -1369,7 +1378,7 @@ namespace BuckRogers
 			
 			if(TerritoryClicked != null)
 			{
-				TerritoryClickEventArgs tcea = new TerritoryClickEventArgs(territoryName);
+				TerritoryEventArgs tcea = new TerritoryEventArgs(territoryName);
 
 				TerritoryClicked(this, tcea);
 			}
@@ -1447,6 +1456,7 @@ namespace BuckRogers
 
 		public void ZoomIn()
 		{
+			// Save the details from before the zoom
 			float currentZoom = Canvas.Camera.ViewScale;
 			Point originalPosition = ScrollControl.ViewPosition;
 			Size originalSize = ScrollControl.ViewSize;
@@ -1455,6 +1465,7 @@ namespace BuckRogers
 			float newZoom = 0.0f;
 			bool foundZoom = false;
 
+			// Find the next smallest zoom factor
 			foreach(float zoom in m_zoomFactors)
 			{
 				if(zoom > currentZoom)
@@ -1466,13 +1477,10 @@ namespace BuckRogers
 				previousZoom = zoom;
 			}
 
+			// Change the zoom if necessary
 			if(foundZoom)
 			{
 				Canvas.Camera.ViewScale = newZoom;
-			}
-			else
-			{
-				//Canvas.Camera.ViewScale += 1.0f;
 			}
 		
 			CenterZoomedMap(originalPosition, originalSize);
@@ -1480,15 +1488,15 @@ namespace BuckRogers
 
 		public void ZoomOut()
 		{
+			// Save the details from before the zoom
 			Point originalPosition = ScrollControl.ViewPosition;
 			Size originalSize = ScrollControl.ViewSize;
 			float currentZoom = Canvas.Camera.ViewScale;
 
-			float previousZoom = 0.0f;
 			float newZoom = 0.0f;
 			bool foundZoom = false;
 
-			
+			// Find the next largest zoom factor
 			for(int i = m_zoomFactors.Length - 1; i >= 0; i--)
 			{
 				float zoom = m_zoomFactors[i];
@@ -1500,30 +1508,11 @@ namespace BuckRogers
 					break;
 				}
 			}
-			
-			/*
-						foreach(float zoom in m_zoomFactors)
-						{
-							if(currentZoom > zoom)
-							{
-								newZoom = zoom;
-								foundZoom = true;
-								break;
-							}
-							previousZoom = zoom;
-						}
-			*/
+
 			if(!foundZoom)
 			{
-				//newZoom -= 1.0f;
 				newZoom = currentZoom;
 			}
-			/*
-			else
-			{
-				Canvas.Camera.ViewScale -= 1.0f;
-			}
-			*/
 
 			Canvas.Camera.ViewScale = newZoom;
 			
@@ -1535,34 +1524,52 @@ namespace BuckRogers
 			Canvas.Camera.ViewScale = 0.25f;
 		}
 
-		private void CenterZoomedMap(Point originalPosition, Size originalSize)
+		private void CenterZoomedMap(Point originalPosition, Size originalDocumentSize)
 		{
-			Size mapSize = ClientSize;
+			Size viewportSize = ClientSize;
 			
-			float oldCenterX = originalPosition.X  + (float)(mapSize.Width / 2);
-			float oldXPercent = (float)(oldCenterX / (float)originalSize.Width);
-			//(originalPosition.X  + mapSize.Width / 2)/ (float)originalSize.Width;
-			float oldCenterY = originalPosition.Y + (float)(mapSize.Height / 2);
-			float oldYPercent = (float)(oldCenterY / (float)originalSize.Height);
-			//float oldYPercent = (float)(originalPosition.Y + mapSize.Height / 2)/ (float)originalSize.Height;
+			// Calculate the point the viewport used to be centered on
+			float oldCenterX = originalPosition.X  + (float)(viewportSize.Width / 2);
+			float oldCenterY = originalPosition.Y + (float)(viewportSize.Height / 2);
 
-			Size newSize = ScrollControl.ViewSize;
+			// Calculate where that point was as a percentage of the old canvas
+			float oldXPercent = (float)(oldCenterX / (float)originalDocumentSize.Width);			
+			float oldYPercent = (float)(oldCenterY / (float)originalDocumentSize.Height);
 
-			int newCenterX = (int)(oldXPercent * newSize.Width);
-			int newXPos = newCenterX - (mapSize.Width / 2);
-			int newCenterY = (int)(oldYPercent * newSize.Height);
-			int newYPos = newCenterY - (mapSize.Height / 2);
-			//int newXPos = (int)(oldXPercent * newSize.Width) - (mapSize.Width / 2);
-			//int newYPos = (int)(oldYPercent * newSize.Height) - (mapSize.Height / 2);
+			// The size has already been changed, so what is it now?
+			Size newDocumentSize = ScrollControl.ViewSize;
 
-			
-			//newXPos += (int)((mapSize.Width / 2) * oldXPercent);
-			//newYPos += (int)((mapSize.Height / 2) * oldYPercent);
+			// Calculate the new viewport center, using the old percentage
+			int newCenterX = (int)(oldXPercent * newDocumentSize.Width);
+			int newCenterY = (int)(oldYPercent * newDocumentSize.Height);
 
-			ScrollControl.ViewPosition = new Point(newXPos, newYPos);
-			//ScrollControl.UpdateScrollbars();
+			// Calculate the upper-left point of the viewport
+			int newXPos = newCenterX - (viewportSize.Width / 2);			
+			int newYPos = newCenterY - (viewportSize.Height / 2);
 
-			Point newPosition = ScrollControl.ViewPosition;
+
+			// Attempt at ensuring the viewport doesn't overrun the 
+			// edges of the canvas - doesn't seem to help
+			if(newXPos < 0)
+			{
+				newXPos = 0;
+			}
+			if(newYPos < 0)
+			{
+				newYPos = 0;
+			}
+
+			if( (newXPos + viewportSize.Width) > newDocumentSize.Width)
+			{
+				newXPos = newDocumentSize.Width - viewportSize.Width;
+			}
+			if( (newYPos + viewportSize.Height) > newDocumentSize.Height)
+			{
+				newYPos = newDocumentSize.Height - viewportSize.Height;
+			}
+
+			// Set the new position of the viewport
+			ScrollControl.ViewPosition = new Point(newXPos, newYPos);			
 		}
 
 		public void DrawScreenshot()
