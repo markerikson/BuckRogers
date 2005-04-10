@@ -16,6 +16,8 @@ namespace BuckRogers
 	/// </summary>
 	public class Territory : skmDataStructures.Graph.Node
 	{
+		
+
 		public BuckRogers.TerritoryType Type
 		{
 			get { return this.m_type; }
@@ -30,15 +32,24 @@ namespace BuckRogers
 
 		public BuckRogers.Player Owner
 		{
-			get { return this.owner; }
+			get { return this.m_owner; }
 			set 
 			{ 
-				if(this.owner != null)
+				if(m_owner != null)
 				{
-					owner.Territories.Remove(this.Name);
+					m_owner.Territories.Remove(this.Name);
 				}
-				this.owner = value; 
-				owner.Territories[this.Name] = this;
+				m_owner = value; 
+				m_owner.Territories[this.Name] = this;
+
+				/*
+				if(TerritoryOwnerChanged != null)
+				{
+					TerritoryEventArgs tea = new TerritoryEventArgs();
+					tea.Name = this.Name;
+					tea.Owner = m_owner;
+				}
+				*/
 			}
 		}
 
@@ -59,7 +70,7 @@ namespace BuckRogers
 		
 
 		private TerritoryType m_type;
-		private Player owner;
+		private Player m_owner;
 		private UnitCollection m_units;
 		private OrbitalSystem m_system;
 		private OrbitalPath m_orbit;

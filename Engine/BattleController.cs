@@ -15,6 +15,7 @@ namespace BuckRogers
 	public class BattleController
 	{
 		public event DisplayUnitsHandler UnitsToDisplay;
+		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
 		
 		private int[,] m_combatTable = new int[,]	{	{6, 8, 7, NOTPOSSIBLE, 6, NOTPOSSIBLE, 3}, // Trooper
 														{5, 6, 6, NOTPOSSIBLE, 5, NOTPOSSIBLE, 2}, // Gennie
@@ -41,6 +42,8 @@ namespace BuckRogers
 		{
 			m_controller = gc;
 			m_cumulativeResult = new CombatResult();
+
+			m_currentBattle = null;
 		}
 
 		private void CheckPlayerOrder()
@@ -90,26 +93,42 @@ namespace BuckRogers
 
 			if(m_battles != null && m_battles.Count > 0)
 			{
+				// if this is not the first battle, check to see if the territory changed owners
+				if(m_currentBattle != null && m_currentBattle.Territory.Type != TerritoryType.Space)
+				{
+					ArrayList playersLeft = m_currentBattle.Territory.Units.GetPlayersWithUnits();
+
+					if(playersLeft.Count > 1)
+					{
+						throw new Exception("Shouldn't be more than one player left after a battle");
+					}
+
+					if(playersLeft.Count == 1)
+					{
+						Player p = (Player)playersLeft[0];
+						Player owner = m_currentBattle.Territory.Owner;
+
+						if(p != owner)
+						{
+							m_currentBattle.Territory.Owner = p;
+
+							if(TerritoryOwnerChanged != null)
+							{
+								TerritoryEventArgs tea = new TerritoryEventArgs();
+								tea.Name = m_currentBattle.Territory.Name;
+								tea.Owner = p;
+
+								TerritoryOwnerChanged(this, tea);
+							}	
+
+						}
+
+					}
+				}
+				
+
 				m_currentBattle = (BattleInfo)m_battles[0];
 				m_battles.Remove(m_currentBattle.ToString());
-
-				/*
-				m_labBattleType.Text = m_currentBattle.Type.ToString();				
-				m_labLocation.Text = m_currentBattle.Territory.Name;
-				m_labBattlesLeft.Text = m_battleController.Battles.Count.ToString();
-
-				m_btnContinue.Enabled = false;
-				m_btnNextPlayer.Enabled = false;
-				m_btnNextBattle.Enabled = false;
-				m_btnAttack.Enabled = false;
-
-				m_lvAttUsed.Items.Clear();
-				m_lvAttUnused.Items.Clear();
-				m_lvAttackers.Items.Clear();
-				m_lvDefenders.Items.Clear();
-				m_lvEnemyLive.Items.Clear();
-				m_lvEnemyDead.Items.Clear();
-				*/
 
 				m_cumulativeResult = new CombatResult();
 				m_turnResult = new CombatResult();				
@@ -117,18 +136,7 @@ namespace BuckRogers
 
 				CheckPlayerOrder();
 
-				/*
-				m_lbCurrentPlayer.Items.Clear();
-
-				foreach(Player p in m_playerOrder)
-				{
-					m_lbCurrentPlayer.Items.Add(p.Name);
-				}
-				*/
-
 				m_currentPlayer = (Player)m_playerOrder[0];
-				//m_lbCurrentPlayer.SelectedIndex = 0;
-				//m_labCurrentPlayer.Text = m_currentPlayer.Name;
 				m_currentUnused = new UnitCollection();
 				
 				Territory t = m_currentBattle.Territory;
@@ -154,8 +162,6 @@ namespace BuckRogers
 
 						if(UnitsToDisplay != null)
 						{
-							//AddUnitsToListView(satellites, m_lvAttackers, false);
-							//AddUnitsToListView(defenders, m_lvDefenders, true);
 							DisplayUnitsEventArgs duea = new DisplayUnitsEventArgs();
 							duea.Category = DisplayCategory.Attackers;
 							duea.Units = satellites;
@@ -166,9 +172,6 @@ namespace BuckRogers
 							duea.Units = defenders;
 							UnitsToDisplay(this, duea);
 						}
-						
-
-						//EnableAttack();
 
 						break;
 					}
@@ -226,6 +229,7 @@ namespace BuckRogers
 				return true;
 			}
 
+			m_currentBattle = null;
 			return false;
 		}
 

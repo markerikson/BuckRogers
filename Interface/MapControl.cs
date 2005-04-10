@@ -42,6 +42,8 @@ namespace BuckRogers
 		private PNode[] m_tmo;
 		private PNode[] m_ao;
 		private PNode[][] m_orbits;
+
+		private Hashtable m_territoryMarkers;
 		
 		private int m_idxPlanets;
 		private PClip[] m_planets;
@@ -55,6 +57,8 @@ namespace BuckRogers
 		{
 			// This call is required by the Windows.Forms Form Designer.
 			InitializeComponent();
+
+			m_territoryMarkers = new Hashtable();
 
 			m_zoomFactors = new float[]{0.1f, 0.175f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 5.0f};
 
@@ -845,6 +849,8 @@ namespace BuckRogers
 			text.TextBrush = Brushes.Black;
 
 
+			m_territoryMarkers[name] = center;
+
 			//parent.AddChild(center);
 			//parent.AddChild(text);
 
@@ -1014,6 +1020,8 @@ namespace BuckRogers
 				PText text = new PText(label);//names[i]);
 				text.X = centerX - (text.Width / 2) + shiftX;
 				text.Y = centerY - (text.Height) + shiftY;
+
+				m_territoryMarkers[label] = center;
 
 				text.TextBrush = Brushes.Black;
 				territory.AddChild(text);
@@ -1570,6 +1578,16 @@ namespace BuckRogers
 
 			// Set the new position of the viewport
 			ScrollControl.ViewPosition = new Point(newXPos, newYPos);			
+		}
+
+		public void SetTerritoryOwner(object sender, TerritoryEventArgs tea)
+		{
+			PPath marker = (PPath)m_territoryMarkers[tea.Name];
+
+			if(marker != null)
+			{
+				marker.Brush = new SolidBrush(tea.Owner.Color);
+			}
 		}
 
 		public void DrawScreenshot()

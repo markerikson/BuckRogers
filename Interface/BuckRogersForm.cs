@@ -31,6 +31,7 @@ namespace BuckRogers
 		private System.Windows.Forms.Button m_btnDefaultZoom;
 
 		private GameController m_controller;
+		private BattleController m_battleController;
 
 		private MapControl m_map;
 		//private MovePanel m_movePanel;
@@ -55,18 +56,20 @@ namespace BuckRogers
 
 			m_movePanel.Height = m_pgAction.ClientSize.Height;
 
+			m_map = new MapControl();
+
 			ControllerTest ct = new ControllerTest();
+			ct.Reinitialize = false;
+			m_controller = ct.GameController;
+			m_battleController = ct.BattleController;
+
+			m_controller.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
+			m_battleController.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
 
 			ct.Init();
-			m_controller = ct.GameController;
-
 			
 
 			
-																		   
-
-			//this.Size = new Size(1024, 730);
-			m_map = new MapControl();
 
 			m_map.Size = new Size(this.ClientSize.Width - tabControl1.Right - 4, this.ClientSize.Height - 30);
 

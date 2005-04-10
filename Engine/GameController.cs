@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using CenterSpace.Free;
 using skmDataStructures.Graph;
+using System.Drawing;
 
 namespace BuckRogers
 {
@@ -10,7 +11,7 @@ namespace BuckRogers
 	/// </summary>
 	public class GameController
 	{
-		
+		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
 		
 		#region Properties
 		/*
@@ -58,6 +59,8 @@ namespace BuckRogers
 		#endregion
 	
 		private GameMap m_map;
+		private Color[] m_playerColors = {Color.CornflowerBlue, Color.Teal, Color.Yellow, 
+											Color.Violet, Color.Tan, Color.MediumVioletRed};
 		// Player list assumes players in clockwise order
 		private Player[] m_players;
 		private ArrayList m_currentPlayerOrder;
@@ -163,6 +166,7 @@ namespace BuckRogers
 			for(int i = 0; i < playerNames.Length; i++)
 			{
 				m_players[i] = new Player(playerNames[i]);
+				m_players[i].Color = m_playerColors[i];
 			}
 		}
 
@@ -213,8 +217,16 @@ namespace BuckRogers
 					Territory t = (Territory)ground[idx];
 					t.Owner = p;
 					ground.Remove(t);
-				}
 
+					if(TerritoryOwnerChanged != null)
+					{
+						TerritoryEventArgs tea = new TerritoryEventArgs();
+						tea.Name = t.Name;
+						tea.Owner = p;
+
+						TerritoryOwnerChanged(this, tea);
+					}
+				}
 			}
 		}
 

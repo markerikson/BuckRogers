@@ -12,16 +12,28 @@ namespace BuckRogers
 	{
 		private GameController m_controller;
 		private BattleController m_battleController;
+		private bool m_reinitialize;
 		public ControllerTest()
 		{
+			m_reinitialize = true;
+
+			string[] players = {"Mark", "Chris", "Stu", "Hannah", "Jake", "Kathryn"};
+			m_controller = new GameController(players);
+			m_battleController = new BattleController(m_controller);
 		}
 
 		[SetUp]
 		public void Init()
 		{
 			string[] players = {"Mark", "Chris", "Stu", "Hannah", "Jake", "Kathryn"};
-			m_controller = new GameController(players);
-			m_battleController = new BattleController(m_controller);
+			if(m_reinitialize)
+			{
+				
+				m_controller = new GameController(players);
+				m_battleController = new BattleController(m_controller);
+			}
+			
+			
 
 			m_controller.AssignTerritories();
 			m_controller.CreateInitialUnits();
@@ -988,5 +1000,12 @@ namespace BuckRogers
 			get { return this.m_controller; }
 			set { this.m_controller = value; }
 		}
+
+		public bool Reinitialize
+		{
+			get { return this.m_reinitialize; }
+			set { this.m_reinitialize = value; }
+		}
+
 	}
 }

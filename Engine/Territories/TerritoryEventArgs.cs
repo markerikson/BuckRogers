@@ -8,6 +8,13 @@ namespace BuckRogers
 	public class TerritoryEventArgs : System.EventArgs
 	{
 		private string m_territoryName;
+		private Player m_owner;
+
+		public TerritoryEventArgs()
+		{
+
+		}
+
 		public TerritoryEventArgs(string s)
 		{
 			m_territoryName = s;
@@ -19,6 +26,12 @@ namespace BuckRogers
 			set { this.m_territoryName = value; }
 		}
 
-		//public string 
+		public BuckRogers.Player Owner
+		{
+			get { return this.m_owner; }
+			set { this.m_owner = value; }
+		}
+
+		
 	}
 }
