@@ -735,8 +735,8 @@ namespace BuckRogers
 			DrawObject(100, 100, scaleFactor, "Deimos", Color.Gray, 1100, -1000);
 
 			// L4 and L5 colonies
-			DrawObject(65, 50, scaleFactor, "L4 Colony", Color.CornflowerBlue, 1350, 600);
-			DrawObject(80, 50, scaleFactor, "L5 Colony", Color.CornflowerBlue, 2100, 650);
+			DrawObject(65, 50, scaleFactor, "L-4 Colony", Color.CornflowerBlue, 1350, 600);
+			DrawObject(80, 50, scaleFactor, "L-5 Colony", Color.CornflowerBlue, 2100, 650);
 
 			#endregion
 

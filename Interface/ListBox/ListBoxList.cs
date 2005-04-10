@@ -159,6 +159,19 @@ namespace BuckRogers.Interface
 			OnInsert( index);
 		}
 
+		public void Insert( int index, string messageHeader, string messageText)
+		{
+			ParseMessageEventArgs pmea = new ParseMessageEventArgs(messageHeader, messageText);
+			_alMessages.Insert( index, pmea);
+			_alMessagesInfo.Insert( index, new ItemInfo( pmea));
+			OnInsert( index);
+		}
+
+		public void Remove(int index)
+		{
+			_alMessages.Remove(_alMessages[index]);
+			_alMessagesInfo.Remove(_alMessagesInfo[index]);
+		}
 
 		/// <summary>
 		/// Raises the 'OnItemAdded' event.

@@ -10,6 +10,8 @@ namespace BuckRogers
 	[TestFixture]
 	public class ControllerTest
 	{
+		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
+
 		private GameController m_controller;
 		private BattleController m_battleController;
 		private bool m_reinitialize;
@@ -35,7 +37,7 @@ namespace BuckRogers
 			
 			
 
-			m_controller.AssignTerritories();
+			//m_controller.AssignTerritories();
 			m_controller.CreateInitialUnits();
 
 			m_controller.RollForInitiative(false);
@@ -62,6 +64,15 @@ namespace BuckRogers
 					Territory t = m_controller.Map[territories[i, j]];
 					t.Owner = m_controller.Players[i];
 					al.Add(t);
+
+					if(TerritoryOwnerChanged != null)
+					{
+						TerritoryEventArgs tea = new TerritoryEventArgs();
+						tea.Name = t.Name;
+						tea.Owner = m_controller.Players[i];
+
+						TerritoryOwnerChanged(this, tea);
+					}
 				}
 			}
 

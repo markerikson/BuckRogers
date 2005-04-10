@@ -138,6 +138,11 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "MoveModeEventArgs.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "MovePanel.cs"
                     SubType = "UserControl"
                     BuildAction = "Compile"
@@ -145,6 +150,16 @@
                 <File
                     RelPath = "MovePanel.resx"
                     DependentUpon = "MovePanel.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "MoveUnitsForm.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "MoveUnitsForm.resx"
+                    DependentUpon = "MoveUnitsForm.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File
@@ -156,6 +171,11 @@
                     RelPath = "TerritoryPanel.resx"
                     DependentUpon = "TerritoryPanel.cs"
                     BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Utility.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
                 />
                 <File
                     RelPath = "ListBox\ItemInfo.cs"

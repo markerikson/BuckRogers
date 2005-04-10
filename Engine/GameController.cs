@@ -70,6 +70,7 @@ namespace BuckRogers
 		private ArrayList m_checkedActions;
 		private ArrayList m_undoneActions;
 		private int m_turnNumber;
+		private int m_idxCurrentPlayer;
 		
 		private Hashlist m_battles;
 		/*
@@ -486,20 +487,37 @@ namespace BuckRogers
 				bool alreadyInEnemyTerritory = false;
 				Territory previousTerritory = move.StartingTerritory;
 
+				//ArrayList originalMoves = new ArrayList();
+				//ArrayList conqueredTerritories = new ArrayList();
+
+				string exceptionString = String.Empty;
+
+				foreach(Unit u in move.Units)
+				{
+					move.OriginalMovesLeft.Add(u.MovesLeft);
+				}
+
+				// TODO Fix issues with undoing moves that turn out to be invalid while half done
+
 				for(int i = 0; i < move.Territories.Count; i++)
 				{
 					if(alreadyInEnemyTerritory)
 					{
-						throw new ActionException("Can't move units in and out of a territory with enemy units");
+						//throw new ActionException("Can't move units in and out of a territory with enemy units");
+						exceptionString = "Can't move units in and out of a territory with enemy units";
+						goto MoveError;
 					}
 
 					Territory t = (Territory)move.Territories[i];
 
 					if(!t.AdjacentTo(previousTerritory))
 					{
-						throw new ActionException("Can't move between non-adjacent territories (" 
-							+ previousTerritory.Name + " -> " + t.Name + ")");
-					}
+						//throw new ActionException("Can't move between non-adjacent territories (" 
+						//	+ previousTerritory.Name + " -> " + t.Name + ")");
+						exceptionString = "Can't move between non-adjacent territories (" 
+							+ previousTerritory.Name + " -> " + t.Name + ")";
+						goto MoveError;
+					}	
 
 					if(t.Type == TerritoryType.Ground)//t.Owner != move.Owner)
 					{
@@ -526,22 +544,31 @@ namespace BuckRogers
 
 						if(u.MaxMoves == 0)
 						{
-							throw new ActionException("Can't move an immobile unit");
+							//throw new ActionException("Can't move an immobile unit");
+							exceptionString = "Can't move an immobile unit";
+							goto MoveError;
 						}
 
 						if(t.Type == TerritoryType.Space && !u.IsSpaceCapable)
 						{
-							throw new ActionException("Can't move a ground unit into space");
+							//throw new ActionException("Can't move a ground unit into space");
+							exceptionString = "Can't move a ground unit into space";
+							goto MoveError;
 						}
 
 						if(u.UnitType == UnitType.Battler && t.Type == TerritoryType.Ground )
 						{
-							throw new ActionException("Can't move a battler onto the ground");
+							//throw new ActionException("Can't move a battler onto the ground");
+							exceptionString = "Can't move a battler onto the ground";
+							goto MoveError;
+							
 						}
 
 						if(u.MovesLeft == 0)
 						{
-							throw new ActionException("Unit has no moves left.  Unit: " + u.Info);
+							//throw new ActionException("Unit has no moves left.  Unit: " + u.Info);
+							exceptionString = "Unit has no moves left.  Unit: " + u.Info;
+							goto MoveError;
 						}
 
 						u.CurrentTerritory = t;
@@ -549,8 +576,42 @@ namespace BuckRogers
 
 					}
 
+					if(t.Type == TerritoryType.Ground 
+						&& t.Owner != move.Owner 
+						&& t.Units.GetPlayerUnitCounts().Count == 1)
+					{
+						move.ConqueredTerritories[t] = t.Owner;
+					}
+
 					previousTerritory = t;
 				}
+
+			MoveError:
+				if(exceptionString != String.Empty)
+				{
+					for(int i = 0; i < move.OriginalMovesLeft.Count; i++)
+					{
+						move.Units[i].MovesLeft = (int)move.OriginalMovesLeft[i];
+					}
+
+					throw new ActionException(exceptionString);
+				}
+
+				foreach(Territory conquered in move.ConqueredTerritories.Keys)
+				{
+					conquered.Owner = move.Owner;
+
+					if(TerritoryOwnerChanged != null)
+					{
+						TerritoryEventArgs tea = new TerritoryEventArgs();
+						tea.Name = conquered.Name;
+						tea.Owner = move.Owner;
+
+						TerritoryOwnerChanged(this, tea);
+					}
+				}
+
+				
 			}
 			else if(action is TransportAction)
 			{
@@ -598,10 +659,27 @@ namespace BuckRogers
 					}
 				}
 
-				foreach(Unit u in ma.Units)
+				//foreach(Unit u in ma.Units)
+				for(int i = 0; i < ma.Units.Count; i++)
 				{
+					Unit u = ma.Units[i];
 					u.CurrentTerritory = ma.StartingTerritory;
-					u.MovesLeft++;
+					//u.MovesLeft = (int)ma.OriginalMovesLeft[i];
+				}
+
+				foreach(Territory t in ma.ConqueredTerritories.Keys)
+				{
+					Player originalOwner = (Player)ma.ConqueredTerritories[t];
+					t.Owner = originalOwner;
+
+					if(TerritoryOwnerChanged != null)
+					{
+						TerritoryEventArgs tea = new TerritoryEventArgs();
+						tea.Name = t.Name;
+						tea.Owner = originalOwner;
+
+						TerritoryOwnerChanged(this, tea);
+					}
 				}
 			}
 			else if(action is TransportAction)
@@ -627,7 +705,7 @@ namespace BuckRogers
 
 		}
 
-		public void RedoAction()
+		public Action RedoAction()
 		{
 			if(m_undoneActions.Count == 0)
 			{
@@ -637,6 +715,8 @@ namespace BuckRogers
 			Action a = (Action)m_undoneActions[m_undoneActions.Count - 1];
 			AddAction(a);
 			m_undoneActions.Remove(a);
+
+			return a;
 
 		}
 
@@ -792,11 +872,9 @@ namespace BuckRogers
 		private ArrayList GetSurfaceTerritories(Territory t)
 		{
 			ArrayList surfaceTerritories = new ArrayList();
-			// TODO I really hate having to use EdgeToNeighbor here... can I have Neighbors return a Node?
-			//foreach(EdgeToNeighbor etn in t.Neighbors)
+
 			foreach(Territory neighbor in t.Neighbors)
 			{
-				//Territory neighbor = (Territory)etn.Neighbor;
 				if(neighbor.Type == TerritoryType.Ground)
 				{
 					surfaceTerritories.Add(neighbor);
@@ -962,6 +1040,58 @@ namespace BuckRogers
 						}
 					}
 				}
+			}
+		}
+
+
+		public void NextTurn()
+		{
+			RollForInitiative();
+
+			m_idxCurrentPlayer = 0;
+			m_turnNumber++;
+		}
+
+		public bool NextPlayer()
+		{
+            if(m_idxCurrentPlayer == m_currentPlayerOrder.Count - 1)
+			{
+				return false;
+			}
+
+			m_idxCurrentPlayer++;
+			return true;
+		}
+
+		public bool CanUndo
+		{
+			get
+			{
+				return m_checkedActions.Count != 0;
+			}
+		}
+
+		public bool CanRedo
+		{
+			get
+			{
+				return m_undoneActions.Count != 0;
+			}
+		}
+
+		public int TurnNumber
+		{
+			get
+			{
+				return m_turnNumber;
+			}
+		}
+
+		public Player CurrentPlayer
+		{
+			get
+			{
+				return (Player)m_currentPlayerOrder[m_idxCurrentPlayer];
 			}
 		}
 

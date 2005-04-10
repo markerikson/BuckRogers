@@ -150,6 +150,11 @@ namespace BuckRogers
 		}
 		*/
 
+		public UnitCollection GetUnits(int max)
+		{
+			return GetUnits(UnitType.None, null, null, max);
+		}
+
 		public UnitCollection GetUnits(UnitType ut, Player p, Territory t)
 		{
 			return GetUnits(ut, p, t, List.Count);
@@ -249,6 +254,21 @@ namespace BuckRogers
 						uc.AddUnit(u);
 						break;
 					}
+				}
+			}
+
+			return uc;
+		}
+
+		public UnitCollection GetUnitsWithMoves(int numMoves)
+		{
+			UnitCollection uc = new UnitCollection();
+
+			foreach(Unit u in List)
+			{
+				if(u.MovesLeft == numMoves)
+				{
+					uc.AddUnit(u);
 				}
 			}
 
