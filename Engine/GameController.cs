@@ -6,12 +6,14 @@ using System.Drawing;
 
 namespace BuckRogers
 {
+	public delegate void StatusUpdateHandler(object sender, StatusUpdateEventArgs suea);
 	/// <summary>
 	/// Summary description for GameController.
 	/// </summary>
 	public class GameController
 	{
 		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
+		public event StatusUpdateHandler StatusUpdate;
 		
 		#region Properties
 		/*
@@ -71,12 +73,9 @@ namespace BuckRogers
 		private ArrayList m_undoneActions;
 		private int m_turnNumber;
 		private int m_idxCurrentPlayer;
+		private bool m_redoingAction;
 		
 		private Hashlist m_battles;
-		/*
-		private int[,] m_combatTable;
-		private const int NOTPOSSIBLE = 99;
-		*/
 
 		// TODO Change this into a property or something		
 		public TurnRoll[] Rolls;
@@ -158,6 +157,8 @@ namespace BuckRogers
 			m_checkedActions = new ArrayList();
 			m_undoneActions = new ArrayList();
 			m_turnNumber = 0;	
+
+			m_redoingAction = false;
 		}
 
 		public void SetPlayers(string[] playerNames)
@@ -457,11 +458,22 @@ namespace BuckRogers
 			// we've got at least one unit, and they're guaranteed to be all the same type
 			ta.UnitType = tr.Transportees[0].UnitType;
 
+			UnitCollection unitsToUnload = null;
+			
+			if(ta.MatchMoves)
+			{
+				tr.Transportees.GetUnitsWithMoves(ta.Moves);
+			}
+			else
+			{
+				unitsToUnload = tr.Transportees;
+			}
+
 			for(int i = 0; i < numToUnload; i++)
 			{
 				// Transportees are automatically removed when the transporting unit is set to NONE,
 				// so the index needs to stay at zero
-				Unit u = tr.Transportees[0];
+				Unit u = unitsToUnload[0];
 				u.TransportingUnit = Unit.NONE;
 
 				// Removes the unit from the old territory, assigns the unit to the new territory, and 
@@ -592,6 +604,7 @@ namespace BuckRogers
 					for(int i = 0; i < move.OriginalMovesLeft.Count; i++)
 					{
 						move.Units[i].MovesLeft = (int)move.OriginalMovesLeft[i];
+						move.Units[i].CurrentTerritory = move.StartingTerritory;
 					}
 
 					throw new ActionException(exceptionString);
@@ -633,10 +646,16 @@ namespace BuckRogers
 				throw new ActionException("Unknown Action type in ExecuteActions");
 			}
 			m_checkedActions.Add(action);
+
+			if(!m_redoingAction)
+			{
+				m_undoneActions.Clear();
+			}
+			
 			
 		}
 
-		public void UndoAction()
+		public Action UndoAction()
 		{
 			if(m_checkedActions.Count == 0)
 			{
@@ -703,6 +722,7 @@ namespace BuckRogers
 			m_checkedActions.Remove(action);
 			m_undoneActions.Add(action);
 
+			return action;
 		}
 
 		public Action RedoAction()
@@ -713,7 +733,9 @@ namespace BuckRogers
 			}
 
 			Action a = (Action)m_undoneActions[m_undoneActions.Count - 1];
+			m_redoingAction = true;
 			AddAction(a);
+			m_redoingAction = false;
 			m_undoneActions.Remove(a);
 
 			return a;
@@ -1054,13 +1076,33 @@ namespace BuckRogers
 
 		public bool NextPlayer()
 		{
+			m_undoneActions.Clear();
+			m_checkedActions.Clear();
+
+			
+			
+			bool morePlayers = true;
             if(m_idxCurrentPlayer == m_currentPlayerOrder.Count - 1)
 			{
-				return false;
+				m_idxCurrentPlayer = 0;
+				morePlayers = false;
+			}
+			else
+			{
+				m_idxCurrentPlayer++;
 			}
 
-			m_idxCurrentPlayer++;
-			return true;
+			
+
+			if(StatusUpdate != null)
+			{
+				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+				suea.Player = (Player)m_currentPlayerOrder[m_idxCurrentPlayer];
+				suea.StatusInfo = morePlayers ? StatusInfo.NextPlayer : StatusInfo.NextPhase;
+				StatusUpdate(this, suea);
+			}
+
+			return morePlayers;
 		}
 
 		public bool CanUndo

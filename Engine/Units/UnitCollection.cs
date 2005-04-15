@@ -458,6 +458,40 @@ namespace BuckRogers
 			return GetNonMatchingUnits(UnitType.None, p, null, max);
 		}
 
+		public UnitCollection GetTransportsWithContents(UnitType ut, int numTransportees)
+		{
+			UnitCollection uc = new UnitCollection();
+			UnitCollection transports = this.GetUnits(UnitType.Transport);
+
+			foreach(Transport tr in transports)
+			{
+				if(ut == UnitType.None && tr.Transportees.Count == 0)
+				{
+					uc.AddUnit(tr);
+					continue;
+				}
+
+				bool transportMatches = true;
+
+				if(tr.Transportees.Count != numTransportees)
+				{
+					transportMatches = false;
+				}
+
+				if(tr.Transportees.Count != 0 && tr.Transportees[0].UnitType != ut)
+				{
+					transportMatches = false;
+				}
+
+				if(transportMatches)
+				{
+					uc.AddUnit(tr);
+				}
+			}
+
+			return uc;
+		}
+
 		public ArrayList GetUnitTerritories()
 		{
 			ArrayList al = new ArrayList();

@@ -72,7 +72,7 @@ namespace BuckRogers.Interface
 																						this.columnHeader1,
 																						this.columnHeader2,
 																						this.columnHeader3});
-			this.m_lvUnits.Location = new System.Drawing.Point(0, 80);
+			this.m_lvUnits.Location = new System.Drawing.Point(0, 64);
 			this.m_lvUnits.Name = "m_lvUnits";
 			this.m_lvUnits.Size = new System.Drawing.Size(232, 240);
 			this.m_lvUnits.TabIndex = 0;

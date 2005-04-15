@@ -1488,10 +1488,11 @@ namespace BuckRogers
 			// Change the zoom if necessary
 			if(foundZoom)
 			{
-				Canvas.Camera.ViewScale = newZoom;
+				//Canvas.Camera.ViewScale = newZoom;
 			}
 		
-			CenterZoomedMap(originalPosition, originalSize);
+			//CenterZoomedMap(newZoom, currentZoom, originalPosition, originalSize);
+			CenterZoomedMap(true, 1.5f);
 		}
 
 		public void ZoomOut()
@@ -1522,9 +1523,10 @@ namespace BuckRogers
 				newZoom = currentZoom;
 			}
 
-			Canvas.Camera.ViewScale = newZoom;
+			//Canvas.Camera.ViewScale = newZoom;
 			
-			CenterZoomedMap(originalPosition, originalSize);
+			//CenterZoomedMap(newZoom, currentZoom, originalPosition, originalSize);
+			CenterZoomedMap(false, 0.67f);
 		}
 
 		public void DefaultZoom()
@@ -1532,8 +1534,28 @@ namespace BuckRogers
 			Canvas.Camera.ViewScale = 0.25f;
 		}
 
-		private void CenterZoomedMap(Point originalPosition, Size originalDocumentSize)
+		//private void CenterZoomedMap(float newZoom, float currentZoom, Point originalPosition, Size originalDocumentSize)
+		private void CenterZoomedMap(bool zoomIn, float scaleFactor)
 		{
+			//float scaleFactor = newZoom / currentZoom;//0f;
+			
+			/*
+			if(newZoom > currentZoom)
+			{
+				scaleFactor = newZoom / currentZoom;
+			}
+			else
+			{
+				scaleFactor = currentZoom / newZoom;
+			}
+			*/
+
+			//scaleFactor += 1.0f;
+			PointF boundsCenter = PUtil.CenterOfRectangle(Canvas.Camera.Bounds);
+			PointF actualCenter = Canvas.Camera.LocalToView(boundsCenter);
+			Canvas.Camera.ScaleViewBy(scaleFactor, actualCenter.X, actualCenter.Y);
+
+			/*
 			Size viewportSize = ClientSize;
 			
 			// Calculate the point the viewport used to be centered on
@@ -1577,7 +1599,8 @@ namespace BuckRogers
 			}
 
 			// Set the new position of the viewport
-			ScrollControl.ViewPosition = new Point(newXPos, newYPos);			
+			ScrollControl.ViewPosition = new Point(newXPos, newYPos);	
+			*/		
 		}
 
 		public void SetTerritoryOwner(object sender, TerritoryEventArgs tea)

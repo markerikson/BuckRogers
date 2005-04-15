@@ -173,6 +173,21 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "TransportInfoEventArgs.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TransportLoadForm.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "TransportLoadForm.resx"
+                    DependentUpon = "TransportLoadForm.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "Utility.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

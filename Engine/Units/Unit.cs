@@ -246,7 +246,7 @@ namespace BuckRogers
 			}
 		}
 
-		public void Destroy()
+		public virtual void Destroy()
 		{
 			if(m_transported)
 			{

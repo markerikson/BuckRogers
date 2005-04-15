@@ -21,5 +21,16 @@ namespace BuckRogers
 			get { return this.m_transportees; }
 			set { this.m_transportees = value; }
 		}
+
+		public override void Destroy()
+		{
+			foreach(Unit u in m_transportees)
+			{
+				u.Destroy();
+			}
+
+			base.Destroy ();
+		}
+
 	}
 }

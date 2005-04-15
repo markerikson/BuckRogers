@@ -37,9 +37,23 @@ namespace BuckRogers
 			get { return this.m_transport; }
 			set { this.m_transport = value; }
 		}
+
+		public int Moves
+		{
+			get { return this.m_moves; }
+			set { this.m_moves = value; }
+		}
+
+		public bool MatchMoves
+		{
+			get { return this.m_matchMoves; }
+			set { this.m_matchMoves = value; }
+		}
 	
 		private bool m_load;
+		private bool m_matchMoves;
 		private int m_maxTransfer;
+		private int m_moves;
 		private Transport m_transport;
 		private UnitType m_unitType;
 		public TransportAction()

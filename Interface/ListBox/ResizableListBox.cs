@@ -195,6 +195,8 @@ namespace BuckRogers.Interface
 			}
 
 			this.AutoScrollMinSize = new Size( this.Width - 30, height);
+
+			ControlPaint.DrawBorder3D(g,ClientRectangle,Border3DStyle.Sunken); 
 		}
 
 

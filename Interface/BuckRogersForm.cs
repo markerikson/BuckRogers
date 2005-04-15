@@ -50,6 +50,9 @@ namespace BuckRogers
 		private System.Windows.Forms.TabPage m_pgTerritory;
 		private BuckRogers.Interface.MovePanel m_movePanel;
 		private System.Windows.Forms.StatusBar statusBar1;
+		private System.Windows.Forms.MainMenu mainMenu1;
+		private System.Windows.Forms.MenuItem menuItem1;
+		private System.Windows.Forms.MenuItem menuItem2;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
 
 
@@ -75,6 +78,7 @@ namespace BuckRogers
 
 			m_controller.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
 			m_battleController.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
+			m_controller.StatusUpdate += new StatusUpdateHandler(m_controller_StatusUpdate);
 			ct.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
 
 			ct.Init();
@@ -155,6 +159,9 @@ namespace BuckRogers
 			this.m_pgTerritory = new System.Windows.Forms.TabPage();
 			this.m_territoryPanel = new BuckRogers.Interface.TerritoryPanel();
 			this.statusBar1 = new System.Windows.Forms.StatusBar();
+			this.mainMenu1 = new System.Windows.Forms.MainMenu();
+			this.menuItem1 = new System.Windows.Forms.MenuItem();
+			this.menuItem2 = new System.Windows.Forms.MenuItem();
 			this.tabControl1.SuspendLayout();
 			this.m_pgAction.SuspendLayout();
 			this.m_pgTerritory.SuspendLayout();
@@ -229,10 +236,10 @@ namespace BuckRogers
 				| System.Windows.Forms.AnchorStyles.Left)));
 			this.tabControl1.Controls.Add(this.m_pgAction);
 			this.tabControl1.Controls.Add(this.m_pgTerritory);
-			this.tabControl1.Location = new System.Drawing.Point(4, 160);
+			this.tabControl1.Location = new System.Drawing.Point(4, 44);
 			this.tabControl1.Name = "tabControl1";
 			this.tabControl1.SelectedIndex = 0;
-			this.tabControl1.Size = new System.Drawing.Size(240, 510);
+			this.tabControl1.Size = new System.Drawing.Size(240, 624);
 			this.tabControl1.TabIndex = 7;
 			// 
 			// m_pgAction
@@ -241,19 +248,18 @@ namespace BuckRogers
 			this.m_pgAction.DockPadding.Top = 10;
 			this.m_pgAction.Location = new System.Drawing.Point(4, 22);
 			this.m_pgAction.Name = "m_pgAction";
-			this.m_pgAction.Size = new System.Drawing.Size(232, 484);
+			this.m_pgAction.Size = new System.Drawing.Size(232, 598);
 			this.m_pgAction.TabIndex = 0;
 			this.m_pgAction.Text = "Actions";
 			// 
 			// m_movePanel
 			// 
 			this.m_movePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+			this.m_movePanel.Controller = null;
 			this.m_movePanel.DockPadding.Bottom = 4;
-			this.m_movePanel.DockPadding.Right = 8;
-			this.m_movePanel.DockPadding.Top = 176;
 			this.m_movePanel.Location = new System.Drawing.Point(0, 5);
 			this.m_movePanel.Name = "m_movePanel";
-			this.m_movePanel.Size = new System.Drawing.Size(236, 374);
+			this.m_movePanel.Size = new System.Drawing.Size(236, 488);
 			this.m_movePanel.TabIndex = 0;
 			// 
 			// m_pgTerritory
@@ -261,7 +267,7 @@ namespace BuckRogers
 			this.m_pgTerritory.Controls.Add(this.m_territoryPanel);
 			this.m_pgTerritory.Location = new System.Drawing.Point(4, 22);
 			this.m_pgTerritory.Name = "m_pgTerritory";
-			this.m_pgTerritory.Size = new System.Drawing.Size(232, 510);
+			this.m_pgTerritory.Size = new System.Drawing.Size(232, 598);
 			this.m_pgTerritory.TabIndex = 1;
 			this.m_pgTerritory.Text = "Territory";
 			// 
@@ -280,6 +286,23 @@ namespace BuckRogers
 			this.statusBar1.TabIndex = 8;
 			this.statusBar1.Text = "statusBar1";
 			// 
+			// mainMenu1
+			// 
+			this.mainMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+																					  this.menuItem1});
+			// 
+			// menuItem1
+			// 
+			this.menuItem1.Index = 0;
+			this.menuItem1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+																					  this.menuItem2});
+			this.menuItem1.Text = "File";
+			// 
+			// menuItem2
+			// 
+			this.menuItem2.Index = 0;
+			this.menuItem2.Text = "Exit";
+			// 
 			// BuckRogersForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
@@ -292,6 +315,7 @@ namespace BuckRogers
 			this.Controls.Add(this.m_btnDefaultZoom);
 			this.Controls.Add(this.m_btnZoomOut);
 			this.Controls.Add(this.m_btnZoomIn);
+			this.Menu = this.mainMenu1;
 			this.Name = "BuckRogersForm";
 			this.Text = "BuckRogersForm";
 			this.Load += new System.EventHandler(this.BuckRogersForm_Load);
@@ -404,18 +428,21 @@ namespace BuckRogers
 			//targetLocation.X *= zoom;
 			//targetLocation.Y *= zoom;
 
-			Size mapSize = m_map.ClientSize;
-			targetLocation.X -= mapSize.Width / 2;
-			targetLocation.Y -= mapSize.Height / 2;
+			//Size mapSize = m_map.ClientSize;
+			//targetLocation.X -= mapSize.Width / 2;
+			//targetLocation.Y -= mapSize.Height / 2;
 
 			Point ulCorner = new Point((int)targetLocation.X, (int)targetLocation.Y);
 
-			//PointF transformedPoint = m_map.Canvas.Camera.ViewToLocal(ulCorner);
-			//ulCorner.X -= m_map.Width /  2;
-			//ulCorner.Y -= m_map.Height / 2;
+			PointF transformedPoint = m_map.Canvas.Camera.ViewToLocal(ulCorner);
+			ulCorner.X -= m_map.Width /  2;
+			ulCorner.Y -= m_map.Height / 2;
 
 			m_map.ScrollControl.ViewPosition = ulCorner;// new Point((int)transformedPoint.X, (int)transformedPoint.Y);
 
+			//PointF local = m_map.Canvas.Camera.GlobalToLocal(targetLocation);
+			//PointF view = m_map.Canvas.Camera.LocalToView(targetLocation);
+			//m_map.Canvas.Camera.ScaleViewBy(0.999999f, view.X, view.Y);
 		}
 
 		private void button1_Click(object sender, System.EventArgs e)
@@ -427,7 +454,8 @@ namespace BuckRogers
 		{
 			switch(mmea.MoveMode)
 			{
-				case MoveMode.Started:
+				case MoveMode.StartMove:
+				case MoveMode.StartTransport:
 				{
 					m_clickMode = MapClickMode.Move;
 					break;
@@ -443,6 +471,24 @@ namespace BuckRogers
 		private void BuckRogersForm_Load(object sender, System.EventArgs e)
 		{
 		
+		}
+
+		private void m_controller_StatusUpdate(object sender, StatusUpdateEventArgs suea)
+		{
+			statusBar1.Text = "Current player: " + suea.Player.Name;
+			switch(suea.StatusInfo)
+			{
+				case StatusInfo.NextPlayer:
+				{
+					
+					break;
+				}
+				case StatusInfo.NextPhase:
+				{
+					MessageBox.Show("Movement over, time for combat");
+					break;
+				}
+			}			
 		}
 	}
 }

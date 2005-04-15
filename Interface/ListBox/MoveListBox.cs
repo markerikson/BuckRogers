@@ -78,7 +78,7 @@ namespace BuckRogers.Interface
 					m_HeadingFont,
 					TextBrush, 
 					bounds.Left/* + IconList.ImageSize.Width*/ + 5,
-					bounds.Top /*+ IconList.ImageSize.Height*/ /*+ m_HeadingFont.Height*/);
+					bounds.Top + 2/*+ IconList.ImageSize.Height*/ /*+ m_HeadingFont.Height*/);
 
 				//draw main text
 				int LinesFilled=0,
