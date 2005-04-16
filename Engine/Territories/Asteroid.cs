@@ -27,5 +27,12 @@ namespace BuckRogers
 				}
 			}	
 		}
+
+		public override bool CheckControl()
+		{
+			return (this.Owner != Player.NONE);
+
+		}
+
 	}
 }

@@ -40,6 +40,9 @@ namespace BuckRogers
 		private GameController m_controller;
 		private BattleController m_battleController;
 
+		private CombatForm m_combatForm;
+		private ProductionForm m_productionForm;
+
 		private MapControl m_map;
 		private MapClickMode m_clickMode;
 		private System.Windows.Forms.Button m_btnCenterCamera;
@@ -53,6 +56,9 @@ namespace BuckRogers
 		private System.Windows.Forms.MainMenu mainMenu1;
 		private System.Windows.Forms.MenuItem menuItem1;
 		private System.Windows.Forms.MenuItem menuItem2;
+		private System.Windows.Forms.StatusBarPanel statusBarPanel1;
+		private System.Windows.Forms.StatusBarPanel statusBarPanel2;
+		private System.Windows.Forms.Button button1;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
 
 
@@ -78,16 +84,15 @@ namespace BuckRogers
 
 			m_controller.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
 			m_battleController.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
-			m_controller.StatusUpdate += new StatusUpdateHandler(m_controller_StatusUpdate);
+			m_controller.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
+			m_battleController.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
 			ct.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
 
 			ct.Init();
 
 			m_movePanel.Controller = m_controller;
 
-			m_controller.NextTurn();
-
-			statusBar1.Text = "Current player: " + m_controller.CurrentPlayer.Name;
+			
 			
 			m_map.Size = new Size(this.ClientSize.Width - tabControl1.Right - 4, this.ClientSize.Height - 52);
 			m_map.TerritoryClicked +=new TerritoryClickedHandler(OnTerritoryClicked);
@@ -116,12 +121,28 @@ namespace BuckRogers
 			//ulCorner.Y -= this.Height / 2;
 
 			m_map.ScrollControl.ViewPosition = ulCorner;
-
 			m_cbCenterLocations.SelectedIndex = 0;
 
-			//this.ResumeLayout(false);
 
 			m_movePanel.MoveModeChanged += new MoveModeChangedHandler(OnMoveModeChanged);
+
+			m_controller.NextTurn();
+
+			/*
+			statusBar1.Panels.Add("Foo");
+			statusBar1.Panels.Add("Bar");
+
+			statusBar1.Panels[0].Width = 120;
+			statusBar1.Panels[1].Width = 100;
+			*/
+			
+			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+			statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
+
+			m_movePanel.RefreshPlayerOrder();
+
+			m_map.GameController = m_controller;
+			m_map.PlacePlanetIcons();
 			
 		}
 
@@ -159,12 +180,17 @@ namespace BuckRogers
 			this.m_pgTerritory = new System.Windows.Forms.TabPage();
 			this.m_territoryPanel = new BuckRogers.Interface.TerritoryPanel();
 			this.statusBar1 = new System.Windows.Forms.StatusBar();
+			this.statusBarPanel1 = new System.Windows.Forms.StatusBarPanel();
+			this.statusBarPanel2 = new System.Windows.Forms.StatusBarPanel();
 			this.mainMenu1 = new System.Windows.Forms.MainMenu();
 			this.menuItem1 = new System.Windows.Forms.MenuItem();
 			this.menuItem2 = new System.Windows.Forms.MenuItem();
+			this.button1 = new System.Windows.Forms.Button();
 			this.tabControl1.SuspendLayout();
 			this.m_pgAction.SuspendLayout();
 			this.m_pgTerritory.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel1)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel2)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// m_btnZoomIn
@@ -257,6 +283,7 @@ namespace BuckRogers
 			this.m_movePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
 			this.m_movePanel.Controller = null;
 			this.m_movePanel.DockPadding.Bottom = 4;
+			this.m_movePanel.DockPadding.Top = 282;
 			this.m_movePanel.Location = new System.Drawing.Point(0, 5);
 			this.m_movePanel.Name = "m_movePanel";
 			this.m_movePanel.Size = new System.Drawing.Size(236, 488);
@@ -282,9 +309,23 @@ namespace BuckRogers
 			// 
 			this.statusBar1.Location = new System.Drawing.Point(0, 674);
 			this.statusBar1.Name = "statusBar1";
+			this.statusBar1.Panels.AddRange(new System.Windows.Forms.StatusBarPanel[] {
+																						  this.statusBarPanel1,
+																						  this.statusBarPanel2});
+			this.statusBar1.ShowPanels = true;
 			this.statusBar1.Size = new System.Drawing.Size(1016, 22);
 			this.statusBar1.TabIndex = 8;
 			this.statusBar1.Text = "statusBar1";
+			// 
+			// statusBarPanel1
+			// 
+			this.statusBarPanel1.Text = "statusBarPanel1";
+			this.statusBarPanel1.Width = 200;
+			// 
+			// statusBarPanel2
+			// 
+			this.statusBarPanel2.Text = "statusBarPanel2";
+			this.statusBarPanel2.Width = 120;
 			// 
 			// mainMenu1
 			// 
@@ -303,10 +344,19 @@ namespace BuckRogers
 			this.menuItem2.Index = 0;
 			this.menuItem2.Text = "Exit";
 			// 
+			// button1
+			// 
+			this.button1.Location = new System.Drawing.Point(284, 648);
+			this.button1.Name = "button1";
+			this.button1.TabIndex = 9;
+			this.button1.Text = "button1";
+			this.button1.Click += new System.EventHandler(this.button1_Click_1);
+			// 
 			// BuckRogersForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(1016, 696);
+			this.Controls.Add(this.button1);
 			this.Controls.Add(this.statusBar1);
 			this.Controls.Add(this.tabControl1);
 			this.Controls.Add(this.label1);
@@ -322,6 +372,8 @@ namespace BuckRogers
 			this.tabControl1.ResumeLayout(false);
 			this.m_pgAction.ResumeLayout(false);
 			this.m_pgTerritory.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel1)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel2)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -473,22 +525,79 @@ namespace BuckRogers
 		
 		}
 
-		private void m_controller_StatusUpdate(object sender, StatusUpdateEventArgs suea)
+		private bool OnStatusUpdate(object sender, StatusUpdateEventArgs suea)
 		{
-			statusBar1.Text = "Current player: " + suea.Player.Name;
+			bool result = true;
 			switch(suea.StatusInfo)
 			{
 				case StatusInfo.NextPlayer:
 				{
-					
+					statusBar1.Panels[0].Text = "Current player: " + suea.Player.Name;
 					break;
 				}
 				case StatusInfo.NextPhase:
 				{
-					MessageBox.Show("Movement over, time for combat");
+					statusBar1.Panels[0].Text = "Combat phase";
+					//MessageBox.Show("Movement over, time for combat");
+
+					switch(m_controller.CurrentPhase)
+					{
+						case GamePhase.Combat:
+						{
+							if(m_combatForm == null)
+							{
+								m_combatForm = new CombatForm(m_controller, m_battleController);
+							}
+
+							m_controller.FindBattles();
+
+							if(m_controller.Battles.Count == 0)
+							{
+								MessageBox.Show("No battles this turn - moving to production");
+								m_controller.NextPhase();
+								
+							}
+							else
+							{
+								m_combatForm.BeginCombat();
+								m_combatForm.ShowDialog();
+							}
+							
+							goto case GamePhase.Production;
+						}
+						case GamePhase.Production:
+						{
+							if(m_productionForm == null)
+							{
+								m_productionForm = new ProductionForm(m_controller);
+							}
+
+							m_productionForm.SetupProduction();
+							m_productionForm.ShowDialog();
+							int i = 42;
+							int q = i;
+
+							m_controller.NextTurn();
+							m_map.AdvancePlanets();
+							statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+							statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
+							break;
+						}
+					}
+					
+					
+
 					break;
 				}
-			}			
+				
+			}		
+	
+			return result;
+		}
+
+		private void button1_Click_1(object sender, System.EventArgs e)
+		{
+		
 		}
 	}
 }

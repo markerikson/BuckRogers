@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Data;
 using System.Windows.Forms;
@@ -11,6 +12,7 @@ using UMD.HCIL.Piccolo;
 using UMD.HCIL.Piccolo.Nodes;
 using UMD.HCIL.Piccolo.Util;
 using UMD.HCIL.PiccoloX;
+using UMD.HCIL.PiccoloX.Activities;
 using UMD.HCIL.PiccoloX.Nodes;
 using UMD.HCIL.PiccoloX.Components;
 using UMD.HCIL.Piccolo.Event;
@@ -43,6 +45,13 @@ namespace BuckRogers
 		private PNode[] m_ao;
 		private PNode[][] m_orbits;
 
+		private GameController m_controller;
+
+		private PPath m_iconMercury;
+		private PPath m_iconVenus;
+		private PPath m_iconEarth;
+		private PPath m_iconMars;
+		private PPath[] m_iconAsteroids;
 		private Hashtable m_territoryMarkers;
 		
 		private int m_idxPlanets;
@@ -1081,6 +1090,7 @@ namespace BuckRogers
 				text.TextBrush = Brushes.White;
 				circle = PPath.CreateEllipse(0f, 0f, 10f, 10f);
 				circle.Brush = new SolidBrush(color);//Brushes.Black;
+				circle.Pen = Pens.Black;
 
 				circle.Tag = orbitName + " Orbit: " + i.ToString();
 
@@ -1613,6 +1623,82 @@ namespace BuckRogers
 			}
 		}
 
+		public void PlacePlanetIcons()
+		{
+			//m_planetIcons = new Hashtable();
+			m_iconMercury = PPath.CreateEllipse(0, 0, 50, 50);
+			m_iconMercury.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Yellow);
+			m_iconMercury.Pen = Pens.White;
+
+			m_iconVenus = PPath.CreateEllipse(0, 0, 50, 50);
+			m_iconVenus.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Green);
+			m_iconVenus.Pen = Pens.White;
+
+			m_iconEarth = PPath.CreateEllipse(0, 0, 50, 50);
+			m_iconEarth.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Blue);
+			m_iconEarth.Pen = Pens.White;
+
+			m_iconMars = PPath.CreateEllipse(0, 0, 50, 50);
+			m_iconMars.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Red);
+			m_iconMars.Pen = Pens.White;
+			
+
+			Canvas.Layer.AddChild(m_iconMercury);
+			Canvas.Layer.AddChild(m_iconVenus);
+			Canvas.Layer.AddChild(m_iconEarth);
+			Canvas.Layer.AddChild(m_iconMars);
+
+			m_iconAsteroids = new PPath[9];
+			for(int i = 0; i < 9; i++)
+			{
+				m_iconAsteroids[i] = PPath.CreateEllipse(0, 0, 50, 50);
+				m_iconAsteroids[i].Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Gray);
+				m_iconAsteroids[i].Pen = Pens.White;
+				Canvas.Layer.AddChild(m_iconAsteroids[i]);
+			}
+
+			
+			AdvancePlanets();
+		}
+
+		public void AdvancePlanets()
+		{
+			OrbitalSystem mercury = (OrbitalSystem)m_controller.Map.Planets["Mercury"];
+			PNode mercuryNode = m_meo[mercury.CurrentOrbitIndex].AllNodes[0];
+			m_iconMercury.X = mercuryNode.X - 20;
+			m_iconMercury.Y = mercuryNode.Y - 20;
+			mercuryNode.Parent.MoveInFrontOf(m_iconMercury);
+
+			OrbitalSystem venus = (OrbitalSystem)m_controller.Map.Planets["Venus"];
+			PNode venusNode = m_vo[venus.CurrentOrbitIndex].AllNodes[0];
+			m_iconVenus.X = venusNode.X - 20;
+			m_iconVenus.Y = venusNode.Y - 20;
+			venusNode.Parent.MoveInFrontOf(m_iconVenus);
+
+			OrbitalSystem earth = (OrbitalSystem)m_controller.Map.Planets["Earth"];
+			PNode earthNode = m_eo[earth.CurrentOrbitIndex].AllNodes[0];
+			m_iconEarth.X = earthNode.X - 20;
+			m_iconEarth.Y = earthNode.Y - 20;
+			earthNode.Parent.MoveInFrontOf(m_iconEarth);
+
+			OrbitalSystem mars = (OrbitalSystem)m_controller.Map.Planets["Mars"];
+			PNode marsNode = m_mao[mars.CurrentOrbitIndex].AllNodes[0];
+			m_iconMars.X = marsNode.X - 20;
+			m_iconMars.Y = marsNode.Y - 20;
+			marsNode.Parent.MoveInFrontOf(m_iconMars);
+
+			string[] asteroidNames = {"Ceres", "Pallas", "Psyche", "Thule", "Fortuna", "Vesta", "Juno", "Hygeia", "Aurora"};
+			for(int i = 0; i < m_iconAsteroids.Length; i++)
+			{
+				OrbitalSystem asteroid = (OrbitalSystem)m_controller.Map.Planets[asteroidNames[i]];
+				PNode asteroidNode = m_ao[asteroid.CurrentOrbitIndex].AllNodes[0];
+				m_iconAsteroids[i].X = asteroidNode.X - 20;
+				m_iconAsteroids[i].Y = asteroidNode.Y - 20;
+				asteroidNode.Parent.MoveInFrontOf(m_iconAsteroids[i]);
+			}
+			
+		}
+
 		public void DrawScreenshot()
 		{
 			float oldScale = m_canvas.Camera.ViewScale;
@@ -1636,6 +1722,12 @@ namespace BuckRogers
 		{
 			get { return this.m_scroller; }
 			set { this.m_scroller = value; }
+		}
+
+		public BuckRogers.GameController GameController
+		{
+			get { return this.m_controller; }
+			set { this.m_controller = value; }
 		}
 
 	}

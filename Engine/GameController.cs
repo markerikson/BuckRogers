@@ -6,7 +6,14 @@ using System.Drawing;
 
 namespace BuckRogers
 {
-	public delegate void StatusUpdateHandler(object sender, StatusUpdateEventArgs suea);
+	public enum GamePhase
+	{
+		Setup,
+		Movement,
+		Combat,
+		Production,
+	}
+	public delegate bool StatusUpdateHandler(object sender, StatusUpdateEventArgs suea);
 	/// <summary>
 	/// Summary description for GameController.
 	/// </summary>
@@ -47,13 +54,55 @@ namespace BuckRogers
 			get { return this.m_currentPlayerOrder; }
 			set { this.m_currentPlayerOrder = value; }
 		}
-
-		// TODO Remove this when it's not needed for testing
 		
 		public BuckRogers.Hashlist Battles
 		{
 			get { return this.m_battles; }
 			set { this.m_battles = value; }
+		}
+
+		public bool CanUndo
+		{
+			get
+			{
+				return m_checkedActions.Count != 0;
+			}
+		}
+
+		public bool CanRedo
+		{
+			get
+			{
+				return m_undoneActions.Count != 0;
+			}
+		}
+
+		public int TurnNumber
+		{
+			get
+			{
+				return m_turnNumber;
+			}
+		}
+
+		public Player CurrentPlayer
+		{
+			get
+			{
+				return (Player)m_currentPlayerOrder[m_idxCurrentPlayer];
+			}
+		}
+
+		public BuckRogers.TurnRoll[] Rolls
+		{
+			get { return this.m_rolls; }
+			set { this.m_rolls = value; }
+		}
+
+		public BuckRogers.GamePhase CurrentPhase
+		{
+			get { return this.m_phase; }
+			set { this.m_phase = value; }
 		}
 		
 		
@@ -67,18 +116,16 @@ namespace BuckRogers
 		private Player[] m_players;
 		private ArrayList m_currentPlayerOrder;
 		public ArrayList m_rollResults;
-		//private MersenneTwister m_twister;
 		private ArrayList m_rollList;
 		private ArrayList m_checkedActions;
 		private ArrayList m_undoneActions;
 		private int m_turnNumber;
 		private int m_idxCurrentPlayer;
 		private bool m_redoingAction;
-		
-		private Hashlist m_battles;
+		private GamePhase m_phase;
 
-		// TODO Change this into a property or something		
-		public TurnRoll[] Rolls;
+		private Hashlist m_battles;	
+		public TurnRoll[] m_rolls;
 
 
 		
@@ -170,6 +217,8 @@ namespace BuckRogers
 				m_players[i] = new Player(playerNames[i]);
 				m_players[i].Color = m_playerColors[i];
 			}
+
+			m_phase = GamePhase.Setup;
 		}
 
 		public Player GetPlayer(string name)
@@ -280,7 +329,7 @@ namespace BuckRogers
 			ArrayList players = new ArrayList(m_players);
 			RollAndCheckForTies(players);
 
-			Rolls = (TurnRoll[])m_rollList.ToArray(typeof(TurnRoll));
+			m_rolls = (TurnRoll[])m_rollList.ToArray(typeof(TurnRoll));
 
 			TurnRoll topRoll = (TurnRoll)m_rollResults[0];
 			m_currentPlayerOrder.Add(topRoll.Player);
@@ -760,10 +809,6 @@ namespace BuckRogers
 
 			m_checkedActions.Clear();
 
-			// TODO Change the active player
-
-			// TODO Raise an event here for end of all movement?
-
 		}
 
 		#endregion
@@ -797,8 +842,7 @@ namespace BuckRogers
 				if(os.HasKillerSatellite)
 				{
 					if(os.NearOrbit.Units.HasUnitsFromMultiplePlayers  
-						// TODO Remove this comment && os.IsControlled)
-						)
+						&& os.IsControlled)
 					{
 						Hashlist hl = (Hashlist)planets[os.Name];
 						// first time around, no need to check for contains
@@ -1068,10 +1112,13 @@ namespace BuckRogers
 
 		public void NextTurn()
 		{
+			m_map.AdvancePlanets();
 			RollForInitiative();
 
 			m_idxCurrentPlayer = 0;
 			m_turnNumber++;
+
+			m_phase = GamePhase.Movement;
 		}
 
 		public bool NextPlayer()
@@ -1092,12 +1139,18 @@ namespace BuckRogers
 				m_idxCurrentPlayer++;
 			}
 
+			if(!morePlayers)
+			{
+				NextPhase();
+			}
 			
 
 			if(StatusUpdate != null)
 			{
 				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
 				suea.Player = (Player)m_currentPlayerOrder[m_idxCurrentPlayer];
+
+				
 				suea.StatusInfo = morePlayers ? StatusInfo.NextPlayer : StatusInfo.NextPhase;
 				StatusUpdate(this, suea);
 			}
@@ -1105,37 +1158,30 @@ namespace BuckRogers
 			return morePlayers;
 		}
 
-		public bool CanUndo
+		public void NextPhase()
 		{
-			get
+			switch(m_phase)
 			{
-				return m_checkedActions.Count != 0;
+				case GamePhase.Setup:
+				case GamePhase.Production:
+				{
+					m_phase = GamePhase.Movement;
+					break;
+				}
+				case GamePhase.Movement:
+				{
+					m_phase = GamePhase.Combat;
+					break;
+				}
+				case GamePhase.Combat:
+				{
+					m_phase = GamePhase.Production;
+					break;
+				}
 			}
 		}
 
-		public bool CanRedo
-		{
-			get
-			{
-				return m_undoneActions.Count != 0;
-			}
-		}
-
-		public int TurnNumber
-		{
-			get
-			{
-				return m_turnNumber;
-			}
-		}
-
-		public Player CurrentPlayer
-		{
-			get
-			{
-				return (Player)m_currentPlayerOrder[m_idxCurrentPlayer];
-			}
-		}
+		
 
 	}
 }

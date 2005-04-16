@@ -16,6 +16,7 @@ namespace BuckRogers
 	{
 		public event DisplayUnitsHandler UnitsToDisplay;
 		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
+		public StatusUpdateHandler StatusUpdate;
 		
 		private int[,] m_combatTable = new int[,]	{	{6, 8, 7, NOTPOSSIBLE, 6, NOTPOSSIBLE, 3}, // Trooper
 														{5, 6, 6, NOTPOSSIBLE, 5, NOTPOSSIBLE, 2}, // Gennie
@@ -91,40 +92,102 @@ namespace BuckRogers
 				u.Destroy();
 			}
 
-			if(m_battles != null && m_battles.Count > 0)
+			// if this is not the first battle, check to see if the territory changed owners
+			if(m_currentBattle != null && m_currentBattle.Territory.Type != TerritoryType.Space)
 			{
-				// if this is not the first battle, check to see if the territory changed owners
-				if(m_currentBattle != null && m_currentBattle.Territory.Type != TerritoryType.Space)
+				ArrayList playersLeft = m_currentBattle.Territory.Units.GetPlayersWithUnits();
+
+				// Check for captured factories
+
+				if(playersLeft.Count == 2)
 				{
-					ArrayList playersLeft = m_currentBattle.Territory.Units.GetPlayersWithUnits();
-
-					if(playersLeft.Count > 1)
+					if(StatusUpdate != null)
 					{
-						throw new Exception("Shouldn't be more than one player left after a battle");
-					}
+						StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+						suea.Territory = m_currentBattle.Territory;
+							
 
-					if(playersLeft.Count == 1)
-					{
-						Player p = (Player)playersLeft[0];
-						Player owner = m_currentBattle.Territory.Owner;
+						UnitCollection factories = m_currentBattle.Territory.Units.GetUnits(UnitType.Factory);
 
-						if(p != owner)
+						UnitCollection destroyedFactories = new UnitCollection();
+						// Possible to have one producing and another just built - unlikely, but possible
+						foreach(Factory f in factories)
 						{
-							m_currentBattle.Territory.Owner = p;
+							suea.StatusInfo = StatusInfo.FactoryConquered;
+							bool destroyFactory = StatusUpdate(this, suea);
 
-							if(TerritoryOwnerChanged != null)
+							// Either the factory will be destroyed or it will be captured.
+							playersLeft.Remove(f.Owner);
+								
+							if(destroyFactory)
 							{
-								TerritoryEventArgs tea = new TerritoryEventArgs();
-								tea.Name = m_currentBattle.Territory.Name;
-								tea.Owner = p;
+								int roll = Utility.RollD10();
+								bool factoryDestroyed = (roll >= 7);
 
-								TerritoryOwnerChanged(this, tea);
-							}	
+								if(factoryDestroyed)
+								{
+									destroyedFactories.AddUnit(f);										
+								}
 
+								suea.StatusInfo = StatusInfo.SabotageResult;
+								suea.Result = factoryDestroyed;
+
+								StatusUpdate(this, suea);
+							}								
 						}
 
+						foreach(Unit u in destroyedFactories)
+						{
+							factories.RemoveUnit(u);
+							
+							u.Destroy();
+						}
+
+						// presumably, at this point, there's only one player left listed in the 
+						// territory, and that should be the new owner.
+
+						Player newOwner = (Player)playersLeft[0];
+
+						foreach(Factory f in factories)
+						{
+							f.Owner = newOwner;
+						}
 					}
 				}
+
+				playersLeft = m_currentBattle.Territory.Units.GetPlayersWithUnits();
+
+				if(playersLeft.Count > 1)
+				{
+					throw new Exception("Shouldn't be more than one player left after a battle");
+				}
+
+				if(playersLeft.Count == 1)
+				{
+					Player p = (Player)playersLeft[0];
+					Player owner = m_currentBattle.Territory.Owner;
+
+					if(p != owner)
+					{
+						m_currentBattle.Territory.Owner = p;
+
+						if(TerritoryOwnerChanged != null)
+						{
+							TerritoryEventArgs tea = new TerritoryEventArgs();
+							tea.Name = m_currentBattle.Territory.Name;
+							tea.Owner = p;
+
+							TerritoryOwnerChanged(this, tea);
+						}	
+
+					}
+
+				}
+			}
+
+			if(m_battles != null && m_battles.Count > 0)
+			{
+				
 				
 
 				m_currentBattle = (BattleInfo)m_battles[0];

@@ -128,6 +128,16 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "CombatForm.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "CombatForm.resx"
+                    DependentUpon = "CombatForm.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "MapControl.cs"
                     SubType = "Component"
                     BuildAction = "Compile"
@@ -160,6 +170,16 @@
                 <File
                     RelPath = "MoveUnitsForm.resx"
                     DependentUpon = "MoveUnitsForm.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "ProductionForm.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "ProductionForm.resx"
+                    DependentUpon = "ProductionForm.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File

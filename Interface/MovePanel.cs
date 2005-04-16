@@ -39,6 +39,7 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.TabControl tabControl1;
 		private System.Windows.Forms.TabPage tabPage1;
 		private System.Windows.Forms.TabPage tabPage2;
+		private System.Windows.Forms.ListBox m_lbPlayerOrder;
 
 		/// <summary> 
 		/// Required designer variable.
@@ -96,6 +97,7 @@ namespace BuckRogers.Interface
 			m_btnUndoMove.Enabled = false;
 			m_btnRedoMove.Enabled = false;
 			m_btnDoneTransports.Enabled = false;
+
 		}
 
 		/// <summary> 
@@ -133,12 +135,13 @@ namespace BuckRogers.Interface
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this.m_lbPlayerOrder = new System.Windows.Forms.ListBox();
 			this.tabControl1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// m_btnAddMove
 			// 
-			this.m_btnAddMove.Location = new System.Drawing.Point(0, 4);
+			this.m_btnAddMove.Location = new System.Drawing.Point(0, 104);
 			this.m_btnAddMove.Name = "m_btnAddMove";
 			this.m_btnAddMove.Size = new System.Drawing.Size(72, 23);
 			this.m_btnAddMove.TabIndex = 0;
@@ -147,7 +150,7 @@ namespace BuckRogers.Interface
 			// 
 			// m_btnUndoMove
 			// 
-			this.m_btnUndoMove.Location = new System.Drawing.Point(0, 60);
+			this.m_btnUndoMove.Location = new System.Drawing.Point(0, 160);
 			this.m_btnUndoMove.Name = "m_btnUndoMove";
 			this.m_btnUndoMove.Size = new System.Drawing.Size(72, 23);
 			this.m_btnUndoMove.TabIndex = 2;
@@ -156,7 +159,7 @@ namespace BuckRogers.Interface
 			// 
 			// m_btnRedoMove
 			// 
-			this.m_btnRedoMove.Location = new System.Drawing.Point(76, 60);
+			this.m_btnRedoMove.Location = new System.Drawing.Point(76, 160);
 			this.m_btnRedoMove.Name = "m_btnRedoMove";
 			this.m_btnRedoMove.Size = new System.Drawing.Size(72, 23);
 			this.m_btnRedoMove.TabIndex = 3;
@@ -165,7 +168,7 @@ namespace BuckRogers.Interface
 			// 
 			// m_btnEndMoves
 			// 
-			this.m_btnEndMoves.Location = new System.Drawing.Point(152, 60);
+			this.m_btnEndMoves.Location = new System.Drawing.Point(152, 160);
 			this.m_btnEndMoves.Name = "m_btnEndMoves";
 			this.m_btnEndMoves.Size = new System.Drawing.Size(72, 23);
 			this.m_btnEndMoves.TabIndex = 4;
@@ -175,7 +178,7 @@ namespace BuckRogers.Interface
 			// m_btnCancelMove
 			// 
 			this.m_btnCancelMove.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-			this.m_btnCancelMove.Location = new System.Drawing.Point(76, 4);
+			this.m_btnCancelMove.Location = new System.Drawing.Point(76, 104);
 			this.m_btnCancelMove.Name = "m_btnCancelMove";
 			this.m_btnCancelMove.Size = new System.Drawing.Size(72, 23);
 			this.m_btnCancelMove.TabIndex = 6;
@@ -185,7 +188,7 @@ namespace BuckRogers.Interface
 			// m_btnAcceptMoves
 			// 
 			this.m_btnAcceptMoves.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-			this.m_btnAcceptMoves.Location = new System.Drawing.Point(152, 4);
+			this.m_btnAcceptMoves.Location = new System.Drawing.Point(152, 104);
 			this.m_btnAcceptMoves.Name = "m_btnAcceptMoves";
 			this.m_btnAcceptMoves.Size = new System.Drawing.Size(72, 23);
 			this.m_btnAcceptMoves.TabIndex = 7;
@@ -194,7 +197,7 @@ namespace BuckRogers.Interface
 			// 
 			// label1
 			// 
-			this.label1.Location = new System.Drawing.Point(0, 92);
+			this.label1.Location = new System.Drawing.Point(0, 192);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(80, 16);
 			this.label1.TabIndex = 8;
@@ -209,14 +212,14 @@ namespace BuckRogers.Interface
 																  "Four",
 																  "Five",
 																  "Six"});
-			this.m_lbCurrentMoves.Location = new System.Drawing.Point(84, 92);
+			this.m_lbCurrentMoves.Location = new System.Drawing.Point(84, 192);
 			this.m_lbCurrentMoves.Name = "m_lbCurrentMoves";
 			this.m_lbCurrentMoves.Size = new System.Drawing.Size(140, 82);
 			this.m_lbCurrentMoves.TabIndex = 9;
 			// 
 			// m_btnTransports
 			// 
-			this.m_btnTransports.Location = new System.Drawing.Point(0, 32);
+			this.m_btnTransports.Location = new System.Drawing.Point(0, 132);
 			this.m_btnTransports.Name = "m_btnTransports";
 			this.m_btnTransports.Size = new System.Drawing.Size(148, 23);
 			this.m_btnTransports.TabIndex = 10;
@@ -226,7 +229,7 @@ namespace BuckRogers.Interface
 			// m_btnDoneTransports
 			// 
 			this.m_btnDoneTransports.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-			this.m_btnDoneTransports.Location = new System.Drawing.Point(152, 32);
+			this.m_btnDoneTransports.Location = new System.Drawing.Point(152, 132);
 			this.m_btnDoneTransports.Name = "m_btnDoneTransports";
 			this.m_btnDoneTransports.Size = new System.Drawing.Size(72, 23);
 			this.m_btnDoneTransports.TabIndex = 11;
@@ -237,7 +240,7 @@ namespace BuckRogers.Interface
 			// 
 			this.tabControl1.Controls.Add(this.tabPage1);
 			this.tabControl1.Controls.Add(this.tabPage2);
-			this.tabControl1.Location = new System.Drawing.Point(0, 180);
+			this.tabControl1.Location = new System.Drawing.Point(0, 280);
 			this.tabControl1.Name = "tabControl1";
 			this.tabControl1.SelectedIndex = 0;
 			this.tabControl1.Size = new System.Drawing.Size(232, 316);
@@ -259,8 +262,16 @@ namespace BuckRogers.Interface
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "Transports";
 			// 
+			// m_lbPlayerOrder
+			// 
+			this.m_lbPlayerOrder.Location = new System.Drawing.Point(88, 4);
+			this.m_lbPlayerOrder.Name = "m_lbPlayerOrder";
+			this.m_lbPlayerOrder.Size = new System.Drawing.Size(136, 95);
+			this.m_lbPlayerOrder.TabIndex = 13;
+			// 
 			// MovePanel
 			// 
+			this.Controls.Add(this.m_lbPlayerOrder);
 			this.Controls.Add(this.tabControl1);
 			this.Controls.Add(this.m_btnDoneTransports);
 			this.Controls.Add(this.m_btnTransports);
@@ -273,7 +284,7 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.m_btnUndoMove);
 			this.Controls.Add(this.m_btnAddMove);
 			this.Name = "MovePanel";
-			this.Size = new System.Drawing.Size(240, 500);
+			this.Size = new System.Drawing.Size(240, 600);
 			this.tabControl1.ResumeLayout(false);
 			this.ResumeLayout(false);
 
@@ -335,7 +346,6 @@ namespace BuckRogers.Interface
 				case MoveMode.StartTransport:
 				{
 					TransportLoadForm tlf = new TransportLoadForm(m_controller);
-					tlf.TransportInfo += new TransportInfoEventHandler(tlf_TransportInfo);
 
 					tlf.SetupUnits(t, m_controller.CurrentPlayer);
 					tlf.ShowDialog();
@@ -349,21 +359,11 @@ namespace BuckRogers.Interface
 
 					foreach(Action a in transferInfo)
 					{
-						/*
-						char[] delimiters = {'%'};
-						string[] eventInfo = s.Split(delimiters);
-
-						//eventInfo[0] += (m_mlbTransports.Items.Count + 1).ToString();
-						m_mlbTransports.Items.Insert(0, eventInfo[0], eventInfo[1]);
-						m_mlbTransports.Refresh();
-						*/
 						AddActionToList(a);
 					}
 					break;
 				}
 			}
-			
-			
 		}
 
 		private void m_btnCancelMove_Click(object sender, System.EventArgs e)
@@ -474,7 +474,6 @@ namespace BuckRogers.Interface
 				m_mlbTransports.Items.Remove(0);
 				m_mlbTransports.Refresh();
 			}
-			
 
 			m_btnUndoMove.Enabled = m_controller.CanUndo;
 			m_btnRedoMove.Enabled = m_controller.CanRedo;
@@ -569,15 +568,38 @@ namespace BuckRogers.Interface
 
 		private void m_btnEndMoves_Click(object sender, System.EventArgs e)
 		{
+			m_controller.EndMovePhase();
+			//m_controller.NextPlayer();
 			if(m_controller.NextPlayer())
 			{
-				m_mlbMoves.Items.Clear();
-				m_mlbMoves.Refresh();
-				m_mlbTransports.Items.Clear();
-				m_mlbTransports.Refresh();
-				m_unitsToMove.Clear();				
+				m_lbPlayerOrder.SelectedIndex++;
+			}
+			else
+			{
+				RefreshPlayerOrder();	
+				
 			}
 
+			m_mlbMoves.Items.Clear();
+			m_mlbMoves.Refresh();
+			m_mlbTransports.Items.Clear();
+			m_mlbTransports.Refresh();
+			m_unitsToMove.Clear();	
+
+			
+
+		}
+
+		public void RefreshPlayerOrder()
+		{
+			m_lbPlayerOrder.Items.Clear();
+
+			foreach(Player p in m_controller.PlayerOrder)
+			{
+				m_lbPlayerOrder.Items.Add(p.Name);
+			}
+
+			m_lbPlayerOrder.SelectedIndex = 0;
 		}
 
 		private void m_btnTransports_Click(object sender, System.EventArgs e)

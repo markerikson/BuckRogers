@@ -7,14 +7,11 @@ using System.Text;
 
 namespace BuckRogers.Interface
 {
-	public delegate void TransportInfoEventHandler(object sender, TransportInfoEventArgs tiea);
 	/// <summary>
 	/// Summary description for TransportLoadForm.
 	/// </summary>
 	public class TransportLoadForm : System.Windows.Forms.Form
 	{
-		public event TransportInfoEventHandler TransportInfo;
-
 		private System.Windows.Forms.ColumnHeader columnHeader4;
 		private System.Windows.Forms.ColumnHeader columnHeader5;
 		private System.Windows.Forms.ColumnHeader columnHeader6;
@@ -470,8 +467,8 @@ namespace BuckRogers.Interface
 					int numToTransfer = Math.Min(numEmptySpaces, numUnits);
 
 
-					//UnitCollection m_
-					UnitCollection transportees = m_troopers.GetUnits(m_player, numToTransfer).GetUnitsWithMoves(numMoves);
+					UnitCollection temp = m_troopers.GetUnitsWithMoves(numMoves);
+					UnitCollection transportees = temp.GetUnits(m_player, numToTransfer);
 			
 					try
 					{

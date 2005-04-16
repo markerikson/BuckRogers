@@ -1127,8 +1127,6 @@ namespace BuckRogers
 
 				destination.Items.Add(lvi2);
 			}
-
-			
 		}
 
 		private void m_butRemAttackers_Click(object sender, System.EventArgs e)
