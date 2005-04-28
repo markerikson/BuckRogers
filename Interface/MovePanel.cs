@@ -573,12 +573,17 @@ namespace BuckRogers.Interface
 			if(m_controller.NextPlayer())
 			{
 				m_lbPlayerOrder.SelectedIndex++;
+				
 			}
 			else
 			{
-				RefreshPlayerOrder();	
+				RefreshPlayerOrder();
+				
 				
 			}
+
+			m_btnUndoMove.Enabled = m_controller.CanUndo;
+			m_btnRedoMove.Enabled = m_controller.CanRedo;
 
 			m_mlbMoves.Items.Clear();
 			m_mlbMoves.Refresh();
@@ -632,8 +637,9 @@ namespace BuckRogers.Interface
 		{
 			m_btnAddMove.Enabled = true;
 			m_btnTransports.Enabled = true;
-			m_btnAcceptMoves.Enabled = true;
 			m_btnEndMoves.Enabled = true;
+
+			m_btnDoneTransports.Enabled = false;
 
 			if(MoveModeChanged != null)
 			{

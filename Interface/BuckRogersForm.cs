@@ -379,11 +379,13 @@ namespace BuckRogers
 		}
 		#endregion
 
+		/*
 		[STAThread]
 		public static void Main(string[] args)
 		{
 			Application.Run(new BuckRogersForm());
 		}
+		*/
 
 		public void OnTerritoryClicked(object sender, TerritoryEventArgs tcea)
 		{
@@ -497,11 +499,6 @@ namespace BuckRogers
 			//m_map.Canvas.Camera.ScaleViewBy(0.999999f, view.X, view.Y);
 		}
 
-		private void button1_Click(object sender, System.EventArgs e)
-		{
-			m_map.DrawScreenshot();
-		}
-
 		public void OnMoveModeChanged(object sender, MoveModeEventArgs mmea)
 		{
 			switch(mmea.MoveMode)
@@ -574,8 +571,6 @@ namespace BuckRogers
 
 							m_productionForm.SetupProduction();
 							m_productionForm.ShowDialog();
-							int i = 42;
-							int q = i;
 
 							m_controller.NextTurn();
 							m_map.AdvancePlanets();
@@ -597,7 +592,20 @@ namespace BuckRogers
 
 		private void button1_Click_1(object sender, System.EventArgs e)
 		{
-		
+			int i = 42;
+			int q = i;
+		}
+
+		public BuckRogers.GameController GameController
+		{
+			get { return this.m_controller; }
+			set { this.m_controller = value; }
+		}
+
+		public BuckRogers.BattleController BattleController
+		{
+			get { return this.m_battleController; }
+			set { this.m_battleController = value; }
 		}
 	}
 }

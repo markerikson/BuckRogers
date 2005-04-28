@@ -539,6 +539,8 @@ namespace BuckRogers.Interface
 						MessageBox.Show("Can't load a factory into a transport that is already carrying units");
 						return;
 					}
+
+					// TODO Check if factory is producing, and if so, ask user for confirmation
 					nodeText = "Factory";
 
 					transport.Nodes.Add(nodeText);

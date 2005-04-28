@@ -138,6 +138,16 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "GameSetupForm.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "GameSetupForm.resx"
+                    DependentUpon = "GameSetupForm.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "MapControl.cs"
                     SubType = "Component"
                     BuildAction = "Compile"

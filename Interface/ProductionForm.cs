@@ -227,6 +227,10 @@ namespace BuckRogers.Interface
 		}
 		#endregion
 
+
+		// TODO Black Market production
+		// TODO Dismantle factories
+		
 		private void m_btnFinishProduction_Click(object sender, System.EventArgs e)
 		{
 			m_controller.ExecuteProduction();
@@ -327,6 +331,7 @@ namespace BuckRogers.Interface
 		public void SetupProduction()
 		{
 			m_lbProductionOrder.Items.Clear();
+			m_btnFinishProduction.Enabled = false;
 
 			foreach(Player p in m_controller.PlayerOrder)
 			{
@@ -373,6 +378,15 @@ namespace BuckRogers.Interface
 					lvi.SubItems.Add(f.DestinationTerritory.Name);
 
 					m_lvFactories.Items.Add(lvi);
+				}
+
+				if(usableFactories.Count > 0)
+				{
+					m_lvFactories.Items[0].Selected = true;
+				}
+				else
+				{
+					m_cbNeighbors.Items.Clear();
 				}
 			}
 			else

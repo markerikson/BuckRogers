@@ -990,6 +990,7 @@ namespace BuckRogers.Interface
 
 		private void EnableAttack()
 		{
+			// TODO What if only a leader is in the territory?
 			if( (m_lvAttackers.Items.Count > 0) &&
 				(m_lvDefenders.Items.Count > 0))
 			{
