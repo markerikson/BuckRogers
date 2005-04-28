@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Drawing.Design;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
@@ -60,6 +61,7 @@ namespace BuckRogers
 		private System.Windows.Forms.StatusBarPanel statusBarPanel2;
 		private System.Windows.Forms.Button button1;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
+		
 
 
 		public BuckRogersForm()
@@ -592,8 +594,8 @@ namespace BuckRogers
 
 		private void button1_Click_1(object sender, System.EventArgs e)
 		{
-			int i = 42;
-			int q = i;
+			OrbitalSystem ceres = (OrbitalSystem)m_controller.Map.Planets["Ceres"];
+			ceres.CheckControl();
 		}
 
 		public BuckRogers.GameController GameController

@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using BuckRogers;
 
 namespace BuckRogers.Interface
 {
@@ -37,20 +38,9 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.TabControl tabControl1;
 		private System.Windows.Forms.TabPage tabPage1;
 		private System.Windows.Forms.TabPage tabPage2;
-		private System.Windows.Forms.CheckBox m_chkPlanetFactory;
-		private System.Windows.Forms.CheckBox m_chkTransportedBuilds;
-		private System.Windows.Forms.CheckBox m_chkDeployAnywhere;
-		private System.Windows.Forms.CheckBox m_chkCombineProduction;
-		private System.Windows.Forms.CheckBox m_chkFactoryDefense;
-		private System.Windows.Forms.CheckBox m_chkSlingshot;
-		private System.Windows.Forms.CheckBox m_chkMergeOrbits;
-		private System.Windows.Forms.CheckBox m_chkPartialPlanets;
-		private System.Windows.Forms.CheckBox m_chkLimitFactories;
-		private System.Windows.Forms.CheckBox m_chkCombatRetreats;
-		private System.Windows.Forms.CheckBox m_chkMarkersFight;
-		private System.Windows.Forms.CheckBox m_chkPassingFire;
-		private System.Windows.Forms.CheckBox m_chkTroopSpeeds;
-		private System.Windows.Forms.CheckBox m_chkShipSpeeds;
+		private PropertyTable m_props;
+		private System.Windows.Forms.DataGrid dataGrid1;
+		private System.Windows.Forms.CheckedListBox checkedListBox1;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -84,6 +74,71 @@ namespace BuckRogers.Interface
 			m_tbPlayerNames[5] = m_tbPlayer6;
 
 			m_options = new GameOptions();
+			//m_props = new PropertyTable();
+
+
+
+			DataGridTableStyle dgts=new DataGridTableStyle();
+			
+			dgts.MappingName = m_options.OptionalRules.GetListName(null);//m_options.OptionalRules.GetType().Name; //typeof(OptionsHashlist).Name;//
+
+			DataGridBoolColumn dgbc=new DataGridBoolColumn();
+			
+			dgbc.MappingName="Value";
+			dgbc.AllowNull=false;
+			dgbc.Width = 20;
+			dgts.GridColumnStyles.Add(dgbc);
+			
+
+			DataGridTextBoxColumn dgtbc=new DataGridTextBoxColumn();
+			dgtbc.MappingName ="Description";
+			dgtbc.HeaderText = "Option";
+			dgtbc.ReadOnly = true;
+			dgts.GridColumnStyles.Add(dgtbc);
+			
+			tabPage2.BindingContext = new BindingContext();
+			
+
+			this.dataGrid1.TableStyles.Clear();
+			this.dataGrid1.TableStyles.Add(dgts);
+			
+			dataGrid1.DataSource = m_options.OptionalRules;
+
+			//this.BindingContext = new BindingContext();
+			//tabPage1.BindingContext = this.BindingContext;
+			//tabPage2.BindingContext = this.BindingContext;
+			//checkedListBox1.BindingContext = this.BindingContext;
+
+			//checkedListBox1.BindingContext = new BindingContext();
+
+			ArrayList al = new ArrayList();
+			al.Add(new GameOption("A", false, "Blah"));
+			al.Add(new GameOption("B", true, "Blah blah"));
+			//checkedListBox1.DataSource = m_options.OptionalRules;
+			//checkedListBox1.DisplayMember = "Description";
+			//checkedListBox1.ValueMember = "Value";
+			
+			
+
+			
+			int numCols = dataGrid1.TableStyles[0].GridColumnStyles.Count;//( (DataTable) dataGrid1.DataSource ).Columns.Count; 
+			//the fudge -4 is for the grid borders 
+			int targetWidth = dataGrid1.ClientSize.Width -
+				SystemInformation.VerticalScrollBarWidth - 4; 
+			dataGrid1.TableStyles[0].RowHeaderWidth = 0;
+			int runningWidthUsed = dataGrid1.TableStyles[0].RowHeaderWidth;//dataGrid1.TableStyles[ "customers" ].RowHeaderWidth; 
+            
+			for ( int i = 0; i < numCols - 1; ++i ) 
+				runningWidthUsed += 
+					dataGrid1.TableStyles[0].GridColumnStyles[ i ].Width;
+
+			if ( runningWidthUsed < targetWidth ) 
+				dataGrid1.TableStyles[0].GridColumnStyles[ numCols - 1 ].Width = 
+					targetWidth - runningWidthUsed; 
+
+			
+
+			
 			
 		}
 
@@ -132,24 +187,13 @@ namespace BuckRogers.Interface
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
-			this.m_chkPlanetFactory = new System.Windows.Forms.CheckBox();
-			this.m_chkTransportedBuilds = new System.Windows.Forms.CheckBox();
-			this.m_chkDeployAnywhere = new System.Windows.Forms.CheckBox();
-			this.m_chkCombineProduction = new System.Windows.Forms.CheckBox();
-			this.m_chkFactoryDefense = new System.Windows.Forms.CheckBox();
-			this.m_chkSlingshot = new System.Windows.Forms.CheckBox();
-			this.m_chkMergeOrbits = new System.Windows.Forms.CheckBox();
-			this.m_chkPartialPlanets = new System.Windows.Forms.CheckBox();
-			this.m_chkLimitFactories = new System.Windows.Forms.CheckBox();
-			this.m_chkCombatRetreats = new System.Windows.Forms.CheckBox();
-			this.m_chkMarkersFight = new System.Windows.Forms.CheckBox();
-			this.m_chkPassingFire = new System.Windows.Forms.CheckBox();
-			this.m_chkTroopSpeeds = new System.Windows.Forms.CheckBox();
-			this.m_chkShipSpeeds = new System.Windows.Forms.CheckBox();
+			this.dataGrid1 = new System.Windows.Forms.DataGrid();
+			this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
 			((System.ComponentModel.ISupportInitialize)(this.m_nudNumTerritories)).BeginInit();
 			this.tabControl1.SuspendLayout();
 			this.tabPage1.SuspendLayout();
 			this.tabPage2.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.dataGrid1)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -266,6 +310,7 @@ namespace BuckRogers.Interface
 			// 
 			// button1
 			// 
+			this.button1.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.button1.Location = new System.Drawing.Point(4, 324);
 			this.button1.Name = "button1";
 			this.button1.TabIndex = 18;
@@ -274,6 +319,7 @@ namespace BuckRogers.Interface
 			// 
 			// button2
 			// 
+			this.button2.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.button2.Location = new System.Drawing.Point(92, 324);
 			this.button2.Name = "button2";
 			this.button2.TabIndex = 19;
@@ -329,12 +375,15 @@ namespace BuckRogers.Interface
 			// 
 			// tabControl1
 			// 
+			this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+				| System.Windows.Forms.AnchorStyles.Left) 
+				| System.Windows.Forms.AnchorStyles.Right)));
 			this.tabControl1.Controls.Add(this.tabPage1);
 			this.tabControl1.Controls.Add(this.tabPage2);
 			this.tabControl1.Location = new System.Drawing.Point(4, 8);
 			this.tabControl1.Name = "tabControl1";
 			this.tabControl1.SelectedIndex = 0;
-			this.tabControl1.Size = new System.Drawing.Size(504, 264);
+			this.tabControl1.Size = new System.Drawing.Size(504, 300);
 			this.tabControl1.TabIndex = 24;
 			// 
 			// tabPage1
@@ -359,157 +408,54 @@ namespace BuckRogers.Interface
 			this.tabPage1.Controls.Add(this.m_nudNumTerritories);
 			this.tabPage1.Location = new System.Drawing.Point(4, 22);
 			this.tabPage1.Name = "tabPage1";
-			this.tabPage1.Size = new System.Drawing.Size(496, 238);
+			this.tabPage1.Size = new System.Drawing.Size(496, 274);
 			this.tabPage1.TabIndex = 0;
 			this.tabPage1.Text = "Players";
 			// 
 			// tabPage2
 			// 
-			this.tabPage2.Controls.Add(this.m_chkPlanetFactory);
-			this.tabPage2.Controls.Add(this.m_chkTransportedBuilds);
-			this.tabPage2.Controls.Add(this.m_chkDeployAnywhere);
-			this.tabPage2.Controls.Add(this.m_chkCombineProduction);
-			this.tabPage2.Controls.Add(this.m_chkFactoryDefense);
-			this.tabPage2.Controls.Add(this.m_chkSlingshot);
-			this.tabPage2.Controls.Add(this.m_chkMergeOrbits);
-			this.tabPage2.Controls.Add(this.m_chkPartialPlanets);
-			this.tabPage2.Controls.Add(this.m_chkLimitFactories);
-			this.tabPage2.Controls.Add(this.m_chkCombatRetreats);
-			this.tabPage2.Controls.Add(this.m_chkMarkersFight);
-			this.tabPage2.Controls.Add(this.m_chkPassingFire);
-			this.tabPage2.Controls.Add(this.m_chkTroopSpeeds);
-			this.tabPage2.Controls.Add(this.m_chkShipSpeeds);
+			this.tabPage2.Controls.Add(this.checkedListBox1);
+			this.tabPage2.Controls.Add(this.dataGrid1);
 			this.tabPage2.Location = new System.Drawing.Point(4, 22);
 			this.tabPage2.Name = "tabPage2";
-			this.tabPage2.Size = new System.Drawing.Size(496, 238);
+			this.tabPage2.Size = new System.Drawing.Size(496, 274);
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "Game Options";
 			// 
-			// m_chkPlanetFactory
+			// dataGrid1
 			// 
-			this.m_chkPlanetFactory.Location = new System.Drawing.Point(252, 124);
-			this.m_chkPlanetFactory.Name = "m_chkPlanetFactory";
-			this.m_chkPlanetFactory.Size = new System.Drawing.Size(212, 20);
-			this.m_chkPlanetFactory.TabIndex = 13;
-			this.m_chkPlanetFactory.Text = "First owner of a planet gets a Factory";
+			this.dataGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+				| System.Windows.Forms.AnchorStyles.Left) 
+				| System.Windows.Forms.AnchorStyles.Right)));
+			this.dataGrid1.DataMember = "";
+			this.dataGrid1.HeaderForeColor = System.Drawing.SystemColors.ControlText;
+			this.dataGrid1.Location = new System.Drawing.Point(8, 8);
+			this.dataGrid1.Name = "dataGrid1";
+			this.dataGrid1.Size = new System.Drawing.Size(400, 248);
+			this.dataGrid1.TabIndex = 25;
 			// 
-			// m_chkTransportedBuilds
+			// checkedListBox1
 			// 
-			this.m_chkTransportedBuilds.Location = new System.Drawing.Point(252, 100);
-			this.m_chkTransportedBuilds.Name = "m_chkTransportedBuilds";
-			this.m_chkTransportedBuilds.Size = new System.Drawing.Size(228, 20);
-			this.m_chkTransportedBuilds.TabIndex = 12;
-			this.m_chkTransportedBuilds.Text = "Transported Factories can build fighters";
-			// 
-			// m_chkDeployAnywhere
-			// 
-			this.m_chkDeployAnywhere.Location = new System.Drawing.Point(252, 76);
-			this.m_chkDeployAnywhere.Name = "m_chkDeployAnywhere";
-			this.m_chkDeployAnywhere.Size = new System.Drawing.Size(196, 20);
-			this.m_chkDeployAnywhere.TabIndex = 11;
-			this.m_chkDeployAnywhere.Text = "New units deployed anywhere";
-			// 
-			// m_chkCombineProduction
-			// 
-			this.m_chkCombineProduction.Location = new System.Drawing.Point(252, 52);
-			this.m_chkCombineProduction.Name = "m_chkCombineProduction";
-			this.m_chkCombineProduction.Size = new System.Drawing.Size(240, 20);
-			this.m_chkCombineProduction.TabIndex = 10;
-			this.m_chkCombineProduction.Text = "Adjacent Factories can combine production";
-			// 
-			// m_chkFactoryDefense
-			// 
-			this.m_chkFactoryDefense.Location = new System.Drawing.Point(252, 28);
-			this.m_chkFactoryDefense.Name = "m_chkFactoryDefense";
-			this.m_chkFactoryDefense.Size = new System.Drawing.Size(176, 20);
-			this.m_chkFactoryDefense.TabIndex = 9;
-			this.m_chkFactoryDefense.Text = "Factories add to defense";
-			// 
-			// m_chkSlingshot
-			// 
-			this.m_chkSlingshot.Location = new System.Drawing.Point(252, 4);
-			this.m_chkSlingshot.Name = "m_chkSlingshot";
-			this.m_chkSlingshot.Size = new System.Drawing.Size(176, 20);
-			this.m_chkSlingshot.TabIndex = 8;
-			this.m_chkSlingshot.Text = "Slingshot around planets";
-			// 
-			// m_chkMergeOrbits
-			// 
-			this.m_chkMergeOrbits.Location = new System.Drawing.Point(8, 176);
-			this.m_chkMergeOrbits.Name = "m_chkMergeOrbits";
-			this.m_chkMergeOrbits.Size = new System.Drawing.Size(200, 20);
-			this.m_chkMergeOrbits.TabIndex = 7;
-			this.m_chkMergeOrbits.Text = "Merge Far Orbits and space zones";
-			// 
-			// m_chkPartialPlanets
-			// 
-			this.m_chkPartialPlanets.Location = new System.Drawing.Point(8, 152);
-			this.m_chkPartialPlanets.Name = "m_chkPartialPlanets";
-			this.m_chkPartialPlanets.Size = new System.Drawing.Size(176, 20);
-			this.m_chkPartialPlanets.TabIndex = 6;
-			this.m_chkPartialPlanets.Text = "Partial planet control";
-			// 
-			// m_chkLimitFactories
-			// 
-			this.m_chkLimitFactories.Location = new System.Drawing.Point(8, 128);
-			this.m_chkLimitFactories.Name = "m_chkLimitFactories";
-			this.m_chkLimitFactories.Size = new System.Drawing.Size(176, 20);
-			this.m_chkLimitFactories.TabIndex = 5;
-			this.m_chkLimitFactories.Text = "Limited factories per planet";
-			// 
-			// m_chkCombatRetreats
-			// 
-			this.m_chkCombatRetreats.Location = new System.Drawing.Point(8, 104);
-			this.m_chkCombatRetreats.Name = "m_chkCombatRetreats";
-			this.m_chkCombatRetreats.Size = new System.Drawing.Size(176, 20);
-			this.m_chkCombatRetreats.TabIndex = 4;
-			this.m_chkCombatRetreats.Text = "Combat retreats allowed";
-			// 
-			// m_chkMarkersFight
-			// 
-			this.m_chkMarkersFight.Location = new System.Drawing.Point(8, 80);
-			this.m_chkMarkersFight.Name = "m_chkMarkersFight";
-			this.m_chkMarkersFight.Size = new System.Drawing.Size(176, 20);
-			this.m_chkMarkersFight.TabIndex = 3;
-			this.m_chkMarkersFight.Text = "Control markers fight";
-			// 
-			// m_chkPassingFire
-			// 
-			this.m_chkPassingFire.Location = new System.Drawing.Point(8, 56);
-			this.m_chkPassingFire.Name = "m_chkPassingFire";
-			this.m_chkPassingFire.Size = new System.Drawing.Size(176, 20);
-			this.m_chkPassingFire.TabIndex = 2;
-			this.m_chkPassingFire.Text = "Passing fire";
-			// 
-			// m_chkTroopSpeeds
-			// 
-			this.m_chkTroopSpeeds.Location = new System.Drawing.Point(8, 32);
-			this.m_chkTroopSpeeds.Name = "m_chkTroopSpeeds";
-			this.m_chkTroopSpeeds.Size = new System.Drawing.Size(176, 20);
-			this.m_chkTroopSpeeds.TabIndex = 1;
-			this.m_chkTroopSpeeds.Text = "Different ground unit speeds";
-			// 
-			// m_chkShipSpeeds
-			// 
-			this.m_chkShipSpeeds.Location = new System.Drawing.Point(8, 8);
-			this.m_chkShipSpeeds.Name = "m_chkShipSpeeds";
-			this.m_chkShipSpeeds.Size = new System.Drawing.Size(176, 20);
-			this.m_chkShipSpeeds.TabIndex = 0;
-			this.m_chkShipSpeeds.Text = "Different spaceship speeds";
+			this.checkedListBox1.Location = new System.Drawing.Point(420, 12);
+			this.checkedListBox1.Name = "checkedListBox1";
+			this.checkedListBox1.Size = new System.Drawing.Size(68, 244);
+			this.checkedListBox1.TabIndex = 26;
 			// 
 			// GameSetupForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.ClientSize = new System.Drawing.Size(512, 370);
+			this.ClientSize = new System.Drawing.Size(516, 362);
 			this.Controls.Add(this.tabControl1);
 			this.Controls.Add(this.button2);
 			this.Controls.Add(this.button1);
 			this.Name = "GameSetupForm";
 			this.Text = "GameSetupForm";
+			this.Load += new System.EventHandler(this.GameSetupForm_Load);
 			((System.ComponentModel.ISupportInitialize)(this.m_nudNumTerritories)).EndInit();
 			this.tabControl1.ResumeLayout(false);
 			this.tabPage1.ResumeLayout(false);
 			this.tabPage2.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.dataGrid1)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -518,9 +464,12 @@ namespace BuckRogers.Interface
 		[STAThread]
 		public static void Main(string[] args)
 		{
+			Application.EnableVisualStyles();
 			GameSetupForm gsf = new GameSetupForm();
 			Application.Run(gsf);
 
+			GameOptions go = gsf.Options;
+			bool shipSpeeds = go.OptionalRules["DifferentShipSpeeds"];
 			if(gsf.DialogResult == DialogResult.OK)
 			{
 
@@ -539,20 +488,6 @@ namespace BuckRogers.Interface
 			{
 				m_playerNames[i] = m_tbPlayerNames[i].Text;
 			}
-
-			m_options.BoardWideProduction = m_chkDeployAnywhere.Checked;
-			m_options.CombatRetreat = m_chkCombatRetreats.Checked;
-			m_options.CombinedProduction = m_chkCombineProduction.Checked;
-			m_options.ControlMarkersFight = m_chkMarkersFight.Checked;
-			m_options.DifferentShipSpeeds = m_chkShipSpeeds.Checked;
-			m_options.DifferentTroopSpeeds = m_chkTroopSpeeds.Checked;
-			m_options.FactoryDefenses = m_chkFactoryDefense.Checked;
-			m_options.FactoryLimits = m_chkLimitFactories.Checked;
-			m_options.MergeFarOrbits = m_chkMergeOrbits.Checked;
-			m_options.PartialPlanetControl = m_chkPartialPlanets.Checked;
-			m_options.PassingFire = m_chkPassingFire.Checked;
-			m_options.SlingshotEffect = m_chkSlingshot.Checked;
-			m_options.TransportedFactoryProduction = m_chkTransportedBuilds.Checked;
 
 			string conditionName = (string)m_cbVictoryConditions.SelectedItem;
 			VictoryConditions vc = (VictoryConditions)Enum.Parse(typeof(VictoryConditions), conditionName);
@@ -590,12 +525,24 @@ namespace BuckRogers.Interface
 			}
 		}
 
+		private void GameSetupForm_Load(object sender, System.EventArgs e)
+		{
+			tabPage2.BindingContext = tabPage2.BindingContext;
+		}
+
+
 		public string[] PlayerNames
 		{
 			get
 			{
 				return m_playerNames;
 			}
+		}
+
+		public BuckRogers.GameOptions Options
+		{
+			get { return this.m_options; }
+			set { this.m_options = value; }
 		}
 	}
 }

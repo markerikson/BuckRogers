@@ -129,6 +129,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "GameOptions.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Player.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -175,6 +180,11 @@
                 />
                 <File
                     RelPath = "Data structures\ProductionInfo.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Data structures\PropertyBag.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

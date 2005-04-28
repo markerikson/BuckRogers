@@ -383,6 +383,7 @@ namespace BuckRogers
 			{
 				UnitCollection leaders = t.Units.GetUnits(UnitType.Leader, p, null);
 
+				// TODO Actually disable the player for a turn
 				if( (leaders.Count > 0) && (t.Units.GetNonMatchingUnits(p).Count > 0))
 				{
 					Unit leader = leaders[0];
@@ -466,7 +467,7 @@ namespace BuckRogers
 				ar.Leader = ci.AttackingLeader;
 				cr.AttackResults.Add(ar);
 
-				Console.WriteLine("To hit: " + toHit + ", roll: " + roll);
+				//Console.WriteLine("To hit: " + toHit + ", roll: " + roll);
 				if(attackHit)
 				{
 					ci.Defenders.RemoveUnit(defender);

@@ -23,14 +23,6 @@ namespace BuckRogers
 		public event StatusUpdateHandler StatusUpdate;
 		
 		#region Properties
-		/*
-		public CenterSpace.Free.MersenneTwister Twister
-		{
-			get { return this.m_twister; }
-			set { this.m_twister = value; }
-		}
-		*/
-
 		public BuckRogers.GameMap Map
 		{
 			get { return this.m_map; }
@@ -104,9 +96,12 @@ namespace BuckRogers
 			get { return this.m_phase; }
 			set { this.m_phase = value; }
 		}
-		
-		
 
+		public static BuckRogers.GameOptions Options
+		{
+			get { return m_options; }
+			set { m_options = value; }
+		}
 		#endregion
 	
 		private GameMap m_map;
@@ -123,68 +118,13 @@ namespace BuckRogers
 		private int m_idxCurrentPlayer;
 		private bool m_redoingAction;
 		private GamePhase m_phase;
+		private static GameOptions m_options = new GameOptions();
 
 		private Hashlist m_battles;	
 		public TurnRoll[] m_rolls;
 
 
-		
-
-		public void PlayGame()
-		{
-			string[] players = {"Mark", "Chris"};
-			
-			//GameController gc = new GameController(players);
-
-			this.AssignTerritories();
-			this.CreateInitialUnits();
-
-			
-			this.RollForInitiative(false);
-
-			//bool playersHaveUnits = true;
-
-			// 18 units, distributed 3 at a time
-			for(int j = 0; j < 6; j++)
-			{
-				foreach(Player p in this.PlayerOrder)
-				{
-					ICollection ic = p.Territories.Keys;
-					Territory terr = Territory.NONE;
-
-
-					//for(int i = 0; i < ic.Count; i++)
-					foreach(string s in ic)
-					{
-						terr = (Territory)p.Territories[s];
-						if(terr.Units.Count < 6)
-						{
-							break;
-						}
-					}
-
-					UnitCollection units = Territory.NONE.Units.GetUnits(p);
-					Utility.RandomizeList(units);
-
-					if(units.Count >= 3)
-					{
-						for(int i = 0; i < 3; i++)
-						{
-							Unit unit = (Unit)units[i];
-							unit.CurrentTerritory = terr;
-						}
-					}
-				}
-			}			
-
-			/*
-			MoveAction move1 = new MoveAction();
-			Territory t = this.Map["Elysium"];
-			move1.Owner = t.Owner;
-			UnitCollection u = new UnitCollection();
-			*/
-			
-		}
+		// TODO Start implementing optional rules
 
 		public GameController()
 		{
@@ -210,12 +150,25 @@ namespace BuckRogers
 
 		public void SetPlayers(string[] playerNames)
 		{
+			SetPlayers(playerNames, null);
+		}
+
+		public void SetPlayers(string[] playerNames, Color[] colors)
+		{
 			m_players = new Player[playerNames.Length];
 
 			for(int i = 0; i < playerNames.Length; i++)
 			{
 				m_players[i] = new Player(playerNames[i]);
-				m_players[i].Color = m_playerColors[i];
+				if(colors == null)
+				{
+					m_players[i].Color = m_playerColors[i];
+				}
+				else
+				{
+					m_players[i].Color = colors[i];
+				}
+				
 			}
 
 			m_phase = GamePhase.Setup;
@@ -237,13 +190,6 @@ namespace BuckRogers
 			return result;
 		}
 
-
-		/*
-		public int RollD10()
-		{
-			return m_twister.Next(1, 10);
-		}
-		*/
 
 		#region Setup functions
 
@@ -320,6 +266,7 @@ namespace BuckRogers
 			RollForInitiative(true);
 		}
 
+		// Handles randomization of player order using rolls
 		public void RollForInitiative(bool checkRollParity)
 		{
 			m_currentPlayerOrder = new ArrayList();
@@ -335,6 +282,7 @@ namespace BuckRogers
 			m_currentPlayerOrder.Add(topRoll.Player);
 			int playerIndex = Array.IndexOf(m_players, topRoll.Player);
 
+			// If it's an odd number, go to the right (counter-clockwise)
 			if(checkRollParity && ( (topRoll.Roll % 2) == 1))
 			{
 				for(int i = playerIndex - 1; i >= 0; i--)
@@ -347,6 +295,7 @@ namespace BuckRogers
 					m_currentPlayerOrder.Add(m_players[i]);
 				}
 			}
+			// if it's even (or it's the setup turn), go to the left (clockwise)
 			else
 			{
 				for(int i = playerIndex + 1; i < m_players.Length; i++)
@@ -361,6 +310,7 @@ namespace BuckRogers
 			}
 		}
 
+		// Rolls dice and 
 		private void RollAndCheckForTies(ArrayList players)
 		{
 			TurnRoll[] rolls = new TurnRoll[players.Count];
@@ -371,7 +321,9 @@ namespace BuckRogers
 				rolls[i].Player = (Player)players[i];				
 			}
 
+			// Sorts lowest to highest
 			Array.Sort(rolls);
+			// reverse so that it's highest to lowest
 			Array.Reverse(rolls);
 
 			for(int i = 0; i < rolls.Length; i++)
@@ -381,6 +333,7 @@ namespace BuckRogers
 
 			int numTopRolls = 1;
 
+			// check for top roll ties
 			for(int i = 1; i < rolls.Length; i++)
 			{
 				if(rolls[i].Roll == rolls[0].Roll)
@@ -393,6 +346,8 @@ namespace BuckRogers
 				}
 			}
 
+			// we've got ties - add all the non-tied players to the results, then 
+			// recurse and try again with just the tied players
 			if(numTopRolls > 1)
 			{
 				for(int i = numTopRolls; i < rolls.Length; i++)
@@ -407,6 +362,7 @@ namespace BuckRogers
 				}
 				RollAndCheckForTies(morePlayers);
 			}
+			// no ties - put the current players at the start of the list
 			else
 			{
 				for(int i = 0; i < rolls.Length; i++)
@@ -475,11 +431,9 @@ namespace BuckRogers
 					transport.Transportees.AddUnit(factory);
 					break;
 				}
-			}
-			
+			}			
 		}
 
-		//public void UnloadTransport(Transport tr, int max)
 		public void UnloadTransport(TransportAction ta)
 		{
 			Transport tr = ta.Transport;
@@ -532,7 +486,6 @@ namespace BuckRogers
 				// need to make sure we've got the right units for undoing the move
 				ta.Units.AddUnit(u);
 			}
-
 		}
 
 		#endregion 
@@ -548,9 +501,6 @@ namespace BuckRogers
 				bool alreadyInEnemyTerritory = false;
 				Territory previousTerritory = move.StartingTerritory;
 
-				//ArrayList originalMoves = new ArrayList();
-				//ArrayList conqueredTerritories = new ArrayList();
-
 				string exceptionString = String.Empty;
 
 				foreach(Unit u in move.Units)
@@ -564,7 +514,6 @@ namespace BuckRogers
 				{
 					if(alreadyInEnemyTerritory)
 					{
-						//throw new ActionException("Can't move units in and out of a territory with enemy units");
 						exceptionString = "Can't move units in and out of a territory with enemy units";
 						goto MoveError;
 					}
@@ -573,8 +522,6 @@ namespace BuckRogers
 
 					if(!t.AdjacentTo(previousTerritory))
 					{
-						//throw new ActionException("Can't move between non-adjacent territories (" 
-						//	+ previousTerritory.Name + " -> " + t.Name + ")");
 						exceptionString = "Can't move between non-adjacent territories (" 
 							+ previousTerritory.Name + " -> " + t.Name + ")";
 						goto MoveError;
@@ -837,6 +784,7 @@ namespace BuckRogers
 				planets[searchOrder[i]] =  new Hashlist();
 			}
 
+			// Since we're adding them to an ordered list, we don't care that the Hashtable returns them unordered
 			foreach(OrbitalSystem os in m_map.Planets)
 			{
 				if(os.HasKillerSatellite)
@@ -855,6 +803,7 @@ namespace BuckRogers
 				}				
 			}
 
+			// Same with players - we don't care what order we search them in
 			foreach(Player p in m_players)
 			{
 				UnitCollection battlers = p.Units.GetUnits(UnitType.Battler);
@@ -884,6 +833,10 @@ namespace BuckRogers
 				Player player = m_players[i];
 				foreach(Unit u in player.Units)
 				{
+					if(u.Transported)
+					{
+						continue;
+					}
 					if(u.CurrentTerritory.Units.HasUnitsFromMultiplePlayers)
 					{
 						string name;
@@ -905,6 +858,7 @@ namespace BuckRogers
 						bi.Type = BattleType.Normal;
 						bi.Territory = u.CurrentTerritory;
 
+						// need to use ToString() because there can be more than one battle in a territory
 						if(!planetBattleList.ContainsKey(bi.ToString()))
 						{
 							
@@ -931,8 +885,7 @@ namespace BuckRogers
 				}
 			}
 
-			return m_battles;
-			
+			return m_battles;			
 		}
 
 		private ArrayList GetSurfaceTerritories(Territory t)
@@ -1109,9 +1062,14 @@ namespace BuckRogers
 			}
 		}
 
+		// TODO Check for dead players and remove them
+		// TODO Uncontrolled Killer Satellites become the property of the new planetary owner
 
 		public void NextTurn()
 		{
+			m_checkedActions.Clear();
+			m_undoneActions.Clear();
+
 			m_map.AdvancePlanets();
 			RollForInitiative();
 
@@ -1125,8 +1083,6 @@ namespace BuckRogers
 		{
 			m_undoneActions.Clear();
 			m_checkedActions.Clear();
-
-			
 			
 			bool morePlayers = true;
             if(m_idxCurrentPlayer == m_currentPlayerOrder.Count - 1)

@@ -183,6 +183,16 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "NumericForm.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "NumericForm.resx"
+                    DependentUpon = "NumericForm.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "ProductionForm.cs"
                     SubType = "Form"
                     BuildAction = "Compile"

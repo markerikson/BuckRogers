@@ -198,6 +198,12 @@ namespace BuckRogers
 			get { return this.m_owner; }
 			set 
 			{ 
+				
+				if(m_owner != null && m_owner != Player.NONE)
+				{
+					m_owner.Units.RemoveUnit(this);
+				}
+				
 				this.m_owner = value; 
 				m_owner.Units.AddUnit(this);
 			}

@@ -1,12 +1,13 @@
 using System;
 using System.Collections;
+using System.ComponentModel;
 
 namespace BuckRogers
 {
 	/// <summary>
 	/// 
 	/// </summary>
-	public /*abstract*/ class Hashlist : IEnumerable, IDictionary
+	public /*abstract*/ class Hashlist : IEnumerable, IDictionary, IList, ITypedList
 	{
 		//array list that contains all the keys 
 		//as they are inserted, the index is associated with
@@ -184,20 +185,78 @@ namespace BuckRogers
 		/// <summary>
 		/// 
 		/// </summary>
+		/// 
+		/*
 		public object this[string Key]
 		{
 			get{return m_oValues[Key];}
 		}
+		*/
 		/// <summary>
 		/// 
 		/// </summary>
+		/// 
+		
 		public object this[int Index]
 		{
 			get{return m_oValues[m_oKeys[Index]];}
 		}
+		
 		#endregion
 
+		#region IList Members
 
+		object System.Collections.IList.this[int index]
+		{
+			get
+			{
+				// TODO:  Add Hashlist.System.Collections.IList.this getter implementation
+				return m_oValues[m_oKeys[index]];
+			}
+			set
+			{
+				m_oValues[m_oKeys[index]] = value;
+			}
+		}
+
+		public void RemoveAt(int index)
+		{
+			object objKey = m_oKeys[index];
+			m_oValues.Remove(objKey);
+			m_oKeys.Remove(objKey);
+		}
+
+		public void Insert(int index, object value)
+		{
+			m_oKeys.Insert(index, value);
+		}
+
+		public int IndexOf(object value)
+		{
+			// TODO:  Add Hashlist.IndexOf implementation
+			return 0;
+		}
+
+		int System.Collections.IList.Add(object value)
+		{
+			// TODO:  Add Hashlist.System.Collections.IList.Add implementation
+			return 0;
+		}
+
+		#endregion
+
+		
+		public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors) 
+		{
+			return TypeDescriptor.GetProperties(typeof(GameOption),
+				new Attribute[] { new BrowsableAttribute(true) });
+		}
+
+		public string GetListName(PropertyDescriptor[] listAccessors) 
+		{
+			return "Hashlist";
+		}
+		
 	}
 
 	// Declare the enumerator and implement the IEnumerator 
@@ -247,27 +306,26 @@ namespace BuckRogers
 		}
 	}
 
-	/*
-	class PlanetCollection : Hashlist
+	
+	public class OptionsHashlist : Hashlist
 	{
-		public new Planet this[string Key]
-		{
-			get{return (Planet)base[Key];}
-		}        
-
-		public new Planet this[int Index]
+		
+		
+		public bool this[string Key]
 		{
 			get
 			{
-				object oTemp = base[Index];
-				return (Planet)oTemp;
+				GameOption go = (GameOption)base[Key];
+
+				return go.Value;
 			}
-		}
-		public PlanetCollection()
+		}  
+		
+		
+		
+
+		public OptionsHashlist()
 		{
-                    
 		}
 	}
-	*/
-
 }

@@ -366,11 +366,11 @@ namespace BuckRogers
 			
 			#endregion
 
+			
 			foreach(OrbitalSystem os in m_planets)
 			{
 				os.CalculateSurfaceAreas();
 			}
-
 		}
 
 		private void InitOrbit(OrbitalPath orbit, string orbitName, bool connectOrbit)

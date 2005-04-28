@@ -182,6 +182,7 @@ namespace BuckRogers
 
 		public virtual bool CheckControl()
 		{
+			// TODO Implement partial planetary control
 			bool controlled = true;
 
 			Player first = ((Territory)m_surface[0]).Owner;

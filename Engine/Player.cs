@@ -8,8 +8,6 @@ namespace BuckRogers
 	/// Summary description for Player.
 	/// </summary>
 	/// 
-	
-	
 
 	public class Player
 	{

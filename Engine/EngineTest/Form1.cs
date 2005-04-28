@@ -472,7 +472,7 @@ namespace BuckRogers
 			GameController gc = new GameController(players);
 
 
-			gc.PlayGame();
+			//gc.PlayGame();
 
 			listView2.Items.Clear();
 			listView3.Items.Clear();
