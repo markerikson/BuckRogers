@@ -129,6 +129,16 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "Controls\PlacementPanel.cs"
+                    SubType = "UserControl"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Controls\PlacementPanel.resx"
+                    DependentUpon = "PlacementPanel.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "Controls\TerritoryPanel.cs"
                     SubType = "UserControl"
                     BuildAction = "Compile"
@@ -186,6 +196,16 @@
                 <File
                     RelPath = "Forms\MoveUnitsForm.resx"
                     DependentUpon = "MoveUnitsForm.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Forms\PlacementForm.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Forms\PlacementForm.resx"
+                    DependentUpon = "PlacementForm.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File

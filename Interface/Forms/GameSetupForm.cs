@@ -555,9 +555,8 @@ namespace BuckRogers.Interface
 			bool shipSpeeds = go.OptionalRules["DifferentShipSpeeds"];
 			if(gsf.DialogResult == DialogResult.OK)
 			{
-
-				BuckRogersForm brf = new BuckRogersForm();
-				Application.Run(new BuckRogersForm());
+				BuckRogersForm brf = new BuckRogersForm(go);
+				Application.Run(brf);
 			}
 		}
 
@@ -571,6 +570,8 @@ namespace BuckRogers.Interface
 			{
 				m_playerNames[i] = m_tbPlayerNames[i].Text;
 			}
+
+			m_options.PlayerNames = m_playerNames;
 
 			string conditionName = (string)m_cbVictoryConditions.SelectedItem;
 			VictoryConditions vc = (VictoryConditions)Enum.Parse(typeof(VictoryConditions), conditionName);

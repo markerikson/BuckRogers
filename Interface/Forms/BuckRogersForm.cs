@@ -23,8 +23,10 @@ namespace BuckRogers
 	{
 		Normal,
 		Move,
+		PlaceUnits,
 		SelectTerritories,
 	}
+
 	/// <summary>
 	/// Summary description for BuckRogersForm.
 	/// </summary>
@@ -50,8 +52,6 @@ namespace BuckRogers
 		private System.Windows.Forms.ComboBox m_cbCenterLocations;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.TabControl tabControl1;
-		private System.Windows.Forms.TabPage m_pgAction;
-		private System.Windows.Forms.TabPage m_pgTerritory;
 		private BuckRogers.Interface.MovePanel m_movePanel;
 		private System.Windows.Forms.StatusBar statusBar1;
 		private System.Windows.Forms.MainMenu mainMenu1;
@@ -60,6 +60,10 @@ namespace BuckRogers
 		private System.Windows.Forms.StatusBarPanel statusBarPanel1;
 		private System.Windows.Forms.StatusBarPanel statusBarPanel2;
 		private System.Windows.Forms.Button button1;
+		private System.Windows.Forms.TabPage m_tpAction;
+		private System.Windows.Forms.TabPage m_tpTerritory;
+		private System.Windows.Forms.TabPage m_tpPlacement;
+		private BuckRogers.Interface.PlacementPanel m_placementPanel;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
 		
 
@@ -73,103 +77,54 @@ namespace BuckRogers
 			m_battleController = ct.BattleController;
 
 			InitControls();
+			InitEvents();
 
 			ct.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
 			ct.Init();
 
-			InitTurn();
+			tabControl1.TabPages.Clear();
+			tabControl1.TabPages.Add(m_tpAction);
+			tabControl1.TabPages.Add(m_tpTerritory);
+
+			m_clickMode = MapClickMode.Normal;
+			StartGame();
 
 		}
 
-		public BuckRogersForm(GameController gc)
+		public BuckRogersForm(GameOptions go)
 		{
 			//
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
 
-			m_controller = gc;
-			m_battleController = new BattleController(gc);
+			m_controller = new GameController(go);
+			m_battleController = new BattleController(m_controller);
 
 			InitControls();
-
+			InitEvents();
 			
 			// TODO Game setup code here
 
-			/*
+			tabControl1.TabPages.Clear();
+			tabControl1.TabPages.Add(m_tpPlacement);
+			tabControl1.TabPages.Add(m_tpTerritory);
+
+			m_controller.AssignTerritories();
+			m_controller.CreateInitialUnits();
+			m_controller.RollForInitiative(false);
+
 			m_clickMode = MapClickMode.Normal;
-
-			m_movePanel.Height = m_pgAction.ClientSize.Height;
-
-			m_map = new MapControl();
-
-			ControllerTest ct = new ControllerTest();
-			ct.Reinitialize = false;
-			m_controller = ct.GameController;
-			m_battleController = ct.BattleController;
-
-		
-
 			
-			ct.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
-
-			ct.Init();
-
-			
-
-			
-			
-			m_map.Size = new Size(this.ClientSize.Width - tabControl1.Right - 4, this.ClientSize.Height - 52);
-			m_map.TerritoryClicked +=new TerritoryClickedHandler(OnTerritoryClicked);
-			m_map.Location = new Point(tabControl1.Right + 4, 0);
-			m_map.ScrollControl.Size = m_map.ClientSize;
-			m_map.Canvas.Size = m_map.ClientSize;
-			this.Controls.Add(m_map);
-
-			m_map.Anchor = 
-				AnchorStyles.Bottom |
-				AnchorStyles.Top |
-				AnchorStyles.Left |
-				AnchorStyles.Right;
-
-			m_map.Canvas.Camera.ViewScale = 0.25f;
-
-			Size viewSize = m_map.ScrollControl.ViewSize;
-
-			int centerX = (int)(viewSize.Width / 2);
-			int centerY = 0;//(int)(viewSize.Height / 2);
-
-			//Point center = new Point(, );
-
-			Point ulCorner = new Point(centerX, centerY);
-			ulCorner.X -= this.Width /  2;
-			//ulCorner.Y -= this.Height / 2;
-
-			m_map.ScrollControl.ViewPosition = ulCorner;
-			m_cbCenterLocations.SelectedIndex = 0;
-
-
-			m_movePanel.MoveModeChanged += new MoveModeChangedHandler(OnMoveModeChanged);
-
-			m_controller.NextTurn();
+			m_placementPanel.RefreshPlayerOrder();
 
 			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
-			statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
 
-			m_movePanel.RefreshPlayerOrder();
-
-			m_movePanel.Controller = m_controller;
-			m_map.GameController = m_controller;
-			m_map.PlacePlanetIcons();
-			*/
-			
 		}
 
 		private void InitControls()
 		{
-			m_clickMode = MapClickMode.Normal;
-
-			m_movePanel.Height = m_pgAction.ClientSize.Height;
+			m_movePanel.Height = m_tpAction.ClientSize.Height;
 
 			m_map = new MapControl();
 			m_map.Size = new Size(this.ClientSize.Width - tabControl1.Right - 4, this.ClientSize.Height - 52);
@@ -199,25 +154,32 @@ namespace BuckRogers
 			m_cbCenterLocations.SelectedIndex = 0;
 
 			m_movePanel.MoveModeChanged += new MoveModeChangedHandler(OnMoveModeChanged);
+			m_placementPanel.MoveModeChanged += new MoveModeChangedHandler(OnMoveModeChanged);
+
+			m_movePanel.Controller = m_controller;
+			m_map.GameController = m_controller;
+			m_placementPanel.Controller = m_controller;
+
+			m_map.PlacePlanetIcons();
 		}
 
-		private void InitTurn()
+
+		private void InitEvents()
 		{
 			m_controller.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
 			m_battleController.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
 			m_controller.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
 			m_battleController.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
+		}
 
+		private void StartGame()
+		{
 			m_controller.NextTurn();
 
 			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
 			statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
-
-			m_movePanel.Controller = m_controller;
-			m_map.GameController = m_controller;
 			
-			m_movePanel.RefreshPlayerOrder();
-			m_map.PlacePlanetIcons();
+			m_movePanel.RefreshPlayerOrder();			
 		}
 
 		/// <summary>
@@ -249,9 +211,11 @@ namespace BuckRogers
 			this.m_cbCenterLocations = new System.Windows.Forms.ComboBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
-			this.m_pgAction = new System.Windows.Forms.TabPage();
+			this.m_tpPlacement = new System.Windows.Forms.TabPage();
+			this.m_placementPanel = new BuckRogers.Interface.PlacementPanel();
+			this.m_tpAction = new System.Windows.Forms.TabPage();
 			this.m_movePanel = new BuckRogers.Interface.MovePanel();
-			this.m_pgTerritory = new System.Windows.Forms.TabPage();
+			this.m_tpTerritory = new System.Windows.Forms.TabPage();
 			this.m_territoryPanel = new BuckRogers.Interface.TerritoryPanel();
 			this.statusBar1 = new System.Windows.Forms.StatusBar();
 			this.statusBarPanel1 = new System.Windows.Forms.StatusBarPanel();
@@ -261,8 +225,9 @@ namespace BuckRogers
 			this.menuItem2 = new System.Windows.Forms.MenuItem();
 			this.button1 = new System.Windows.Forms.Button();
 			this.tabControl1.SuspendLayout();
-			this.m_pgAction.SuspendLayout();
-			this.m_pgTerritory.SuspendLayout();
+			this.m_tpPlacement.SuspendLayout();
+			this.m_tpAction.SuspendLayout();
+			this.m_tpTerritory.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel2)).BeginInit();
 			this.SuspendLayout();
@@ -334,23 +299,42 @@ namespace BuckRogers
 			// 
 			this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
 				| System.Windows.Forms.AnchorStyles.Left)));
-			this.tabControl1.Controls.Add(this.m_pgAction);
-			this.tabControl1.Controls.Add(this.m_pgTerritory);
+			this.tabControl1.Controls.Add(this.m_tpPlacement);
+			this.tabControl1.Controls.Add(this.m_tpAction);
+			this.tabControl1.Controls.Add(this.m_tpTerritory);
 			this.tabControl1.Location = new System.Drawing.Point(4, 44);
 			this.tabControl1.Name = "tabControl1";
 			this.tabControl1.SelectedIndex = 0;
 			this.tabControl1.Size = new System.Drawing.Size(240, 624);
 			this.tabControl1.TabIndex = 7;
 			// 
-			// m_pgAction
+			// m_tpPlacement
 			// 
-			this.m_pgAction.Controls.Add(this.m_movePanel);
-			this.m_pgAction.DockPadding.Top = 10;
-			this.m_pgAction.Location = new System.Drawing.Point(4, 22);
-			this.m_pgAction.Name = "m_pgAction";
-			this.m_pgAction.Size = new System.Drawing.Size(232, 598);
-			this.m_pgAction.TabIndex = 0;
-			this.m_pgAction.Text = "Actions";
+			this.m_tpPlacement.Controls.Add(this.m_placementPanel);
+			this.m_tpPlacement.Location = new System.Drawing.Point(4, 22);
+			this.m_tpPlacement.Name = "m_tpPlacement";
+			this.m_tpPlacement.Size = new System.Drawing.Size(232, 598);
+			this.m_tpPlacement.TabIndex = 2;
+			this.m_tpPlacement.Text = "Placement";
+			// 
+			// m_placementPanel
+			// 
+			this.m_placementPanel.Controller = null;
+			this.m_placementPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.m_placementPanel.Location = new System.Drawing.Point(0, 0);
+			this.m_placementPanel.Name = "m_placementPanel";
+			this.m_placementPanel.Size = new System.Drawing.Size(232, 598);
+			this.m_placementPanel.TabIndex = 0;
+			// 
+			// m_tpAction
+			// 
+			this.m_tpAction.Controls.Add(this.m_movePanel);
+			this.m_tpAction.DockPadding.Top = 10;
+			this.m_tpAction.Location = new System.Drawing.Point(4, 22);
+			this.m_tpAction.Name = "m_tpAction";
+			this.m_tpAction.Size = new System.Drawing.Size(232, 598);
+			this.m_tpAction.TabIndex = 0;
+			this.m_tpAction.Text = "Actions";
 			// 
 			// m_movePanel
 			// 
@@ -363,14 +347,14 @@ namespace BuckRogers
 			this.m_movePanel.Size = new System.Drawing.Size(236, 488);
 			this.m_movePanel.TabIndex = 0;
 			// 
-			// m_pgTerritory
+			// m_tpTerritory
 			// 
-			this.m_pgTerritory.Controls.Add(this.m_territoryPanel);
-			this.m_pgTerritory.Location = new System.Drawing.Point(4, 22);
-			this.m_pgTerritory.Name = "m_pgTerritory";
-			this.m_pgTerritory.Size = new System.Drawing.Size(232, 598);
-			this.m_pgTerritory.TabIndex = 1;
-			this.m_pgTerritory.Text = "Territory";
+			this.m_tpTerritory.Controls.Add(this.m_territoryPanel);
+			this.m_tpTerritory.Location = new System.Drawing.Point(4, 22);
+			this.m_tpTerritory.Name = "m_tpTerritory";
+			this.m_tpTerritory.Size = new System.Drawing.Size(232, 598);
+			this.m_tpTerritory.TabIndex = 1;
+			this.m_tpTerritory.Text = "Territory";
 			// 
 			// m_territoryPanel
 			// 
@@ -444,8 +428,9 @@ namespace BuckRogers
 			this.Text = "BuckRogersForm";
 			this.Load += new System.EventHandler(this.BuckRogersForm_Load);
 			this.tabControl1.ResumeLayout(false);
-			this.m_pgAction.ResumeLayout(false);
-			this.m_pgTerritory.ResumeLayout(false);
+			this.m_tpPlacement.ResumeLayout(false);
+			this.m_tpAction.ResumeLayout(false);
+			this.m_tpTerritory.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel1)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel2)).EndInit();
 			this.ResumeLayout(false);
@@ -481,8 +466,13 @@ namespace BuckRogers
 						m_movePanel.TerritoryClicked(t);
 						break;
 					}
+					case MapClickMode.PlaceUnits:
+					{
+						m_placementPanel.TerritoryClicked(t);
+						break;
+					}
 				}
-				
+
 				//MessageBox.Show("Territory: " + name + ", owner: " + t.Owner.Name);
 			}
 
@@ -588,6 +578,11 @@ namespace BuckRogers
 					m_clickMode = MapClickMode.Normal;
 					break;
 				}
+				case MoveMode.StartPlacement:
+				{
+					m_clickMode = MapClickMode.PlaceUnits;
+					break;
+				}
 			}
 		}
 
@@ -608,13 +603,22 @@ namespace BuckRogers
 				}
 				case StatusInfo.NextPhase:
 				{
-					statusBar1.Panels[0].Text = "Combat phase";
-					//MessageBox.Show("Movement over, time for combat");
-
 					switch(m_controller.CurrentPhase)
 					{
+						case GamePhase.Movement:
+						{
+							//tabControl1.TabPages.Remove(m_tpPlacement);
+							tabControl1.TabPages.Clear();
+							tabControl1.TabPages.Add(m_tpAction);
+							tabControl1.TabPages.Add(m_tpTerritory);
+
+							StartGame();
+							break;
+						}
 						case GamePhase.Combat:
 						{
+							statusBar1.Panels[0].Text = "Combat phase";
+							//MessageBox.Show("Movement over, time for combat");
 							if(m_combatForm == null)
 							{
 								m_combatForm = new CombatForm(m_controller, m_battleController);
@@ -625,7 +629,7 @@ namespace BuckRogers
 							if(m_controller.Battles.Count == 0)
 							{
 								MessageBox.Show("No battles this turn - moving to production");
-								m_controller.NextPhase();
+								m_controller.CheckNextPhase();
 								
 							}
 							else

@@ -290,15 +290,15 @@ namespace BuckRogers.Interface
 			this.columnHeader12 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader13 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader14 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader4 = new System.Windows.Forms.ColumnHeader();
 			this.label2 = new System.Windows.Forms.Label();
 			this.m_lvAvailableUnits = new System.Windows.Forms.ListView();
 			this.columnHeader11 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
 			this.m_btnOK = new System.Windows.Forms.Button();
 			this.m_btnCancel = new System.Windows.Forms.Button();
-			this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
-			this.columnHeader4 = new System.Windows.Forms.ColumnHeader();
 			this.SuspendLayout();
 			// 
 			// m_butRemAttackers
@@ -379,6 +379,11 @@ namespace BuckRogers.Interface
 			this.columnHeader14.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			this.columnHeader14.Width = 47;
 			// 
+			// columnHeader4
+			// 
+			this.columnHeader4.Text = "Contents";
+			this.columnHeader4.Width = 64;
+			// 
 			// label2
 			// 
 			this.label2.Location = new System.Drawing.Point(4, 8);
@@ -426,6 +431,11 @@ namespace BuckRogers.Interface
 			this.columnHeader2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			this.columnHeader2.Width = 47;
 			// 
+			// columnHeader3
+			// 
+			this.columnHeader3.Text = "Contents";
+			this.columnHeader3.Width = 64;
+			// 
 			// m_btnOK
 			// 
 			this.m_btnOK.Location = new System.Drawing.Point(4, 176);
@@ -442,16 +452,6 @@ namespace BuckRogers.Interface
 			this.m_btnCancel.Text = "Cancel";
 			this.m_btnCancel.Click += new System.EventHandler(this.m_btnCancel_Click);
 			// 
-			// columnHeader3
-			// 
-			this.columnHeader3.Text = "Contents";
-			this.columnHeader3.Width = 64;
-			// 
-			// columnHeader4
-			// 
-			this.columnHeader4.Text = "Contents";
-			this.columnHeader4.Width = 64;
-			// 
 			// MoveUnitsForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
@@ -467,6 +467,7 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.m_lvAvailableUnits);
 			this.Name = "MoveUnitsForm";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Move Units";
 			this.ResumeLayout(false);
 

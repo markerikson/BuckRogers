@@ -40,6 +40,7 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.TabPage tabPage1;
 		private System.Windows.Forms.TabPage tabPage2;
 		private System.Windows.Forms.ListBox m_lbPlayerOrder;
+		private System.Windows.Forms.Label label2;
 
 		/// <summary> 
 		/// Required designer variable.
@@ -136,6 +137,7 @@ namespace BuckRogers.Interface
 			this.tabPage1 = new System.Windows.Forms.TabPage();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
 			this.m_lbPlayerOrder = new System.Windows.Forms.ListBox();
+			this.label2 = new System.Windows.Forms.Label();
 			this.tabControl1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -269,8 +271,17 @@ namespace BuckRogers.Interface
 			this.m_lbPlayerOrder.Size = new System.Drawing.Size(136, 95);
 			this.m_lbPlayerOrder.TabIndex = 13;
 			// 
+			// label2
+			// 
+			this.label2.Location = new System.Drawing.Point(0, 4);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(84, 16);
+			this.label2.TabIndex = 14;
+			this.label2.Text = "Player order:";
+			// 
 			// MovePanel
 			// 
+			this.Controls.Add(this.label2);
 			this.Controls.Add(this.m_lbPlayerOrder);
 			this.Controls.Add(this.tabControl1);
 			this.Controls.Add(this.m_btnDoneTransports);
@@ -578,8 +589,6 @@ namespace BuckRogers.Interface
 			else
 			{
 				RefreshPlayerOrder();
-				
-				
 			}
 
 			m_btnUndoMove.Enabled = m_controller.CanUndo;
@@ -590,9 +599,6 @@ namespace BuckRogers.Interface
 			m_mlbTransports.Items.Clear();
 			m_mlbTransports.Refresh();
 			m_unitsToMove.Clear();	
-
-			
-
 		}
 
 		public void RefreshPlayerOrder()

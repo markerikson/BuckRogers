@@ -7,6 +7,7 @@ namespace BuckRogers.Interface
 	{
 		StartMove,
 		StartTransport,
+		StartPlacement,
 		Finished,
 	}
 	/// <summary>

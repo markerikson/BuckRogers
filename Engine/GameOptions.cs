@@ -41,6 +41,7 @@ namespace BuckRogers
 		private int m_productionMultiplier;
 		private int m_increasedProductionTurn;
 		private int m_numTerritoriesNeeded;
+		private string[] m_playerNames;
 
 		public GameOptions()
 		{
@@ -131,6 +132,12 @@ namespace BuckRogers
 		{
 			get { return this.m_startingScenarios; }
 			set { this.m_startingScenarios = value; }
+		}
+
+		public string[] PlayerNames
+		{
+			get { return this.m_playerNames; }
+			set { this.m_playerNames = value; }
 		}
 	}
 

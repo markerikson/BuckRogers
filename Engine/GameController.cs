@@ -138,11 +138,11 @@ namespace BuckRogers
 			SetPlayers(playerNames);
 		}
 
-		public GameController(string[] playerNames, GameOptions options)
+		public GameController(GameOptions options)
 		{
 			m_options = options;
 			Init();
-			SetPlayers(playerNames);
+			SetPlayers(m_options.PlayerNames);
 		}
 
 		private void Init()
@@ -216,7 +216,7 @@ namespace BuckRogers
 			foreach(Player p in m_players)
 			{
 				// TODO Technically supposed to be 6 territories apiece
-				for(int i = 0; i < 7; i++)
+				for(int i = 0; i < 6; i++)
 				{
 					int idx = Utility.Twister.Next(ground.Count - 1);
 					Territory t = (Territory)ground[idx];
@@ -1105,8 +1105,12 @@ namespace BuckRogers
 
 			if(!morePlayers)
 			{
-				NextPhase();
+				// returns false if we don't go to the next phase, so to 
+				// tell the listener that we're not advancing, needs to be true
+				// Makes sense in a twisted way at the moment
+				morePlayers = !CheckNextPhase();
 			}
+			
 			
 
 			if(StatusUpdate != null)
@@ -1122,11 +1126,33 @@ namespace BuckRogers
 			return morePlayers;
 		}
 
-		public void NextPhase()
+		public bool CheckNextPhase()
 		{
+			bool doNextPhase = true;
 			switch(m_phase)
 			{
 				case GamePhase.Setup:
+				{
+					foreach(Player p in m_currentPlayerOrder)
+					{
+						for(int i = 0; i < p.Units.Count && doNextPhase; i++)
+						{
+							Unit u = p.Units[i];
+							if(u.CurrentTerritory == Territory.NONE)
+							{
+								doNextPhase = false;
+								break;
+
+							}
+						}
+					}
+
+					if(doNextPhase)
+					{
+						m_phase = GamePhase.Movement;
+					}
+					break;
+				}
 				case GamePhase.Production:
 				{
 					m_phase = GamePhase.Movement;
@@ -1143,9 +1169,8 @@ namespace BuckRogers
 					break;
 				}
 			}
+			return doNextPhase;
 		}
-
-		
-
+      
 	}
 }
