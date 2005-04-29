@@ -7,7 +7,7 @@
     >
         <Build>
             <Settings
-                ApplicationIcon = "App.ico"
+                ApplicationIcon = ""
                 AssemblyKeyContainerName = ""
                 AssemblyName = "BuckRogers"
                 AssemblyOriginatorKeyFile = ""
@@ -109,128 +109,94 @@
         <Files>
             <Include>
                 <File
-                    RelPath = "App.ico"
-                    BuildAction = "Content"
-                />
-                <File
-                    RelPath = "AssemblyInfo.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "BuckRogersForm.cs"
-                    SubType = "Form"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "BuckRogersForm.resx"
-                    DependentUpon = "BuckRogersForm.cs"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "CombatForm.cs"
-                    SubType = "Form"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "CombatForm.resx"
-                    DependentUpon = "CombatForm.cs"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "GameSetupForm.cs"
-                    SubType = "Form"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "GameSetupForm.resx"
-                    DependentUpon = "GameSetupForm.cs"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "MapControl.cs"
+                    RelPath = "Controls\MapControl.cs"
                     SubType = "Component"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "MapControl.resx"
+                    RelPath = "Controls\MapControl.resx"
                     DependentUpon = "MapControl.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "MoveModeEventArgs.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "MovePanel.cs"
+                    RelPath = "Controls\MovePanel.cs"
                     SubType = "UserControl"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "MovePanel.resx"
+                    RelPath = "Controls\MovePanel.resx"
                     DependentUpon = "MovePanel.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "MoveUnitsForm.cs"
-                    SubType = "Form"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "MoveUnitsForm.resx"
-                    DependentUpon = "MoveUnitsForm.cs"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "NumericForm.cs"
-                    SubType = "Form"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "NumericForm.resx"
-                    DependentUpon = "NumericForm.cs"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "ProductionForm.cs"
-                    SubType = "Form"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "ProductionForm.resx"
-                    DependentUpon = "ProductionForm.cs"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "TerritoryPanel.cs"
+                    RelPath = "Controls\TerritoryPanel.cs"
                     SubType = "UserControl"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TerritoryPanel.resx"
+                    RelPath = "Controls\TerritoryPanel.resx"
                     DependentUpon = "TerritoryPanel.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "TransportInfoEventArgs.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "TransportLoadForm.cs"
+                    RelPath = "Forms\BuckRogersForm.cs"
                     SubType = "Form"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "TransportLoadForm.resx"
-                    DependentUpon = "TransportLoadForm.cs"
+                    RelPath = "Forms\BuckRogersForm.resx"
+                    DependentUpon = "BuckRogersForm.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "Utility.cs"
-                    SubType = "Code"
+                    RelPath = "Forms\CombatForm.cs"
+                    SubType = "Form"
                     BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Forms\CombatForm.resx"
+                    DependentUpon = "CombatForm.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Forms\GameSetupForm.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Forms\GameSetupForm.resx"
+                    DependentUpon = "GameSetupForm.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Forms\MoveUnitsForm.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Forms\MoveUnitsForm.resx"
+                    DependentUpon = "MoveUnitsForm.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Forms\ProductionForm.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Forms\ProductionForm.resx"
+                    DependentUpon = "ProductionForm.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Forms\TransportLoadForm.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Forms\TransportLoadForm.resx"
+                    DependentUpon = "TransportLoadForm.cs"
+                    BuildAction = "EmbeddedResource"
                 />
                 <File
                     RelPath = "ListBox\ItemInfo.cs"
@@ -261,6 +227,24 @@
                     RelPath = "ListBox\ResizableListBox.resx"
                     DependentUpon = "ResizableListBox.cs"
                     BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\App.ico"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Other\AssemblyInfo.cs"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Other\MoveModeEventArgs.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Other\TransportInfoEventArgs.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
                 />
             </Include>
         </Files>
