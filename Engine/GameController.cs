@@ -133,6 +133,14 @@ namespace BuckRogers
 
 		public GameController(string[] playerNames)
 		{
+			m_options = new GameOptions();
+			Init();
+			SetPlayers(playerNames);
+		}
+
+		public GameController(string[] playerNames, GameOptions options)
+		{
+			m_options = options;
 			Init();
 			SetPlayers(playerNames);
 		}

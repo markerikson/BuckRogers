@@ -139,6 +139,16 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "Controls\WinEnumEditoror.cs"
+                    SubType = "UserControl"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Controls\WinEnumEditoror.resx"
+                    DependentUpon = "WinEnumEditoror.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "Forms\BuckRogersForm.cs"
                     SubType = "Form"
                     BuildAction = "Compile"

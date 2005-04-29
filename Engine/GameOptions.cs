@@ -25,7 +25,9 @@ namespace BuckRogers
 	{
 		[Browsable(false)]
 		Normal = 0,
+		[Description("Planets do not move")]
 		NoPlanetaryMovement = 1,
+		[Description("Players can pick their starting units")]
 		PickStartingUnits = 2,
 	}
 

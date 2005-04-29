@@ -44,6 +44,8 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.NumericUpDown m_nudProductionTurn;
 		private System.Windows.Forms.Label label10;
 		private System.Windows.Forms.Label label11;
+		private EeekSoft.WinForms.Controls.EnumEditor enumEditor1;
+		private System.Windows.Forms.GroupBox groupBox1;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -56,6 +58,9 @@ namespace BuckRogers.Interface
 			//
 			InitializeComponent();
 
+			enumEditor1.EnumType = typeof(StartingScenarios);
+			enumEditor1.EnumValue = (long)StartingScenarios.Normal;
+			enumEditor1.LableFormat = "{1}";
 			
 
 			m_cbVictoryConditions.Items.Clear();
@@ -115,16 +120,16 @@ namespace BuckRogers.Interface
 			int runningWidthUsed = dataGrid1.TableStyles[0].RowHeaderWidth;//dataGrid1.TableStyles[ "customers" ].RowHeaderWidth; 
             
 			for ( int i = 0; i < numCols - 1; ++i ) 
+			{
 				runningWidthUsed += 
 					dataGrid1.TableStyles[0].GridColumnStyles[ i ].Width;
+			}
 
 			if ( runningWidthUsed < targetWidth ) 
+			{
 				dataGrid1.TableStyles[0].GridColumnStyles[ numCols - 1 ].Width = 
 					targetWidth - runningWidthUsed; 
-
-			
-
-			
+			}
 			
 		}
 
@@ -172,19 +177,22 @@ namespace BuckRogers.Interface
 			this.label9 = new System.Windows.Forms.Label();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
+			this.enumEditor1 = new EeekSoft.WinForms.Controls.EnumEditor();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
-			this.dataGrid1 = new System.Windows.Forms.DataGrid();
-			this.m_nudProductionMultiplier = new System.Windows.Forms.NumericUpDown();
-			this.m_nudProductionTurn = new System.Windows.Forms.NumericUpDown();
-			this.label10 = new System.Windows.Forms.Label();
 			this.label11 = new System.Windows.Forms.Label();
+			this.label10 = new System.Windows.Forms.Label();
+			this.m_nudProductionTurn = new System.Windows.Forms.NumericUpDown();
+			this.m_nudProductionMultiplier = new System.Windows.Forms.NumericUpDown();
+			this.dataGrid1 = new System.Windows.Forms.DataGrid();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			((System.ComponentModel.ISupportInitialize)(this.m_nudNumTerritories)).BeginInit();
 			this.tabControl1.SuspendLayout();
 			this.tabPage1.SuspendLayout();
 			this.tabPage2.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.dataGrid1)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionMultiplier)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionTurn)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionMultiplier)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.dataGrid1)).BeginInit();
+			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -380,6 +388,7 @@ namespace BuckRogers.Interface
 			// 
 			// tabPage1
 			// 
+			this.tabPage1.Controls.Add(this.groupBox1);
 			this.tabPage1.Controls.Add(this.m_tbPlayer3);
 			this.tabPage1.Controls.Add(this.m_tbPlayer6);
 			this.tabPage1.Controls.Add(this.m_tbPlayer4);
@@ -404,6 +413,18 @@ namespace BuckRogers.Interface
 			this.tabPage1.TabIndex = 0;
 			this.tabPage1.Text = "Players";
 			// 
+			// enumEditor1
+			// 
+			this.enumEditor1.ControlSpacing = 24;
+			this.enumEditor1.EditorType = EeekSoft.WinForms.Controls.EnumEditorType.Flags;
+			this.enumEditor1.EnumType = null;
+			this.enumEditor1.EnumValue = ((long)(0));
+			this.enumEditor1.LableFormat = "{1}";
+			this.enumEditor1.Location = new System.Drawing.Point(8, 24);
+			this.enumEditor1.Name = "enumEditor1";
+			this.enumEditor1.Size = new System.Drawing.Size(248, 52);
+			this.enumEditor1.TabIndex = 24;
+			// 
 			// tabPage2
 			// 
 			this.tabPage2.Controls.Add(this.label11);
@@ -417,40 +438,21 @@ namespace BuckRogers.Interface
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "Game Options";
 			// 
-			// dataGrid1
+			// label11
 			// 
-			this.dataGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-				| System.Windows.Forms.AnchorStyles.Left) 
-				| System.Windows.Forms.AnchorStyles.Right)));
-			this.dataGrid1.DataMember = "";
-			this.dataGrid1.HeaderForeColor = System.Drawing.SystemColors.ControlText;
-			this.dataGrid1.Location = new System.Drawing.Point(4, 4);
-			this.dataGrid1.Name = "dataGrid1";
-			this.dataGrid1.Size = new System.Drawing.Size(468, 236);
-			this.dataGrid1.TabIndex = 25;
-			this.dataGrid1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dataGrid1_MouseUp);
+			this.label11.Location = new System.Drawing.Point(48, 272);
+			this.label11.Name = "label11";
+			this.label11.Size = new System.Drawing.Size(176, 16);
+			this.label11.TabIndex = 29;
+			this.label11.Text = "First turn for increased production";
 			// 
-			// m_nudProductionMultiplier
+			// label10
 			// 
-			this.m_nudProductionMultiplier.Location = new System.Drawing.Point(4, 244);
-			this.m_nudProductionMultiplier.Maximum = new System.Decimal(new int[] {
-																					  5,
-																					  0,
-																					  0,
-																					  0});
-			this.m_nudProductionMultiplier.Minimum = new System.Decimal(new int[] {
-																					  1,
-																					  0,
-																					  0,
-																					  0});
-			this.m_nudProductionMultiplier.Name = "m_nudProductionMultiplier";
-			this.m_nudProductionMultiplier.Size = new System.Drawing.Size(44, 20);
-			this.m_nudProductionMultiplier.TabIndex = 26;
-			this.m_nudProductionMultiplier.Value = new System.Decimal(new int[] {
-																					1,
-																					0,
-																					0,
-																					0});
+			this.label10.Location = new System.Drawing.Point(52, 248);
+			this.label10.Name = "label10";
+			this.label10.Size = new System.Drawing.Size(124, 16);
+			this.label10.TabIndex = 28;
+			this.label10.Text = "Production multiplier";
 			// 
 			// m_nudProductionTurn
 			// 
@@ -474,21 +476,50 @@ namespace BuckRogers.Interface
 																			  0,
 																			  0});
 			// 
-			// label10
+			// m_nudProductionMultiplier
 			// 
-			this.label10.Location = new System.Drawing.Point(52, 248);
-			this.label10.Name = "label10";
-			this.label10.Size = new System.Drawing.Size(124, 16);
-			this.label10.TabIndex = 28;
-			this.label10.Text = "Production multiplier";
+			this.m_nudProductionMultiplier.Location = new System.Drawing.Point(4, 244);
+			this.m_nudProductionMultiplier.Maximum = new System.Decimal(new int[] {
+																					  5,
+																					  0,
+																					  0,
+																					  0});
+			this.m_nudProductionMultiplier.Minimum = new System.Decimal(new int[] {
+																					  1,
+																					  0,
+																					  0,
+																					  0});
+			this.m_nudProductionMultiplier.Name = "m_nudProductionMultiplier";
+			this.m_nudProductionMultiplier.Size = new System.Drawing.Size(44, 20);
+			this.m_nudProductionMultiplier.TabIndex = 26;
+			this.m_nudProductionMultiplier.Value = new System.Decimal(new int[] {
+																					1,
+																					0,
+																					0,
+																					0});
 			// 
-			// label11
+			// dataGrid1
 			// 
-			this.label11.Location = new System.Drawing.Point(48, 272);
-			this.label11.Name = "label11";
-			this.label11.Size = new System.Drawing.Size(176, 16);
-			this.label11.TabIndex = 29;
-			this.label11.Text = "First turn for increased production";
+			this.dataGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+				| System.Windows.Forms.AnchorStyles.Left) 
+				| System.Windows.Forms.AnchorStyles.Right)));
+			this.dataGrid1.DataMember = "";
+			this.dataGrid1.HeaderForeColor = System.Drawing.SystemColors.ControlText;
+			this.dataGrid1.Location = new System.Drawing.Point(4, 4);
+			this.dataGrid1.Name = "dataGrid1";
+			this.dataGrid1.Size = new System.Drawing.Size(468, 236);
+			this.dataGrid1.TabIndex = 25;
+			this.dataGrid1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dataGrid1_MouseUp);
+			// 
+			// groupBox1
+			// 
+			this.groupBox1.Controls.Add(this.enumEditor1);
+			this.groupBox1.Location = new System.Drawing.Point(228, 88);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(264, 84);
+			this.groupBox1.TabIndex = 25;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Setup Options";
 			// 
 			// GameSetupForm
 			// 
@@ -504,9 +535,10 @@ namespace BuckRogers.Interface
 			this.tabControl1.ResumeLayout(false);
 			this.tabPage1.ResumeLayout(false);
 			this.tabPage2.ResumeLayout(false);
-			((System.ComponentModel.ISupportInitialize)(this.dataGrid1)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionMultiplier)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionTurn)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionMultiplier)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.dataGrid1)).EndInit();
+			this.groupBox1.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -550,6 +582,14 @@ namespace BuckRogers.Interface
 				int numTerritories = (int)m_nudNumTerritories.Value;
 				m_options.NumTerritoriesNeeded = numTerritories;
 			}
+
+			if(m_options.OptionalRules["IncreasedProduction"])
+			{
+				m_options.IncreasedProductionTurn = (int)m_nudProductionTurn.Value;
+				m_options.ProductionMultiplier = (int)m_nudProductionMultiplier.Value;
+			}
+
+			m_options.SetupOptions = (StartingScenarios)enumEditor1.EnumValue;
 
 			this.Close();
 		}

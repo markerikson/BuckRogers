@@ -63,14 +63,40 @@ namespace BuckRogers
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
 		
 
-
 		public BuckRogersForm()
+		{
+			InitializeComponent();
+
+			ControllerTest ct = new ControllerTest();
+			ct.Reinitialize = false;
+			m_controller = ct.GameController;
+			m_battleController = ct.BattleController;
+
+			InitControls();
+
+			ct.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
+			ct.Init();
+
+			InitTurn();
+
+		}
+
+		public BuckRogersForm(GameController gc)
 		{
 			//
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
 
+			m_controller = gc;
+			m_battleController = new BattleController(gc);
+
+			InitControls();
+
+			
+			// TODO Game setup code here
+
+			/*
 			m_clickMode = MapClickMode.Normal;
 
 			m_movePanel.Height = m_pgAction.ClientSize.Height;
@@ -84,15 +110,12 @@ namespace BuckRogers
 
 		
 
-			m_controller.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
-			m_battleController.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
-			m_controller.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
-			m_battleController.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
+			
 			ct.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
 
 			ct.Init();
 
-			m_movePanel.Controller = m_controller;
+			
 
 			
 			
@@ -130,22 +153,71 @@ namespace BuckRogers
 
 			m_controller.NextTurn();
 
-			/*
-			statusBar1.Panels.Add("Foo");
-			statusBar1.Panels.Add("Bar");
-
-			statusBar1.Panels[0].Width = 120;
-			statusBar1.Panels[1].Width = 100;
-			*/
-			
 			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
 			statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
 
 			m_movePanel.RefreshPlayerOrder();
 
+			m_movePanel.Controller = m_controller;
 			m_map.GameController = m_controller;
 			m_map.PlacePlanetIcons();
+			*/
 			
+		}
+
+		private void InitControls()
+		{
+			m_clickMode = MapClickMode.Normal;
+
+			m_movePanel.Height = m_pgAction.ClientSize.Height;
+
+			m_map = new MapControl();
+			m_map.Size = new Size(this.ClientSize.Width - tabControl1.Right - 4, this.ClientSize.Height - 52);
+			m_map.TerritoryClicked +=new TerritoryClickedHandler(OnTerritoryClicked);
+			m_map.Location = new Point(tabControl1.Right + 4, 0);
+			m_map.ScrollControl.Size = m_map.ClientSize;
+			m_map.Canvas.Size = m_map.ClientSize;
+			this.Controls.Add(m_map);
+
+			m_map.Anchor = 
+				AnchorStyles.Bottom |
+				AnchorStyles.Top |
+				AnchorStyles.Left |
+				AnchorStyles.Right;
+
+			m_map.Canvas.Camera.ViewScale = 0.25f;
+
+			Size viewSize = m_map.ScrollControl.ViewSize;
+
+			int centerX = (int)(viewSize.Width / 2);
+			int centerY = 0;
+
+			Point ulCorner = new Point(centerX, centerY);
+			ulCorner.X -= this.Width /  2;
+
+			m_map.ScrollControl.ViewPosition = ulCorner;
+			m_cbCenterLocations.SelectedIndex = 0;
+
+			m_movePanel.MoveModeChanged += new MoveModeChangedHandler(OnMoveModeChanged);
+		}
+
+		private void InitTurn()
+		{
+			m_controller.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
+			m_battleController.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
+			m_controller.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
+			m_battleController.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
+
+			m_controller.NextTurn();
+
+			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+			statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
+
+			m_movePanel.Controller = m_controller;
+			m_map.GameController = m_controller;
+			
+			m_movePanel.RefreshPlayerOrder();
+			m_map.PlacePlanetIcons();
 		}
 
 		/// <summary>
