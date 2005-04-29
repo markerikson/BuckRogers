@@ -309,8 +309,6 @@ namespace BuckRogers
 	
 	public class OptionsHashlist : Hashlist
 	{
-		
-		
 		public bool this[string Key]
 		{
 			get
@@ -321,9 +319,6 @@ namespace BuckRogers
 			}
 		}  
 		
-		
-		
-
 		public OptionsHashlist()
 		{
 		}

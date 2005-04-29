@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 
 namespace BuckRogers
 {
@@ -22,6 +23,7 @@ namespace BuckRogers
 	[Flags]
 	public enum StartingScenarios
 	{
+		[Browsable(false)]
 		Normal = 0,
 		NoPlanetaryMovement = 1,
 		PickStartingUnits = 2,
@@ -40,28 +42,44 @@ namespace BuckRogers
 
 		public GameOptions()
 		{
-			string[] optionShortNames = {"DifferentShipSpeeds", "DifferentTroopSpeeds", "PassingFire", "ControlMarkersFight",
-											"CombatRetreat", "LimitedFactories", "DoubledProduction", "CombineFactories",
-											"PartialPlanetControl", "SpecializedGennies", "MergeFarOrbits", "SlingshotEffect",
-											"FactoryDefense", "DeployAnywhere", "TransportedFactoriesBuild", "FreePlanetaryFactory",
-											"ConquerWithGround"};
+			string[] optionShortNames = {"DifferentShipSpeeds", 
+											"DifferentTroopSpeeds", 
+											"PassingFire", 
+											"ControlMarkersFight",
+											"ConquerWithGround", 
+											"CombatRetreat", 
+											"LimitedFactories", 
+											"IncreasedProduction", 
+											"CombineFactories",
+											"PartialPlanetControl", 
+											"SpecializedGennies", 
+											"MergeFarOrbits", 
+											"SlingshotEffect",
+											"FactoryDefense", 
+											"DeployAnywhere", 
+											"TransportedFactoriesBuild", 
+											"FreePlanetaryFactory",
+											"KillerAsteroids",
+											};
 			string[] optionDescriptions = {"Spaceships have different speeds", 
-											  "Gennies and troopers have different speeds",
-											  "Moving units can be fired at",
-											  "Control markers must be killed to conquer the territory",
-											  "Players can retreat from combat",
-											  "Limited number of factories per planet",
-											  "Double production after turn 3",
-											  "Factories may combine output to produce faster",
-											  "Players only need a majority of territories to own a planet",
-											  "Gennies on different planets have different abilities",
-											  "No cost to move from far orbit to the solar system",
-											  "Ships can slingshot around planets or the Sun",
-											  "Factories provide a defensive bonus",
-											  "Newly produced units may be deployed anywhere",
-											  "Factories in transports can build fighters",
-											  "First player to own each planet gets a free factory",
-											  "Only ground units can conquer planetary territories"};
+											"Gennies and troopers have different speeds",
+											"Moving units can be fired at",
+											"Control markers must be killed to conquer the territory",
+											"Only ground units can conquer planetary territories",
+											"Players can retreat from combat",
+											"Limited number of factories per planet",
+											"Increased production after turn N",
+											"Factories may combine output to produce faster",
+											"Players only need a majority of territories to own a planet",
+											"Gennies on different planets have different abilities",
+											"No cost to move from far orbit to the solar system",
+											"Ships can slingshot around planets or the Sun",
+											"Factories provide a defensive bonus",
+											"Newly produced units may be deployed anywhere",
+											"Factories in transports can build fighters",
+											"First player to own each planet gets a free factory",
+											"Asteroids may be launched towards the sun",
+											  };
 
 			m_optionalRules = new OptionsHashlist();
 			for(int i = 0; i < optionDescriptions.Length; i++)
@@ -107,7 +125,7 @@ namespace BuckRogers
 			set { this.m_optionalRules = value; }
 		}
 
-		public BuckRogers.StartingScenarios StartingScenarios
+		public BuckRogers.StartingScenarios SetupOptions
 		{
 			get { return this.m_startingScenarios; }
 			set { this.m_startingScenarios = value; }

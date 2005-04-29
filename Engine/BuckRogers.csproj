@@ -184,11 +184,6 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Data structures\PropertyBag.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
                     RelPath = "Data structures\StatusUpdateEventArgs.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
