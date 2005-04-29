@@ -12,6 +12,7 @@ namespace BuckRogers
 		Movement,
 		Combat,
 		Production,
+		GameOver,
 	}
 	public delegate bool StatusUpdateHandler(object sender, StatusUpdateEventArgs suea);
 	/// <summary>
@@ -109,6 +110,7 @@ namespace BuckRogers
 											Color.Violet, Color.Tan, Color.MediumVioletRed};
 		// Player list assumes players in clockwise order
 		private Player[] m_players;
+		private Player m_winner;
 		private ArrayList m_currentPlayerOrder;
 		public ArrayList m_rollResults;
 		private ArrayList m_rollList;
@@ -151,6 +153,7 @@ namespace BuckRogers
 
 			m_checkedActions = new ArrayList();
 			m_undoneActions = new ArrayList();
+			m_winner = Player.NONE;
 			m_turnNumber = 0;	
 
 			m_redoingAction = false;
@@ -1079,12 +1082,87 @@ namespace BuckRogers
 			m_undoneActions.Clear();
 
 			m_map.AdvancePlanets();
-			RollForInitiative();
 
-			m_idxCurrentPlayer = 0;
-			m_turnNumber++;
+			CheckDeadPlayers();
 
-			m_phase = GamePhase.Movement;
+			if(!CheckVictory())
+			{
+				RollForInitiative();
+
+				m_idxCurrentPlayer = 0;
+				m_turnNumber++;
+
+				m_phase = GamePhase.Movement;
+			}			
+			else
+			{
+				if(StatusUpdate != null)
+				{
+					StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+					suea.Player = m_winner;//(Player)m_currentPlayerOrder[m_idxCurrentPlayer];
+				
+					suea.StatusInfo = StatusInfo.GameOver;
+					StatusUpdate(this, suea);
+				}
+				
+			}
+		}
+
+		private bool CheckVictory()
+		{
+			bool gameOver = false;
+
+			switch(m_options.WinningConditions)
+			{
+				case VictoryConditions.TotalAnnihilation:
+				{
+					gameOver = (m_players.Length == 1);
+					
+					if(gameOver)
+					{
+						m_winner = m_players[0];
+					}
+					break;
+				}
+				case VictoryConditions.OneEarthYear:
+				{
+					if(m_turnNumber == 8)
+					{
+						// Can't test against Player.NONE, because he "owns" all the 
+						// space zones
+						Player highest = m_players[0];
+
+						foreach(Player p in m_players)
+						{
+							if(p.Territories.Count > highest.Territories.Count)
+							{
+								highest = p;
+							}
+						}
+
+						gameOver = true;
+						m_winner = highest;
+					}
+					break;
+				}
+			}
+			return gameOver;
+		}
+
+		private void CheckDeadPlayers()
+		{
+			ArrayList al = new ArrayList(m_players);
+
+			foreach(Player p in m_players)
+			{
+				if(p.Units.Count == 0 && p.Territories.Count == 0)
+				{
+					al.Remove(p);
+				}
+			}
+
+			m_players = (Player[])al.ToArray(typeof(Player));
+
 		}
 
 		public bool NextPlayer()

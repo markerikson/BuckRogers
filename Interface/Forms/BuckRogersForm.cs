@@ -103,8 +103,6 @@ namespace BuckRogers
 
 			InitControls();
 			InitEvents();
-			
-			// TODO Game setup code here
 
 			tabControl1.TabPages.Clear();
 			tabControl1.TabPages.Add(m_tpPlacement);
@@ -660,6 +658,11 @@ namespace BuckRogers
 					
 					
 
+					break;
+				}
+				case StatusInfo.GameOver:
+				{
+					MessageBox.Show("The winner is " + suea.Player.Name, "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
 					break;
 				}
 				

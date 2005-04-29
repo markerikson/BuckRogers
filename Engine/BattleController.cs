@@ -45,6 +45,7 @@ namespace BuckRogers
 			m_cumulativeResult = new CombatResult();
 
 			m_currentBattle = null;
+			m_battles = null;
 		}
 
 		private void CheckPlayerOrder()
@@ -410,6 +411,13 @@ namespace BuckRogers
 				return (m_playerOrder.Count > 1);
 			}
 			
+		}
+
+		public void CombatComplete()
+		{
+			m_cumulativeResult.Casualties.Clear();
+
+			m_currentBattle = null;
 		}
 
 

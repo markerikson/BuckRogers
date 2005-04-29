@@ -8,6 +8,7 @@ namespace BuckRogers
 		NextPhase,
 		FactoryConquered,
 		SabotageResult,
+		GameOver,
 	};
 	/// <summary>
 	/// Summary description for StatusUpdateEventArgs.

@@ -387,6 +387,7 @@ namespace BuckRogers.Interface
 
 			m_btnAddMove.Enabled = true;
 			m_btnEndMoves.Enabled = true;
+			m_btnTransports.Enabled = true;
 
 			m_btnUndoMove.Enabled = m_controller.CanUndo;
 			m_btnRedoMove.Enabled = m_controller.CanRedo;
@@ -580,7 +581,6 @@ namespace BuckRogers.Interface
 		private void m_btnEndMoves_Click(object sender, System.EventArgs e)
 		{
 			m_controller.EndMovePhase();
-			//m_controller.NextPlayer();
 			if(m_controller.NextPlayer())
 			{
 				m_lbPlayerOrder.SelectedIndex++;

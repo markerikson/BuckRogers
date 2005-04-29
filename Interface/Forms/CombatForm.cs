@@ -1379,6 +1379,7 @@ namespace BuckRogers.Interface
 			if(!m_battleController.NextBattle())
 			{
 				// TODO Initiate production here
+				m_battleController.CombatComplete();
 				MessageBox.Show("Combat complete");
 				this.DialogResult = DialogResult.OK;
 			}
