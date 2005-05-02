@@ -1875,11 +1875,10 @@ namespace BuckRogers
 				}
 			}
 
-			MessageBox.Show(sb.ToString(), "Combat Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
+			//MessageBox.Show(sb.ToString(), "Combat Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
 			//MessageBox.Show()
 			if(!m_battleController.NextBattle())
 			{
-				// TODO Initiate production here
 				MessageBox.Show("Done with battles");
 			}
 			else

@@ -368,10 +368,15 @@ namespace BuckRogers.Interface
 
 					ArrayList transferInfo = tlf.TransferInfo;
 
-					foreach(Action a in transferInfo)
+					//foreach(Action a in transferInfo)
+					for(int i = 0; i < transferInfo.Count; i++)
 					{
+						Action a = (Action)transferInfo[i];
 						AddActionToList(a);
 					}
+
+					m_mlbMoves.Refresh();
+					m_mlbTransports.Refresh();
 					break;
 				}
 			}

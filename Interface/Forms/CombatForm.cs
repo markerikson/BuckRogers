@@ -1374,11 +1374,10 @@ namespace BuckRogers.Interface
 				}
 			}
 
-			MessageBox.Show(sb.ToString(), "Combat Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
+			//MessageBox.Show(sb.ToString(), "Combat Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
 			//MessageBox.Show()
 			if(!m_battleController.NextBattle())
 			{
-				// TODO Initiate production here
 				m_battleController.CombatComplete();
 				MessageBox.Show("Combat complete");
 				this.DialogResult = DialogResult.OK;

@@ -19,9 +19,6 @@ namespace BuckRogers.Interface
 
 		public MoveModeEventArgs()
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 			
 		}
 

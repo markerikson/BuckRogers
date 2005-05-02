@@ -555,15 +555,51 @@ namespace BuckRogers.Interface
 			bool shipSpeeds = go.OptionalRules["DifferentShipSpeeds"];
 			if(gsf.DialogResult == DialogResult.OK)
 			{
-				BuckRogersForm brf = new BuckRogersForm(go);
+				BuckRogersForm brf = null;
+				
+				if(go.OptionalRules["UseTestingSetup"])
+				{
+					brf = new BuckRogersForm();
+				}
+				else
+				{
+					brf = new BuckRogersForm(go);
+				}
+
 				Application.Run(brf);
 			}
 		}
 
 		private void button1_Click(object sender, System.EventArgs e)
 		{
-			this.DialogResult = DialogResult.OK;
 			int numPlayers = Int32.Parse((string)m_cbNumPlayers.SelectedItem);
+			ArrayList al = new ArrayList();
+
+			string errorMessage = "";
+			for(int i = 0; i < numPlayers; i++)
+			{
+				string name = m_tbPlayerNames[i].Text;
+				if(al.Contains(name))
+				{
+					errorMessage = "Can't have two players with the same name";
+					break;
+				}
+				al.Add(name);
+			}
+
+			if(al.Contains(""))
+			{
+				errorMessage = "A player's name cannot be empty";
+			}
+
+			if(errorMessage != "")
+			{
+				MessageBox.Show(errorMessage, "Setup", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return;
+			}
+
+			this.DialogResult = DialogResult.OK;
+			
 			m_playerNames = new string[numPlayers];
 
 			for(int i = 0; i < numPlayers; i++)

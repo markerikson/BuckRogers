@@ -11,9 +11,6 @@ namespace BuckRogers.Interface
 
 		public TransportInfoEventArgs()
 		{
-			//
-			// TODO: Add constructor logic here
-			//
 		}
 
 		public string Message

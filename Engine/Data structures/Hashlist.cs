@@ -210,7 +210,6 @@ namespace BuckRogers
 		{
 			get
 			{
-				// TODO:  Add Hashlist.System.Collections.IList.this getter implementation
 				return m_oValues[m_oKeys[index]];
 			}
 			set
@@ -233,13 +232,11 @@ namespace BuckRogers
 
 		public int IndexOf(object value)
 		{
-			// TODO:  Add Hashlist.IndexOf implementation
 			return 0;
 		}
 
 		int System.Collections.IList.Add(object value)
 		{
-			// TODO:  Add Hashlist.System.Collections.IList.Add implementation
 			return 0;
 		}
 

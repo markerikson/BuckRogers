@@ -322,6 +322,7 @@ namespace BuckRogers.Interface
 			node.Nodes.Add(text);
 		}
 
+
 		private void m_btnLoadOne_Click(object sender, System.EventArgs e)
 		{
 			TreeNode transport = m_tvTransports.SelectedNode;
@@ -337,6 +338,10 @@ namespace BuckRogers.Interface
 				return;
 			}
 
+			m_transports = m_territory.Units.GetUnits(UnitType.Transport, m_player, null);
+			m_troopers = m_territory.Units.GetUnits(UnitType.Trooper, m_player, null);
+			m_factories = m_territory.Units.GetUnits(UnitType.Factory, m_player, null);
+
 			int idxUnit = m_lvUnits.SelectedIndices[0];
 			ListViewItem lvi = m_lvUnits.Items[idxUnit];
 
@@ -345,6 +350,8 @@ namespace BuckRogers.Interface
 			UnitCollection containerCollection = null;
 
 			string nodeText = String.Empty;
+			UnitType ut = UnitType.None;
+
 			switch(lvi.Text)
 			{
 				case "Trooper":
@@ -357,6 +364,7 @@ namespace BuckRogers.Interface
 
 					nodeText = "Trooper (Moves: " + lvi.SubItems[2].Text + ")";
 					containerCollection = m_troopers;
+					ut = UnitType.Trooper;
 					
 					break;
 				}
@@ -369,12 +377,14 @@ namespace BuckRogers.Interface
 					}
 					nodeText = "Factory";
 					containerCollection = m_factories;
+					ut = UnitType.Factory;
 					break;
 					
 				}
 			}
 
-			UnitCollection transportees = containerCollection.GetUnits(m_player, 1).GetUnitsWithMoves(numMoves);
+			UnitCollection tempUC = containerCollection.GetUnitsWithMoves(numMoves);
+			UnitCollection transportees = tempUC.GetUnits(1);
 			
 			try
 			{
@@ -385,6 +395,7 @@ namespace BuckRogers.Interface
 				int idxTransport = m_tvTransports.Nodes.IndexOf(transport);
 				ta.Transport = (Transport)m_transports[idxTransport];
 				ta.Units = transportees;
+				ta.UnitType = ut;
 				ta.Load = true;
 				ta.MaxTransfer = 1;
 
@@ -397,21 +408,7 @@ namespace BuckRogers.Interface
 				return;
 			}
 
-			containerCollection.RemoveAllUnits(transportees);
-
-			/*
-			StringBuilder sb = new StringBuilder();
-			sb.Append("Transportation #");
-			sb.Append(m_transferInfo.Count + 1);
-			sb.Append("%");
-			sb.Append("Territory: ");
-			sb.Append(m_territory.Name);
-			sb.Append("\n");
-			sb.Append("Loaded: 1 ");
-			sb.Append(lvi.Text);
-
-			m_transferInfo.Add(sb.ToString());
-			*/
+			//containerCollection.RemoveAllUnits(transportees);
 
 			transport.Nodes.Add(nodeText);
 
@@ -441,6 +438,10 @@ namespace BuckRogers.Interface
 			{
 				return;
 			}
+
+			m_transports = m_territory.Units.GetUnits(UnitType.Transport, m_player, null);
+			m_troopers = m_territory.Units.GetUnits(UnitType.Trooper, m_player, null);
+			m_factories = m_territory.Units.GetUnits(UnitType.Factory, m_player, null);
 
 			int idxUnit = m_lvUnits.SelectedIndices[0];
 			ListViewItem lvi = m_lvUnits.Items[idxUnit];
@@ -495,33 +496,11 @@ namespace BuckRogers.Interface
 
 					m_troopers.RemoveAllUnits(transportees);
 
-					
-/*
-					sb.Append("Transportation #");
-					sb.Append(m_transferInfo.Count + 1);
-					sb.Append("%");
-					sb.Append("Territory: ");
-					sb.Append(m_territory.Name);
-					sb.Append("\n");
-					sb.Append("Loaded: ");
-					sb.Append(numToTransfer);
-					sb.Append(" ");
-					sb.Append(lvi.Text);
-					
-					if(numToTransfer > 1)
-					{
-						sb.Append("s");
-					}
-
-					m_transferInfo.Add(sb.ToString());
-*/
 					for(int i = 0; i < numToTransfer; i++)
 					{
 						transport.Nodes.Add(nodeText);
 						numUnits--;
 					}
-
-
 
 					if(numUnits == 0)
 					{
@@ -543,6 +522,31 @@ namespace BuckRogers.Interface
 
 					// TODO Check if factory is producing, and if so, ask user for confirmation
 					nodeText = "Factory";
+
+					try
+					{
+						TransportAction ta = new TransportAction();
+						ta.Owner = m_player;
+						ta.StartingTerritory = m_territory;
+
+						UnitCollection transportees = m_territory.Units.GetUnits(UnitType.Factory, m_player, m_territory, 1);
+
+						int idxTransport = m_tvTransports.Nodes.IndexOf(transport);
+						ta.Transport = (Transport)m_transports[idxTransport];
+						ta.Units = transportees;
+						ta.UnitType = UnitType.Factory;
+						ta.Load = true;
+						ta.MaxTransfer = 1;
+
+						m_controller.AddAction(ta);
+						
+						m_transferInfo.Add(ta);
+					}
+					catch(Exception ex)
+					{
+						MessageBox.Show(ex.Message);
+						return;
+					}
 
 					transport.Nodes.Add(nodeText);
 

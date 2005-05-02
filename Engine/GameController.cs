@@ -106,7 +106,7 @@ namespace BuckRogers
 		#endregion
 	
 		private GameMap m_map;
-		private Color[] m_playerColors = {Color.CornflowerBlue, Color.Teal, Color.Yellow, 
+		private Color[] m_playerColors = {Color.CornflowerBlue, Color.Yellow, Color.Teal,  
 											Color.Violet, Color.Tan, Color.MediumVioletRed};
 		// Player list assumes players in clockwise order
 		private Player[] m_players;
@@ -218,8 +218,22 @@ namespace BuckRogers
 			
 			foreach(Player p in m_players)
 			{
-				// TODO Technically supposed to be 6 territories apiece
-				for(int i = 0; i < 6; i++)
+				int numTerritories = 6;
+
+				if(!m_options.OptionalRules["LimitedTwoPlayerSetup"])
+				{
+					if(m_players.Length == 2)
+					{
+						numTerritories = 12;
+					}
+					else if(m_players.Length == 3)
+					{
+						numTerritories = 9;
+					}
+				}
+				
+
+				for(int i = 0; i < numTerritories; i++)
 				{
 					int idx = Utility.Twister.Next(ground.Count - 1);
 					Territory t = (Territory)ground[idx];
@@ -240,31 +254,50 @@ namespace BuckRogers
 
 		public void CreateInitialUnits()
 		{
+			int numPlayersModifier = 1;
+
+			if(!m_options.OptionalRules["LimitedTwoPlayerSetup"])
+			{
+				if(m_players.Length == 3)
+				{
+					numPlayersModifier = 2;
+				}
+				else if(m_players.Length == 2)
+				{
+					numPlayersModifier = 3;
+				}
+			}
+			
 			foreach(Player p in m_players)
 			{
-				Unit u = Unit.CreateNewUnit(p, UnitType.Leader);
+				Unit u = null;
 
-				for(int i = 0; i < 8; i++)
+				for(int i = 0; i < 8 * numPlayersModifier; i++)
 				{
 					u = Unit.CreateNewUnit(p, UnitType.Trooper);
 				}
 
-				for(int i = 0; i < 4; i++)
+				for(int i = 0; i < 4 * numPlayersModifier; i++)
 				{
 					u = Unit.CreateNewUnit(p, UnitType.Fighter);
 				}
 
-				for(int i = 0; i < 2; i++)
+				for(int i = 0; i < 2 * numPlayersModifier; i++)
 				{
 					u = Unit.CreateNewUnit(p, UnitType.Factory);
 				}
 
-				for(int i = 0; i < 2; i++)
+				for(int i = 0; i < 2 * numPlayersModifier; i++)
 				{
 					u = Unit.CreateNewUnit(p, UnitType.Gennie);
 				}
 
-				u = Unit.CreateNewUnit(p, UnitType.Transport);
+				for(int i = 0; i < numPlayersModifier; i++)
+				{
+					u = Unit.CreateNewUnit(p, UnitType.Transport);
+					u = Unit.CreateNewUnit(p, UnitType.Leader);
+				}
+				
 			}
 		}
 
@@ -474,6 +507,7 @@ namespace BuckRogers
 
 			UnitCollection unitsToUnload = null;
 			
+			
 			if(ta.MatchMoves)
 			{
 				tr.Transportees.GetUnitsWithMoves(ta.Moves);
@@ -518,8 +552,6 @@ namespace BuckRogers
 				{
 					move.OriginalMovesLeft.Add(u.MovesLeft);
 				}
-
-				// TODO Fix issues with undoing moves that turn out to be invalid while half done
 
 				for(int i = 0; i < move.Territories.Count; i++)
 				{
@@ -771,7 +803,6 @@ namespace BuckRogers
 
 		#endregion
 
-		// TODO Move this to BattleController?
 		public Hashlist FindBattles()
 		{
 			/* Two possible methods for finding battles.
@@ -1049,7 +1080,13 @@ namespace BuckRogers
 					break;
 				}
 			}
-			//}
+			
+			if(pi.DestinationTerritory.Type == TerritoryType.Space 
+				&& pi.Type != UnitType.Battler
+				&& pi.Type != UnitType.KillerSatellite)
+			{
+				throw new Exception("Can't build this in space");
+			}
 
 			return validProduction;
 		}
@@ -1073,7 +1110,6 @@ namespace BuckRogers
 			}
 		}
 
-		// TODO Check for dead players and remove them
 		// TODO Uncontrolled Killer Satellites become the property of the new planetary owner
 
 		public void NextTurn()
@@ -1081,7 +1117,11 @@ namespace BuckRogers
 			m_checkedActions.Clear();
 			m_undoneActions.Clear();
 
-			m_map.AdvancePlanets();
+			if(m_turnNumber != 0)
+			{
+				m_map.AdvancePlanets();
+			}
+			
 
 			CheckDeadPlayers();
 

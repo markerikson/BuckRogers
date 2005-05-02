@@ -63,6 +63,8 @@ namespace BuckRogers
 											"TransportedFactoriesBuild", 
 											"FreePlanetaryFactory",
 											"KillerAsteroids",
+											"UseTestingSetup",
+											"LimitedTwoPlayerSetup",
 											};
 			string[] optionDescriptions = {"Spaceships have different speeds", 
 											"Gennies and troopers have different speeds",
@@ -82,6 +84,8 @@ namespace BuckRogers
 											"Factories in transports can build fighters",
 											"First player to own each planet gets a free factory",
 											"Asteroids may be launched towards the sun",
+											"Use the sample player setup and deployment",
+											"No extra units or territories in two/three player games",
 											  };
 
 			m_optionalRules = new OptionsHashlist();
