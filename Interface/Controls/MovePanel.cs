@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Text;
 
 using BuckRogers;
+using BuckRogers.Interface;
 
 namespace BuckRogers.Interface
 {
@@ -39,7 +40,7 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.TabControl tabControl1;
 		private System.Windows.Forms.TabPage tabPage1;
 		private System.Windows.Forms.TabPage tabPage2;
-		private System.Windows.Forms.ListBox m_lbPlayerOrder;
+		private PlayerListBox m_lbPlayerOrder;
 		private System.Windows.Forms.Label label2;
 
 		/// <summary> 
@@ -136,7 +137,7 @@ namespace BuckRogers.Interface
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
-			this.m_lbPlayerOrder = new System.Windows.Forms.ListBox();
+			this.m_lbPlayerOrder = new PlayerListBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.tabControl1.SuspendLayout();
 			this.SuspendLayout();
@@ -588,7 +589,8 @@ namespace BuckRogers.Interface
 			m_controller.EndMovePhase();
 			if(m_controller.NextPlayer())
 			{
-				m_lbPlayerOrder.SelectedIndex++;
+				m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
+				m_lbPlayerOrder.Refresh();
 				
 			}
 			else
@@ -612,10 +614,11 @@ namespace BuckRogers.Interface
 
 			foreach(Player p in m_controller.PlayerOrder)
 			{
-				m_lbPlayerOrder.Items.Add(p.Name);
+				m_lbPlayerOrder.Items.Add(p);
 			}
 
-			m_lbPlayerOrder.SelectedIndex = 0;
+			//m_lbPlayerOrder.SelectedIndex = 0;
+			m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
 		}
 
 		private void m_btnTransports_Click(object sender, System.EventArgs e)

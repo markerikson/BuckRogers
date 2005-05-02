@@ -139,6 +139,16 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "Controls\PlayerListbox.cs"
+                    SubType = "Component"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Controls\PlayerListbox.resx"
+                    DependentUpon = "PlayerListbox.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "Controls\TerritoryPanel.cs"
                     SubType = "UserControl"
                     BuildAction = "Compile"
@@ -147,6 +157,11 @@
                     RelPath = "Controls\TerritoryPanel.resx"
                     DependentUpon = "TerritoryPanel.cs"
                     BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Controls\UnclickableListBox.cs"
+                    SubType = "Component"
+                    BuildAction = "Compile"
                 />
                 <File
                     RelPath = "Controls\WinEnumEditoror.cs"

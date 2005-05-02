@@ -171,6 +171,9 @@ namespace BuckRogers
 			DrawConnectors();
 
 			AddPlanets();
+
+			Canvas.AnimatingRenderQuality = RenderQuality.HighQuality;
+			Canvas.InteractingRenderQuality = RenderQuality.HighQuality;
 		}
 
 		/// <summary>
@@ -697,7 +700,7 @@ namespace BuckRogers
 
 			PointF[] earthCenters = new PointF[] {new PointF(79f, 14f), new PointF(105f, 50f),
 													 new PointF(105f, 90f), new PointF(95f, 130f),
-													 new PointF(40f, 120f), new PointF(45f, 85f), new PointF(45f, 45f)}; 
+													 new PointF(45f, 127f), new PointF(45f, 85f), new PointF(45f, 45f)}; 
 
 
 			
@@ -726,7 +729,7 @@ namespace BuckRogers
 			DrawPlanetaryOrbit(marsNearOrbitPoints, "Near Mars Orbit", Color.Red, scaleFactor, 1000, -1300, true);
 			DrawPlanetaryOrbit(marsFarOrbitPoints, "Far Mars Orbit", Color.Red, scaleFactor, 1000, -1300, true);
 
-			DrawAsteroid(75, 75, scaleFactor, "Ceres", Color.Gray, 30, 40, -200, 1150);
+			DrawAsteroid(75, 75, scaleFactor, "Ceres", Color.Gray, 30, 45, -200, 1150);
 			DrawAsteroid(65, 55, scaleFactor, "Pallas", Color.Gray, -20, 20, 450, 1000);
 			DrawAsteroid(70, 45, scaleFactor, "Psyche", Color.LightSteelBlue, 40, 10, 500, 1350);
 			DrawAsteroid(70, 60, scaleFactor, "Thule", Color.MediumSlateBlue, 35, 30, 500, 1650);
@@ -837,7 +840,7 @@ namespace BuckRogers
 
 		private PComposite DrawLabelAndOwner(PPath parent, string name, int shiftX, int shiftY)
 		{
-			PPath center = PPath.CreateEllipse(0, 0, 20, 20);
+			PPath center = PPath.CreateEllipse(0, 0, 40, 40);
 			center.Brush = Brushes.White;
 			Pen p = new Pen(Color.Black, 3.0f);
 			center.Pen = p;
@@ -1007,7 +1010,7 @@ namespace BuckRogers
 				territory.Pen = Pens.White;
 
 
-				PPath center = PPath.CreateEllipse(0, 0, 20, 20);
+				PPath center = PPath.CreateEllipse(0, 0, 40, 40);
 				center.Brush = Brushes.White;
 				Pen p = new Pen(Color.Black, 3.0f);
 				center.Pen = p;
@@ -1397,6 +1400,7 @@ namespace BuckRogers
 			if(TerritoryClicked != null)
 			{
 				TerritoryEventArgs tcea = new TerritoryEventArgs(territoryName);
+				tcea.Button = e.Button;
 
 				TerritoryClicked(this, tcea);
 			}
@@ -1564,6 +1568,7 @@ namespace BuckRogers
 			PointF boundsCenter = PUtil.CenterOfRectangle(Canvas.Camera.Bounds);
 			PointF actualCenter = Canvas.Camera.LocalToView(boundsCenter);
 			Canvas.Camera.ScaleViewBy(scaleFactor, actualCenter.X, actualCenter.Y);
+			Canvas.Refresh();
 
 			/*
 			Size viewportSize = ClientSize;

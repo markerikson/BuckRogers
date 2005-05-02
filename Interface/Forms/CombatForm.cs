@@ -107,7 +107,7 @@ namespace BuckRogers.Interface
 			//
 			InitializeComponent();
 
-			m_cbNumUnits.SelectedIndex = 0;
+			m_cbNumUnits.SelectedIndex = 5;
 
 			m_lvAttackers.Items.Clear();
 			m_lvDefenders.Items.Clear();
@@ -443,7 +443,8 @@ namespace BuckRogers.Interface
 															  "5",
 															  "10",
 															  "25",
-															  "100"});
+															  "100",
+															  "1000"});
 			this.m_cbNumUnits.Location = new System.Drawing.Point(204, 204);
 			this.m_cbNumUnits.Name = "m_cbNumUnits";
 			this.m_cbNumUnits.Size = new System.Drawing.Size(76, 21);
@@ -1500,7 +1501,5 @@ namespace BuckRogers.Interface
 			
 			return allMatches;
 		}
-
-
 	}
 }

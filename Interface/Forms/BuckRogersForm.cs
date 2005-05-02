@@ -450,7 +450,13 @@ namespace BuckRogers
 
 			Territory t = m_controller.Map[name];
 
-			if(t != null)
+			if(tcea.Button == MouseButtons.Right)
+			{
+				tabControl1.SelectedTab = m_tpTerritory;
+				m_territoryPanel.DisplayUnits(t);
+			}
+
+			else if(t != null)
 			{
 				switch(m_clickMode)
 				{

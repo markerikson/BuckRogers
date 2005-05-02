@@ -26,6 +26,10 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.ListView m_lvAvailableUnits;
 		private System.Windows.Forms.ColumnHeader columnHeader11;
 		private System.Windows.Forms.ColumnHeader columnHeader1;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.ColumnHeader columnHeader2;
+		private System.Windows.Forms.ColumnHeader columnHeader3;
+		private System.Windows.Forms.ListView m_lvCurrentUnits;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -100,6 +104,10 @@ namespace BuckRogers.Interface
 			this.m_lvAvailableUnits = new System.Windows.Forms.ListView();
 			this.columnHeader11 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
+			this.label1 = new System.Windows.Forms.Label();
+			this.m_lvCurrentUnits = new System.Windows.Forms.ListView();
+			this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
 			this.SuspendLayout();
 			// 
 			// m_btnCancel
@@ -204,10 +212,44 @@ namespace BuckRogers.Interface
 			this.columnHeader1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			this.columnHeader1.Width = 43;
 			// 
+			// label1
+			// 
+			this.label1.Location = new System.Drawing.Point(368, 4);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(100, 16);
+			this.label1.TabIndex = 37;
+			this.label1.Text = "Current units:";
+			// 
+			// m_lvCurrentUnits
+			// 
+			this.m_lvCurrentUnits.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+																							   this.columnHeader2,
+																							   this.columnHeader3});
+			this.m_lvCurrentUnits.FullRowSelect = true;
+			this.m_lvCurrentUnits.HideSelection = false;
+			this.m_lvCurrentUnits.Location = new System.Drawing.Point(368, 20);
+			this.m_lvCurrentUnits.MultiSelect = false;
+			this.m_lvCurrentUnits.Name = "m_lvCurrentUnits";
+			this.m_lvCurrentUnits.Size = new System.Drawing.Size(128, 136);
+			this.m_lvCurrentUnits.TabIndex = 36;
+			this.m_lvCurrentUnits.View = System.Windows.Forms.View.Details;
+			// 
+			// columnHeader2
+			// 
+			this.columnHeader2.Text = "Type";
+			// 
+			// columnHeader3
+			// 
+			this.columnHeader3.Text = "Count";
+			this.columnHeader3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+			this.columnHeader3.Width = 43;
+			// 
 			// PlacementForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.ClientSize = new System.Drawing.Size(356, 198);
+			this.ClientSize = new System.Drawing.Size(532, 198);
+			this.Controls.Add(this.label1);
+			this.Controls.Add(this.m_lvCurrentUnits);
 			this.Controls.Add(this.m_btnCancel);
 			this.Controls.Add(this.m_btnOK);
 			this.Controls.Add(this.m_butRemAttackers);
@@ -219,6 +261,7 @@ namespace BuckRogers.Interface
 			this.Name = "PlacementForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "PlacementForm";
+			this.Load += new System.EventHandler(this.PlacementForm_Load);
 			this.ResumeLayout(false);
 
 		}
@@ -248,7 +291,7 @@ namespace BuckRogers.Interface
 			this.DialogResult = DialogResult.Cancel;
 		}
 
-		public void SetupUnits(Player p)
+		public void SetupUnits(Player p, Territory t)
 		{
 			m_player = p;
 
@@ -266,6 +309,22 @@ namespace BuckRogers.Interface
 
 				m_lvAvailableUnits.Items.Add(lvi);
 			}
+
+			UnitCollection existingUnits = t.Units.GetUnits(p);
+
+			unitCount = existingUnits.GetUnitTypeCount();
+			foreach(UnitType ut in unitCount.Keys)
+			{
+				UnitCollection typeCollection = existingUnits.GetUnits(ut);
+
+				ListViewItem lvi = new ListViewItem();
+				lvi.Text = ut.ToString();
+				int numUnits = (int)unitCount[ut];
+				lvi.SubItems.Add(numUnits.ToString());
+
+				m_lvCurrentUnits.Items.Add(lvi);
+			}
+			
 		}
 
 		private void MoveItems(ListView origin, ListView destination, int numToMove)
@@ -337,6 +396,11 @@ namespace BuckRogers.Interface
 		private void m_butRemAttackers_Click(object sender, System.EventArgs e)
 		{
 			MoveItems(m_lvSelectedUnits, m_lvAvailableUnits, 1);
+		}
+
+		private void PlacementForm_Load(object sender, System.EventArgs e)
+		{
+		
 		}
 
 		public UnitCollection SelectedUnits

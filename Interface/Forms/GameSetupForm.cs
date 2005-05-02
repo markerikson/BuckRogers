@@ -576,27 +576,32 @@ namespace BuckRogers.Interface
 			ArrayList al = new ArrayList();
 
 			string errorMessage = "";
-			for(int i = 0; i < numPlayers; i++)
+
+			if(!Options.OptionalRules["UseTestingSetup"])
 			{
-				string name = m_tbPlayerNames[i].Text;
-				if(al.Contains(name))
+				for(int i = 0; i < numPlayers; i++)
 				{
-					errorMessage = "Can't have two players with the same name";
-					break;
+					string name = m_tbPlayerNames[i].Text;
+					if(al.Contains(name))
+					{
+						errorMessage = "Can't have two players with the same name";
+						break;
+					}
+					al.Add(name);
 				}
-				al.Add(name);
-			}
 
-			if(al.Contains(""))
-			{
-				errorMessage = "A player's name cannot be empty";
-			}
+				if(al.Contains(""))
+				{
+					errorMessage = "A player's name cannot be empty";
+				}
 
-			if(errorMessage != "")
-			{
-				MessageBox.Show(errorMessage, "Setup", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-				return;
+				if(errorMessage != "")
+				{
+					MessageBox.Show(errorMessage, "Setup", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+					return;
+				}
 			}
+			
 
 			this.DialogResult = DialogResult.OK;
 			

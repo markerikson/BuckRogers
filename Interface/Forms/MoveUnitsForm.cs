@@ -333,7 +333,8 @@ namespace BuckRogers.Interface
 															  "5",
 															  "10",
 															  "25",
-															  "100"});
+															  "100",
+															  "1000"});
 			this.m_cbNumUnits.Location = new System.Drawing.Point(252, 136);
 			this.m_cbNumUnits.Name = "m_cbNumUnits";
 			this.m_cbNumUnits.Size = new System.Drawing.Size(116, 21);

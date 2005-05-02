@@ -14,7 +14,7 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.Button m_btnFinishProduction;
 		private System.Windows.Forms.Button m_btnNextProduction;
 		private System.Windows.Forms.Label label16;
-		private System.Windows.Forms.ListBox m_lbProductionOrder;
+		private UnclickableListBox m_lbProductionOrder;
 		private System.Windows.Forms.ListView m_lvFactories;
 		private System.Windows.Forms.ColumnHeader columnHeader25;
 		private System.Windows.Forms.ColumnHeader columnHeader26;
@@ -77,7 +77,7 @@ namespace BuckRogers.Interface
 			this.m_btnFinishProduction = new System.Windows.Forms.Button();
 			this.m_btnNextProduction = new System.Windows.Forms.Button();
 			this.label16 = new System.Windows.Forms.Label();
-			this.m_lbProductionOrder = new System.Windows.Forms.ListBox();
+			this.m_lbProductionOrder = new UnclickableListBox();
 			this.m_lvFactories = new System.Windows.Forms.ListView();
 			this.columnHeader25 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader26 = new System.Windows.Forms.ColumnHeader();
@@ -233,6 +233,7 @@ namespace BuckRogers.Interface
 		
 		private void m_btnFinishProduction_Click(object sender, System.EventArgs e)
 		{
+			AddProduction();
 			m_controller.ExecuteProduction();
 			this.DialogResult = DialogResult.OK;
 		}
@@ -346,6 +347,45 @@ namespace BuckRogers.Interface
 			NextProduction();
 		}
 
+		private void AddProduction()
+		{
+			
+			string playerName = (string)m_lbProductionOrder.SelectedItem;
+			Player p = m_controller.GetPlayer(playerName);
+
+			UnitCollection allFactories = p.Units.GetUnits(UnitType.Factory);
+
+			UnitCollection usableFactories = new UnitCollection();
+
+			foreach(Factory f in allFactories)
+			{
+				if(f.CanProduce)
+				{
+					usableFactories.AddUnit(f);
+				}
+			}
+
+			foreach(Factory f in usableFactories)
+			{
+				ListViewItem lvi = new ListViewItem();
+
+				lvi.Text = f.CurrentTerritory.Name;
+				lvi.SubItems.Add(f.ProductionType.ToString());
+				lvi.SubItems.Add(f.AmountProduced.ToString());
+				lvi.SubItems.Add(f.DestinationTerritory.Name);
+
+				m_lvFactories.Items.Add(lvi);
+			}
+
+			if(usableFactories.Count > 0)
+			{
+				m_lvFactories.Items[0].Selected = true;
+			}
+			else
+			{
+				m_cbNeighbors.Items.Clear();
+			}
+		}
 		private void NextProduction()
 		{
 			m_productionIndex++;
@@ -353,43 +393,10 @@ namespace BuckRogers.Interface
 			if(m_productionIndex < m_lbProductionOrder.Items.Count)
 			{
 				m_lbProductionOrder.SelectedIndex = m_productionIndex;
-				string playerName = (string)m_lbProductionOrder.SelectedItem;
-				Player p = m_controller.GetPlayer(playerName);
-
-				UnitCollection allFactories = p.Units.GetUnits(UnitType.Factory);
-
-				UnitCollection usableFactories = new UnitCollection();
-
-				foreach(Factory f in allFactories)
-				{
-					if(f.CanProduce)
-					{
-						usableFactories.AddUnit(f);
-					}
-				}
-
-				foreach(Factory f in usableFactories)
-				{
-					ListViewItem lvi = new ListViewItem();
-
-					lvi.Text = f.CurrentTerritory.Name;
-					lvi.SubItems.Add(f.ProductionType.ToString());
-					lvi.SubItems.Add(f.AmountProduced.ToString());
-					lvi.SubItems.Add(f.DestinationTerritory.Name);
-
-					m_lvFactories.Items.Add(lvi);
-				}
-
-				if(usableFactories.Count > 0)
-				{
-					m_lvFactories.Items[0].Selected = true;
-				}
-				else
-				{
-					m_cbNeighbors.Items.Clear();
-				}
+				AddProduction();
 			}
-			else
+			
+			if(m_productionIndex == (m_lbProductionOrder.Items.Count - 1))
 			{
 				m_btnNextProduction.Enabled = false;
 				//m_btnProduce.Enabled = true;
