@@ -149,6 +149,11 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "Controls\RefreshingScrollableControl.cs"
+                    SubType = "Component"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Controls\TerritoryPanel.cs"
                     SubType = "UserControl"
                     BuildAction = "Compile"
@@ -279,6 +284,7 @@
                 />
                 <File
                     RelPath = "Other\AssemblyInfo.cs"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File

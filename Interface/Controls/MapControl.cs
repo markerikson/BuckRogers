@@ -47,11 +47,11 @@ namespace BuckRogers
 
 		private GameController m_controller;
 
-		private PPath m_iconMercury;
-		private PPath m_iconVenus;
-		private PPath m_iconEarth;
-		private PPath m_iconMars;
-		private PPath[] m_iconAsteroids;
+		private PComposite m_iconMercury;
+		private PComposite m_iconVenus;
+		private PComposite m_iconEarth;
+		private PComposite m_iconMars;
+		private PComposite[] m_iconAsteroids;
 		private Hashtable m_territoryMarkers;
 		
 		private int m_idxPlanets;
@@ -60,7 +60,7 @@ namespace BuckRogers
 		private float[] m_zoomFactors;
 
 		private PCanvas m_canvas;
-		private PScrollableControl m_scroller;
+		private RefreshingScrollableControl m_scroller;
 
 		public MapControl()
 		{
@@ -89,7 +89,7 @@ namespace BuckRogers
 
 			m_canvas.Focus();
 
-			m_scroller = new PScrollableControl(m_canvas);
+			m_scroller = new RefreshingScrollableControl(m_canvas);
 			m_scroller.Scrollable = true;
 
 			this.SuspendLayout();
@@ -859,6 +859,8 @@ namespace BuckRogers
 			text.X = centerX - (text.Width / 2) + shiftX;
 			text.Y = centerY - (text.Height) + shiftY;
 			text.TextBrush = Brushes.Black;
+			Font f = text.Font;
+			text.Font = new Font(f.Name, f.SizeInPoints + 2);
 
 
 			m_territoryMarkers[name] = center;
@@ -1030,6 +1032,8 @@ namespace BuckRogers
 				string label = names[i];// + "\r\n(x: " + (unshiftedCenter.X / scaleFactor)  + ", y: " + (unshiftedCenter.Y / scaleFactor) + ")";
 				
 				PText text = new PText(label);//names[i]);
+				Font f = text.Font;
+				text.Font = new Font(f.Name, f.SizeInPoints + 2);
 				text.X = centerX - (text.Width / 2) + shiftX;
 				text.Y = centerY - (text.Height) + shiftY;
 
@@ -1630,22 +1634,53 @@ namespace BuckRogers
 
 		public void PlacePlanetIcons()
 		{
+			int iconRadius = 50;
 			//m_planetIcons = new Hashtable();
-			m_iconMercury = PPath.CreateEllipse(0, 0, 50, 50);
-			m_iconMercury.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Yellow);
-			m_iconMercury.Pen = Pens.White;
+			m_iconMercury = new PComposite();
+			PPath mercCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
+			
+			mercCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Yellow);
+			mercCircle.Pen = Pens.White;
+			PText mercName = new PText("Mercury");
+			mercName.TextBrush = new SolidBrush(Color.White);
+			mercName.X = iconRadius - (mercName.Width / 2);
+			mercName.Y = iconRadius + mercName.Height + 4;
+			m_iconMercury.AddChild(mercCircle);
+			m_iconMercury.AddChild(mercName);
 
-			m_iconVenus = PPath.CreateEllipse(0, 0, 50, 50);
-			m_iconVenus.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Green);
-			m_iconVenus.Pen = Pens.White;
+			m_iconVenus = new PComposite();
+			PPath venusCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
+			venusCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Green);
+			venusCircle.Pen = Pens.White;
+			PText venusName = new PText("Venus");
+			venusName.TextBrush = new SolidBrush(Color.White);
+			venusName.X = iconRadius - (venusName.Width / 2);
+			venusName.Y = iconRadius + venusName.Height + 4;
+			m_iconVenus.AddChild(venusCircle);
+			m_iconVenus.AddChild(venusName);
+			
 
-			m_iconEarth = PPath.CreateEllipse(0, 0, 50, 50);
-			m_iconEarth.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Blue);
-			m_iconEarth.Pen = Pens.White;
+			m_iconEarth = new PComposite();
+			PPath earthCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
+			earthCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Blue);
+			earthCircle.Pen = Pens.White;
+			PText earthName = new PText("Earth");
+			earthName.TextBrush = new SolidBrush(Color.White);
+			earthName.X = iconRadius - (earthName.Width / 2);
+			earthName.Y = iconRadius + earthName.Height + 4;
+			m_iconEarth.AddChild(earthCircle);
+			m_iconEarth.AddChild(earthName);
 
-			m_iconMars = PPath.CreateEllipse(0, 0, 50, 50);
-			m_iconMars.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Red);
-			m_iconMars.Pen = Pens.White;
+			m_iconMars = new PComposite();
+			PPath marsCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
+			marsCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Red);
+			marsCircle.Pen = Pens.White;
+			PText marsName = new PText("Mars");
+			marsName.TextBrush = new SolidBrush(Color.White);
+			marsName.X = iconRadius - (marsName.Width / 2);
+			marsName.Y = iconRadius + marsName.Height + 4;
+			m_iconMars.AddChild(marsCircle);
+			m_iconMars.AddChild(marsName);
 			
 
 			Canvas.Layer.AddChild(m_iconMercury);
@@ -1653,14 +1688,26 @@ namespace BuckRogers
 			Canvas.Layer.AddChild(m_iconEarth);
 			Canvas.Layer.AddChild(m_iconMars);
 
-			m_iconAsteroids = new PPath[9];
+			m_iconAsteroids = new PComposite[9];
+			string[] asteroidNames = {"Ceres", "Pallas", "Psyche", "Thule", "Fortuna", "Vesta", "Juno", "Hygeia", "Aurora"};
 			for(int i = 0; i < 9; i++)
 			{
-				m_iconAsteroids[i] = PPath.CreateEllipse(0, 0, 50, 50);
-				m_iconAsteroids[i].Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Gray);
-				m_iconAsteroids[i].Pen = Pens.White;
+				m_iconAsteroids[i] = new PComposite();
+				PPath asteroidCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
+				asteroidCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Gray);
+				asteroidCircle.Pen = Pens.White;
+				m_iconAsteroids[i].AddChild(asteroidCircle);
+				PText asteroidName = new PText(asteroidNames[i]);
+				asteroidName.TextBrush = new SolidBrush(Color.White);
+				asteroidName.X = iconRadius - (asteroidName.Width / 2);
+				asteroidName.Y = iconRadius + asteroidName.Height + 4;
+
+				m_iconAsteroids[i].AddChild(asteroidCircle);
+				m_iconAsteroids[i].AddChild(asteroidName);
 				Canvas.Layer.AddChild(m_iconAsteroids[i]);
+
 			}
+
 
 			
 			AdvancePlanets();
@@ -1668,38 +1715,42 @@ namespace BuckRogers
 
 		public void AdvancePlanets()
 		{
-			OrbitalSystem mercury = (OrbitalSystem)m_controller.Map.Planets["Mercury"];
-			PNode mercuryNode = m_meo[mercury.CurrentOrbitIndex].AllNodes[0];
-			m_iconMercury.X = mercuryNode.X - 20;
-			m_iconMercury.Y = mercuryNode.Y - 20;
-			mercuryNode.Parent.MoveInFrontOf(m_iconMercury);
+			object[][] groups = {	new object[]{"Mercury", m_meo, m_iconMercury},
+									new object[]{"Venus", m_vo, m_iconVenus}, 
+									new object[]{"Earth", m_eo, m_iconEarth},
+									new object[]{"Mars", m_mao, m_iconMars},
+							   };
 
-			OrbitalSystem venus = (OrbitalSystem)m_controller.Map.Planets["Venus"];
-			PNode venusNode = m_vo[venus.CurrentOrbitIndex].AllNodes[0];
-			m_iconVenus.X = venusNode.X - 20;
-			m_iconVenus.Y = venusNode.Y - 20;
-			venusNode.Parent.MoveInFrontOf(m_iconVenus);
+			for(int i = 0; i < groups.Length; i++)
+			{
+				string name = (string)groups[i][0];
+				OrbitalSystem os = (OrbitalSystem)m_controller.Map.Planets[name];
+				PNode[] orbit = (PNode[])groups[i][ 1];
+				PNode node = orbit[os.CurrentOrbitIndex].AllNodes[0];
+				PNode composite = (PNode)groups[i][ 2];
+				PNode icon = composite[0];
+				PNode text = composite[1];
 
-			OrbitalSystem earth = (OrbitalSystem)m_controller.Map.Planets["Earth"];
-			PNode earthNode = m_eo[earth.CurrentOrbitIndex].AllNodes[0];
-			m_iconEarth.X = earthNode.X - 20;
-			m_iconEarth.Y = earthNode.Y - 20;
-			earthNode.Parent.MoveInFrontOf(m_iconEarth);
+				icon.CenterFullBoundsOnPoint(node.X + node.Width / 2, node.Y + node.Height / 2);
+				text.CenterFullBoundsOnPoint(node.X + node.Width / 2, node.Y + 40 + node.Height / 2);
+				node.Parent.MoveInFrontOf(composite);
 
-			OrbitalSystem mars = (OrbitalSystem)m_controller.Map.Planets["Mars"];
-			PNode marsNode = m_mao[mars.CurrentOrbitIndex].AllNodes[0];
-			m_iconMars.X = marsNode.X - 20;
-			m_iconMars.Y = marsNode.Y - 20;
-			marsNode.Parent.MoveInFrontOf(m_iconMars);
+			}
 
 			string[] asteroidNames = {"Ceres", "Pallas", "Psyche", "Thule", "Fortuna", "Vesta", "Juno", "Hygeia", "Aurora"};
 			for(int i = 0; i < m_iconAsteroids.Length; i++)
 			{
 				OrbitalSystem asteroid = (OrbitalSystem)m_controller.Map.Planets[asteroidNames[i]];
-				PNode asteroidNode = m_ao[asteroid.CurrentOrbitIndex].AllNodes[0];
-				m_iconAsteroids[i].X = asteroidNode.X - 20;
-				m_iconAsteroids[i].Y = asteroidNode.Y - 20;
-				asteroidNode.Parent.MoveInFrontOf(m_iconAsteroids[i]);
+				PNode node = m_ao[asteroid.CurrentOrbitIndex].AllNodes[0];
+				PNode composite = m_iconAsteroids[i];
+				PNode icon = composite[0];
+				PNode text = composite[1];
+
+				icon.CenterFullBoundsOnPoint(node.X + node.Width / 2, node.Y + node.Height / 2);
+				text.CenterFullBoundsOnPoint(node.X + node.Width / 2, node.Y + 40 + node.Height / 2);
+				node.Parent.MoveInFrontOf(composite);
+
+				node.Parent.MoveInFrontOf(m_iconAsteroids[i]);
 			}
 			
 		}
@@ -1723,7 +1774,7 @@ namespace BuckRogers
 			set { this.m_canvas = value; }
 		}
 
-		public UMD.HCIL.PiccoloX.Components.PScrollableControl ScrollControl
+		public RefreshingScrollableControl ScrollControl
 		{
 			get { return this.m_scroller; }
 			set { this.m_scroller = value; }

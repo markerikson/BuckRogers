@@ -9,6 +9,7 @@ namespace BuckRogers
 	{
 		private string m_territoryName;
 		private Player m_owner;
+		private System.Windows.Forms.MouseButtons m_button;
 
 		public TerritoryEventArgs()
 		{
@@ -30,6 +31,12 @@ namespace BuckRogers
 		{
 			get { return this.m_owner; }
 			set { this.m_owner = value; }
+		}
+
+		public System.Windows.Forms.MouseButtons Button
+		{
+			get { return this.m_button; }
+			set { this.m_button = value; }
 		}
 
 		

@@ -171,7 +171,7 @@ namespace BuckRogers
 			{
 				//object b = o;
 				
-				if(t.Neighbors.Count > 1)
+				if(t.Neighbors.Count > 1 || this is Asteroid)
 				{
 					m_surface.Add(t.Name, t);
 				}
