@@ -76,8 +76,28 @@ namespace BuckRogers
 			{
 				if(al.Contains(p))
 				{
-					m_playerOrder.Add(p);
-					m_survivingUnits[p] = new UnitCollection();
+					UnitCollection uc = m_currentBattle.Territory.Units.GetUnits(p);
+					Hashtable ht = uc.GetUnitTypeCount();
+
+					if(ht.Count == 1 && ht.ContainsKey(UnitType.Leader))
+					{
+						Unit leader = uc[0];
+						p.Disabled = true;
+
+						if(StatusUpdate != null)
+						{
+							StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+							suea.StatusInfo = StatusInfo.LeaderKilled;
+							suea.Player = leader.Owner;
+
+							StatusUpdate(this, suea);
+						}
+					}
+					else
+					{
+						m_playerOrder.Add(p);
+						m_survivingUnits[p] = new UnitCollection();
+					}					
 				}
 			}
 
@@ -189,17 +209,12 @@ namespace BuckRogers
 
 							TerritoryOwnerChanged(this, tea);
 						}	
-
 					}
-
 				}
 			}
 
 			if(m_battles != null && m_battles.Count > 0)
 			{
-				
-				
-
 				m_currentBattle = (BattleInfo)m_battles[0];
 				m_battles.Remove(m_currentBattle.ToString());
 
@@ -209,98 +224,107 @@ namespace BuckRogers
 
 				CheckPlayerOrder();
 
-				m_currentPlayer = (Player)m_playerOrder[0];
-				m_currentUnused = new UnitCollection();
-				
-				Territory t = m_currentBattle.Territory;
-
-				switch(m_currentBattle.Type)
+				if(m_playerOrder.Count == 1)
 				{
-					case BattleType.KillerSatellite:
-					{
-						UnitCollection satellites = t.Units.GetUnits(UnitType.KillerSatellite);
-						m_currentUnused.AddAllUnits(satellites);
-						UnitCollection defenders = t.Units.GetNonMatchingUnits(m_currentBattle.Player);
-
-						UnitCollection uc = null;
-
-						uc = (UnitCollection)m_survivingUnits[m_currentPlayer];
-						uc.AddAllUnits(satellites);
-
-						foreach(Player p in defenders.GetPlayersWithUnits())
-						{
-							uc = (UnitCollection)m_survivingUnits[p];
-							uc.AddAllUnits(defenders.GetUnits(p));
-						}
-
-						if(UnitsToDisplay != null)
-						{
-							DisplayUnitsEventArgs duea = new DisplayUnitsEventArgs();
-							duea.Category = DisplayCategory.Attackers;
-							duea.Units = satellites;
-							UnitsToDisplay(this, duea);
-
-							duea = new DisplayUnitsEventArgs();
-							duea.Category = DisplayCategory.Defenders;
-							duea.Units = defenders;
-							UnitsToDisplay(this, duea);
-						}
-
-						break;
-					}
-					case BattleType.Bombing:
-					{
-						UnitCollection attackers = t.Units.GetUnits(UnitType.Battler, m_currentPlayer, null);//).GetUnits(UnitType.Battler);
-						UnitCollection defenders = m_controller.GetBombingTargets(t, m_currentPlayer);
-
-						m_currentUnused.AddAllUnits(attackers);
-
-						UnitCollection uc = null;
-
-						uc = (UnitCollection)m_survivingUnits[m_currentPlayer];
-						uc.AddAllUnits(attackers);
-
-						foreach(Player p in defenders.GetPlayersWithUnits())
-						{
-							uc = (UnitCollection)m_survivingUnits[p];
-							UnitCollection playerUnits = defenders.GetUnits(p);
-							uc.AddAllUnits(playerUnits);
-						}
-
-						/*
-						AddUnitsToListView(attackers, m_lvAttUnused, false);
-						AddUnitsToListView(defenders, m_lvEnemyLive, true);
-						*/
-						if(UnitsToDisplay != null)
-						{
-							DisplayUnitsEventArgs duea = new DisplayUnitsEventArgs();
-							duea.Category = DisplayCategory.UnusedAttackers;
-							duea.Units = attackers;
-							UnitsToDisplay(this, duea);
-
-							duea = new DisplayUnitsEventArgs();
-							duea.Category = DisplayCategory.SurvivingDefenders;
-							duea.Units = defenders;
-							UnitsToDisplay(this, duea);
-						}
-						break;
-					}
-					case BattleType.Normal:
-					{
-						foreach(Player p in m_playerOrder)
-						{
-							UnitCollection uc = (UnitCollection)m_survivingUnits[p];
-							UnitCollection playerUnits = t.Units.GetUnits(p);
-							uc.AddAllUnits(playerUnits.GetCombatUnits());
-						}
-
-						UpdateUnusedUnits();
-						DisplayUnits();
-						break;
-					}
+					m_status = BattleStatus.BattleComplete;
+					return true;
 				}
-				m_status = BattleStatus.Setup;
-				return true;
+				else
+				{
+					m_currentPlayer = (Player)m_playerOrder[0];
+					m_currentUnused = new UnitCollection();
+				
+					Territory t = m_currentBattle.Territory;
+
+					switch(m_currentBattle.Type)
+					{
+						case BattleType.KillerSatellite:
+						{
+							UnitCollection satellites = t.Units.GetUnits(UnitType.KillerSatellite);
+							m_currentUnused.AddAllUnits(satellites);
+							UnitCollection defenders = t.Units.GetNonMatchingUnits(m_currentBattle.Player);
+
+							UnitCollection uc = null;
+
+							uc = (UnitCollection)m_survivingUnits[m_currentPlayer];
+							uc.AddAllUnits(satellites);
+
+							foreach(Player p in defenders.GetPlayersWithUnits())
+							{
+								uc = (UnitCollection)m_survivingUnits[p];
+								uc.AddAllUnits(defenders.GetUnits(p));
+							}
+
+							if(UnitsToDisplay != null)
+							{
+								DisplayUnitsEventArgs duea = new DisplayUnitsEventArgs();
+								duea.Category = DisplayCategory.Attackers;
+								duea.Units = satellites;
+								UnitsToDisplay(this, duea);
+
+								duea = new DisplayUnitsEventArgs();
+								duea.Category = DisplayCategory.Defenders;
+								duea.Units = defenders;
+								UnitsToDisplay(this, duea);
+							}
+
+							break;
+						}
+						case BattleType.Bombing:
+						{
+							UnitCollection attackers = t.Units.GetUnits(UnitType.Battler, m_currentPlayer, null);//).GetUnits(UnitType.Battler);
+							UnitCollection defenders = m_controller.GetBombingTargets(t, m_currentPlayer);
+
+							m_currentUnused.AddAllUnits(attackers);
+
+							UnitCollection uc = null;
+
+							uc = (UnitCollection)m_survivingUnits[m_currentPlayer];
+							uc.AddAllUnits(attackers);
+
+							foreach(Player p in defenders.GetPlayersWithUnits())
+							{
+								uc = (UnitCollection)m_survivingUnits[p];
+								UnitCollection playerUnits = defenders.GetUnits(p);
+								uc.AddAllUnits(playerUnits);
+							}
+
+							/*
+							AddUnitsToListView(attackers, m_lvAttUnused, false);
+							AddUnitsToListView(defenders, m_lvEnemyLive, true);
+							*/
+							if(UnitsToDisplay != null)
+							{
+								DisplayUnitsEventArgs duea = new DisplayUnitsEventArgs();
+								duea.Category = DisplayCategory.UnusedAttackers;
+								duea.Units = attackers;
+								UnitsToDisplay(this, duea);
+
+								duea = new DisplayUnitsEventArgs();
+								duea.Category = DisplayCategory.SurvivingDefenders;
+								duea.Units = defenders;
+								UnitsToDisplay(this, duea);
+							}
+							break;
+						}
+						case BattleType.Normal:
+						{
+							foreach(Player p in m_playerOrder)
+							{
+								UnitCollection uc = (UnitCollection)m_survivingUnits[p];
+								UnitCollection playerUnits = t.Units.GetUnits(p);
+								uc.AddAllUnits(playerUnits.GetCombatUnits());
+							}
+
+							UpdateUnusedUnits();
+							DisplayUnits();
+							break;
+						}
+					}
+					m_status = BattleStatus.Setup;
+					return true;
+				}
+				
 			}
 
 			m_currentBattle = null;
@@ -470,6 +494,15 @@ namespace BuckRogers
 					m_cumulativeResult.Casualties.AddUnit(leader);
 					p.Disabled = true;
 					//leader.Destroy();
+
+					if(StatusUpdate != null)
+					{
+						StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+						suea.StatusInfo = StatusInfo.LeaderKilled;
+						suea.Player = leader.Owner;
+
+						StatusUpdate(this, suea);
+					}
 				}
 
 				m_playerOrder.Remove(p);

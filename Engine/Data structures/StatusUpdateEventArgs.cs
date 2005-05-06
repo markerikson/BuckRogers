@@ -8,6 +8,7 @@ namespace BuckRogers
 		NextPhase,
 		FactoryConquered,
 		SabotageResult,
+		LeaderKilled,
 		GameOver,
 	};
 	/// <summary>

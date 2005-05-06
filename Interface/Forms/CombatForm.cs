@@ -1470,6 +1470,12 @@ namespace BuckRogers.Interface
 					MessageBox.Show(message, "Sabotage Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
 					break;
 				}
+				case StatusInfo.LeaderKilled:
+				{
+					string message = suea.Player.Name + "'s leader has been killed!";
+					MessageBox.Show(message, "Leader Killed", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+					break;
+				}
 			}
 
 			return result;
