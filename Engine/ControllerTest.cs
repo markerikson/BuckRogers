@@ -833,13 +833,13 @@ namespace BuckRogers
 			Assert.AreEqual(4, cr.Casualties.Count);
 			Assert.AreEqual(2, cr.Survivors.Count);
 
-			Assert.AreEqual(UnitType.Battler, cr.Survivors[0].UnitType);
-			Assert.AreEqual(UnitType.Fighter, cr.Survivors[1].UnitType);
+			Assert.AreEqual(UnitType.Battler, cr.Survivors[0].Type);
+			Assert.AreEqual(UnitType.Fighter, cr.Survivors[1].Type);
 
-			Assert.AreEqual(UnitType.Fighter, cr.Casualties[0].UnitType);
-			Assert.AreEqual(UnitType.Fighter, cr.Casualties[1].UnitType);
-			Assert.AreEqual(UnitType.Fighter, cr.Casualties[2].UnitType);
-			Assert.AreEqual(UnitType.Fighter, cr.Casualties[3].UnitType);
+			Assert.AreEqual(UnitType.Fighter, cr.Casualties[0].Type);
+			Assert.AreEqual(UnitType.Fighter, cr.Casualties[1].Type);
+			Assert.AreEqual(UnitType.Fighter, cr.Casualties[2].Type);
+			Assert.AreEqual(UnitType.Fighter, cr.Casualties[3].Type);
 		}
 
 		[Test]

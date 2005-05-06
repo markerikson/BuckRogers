@@ -572,7 +572,7 @@ namespace BuckRogers.Interface
 				
 				sb.Append(ta.Units.Count);
 				sb.Append(" ");
-				sb.Append(ta.Units[0].UnitType.ToString());
+				sb.Append(ta.Units[0].Type.ToString());
 				
 				if(ta.Units.Count > 1)
 				{

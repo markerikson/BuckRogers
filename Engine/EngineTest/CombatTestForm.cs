@@ -1726,8 +1726,8 @@ namespace BuckRogers
 				foreach(AttackResult ar in cr.AttackResults)
 				{
 					ListViewItem lvi = new ListViewItem();
-					lvi.Text = ar.Attacker.UnitType.ToString();
-					lvi.SubItems.Add(ar.Defender.UnitType.ToString());
+					lvi.Text = ar.Attacker.Type.ToString();
+					lvi.SubItems.Add(ar.Defender.Type.ToString());
 					lvi.SubItems.Add(ar.Defender.Owner.Name);
 					lvi.SubItems.Add(ar.Roll.ToString());
 					string leader = ar.Leader ? "Yes" : "No";

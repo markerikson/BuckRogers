@@ -184,6 +184,25 @@ namespace BuckRogers
 				
 				this.m_currentTerritory = value; 
 				m_currentTerritory.Units.AddUnit(this);
+
+				if(this.Type == UnitType.Factory)
+				{
+					Factory f = this as Factory;
+					bool canProduce = true;
+					if(m_currentTerritory == Territory.NONE)
+					{
+						canProduce = false;
+					}
+					else
+					{
+						UnitCollection factories = m_currentTerritory.Units.GetUnits(UnitType.Factory, m_owner, null);
+						if(factories.Count > 1)
+						{
+							canProduce = false;
+						}
+					}
+					f.CanProduce = canProduce;
+				}
 			}
 		}
 
@@ -209,7 +228,7 @@ namespace BuckRogers
 			}
 		}
 
-		public BuckRogers.UnitType UnitType
+		public BuckRogers.UnitType Type
 		{
 			get { return this.m_unitType; }
 			set { this.m_unitType = value; }
@@ -226,7 +245,7 @@ namespace BuckRogers
 		{
 			get
 			{
-				return ID + " - " + UnitType.ToString() + " - " + Owner.Name + " - " + CurrentTerritory.Name;
+				return ID + " - " + Type.ToString() + " - " + Owner.Name + " - " + CurrentTerritory.Name;
 			}
 			//return base.ToString ();
 			
@@ -243,6 +262,8 @@ namespace BuckRogers
 					this.Transported = false;
 					Transport t = (Transport)m_transportingUnit;
 					t.Transportees.RemoveUnit(this);
+
+					
 				}
 				else
 				{

@@ -77,7 +77,7 @@ namespace BuckRogers.Interface
 			this.m_btnFinishProduction = new System.Windows.Forms.Button();
 			this.m_btnNextProduction = new System.Windows.Forms.Button();
 			this.label16 = new System.Windows.Forms.Label();
-			this.m_lbProductionOrder = new UnclickableListBox();
+			this.m_lbProductionOrder = new BuckRogers.Interface.UnclickableListBox();
 			this.m_lvFactories = new System.Windows.Forms.ListView();
 			this.columnHeader25 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader26 = new System.Windows.Forms.ColumnHeader();
@@ -210,6 +210,7 @@ namespace BuckRogers.Interface
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(748, 202);
+			this.ControlBox = false;
 			this.Controls.Add(this.label18);
 			this.Controls.Add(this.label17);
 			this.Controls.Add(this.m_btnProduce);
@@ -221,7 +222,7 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.label16);
 			this.Controls.Add(this.m_lbProductionOrder);
 			this.Name = "ProductionForm";
-			this.Text = "ProductionForm";
+			this.Text = "Production";
 			this.ResumeLayout(false);
 
 		}
@@ -350,6 +351,8 @@ namespace BuckRogers.Interface
 		private void AddProduction()
 		{
 			
+			m_lvFactories.Items.Clear();
+
 			string playerName = (string)m_lbProductionOrder.SelectedItem;
 			Player p = m_controller.GetPlayer(playerName);
 
@@ -359,6 +362,11 @@ namespace BuckRogers.Interface
 
 			foreach(Factory f in allFactories)
 			{
+				if(f.Transported)
+				{
+					continue;
+				}
+
 				if(f.CanProduce)
 				{
 					usableFactories.AddUnit(f);

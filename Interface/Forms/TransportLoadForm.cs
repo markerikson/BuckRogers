@@ -305,7 +305,7 @@ namespace BuckRogers.Interface
 		private void AddUnit(TreeNode node, Unit u)
 		{
 			string text = "";
-			switch(u.UnitType)
+			switch(u.Type)
 			{
 				case UnitType.Trooper:
 				{

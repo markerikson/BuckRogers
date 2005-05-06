@@ -468,11 +468,20 @@ namespace BuckRogers
 
 					Factory factory = factories[0] as Factory;
 
+					Territory startingTerritory = factory.CurrentTerritory;
 					factory.CurrentTerritory = Territory.NONE;
 					factory.Transported = true;
 					factory.TransportingUnit = transport;
 
 					transport.Transportees.AddUnit(factory);
+
+					UnitCollection remainingFactories = startingTerritory.Units.GetUnits(UnitType.Factory);
+
+					if(remainingFactories.Count == 1)
+					{
+						Factory otherFactory = (Factory)remainingFactories[0];
+						otherFactory.CanProduce = true;
+					}
 					break;
 				}
 			}			
@@ -503,7 +512,7 @@ namespace BuckRogers
 			ta.Units = new UnitCollection();
 
 			// we've got at least one unit, and they're guaranteed to be all the same type
-			ta.UnitType = tr.Transportees[0].UnitType;
+			ta.UnitType = tr.Transportees[0].Type;
 
 			UnitCollection unitsToUnload = null;
 			
@@ -607,7 +616,7 @@ namespace BuckRogers
 							goto MoveError;
 						}
 
-						if(u.UnitType == UnitType.Battler && t.Type == TerritoryType.Ground )
+						if(u.Type == UnitType.Battler && t.Type == TerritoryType.Ground )
 						{
 							//throw new ActionException("Can't move a battler onto the ground");
 							exceptionString = "Can't move a battler onto the ground";
@@ -631,7 +640,29 @@ namespace BuckRogers
 						&& t.Owner != move.Owner 
 						&& t.Units.GetPlayerUnitCounts().Count == 1)
 					{
-						move.ConqueredTerritories[t] = t.Owner;
+						bool conquerTerritory = true;
+
+						Hashtable unitCount = t.Units.GetPlayerUnitCounts();
+						unitCount.Remove(UnitType.Leader);
+						
+						// can't conquer a territory with just a Leader
+						if(unitCount.Count == 0)
+						{
+							conquerTerritory = false;
+						}
+
+						if(m_options.OptionalRules["ConquerWithGround"])
+						{
+							if(!(t.System is Asteroid))
+							{
+								conquerTerritory = unitCount.ContainsKey(UnitType.Trooper) || unitCount.ContainsKey(UnitType.Gennie);
+							}
+						}
+						if(conquerTerritory)
+						{
+							move.ConqueredTerritories[t] = t.Owner;
+						}
+						
 					}
 
 					previousTerritory = t;

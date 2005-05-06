@@ -5,6 +5,8 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Text;
 
+using CommandManagement;
+
 namespace BuckRogers.Interface
 {
 	/// <summary>
@@ -18,8 +20,6 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.Label label11;
 		private System.Windows.Forms.Label m_labCurrentPlayer;
 		private System.Windows.Forms.Label label9;
-		private System.Windows.Forms.Button m_butRemAttackers;
-		private System.Windows.Forms.Button m_butAddAttackers;
 		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.ListView m_lvAttackers;
 		private System.Windows.Forms.ColumnHeader columnHeader12;
@@ -57,8 +57,6 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.ColumnHeader columnHeader28;
 		private System.Windows.Forms.ColumnHeader columnHeader30;
 		private System.Windows.Forms.ColumnHeader columnHeader31;
-		private System.Windows.Forms.Button m_butRemDefenders;
-		private System.Windows.Forms.Button m_butAddDefenders;
 		private System.Windows.Forms.Label label8;
 		private System.Windows.Forms.ListView m_lvDefenders;
 		private System.Windows.Forms.ColumnHeader columnHeader32;
@@ -99,6 +97,13 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.ColumnHeader columnHeader48;
 		private System.Windows.Forms.Label label3;
 		private GameController m_controller;
+		private System.Windows.Forms.Button m_btnAddAllAttackers;
+		private System.Windows.Forms.Button m_btnAddAllDefenders;
+		private System.Windows.Forms.Button m_btnRemoveAttackers;
+		private System.Windows.Forms.Button m_btnAddAttackers;
+		private System.Windows.Forms.Button m_btnAddDefenders;
+		private System.Windows.Forms.Button m_btnRemoveDefenders;
+		private CommandManager m_command;
 
 		public CombatForm(GameController gc, BattleController bc)
 		{
@@ -120,7 +125,70 @@ namespace BuckRogers.Interface
 			m_battleController.UnitsToDisplay += new DisplayUnitsHandler(DisplayUnits);
 			m_battleController.StatusUpdate += new StatusUpdateHandler(OnBattleControllerStatusUpdate);
 
+			m_command = new CommandManager();
+
+			m_command.Commands.Add(new Command("Attack", new Command.ExecuteHandler(DoAttackCommand), 
+									new Command.UpdateHandler(UpdateAttackCommand)));
+
+			m_command.Commands.Add(new Command("Continue", new Command.ExecuteHandler(DoContinueCommand), 
+				new Command.UpdateHandler(UpdateContinueCommand)));
+
+			m_command.Commands.Add(new Command("NextPlayer", new Command.ExecuteHandler(DoNextPlayerCommand), 
+				new Command.UpdateHandler(UpdateNextPlayerCommand)));
+
+			m_command.Commands.Add(new Command("NextBattle", new Command.ExecuteHandler(DoNextBattleCommand), 
+				new Command.UpdateHandler(UpdateNextBattleCommand)));
+
+			Command.UpdateHandler addRemoveHandler = new Command.UpdateHandler(UpdateAddRemoveCommands);
+			m_command.Commands.Add(new Command("AddAttackers", new Command.ExecuteHandler(DoAddAttackersCommand), 
+				addRemoveHandler));
+
+			m_command.Commands.Add(new Command("RemoveAttackers", new Command.ExecuteHandler(DoRemoveAttackersCommand), 
+				addRemoveHandler));
+
+			m_command.Commands.Add(new Command("AddDefenders", new Command.ExecuteHandler(DoAddDefendersCommand), 
+				addRemoveHandler));
+
+			m_command.Commands.Add(new Command("RemoveDefenders", new Command.ExecuteHandler(DoRemoveDefendersCommand), 
+				addRemoveHandler));
+
+			m_command.Commands.Add(new Command("AddAllAttackers", new Command.ExecuteHandler(DoAddAllAttackersCommand), 
+				addRemoveHandler));
+
+			m_command.Commands.Add(new Command("AddAllDefenders", new Command.ExecuteHandler(DoAddAllDefendersCommand), 
+				addRemoveHandler));
+
+
+			m_command.Commands["Attack"].CommandInstances.Add(
+				new Object[]{m_btnAttack});
+
+			m_command.Commands["Continue"].CommandInstances.Add(
+				new Object[]{m_btnContinue});
+
+			m_command.Commands["NextPlayer"].CommandInstances.Add(
+				new Object[]{m_btnNextPlayer});
+
+			m_command.Commands["NextBattle"].CommandInstances.Add(
+				new Object[]{m_btnNextBattle});
+
+			m_command.Commands["AddAttackers"].CommandInstances.Add(
+				new Object[]{m_btnAddAttackers});
+
+			m_command.Commands["RemoveAttackers"].CommandInstances.Add(
+				new Object[]{m_btnRemoveAttackers});
+
+			m_command.Commands["AddDefenders"].CommandInstances.Add(
+				new Object[]{m_btnAddDefenders});
 			
+			m_command.Commands["RemoveDefenders"].CommandInstances.Add(
+				new Object[]{m_btnRemoveDefenders});
+			
+			m_command.Commands["AddAllAttackers"].CommandInstances.Add(
+				new Object[]{m_btnAddAllAttackers});
+
+			m_command.Commands["AddAllDefenders"].CommandInstances.Add(
+				new Object[]{m_btnAddAllDefenders});
+
 		}
 
 		/// <summary>
@@ -203,8 +271,8 @@ namespace BuckRogers.Interface
 			this.label11 = new System.Windows.Forms.Label();
 			this.m_labCurrentPlayer = new System.Windows.Forms.Label();
 			this.label9 = new System.Windows.Forms.Label();
-			this.m_butRemAttackers = new System.Windows.Forms.Button();
-			this.m_butAddAttackers = new System.Windows.Forms.Button();
+			this.m_btnRemoveAttackers = new System.Windows.Forms.Button();
+			this.m_btnAddAttackers = new System.Windows.Forms.Button();
 			this.label6 = new System.Windows.Forms.Label();
 			this.m_lvAttackers = new System.Windows.Forms.ListView();
 			this.columnHeader12 = new System.Windows.Forms.ColumnHeader();
@@ -242,8 +310,8 @@ namespace BuckRogers.Interface
 			this.columnHeader28 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader30 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader31 = new System.Windows.Forms.ColumnHeader();
-			this.m_butRemDefenders = new System.Windows.Forms.Button();
-			this.m_butAddDefenders = new System.Windows.Forms.Button();
+			this.m_btnRemoveDefenders = new System.Windows.Forms.Button();
+			this.m_btnAddDefenders = new System.Windows.Forms.Button();
 			this.label8 = new System.Windows.Forms.Label();
 			this.m_lvDefenders = new System.Windows.Forms.ListView();
 			this.columnHeader32 = new System.Windows.Forms.ColumnHeader();
@@ -277,6 +345,8 @@ namespace BuckRogers.Interface
 			this.columnHeader47 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader48 = new System.Windows.Forms.ColumnHeader();
 			this.label3 = new System.Windows.Forms.Label();
+			this.m_btnAddAllAttackers = new System.Windows.Forms.Button();
+			this.m_btnAddAllDefenders = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// m_labLocation
@@ -333,21 +403,21 @@ namespace BuckRogers.Interface
 			this.label9.TabIndex = 29;
 			this.label9.Text = "Current Player:";
 			// 
-			// m_butRemAttackers
+			// m_btnRemoveAttackers
 			// 
-			this.m_butRemAttackers.Location = new System.Drawing.Point(204, 116);
-			this.m_butRemAttackers.Name = "m_butRemAttackers";
-			this.m_butRemAttackers.TabIndex = 40;
-			this.m_butRemAttackers.Text = "<< Remove";
-			this.m_butRemAttackers.Click += new System.EventHandler(this.m_butRemAttackers_Click);
+			this.m_btnRemoveAttackers.Location = new System.Drawing.Point(204, 140);
+			this.m_btnRemoveAttackers.Name = "m_btnRemoveAttackers";
+			this.m_btnRemoveAttackers.TabIndex = 40;
+			this.m_btnRemoveAttackers.Text = "<< Remove";
+			this.m_btnRemoveAttackers.Click += new System.EventHandler(this.m_butRemAttackers_Click);
 			// 
-			// m_butAddAttackers
+			// m_btnAddAttackers
 			// 
-			this.m_butAddAttackers.Location = new System.Drawing.Point(204, 84);
-			this.m_butAddAttackers.Name = "m_butAddAttackers";
-			this.m_butAddAttackers.TabIndex = 39;
-			this.m_butAddAttackers.Text = "Add >>";
-			this.m_butAddAttackers.Click += new System.EventHandler(this.m_butAddAttackers_Click);
+			this.m_btnAddAttackers.Location = new System.Drawing.Point(204, 108);
+			this.m_btnAddAttackers.Name = "m_btnAddAttackers";
+			this.m_btnAddAttackers.TabIndex = 39;
+			this.m_btnAddAttackers.Text = "Add >>";
+			this.m_btnAddAttackers.Click += new System.EventHandler(this.m_butAddAttackers_Click);
 			// 
 			// label6
 			// 
@@ -566,21 +636,21 @@ namespace BuckRogers.Interface
 			this.columnHeader31.Text = "Count";
 			this.columnHeader31.Width = 45;
 			// 
-			// m_butRemDefenders
+			// m_btnRemoveDefenders
 			// 
-			this.m_butRemDefenders.Location = new System.Drawing.Point(204, 304);
-			this.m_butRemDefenders.Name = "m_butRemDefenders";
-			this.m_butRemDefenders.TabIndex = 48;
-			this.m_butRemDefenders.Text = "<< Remove";
-			this.m_butRemDefenders.Click += new System.EventHandler(this.m_butRemDefenders_Click);
+			this.m_btnRemoveDefenders.Location = new System.Drawing.Point(204, 328);
+			this.m_btnRemoveDefenders.Name = "m_btnRemoveDefenders";
+			this.m_btnRemoveDefenders.TabIndex = 48;
+			this.m_btnRemoveDefenders.Text = "<< Remove";
+			this.m_btnRemoveDefenders.Click += new System.EventHandler(this.m_butRemDefenders_Click);
 			// 
-			// m_butAddDefenders
+			// m_btnAddDefenders
 			// 
-			this.m_butAddDefenders.Location = new System.Drawing.Point(204, 272);
-			this.m_butAddDefenders.Name = "m_butAddDefenders";
-			this.m_butAddDefenders.TabIndex = 47;
-			this.m_butAddDefenders.Text = "Add >>";
-			this.m_butAddDefenders.Click += new System.EventHandler(this.m_butAddDefenders_Click);
+			this.m_btnAddDefenders.Location = new System.Drawing.Point(204, 296);
+			this.m_btnAddDefenders.Name = "m_btnAddDefenders";
+			this.m_btnAddDefenders.TabIndex = 47;
+			this.m_btnAddDefenders.Text = "Add >>";
+			this.m_btnAddDefenders.Click += new System.EventHandler(this.m_butAddDefenders_Click);
 			// 
 			// label8
 			// 
@@ -727,7 +797,6 @@ namespace BuckRogers.Interface
 			this.m_btnNextBattle.Name = "m_btnNextBattle";
 			this.m_btnNextBattle.TabIndex = 54;
 			this.m_btnNextBattle.Text = "Next battle";
-			this.m_btnNextBattle.Click += new System.EventHandler(this.m_btnNextBattle_Click);
 			// 
 			// m_btnNextPlayer
 			// 
@@ -735,7 +804,6 @@ namespace BuckRogers.Interface
 			this.m_btnNextPlayer.Name = "m_btnNextPlayer";
 			this.m_btnNextPlayer.TabIndex = 53;
 			this.m_btnNextPlayer.Text = "Next player";
-			this.m_btnNextPlayer.Click += new System.EventHandler(this.m_btnNextPlayer_Click);
 			// 
 			// m_btnAttack
 			// 
@@ -743,7 +811,6 @@ namespace BuckRogers.Interface
 			this.m_btnAttack.Name = "m_btnAttack";
 			this.m_btnAttack.TabIndex = 52;
 			this.m_btnAttack.Text = "Attack";
-			this.m_btnAttack.Click += new System.EventHandler(this.m_btnAttack_Click);
 			// 
 			// m_btnContinue
 			// 
@@ -751,7 +818,6 @@ namespace BuckRogers.Interface
 			this.m_btnContinue.Name = "m_btnContinue";
 			this.m_btnContinue.TabIndex = 51;
 			this.m_btnContinue.Text = "Continue";
-			this.m_btnContinue.Click += new System.EventHandler(this.m_btnContinue_Click);
 			// 
 			// m_labBattlesLeft
 			// 
@@ -833,10 +899,27 @@ namespace BuckRogers.Interface
 			this.label3.TabIndex = 60;
 			this.label3.Text = "Casualties:";
 			// 
+			// m_btnAddAllAttackers
+			// 
+			this.m_btnAddAllAttackers.Location = new System.Drawing.Point(204, 76);
+			this.m_btnAddAllAttackers.Name = "m_btnAddAllAttackers";
+			this.m_btnAddAllAttackers.TabIndex = 61;
+			this.m_btnAddAllAttackers.Text = "Add All >>>";
+			// 
+			// m_btnAddAllDefenders
+			// 
+			this.m_btnAddAllDefenders.Location = new System.Drawing.Point(204, 264);
+			this.m_btnAddAllDefenders.Name = "m_btnAddAllDefenders";
+			this.m_btnAddAllDefenders.TabIndex = 62;
+			this.m_btnAddAllDefenders.Text = "Add All >>>";
+			// 
 			// CombatForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(816, 566);
+			this.ControlBox = false;
+			this.Controls.Add(this.m_btnAddAllDefenders);
+			this.Controls.Add(this.m_btnAddAllAttackers);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.m_lvCasualties);
 			this.Controls.Add(this.m_lbCurrentPlayer);
@@ -849,16 +932,16 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.m_btnContinue);
 			this.Controls.Add(this.label10);
 			this.Controls.Add(this.m_lvResults);
-			this.Controls.Add(this.m_butRemDefenders);
-			this.Controls.Add(this.m_butAddDefenders);
+			this.Controls.Add(this.m_btnRemoveDefenders);
+			this.Controls.Add(this.m_btnAddDefenders);
 			this.Controls.Add(this.label8);
 			this.Controls.Add(this.m_lvDefenders);
 			this.Controls.Add(this.label4);
 			this.Controls.Add(this.m_lvEnemyLive);
 			this.Controls.Add(this.label7);
 			this.Controls.Add(this.m_cbNumUnits);
-			this.Controls.Add(this.m_butRemAttackers);
-			this.Controls.Add(this.m_butAddAttackers);
+			this.Controls.Add(this.m_btnRemoveAttackers);
+			this.Controls.Add(this.m_btnAddAttackers);
 			this.Controls.Add(this.label6);
 			this.Controls.Add(this.m_lvAttackers);
 			this.Controls.Add(this.label2);
@@ -870,7 +953,8 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.m_labCurrentPlayer);
 			this.Controls.Add(this.label9);
 			this.Name = "CombatForm";
-			this.Text = "CombatForm";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+			this.Text = "Combat";
 			this.ResumeLayout(false);
 
 		}
@@ -921,6 +1005,7 @@ namespace BuckRogers.Interface
 
 		private void AddUnitsToListView(UnitCollection uc, ListView lv, bool includeTerritory)
 		{
+			lv.Items.Clear();
 			foreach(Player p in uc.GetPlayersWithUnits())
 			{
 				UnitCollection playerUnits = uc.GetUnits(p);
@@ -959,13 +1044,13 @@ namespace BuckRogers.Interface
 					
 						lv.Items.Add(lvi);
 					}
-				}
-				
+				}				
 			}			
 		}
 
 		private void UpdateCombatInformation()
 		{
+			ResetDisplay();
 			m_labBattleType.Text = m_battleController.CurrentBattle.Type.ToString();				
 			m_labLocation.Text = m_battleController.CurrentBattle.Territory.Name;
 			m_labBattlesLeft.Text = m_battleController.Battles.Count.ToString();
@@ -1008,7 +1093,50 @@ namespace BuckRogers.Interface
 			MoveItems(m_lvAttUnused, m_lvAttackers, false);
 
 			EnableAttack();
+		}
 
+		public void DoAddAttackersCommand(Command cmd)
+		{
+			MoveItems(m_lvAttUnused, m_lvAttackers, false);
+		}
+
+		public void DoRemoveAttackersCommand(Command cmd)
+		{
+			MoveItems(m_lvAttackers, m_lvAttUnused, false);
+		}
+
+		public void DoAddDefendersCommand(Command cmd)
+		{
+			MoveItems(m_lvEnemyLive, m_lvDefenders, true);
+		}
+
+		public void DoRemoveDefendersCommand(Command cmd)
+		{
+			MoveItems(m_lvDefenders, m_lvEnemyLive, true);
+		}
+
+		public void DoAddAllAttackersCommand(Command cmd)
+		{
+			while(m_lvAttUnused.Items.Count > 0)
+			{
+				m_lvAttUnused.Items[0].Selected = true;
+				MoveItems(m_lvAttUnused, m_lvAttackers, false);
+			}
+		}
+
+		public void DoAddAllDefendersCommand(Command cmd)
+		{
+			// TODO Save Transports until last
+			while(m_lvEnemyLive.Items.Count > 0)
+			{
+				m_lvEnemyLive.Items[0].Selected = true;
+				MoveItems(m_lvEnemyLive, m_lvDefenders, true);
+			}
+		}
+
+		public void UpdateAddRemoveCommands(Command cmd)
+		{
+			cmd.Enabled = (m_battleController.Status == BattleStatus.Setup);
 		}
 
 		private void m_butRemAttackers_Click(object sender, System.EventArgs e)
@@ -1121,14 +1249,27 @@ namespace BuckRogers.Interface
 		#region Combat button handlers
 		private void m_btnAttack_Click(object sender, System.EventArgs e)
 		{
+			DoAttack();
+		}
+
+		public void DoAttackCommand(Command cmd)
+		{
+			DoAttack();
+		}
+
+		public void UpdateAttackCommand(Command cmd)
+		{
+			bool rightStatus = m_battleController.Status == BattleStatus.Setup;
+			bool haveAttackers = (m_lvAttackers.Items.Count > 0);
+			bool haveDefenders = (m_lvDefenders.Items.Count > 0);
+			cmd.Enabled = rightStatus && haveAttackers && haveDefenders;
+		}
+
+		private void DoAttack()
+		{
 			CombatResult cr = null;
 			m_lvResults.Items.Clear();
 
-			m_btnAttack.Enabled = false;
-			m_btnContinue.Enabled = false;
-			m_btnNextBattle.Enabled = false;
-			m_btnNextPlayer.Enabled = false;
-			
 			switch(m_battleController.CurrentBattle.Type)
 			{
 				case BattleType.KillerSatellite:
@@ -1163,7 +1304,6 @@ namespace BuckRogers.Interface
 					}
 					catch(Exception ex)
 					{
-						//m_battleController.CurrentUnused.AddAllUnits(ci.Attackers);
 						MessageBox.Show(ex.Message);
 						m_btnAttack.Enabled = true;
 						return;
@@ -1172,7 +1312,6 @@ namespace BuckRogers.Interface
 					break;
 				}
 			}
-
 			
 			if(cr != null)
 			{
@@ -1181,8 +1320,8 @@ namespace BuckRogers.Interface
 				foreach(AttackResult ar in cr.AttackResults)
 				{
 					ListViewItem lvi = new ListViewItem();
-					lvi.Text = ar.Attacker.UnitType.ToString();
-					lvi.SubItems.Add(ar.Defender.UnitType.ToString());
+					lvi.Text = ar.Attacker.Type.ToString();
+					lvi.SubItems.Add(ar.Defender.Type.ToString());
 					lvi.SubItems.Add(ar.Defender.Owner.Name);
 					lvi.SubItems.Add(ar.Roll.ToString());
 					string leader = ar.Leader ? "Yes" : "No";
@@ -1196,7 +1335,6 @@ namespace BuckRogers.Interface
 					}
 
 					m_lvResults.Items.Add(lvi);
-
 				}
 
 				foreach(AttackResult ar in casualties)
@@ -1212,7 +1350,7 @@ namespace BuckRogers.Interface
 							continue;
 						}
 
-						if(lvi.SubItems[1].Text != ar.Defender.UnitType.ToString())
+						if(lvi.SubItems[1].Text != ar.Defender.Type.ToString())
 						{
 							continue;
 						}
@@ -1231,7 +1369,7 @@ namespace BuckRogers.Interface
 					{
 						matchingItem = new ListViewItem();
 						matchingItem.Text = ar.Defender.Owner.Name;
-						matchingItem.SubItems.Add(ar.Defender.UnitType.ToString());
+						matchingItem.SubItems.Add(ar.Defender.Type.ToString());
 						matchingItem.SubItems.Add("1");
 
 						m_lvCasualties.Items.Add(matchingItem);
@@ -1241,142 +1379,41 @@ namespace BuckRogers.Interface
 				m_battleController.LastResult = cr;
 			}
 
-			m_btnContinue.Enabled = true;
-		}
-
-		private void m_btnContinue_Click(object sender, System.EventArgs e)
-		{
-			m_btnContinue.Enabled = false;
+			m_battleController.ProcessAttackResults();
 
 			m_lvAttackers.Items.Clear();
 			m_lvDefenders.Items.Clear();
-			m_lvResults.Items.Clear();
-
-			m_battleController.TurnResult.Casualties.AddAllUnits(m_battleController.LastResult.Casualties);
-			
-			foreach(Player p in m_battleController.LastResult.Casualties.GetPlayersWithUnits())
-			{
-				UnitCollection uc = (UnitCollection)m_battleController.SurvivingUnits[p];
-				uc.RemoveAllUnits(m_battleController.LastResult.Casualties.GetUnits(p));
-			}
-
-			m_battleController.CurrentUnused.AddAllUnits(m_battleController.LastResult.UnusedAttackers);
-			m_battleController.CurrentUnused.RemoveAllUnits(m_battleController.LastResult.UsedAttackers);
-
-			
-			if(m_battleController.CurrentUnused.Count == 0)
-			{
-				m_btnNextPlayer.Enabled = true;
-			}
-			else
-			{
-				m_lvAttUnused.Items.Clear();
-				AddUnitsToListView(m_battleController.CurrentUnused, m_lvAttUnused, false);
-			}
-
-			m_lvAttUnused.Items.Clear();
-			m_lvEnemyLive.Items.Clear();
-			m_battleController.DisplayUnits();
-
-			if(m_lvEnemyLive.Items.Count == 0)
-			{
-				m_btnNextPlayer.Enabled = true;
-			}
 		}
 
-		private void m_btnNextPlayer_Click(object sender, System.EventArgs e)
+		public void DoContinueCommand(Command cmd)
 		{
-			m_btnNextPlayer.Enabled = false;
-
-			switch(m_battleController.CurrentBattle.Type)
-			{
-					// only one turn / player for these types
-				case BattleType.KillerSatellite:
-				case BattleType.Bombing:
-				{
-					m_battleController.NextTurn();
-					m_battleController.DisplaySurvivingEnemies();
-					m_btnNextBattle.Enabled = true;
-					break;
-				}
-				case BattleType.Normal:
-				{
-					int index = m_battleController.BattleOrder.IndexOf(m_battleController.CurrentPlayer);
-
-					bool anotherTurn = false;
-
-					if( (index == (m_battleController.BattleOrder.Count - 1)))
-					{
-						anotherTurn = m_battleController.NextTurn();
-						if(anotherTurn)
-						{
-							m_battleController.CurrentPlayer = (Player)m_battleController.BattleOrder[0];
-							m_battleController.UpdateUnusedUnits();
-							m_labCurrentPlayer.Text = m_battleController.CurrentPlayer.Name;
-							m_lbCurrentPlayer.SelectedIndex = m_battleController.BattleOrder.IndexOf(m_battleController.CurrentPlayer);
-						}
-						else
-						{
-							m_btnNextBattle.Enabled = true;
-						}
-					}
-					else
-					{
-						m_battleController.CurrentPlayer = (Player)m_battleController.BattleOrder[index + 1];
-						m_battleController.UpdateUnusedUnits();
-					}
-
-					m_lvAttUnused.Items.Clear();
-					m_lvEnemyLive.Items.Clear();
-					m_battleController.DisplayUnits();
-					break;
-				}
-			}
+			DoContinue();
 		}
 
-		private void m_btnNextBattle_Click(object sender, System.EventArgs e)
+		public void UpdateContinueCommand(Command cmd)
 		{
-			/*
-			int battlesToSkip = Convert.ToInt32(m_udSkipBattles.Value);
+			cmd.Enabled = (m_battleController.Status == BattleStatus.AttackComplete);
+		}
 
-			if(battlesToSkip >= (m_battleController.Battles.Count -1))
-			{
-				battlesToSkip = m_battleController.Battles.Count - 1;
-			}
-			for(int i = 0; i < battlesToSkip; i++)
-			{
-				m_battleController.Battles.Remove(0);
-			}
-			*/
+		private void DoContinue()
+		{
+			ResetDisplay();
+			m_battleController.NextRound();
+		}
 
-			m_lvAttUnused.Items.Clear();
-			m_lvEnemyLive.Items.Clear();
-			m_lvAttackers.Items.Clear();
-			m_lvEnemyLive.Items.Clear();
+		public void DoNextPlayerCommand(Command cmd)
+		{
+			ResetDisplay();
+			m_battleController.NextPlayer();
+		}
+		
+		public void UpdateNextPlayerCommand(Command cmd)
+		{
+			cmd.Enabled = (m_battleController.Status == BattleStatus.RoundComplete);
+		}
 
-			CombatResult cr = m_battleController.BattleResult;
-
-			StringBuilder sb = new StringBuilder();
-
-			foreach(Player p in cr.Casualties.GetPlayersWithUnits())
-			{
-				UnitCollection playerUnits = cr.Casualties.GetUnits(p);
-
-				foreach(UnitType ut in playerUnits.GetUnitTypeCount().Keys)
-				{
-					UnitCollection types = playerUnits.GetUnits(ut);
-
-					sb.Append(p.Name);
-					sb.Append(" - ");
-					sb.Append(ut.ToString());
-					sb.Append(" - ");
-					sb.Append(types.Count.ToString());
-					sb.Append("\r\n");
-				}
-			}
-
-			//MessageBox.Show(sb.ToString(), "Combat Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
-			//MessageBox.Show()
+		public void DoNextBattleCommand(Command cmd)
+		{
 			if(!m_battleController.NextBattle())
 			{
 				m_battleController.CombatComplete();
@@ -1387,6 +1424,18 @@ namespace BuckRogers.Interface
 			{
 				UpdateCombatInformation();
 			}
+		}
+
+		public void UpdateNextBattleCommand(Command cmd)
+		{
+			cmd.Enabled = (m_battleController.Status == BattleStatus.BattleComplete);
+		}
+
+		private void ResetDisplay()
+		{
+			m_lvAttackers.Items.Clear();
+			m_lvDefenders.Items.Clear();
+			m_lvResults.Items.Clear();
 		}
 
 		#endregion

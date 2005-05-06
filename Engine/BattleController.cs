@@ -6,6 +6,14 @@ namespace BuckRogers
 
 	public delegate void DisplayUnitsHandler(object sender, DisplayUnitsEventArgs e);
 
+	public enum BattleStatus
+	{
+		None,
+		Setup,
+		AttackComplete,
+		RoundComplete,
+		BattleComplete,
+	}
 	
 
 
@@ -38,6 +46,7 @@ namespace BuckRogers
 		private CombatResult m_turnResult;
 		private CombatResult m_cumulativeResult;
 		private CombatResult m_lastResult;
+		private BattleStatus m_status;
 
 		public BattleController(GameController gc)
 		{
@@ -290,6 +299,7 @@ namespace BuckRogers
 						break;
 					}
 				}
+				m_status = BattleStatus.Setup;
 				return true;
 			}
 
@@ -297,13 +307,88 @@ namespace BuckRogers
 			return false;
 		}
 
+		public void ProcessAttackResults()
+		{
+			TurnResult.Casualties.AddAllUnits(LastResult.Casualties);
+			
+			UnitCollection totalSurvivors = new UnitCollection();
+			foreach(Player p in LastResult.Casualties.GetPlayersWithUnits())
+			{
+				UnitCollection uc = (UnitCollection)SurvivingUnits[p];
+				uc.RemoveAllUnits(LastResult.Casualties.GetUnits(p));
+				totalSurvivors.AddAllUnits(uc);
+			}
+
+			CurrentUnused.AddAllUnits(LastResult.UnusedAttackers);
+			CurrentUnused.RemoveAllUnits(LastResult.UsedAttackers);
+
+
+
+			
+			if(totalSurvivors.Count == 0)
+			{
+				NextPlayer();
+			}
+			else if(CurrentUnused.Count == 0)
+			{
+				m_status = BattleStatus.RoundComplete;
+			}
+			else
+			{
+				m_status = BattleStatus.AttackComplete;
+				DisplayUnits();
+			}
+		}
+
+		public void NextPlayer()
+		{
+			switch(CurrentBattle.Type)
+			{
+					// only one turn / player for these types
+				case BattleType.KillerSatellite:
+				case BattleType.Bombing:
+				{
+					NextTurn();
+					DisplaySurvivingEnemies();
+					m_status = BattleStatus.BattleComplete;
+					break;
+				}
+				case BattleType.Normal:
+				{
+					int index = BattleOrder.IndexOf(CurrentPlayer);
+
+					bool anotherTurn = false;
+
+					if( (index == (BattleOrder.Count - 1)))
+					{
+						anotherTurn = NextTurn();
+						if(anotherTurn)
+						{
+							CurrentPlayer = (Player)BattleOrder[0];
+							UpdateUnusedUnits();
+							m_status = BattleStatus.Setup;
+						}
+					}
+					else
+					{
+						CurrentPlayer = (Player)BattleOrder[index + 1];
+						UpdateUnusedUnits();
+						m_status = BattleStatus.Setup;
+					}
+
+					DisplayUnits();
+					break;
+				}
+			}
+		}
+
+		public void NextRound()
+		{
+			m_status = BattleStatus.Setup;
+		}
+
 		public void DisplayUnits()
 		{
-			//m_lvAttUnused.Items.Clear();
-			//m_lvEnemyLive.Items.Clear();
-
-			//AddUnitsToListView(m_currentUnused, m_lvAttUnused, false);
-
 			if(UnitsToDisplay != null)
 			{
 				DisplayUnitsEventArgs duea = new DisplayUnitsEventArgs();
@@ -313,7 +398,7 @@ namespace BuckRogers
 				UnitsToDisplay(this, duea);
 			}
 
-			DisplaySurvivingEnemies();			
+			DisplaySurvivingEnemies();		
 		}
 
 		public void DisplaySurvivingEnemies()
@@ -327,8 +412,6 @@ namespace BuckRogers
 
 				UnitCollection enemySurvivors = (UnitCollection)m_survivingUnits[p];
 
-
-				//AddUnitsToListView(enemySurvivors, m_lvEnemyLive, true);
 				if(UnitsToDisplay != null)
 				{
 					DisplayUnitsEventArgs duea = new DisplayUnitsEventArgs();
@@ -350,9 +433,6 @@ namespace BuckRogers
 
 			m_currentUnused.AddAllUnits(survivors);
 			m_currentUnused.AddAllUnits(casualties);
-
-			//m_labCurrentPlayer.Text = m_currentPlayer.Name;
-			//m_lbCurrentPlayer.SelectedIndex = m_playerOrder.IndexOf(m_currentPlayer);
 		}
 
 		
@@ -362,7 +442,6 @@ namespace BuckRogers
 			foreach(Unit u in m_turnResult.Casualties)
 			{
 				m_cumulativeResult.Casualties.AddUnit(u);
-				//u.Destroy();
 			}
 
 			m_currentUnused.RemoveAllUnits(m_turnResult.Casualties);
@@ -396,11 +475,12 @@ namespace BuckRogers
 				m_playerOrder.Remove(p);
 			}
 
+			bool anotherTurn = true;
 			if( (m_currentBattle.Type == BattleType.KillerSatellite)
 				|| (m_currentBattle.Type == BattleType.Bombing))
 			{
 				m_playerOrder.Clear();
-				return false;
+				anotherTurn = false;
 			}
 			else
 			{
@@ -408,8 +488,19 @@ namespace BuckRogers
 				m_turnResult = new CombatResult();
 
 				// only one player left?
-				return (m_playerOrder.Count > 1);
+				anotherTurn = (m_playerOrder.Count > 1);
 			}
+
+			if(anotherTurn)
+			{
+				m_status = BattleStatus.RoundComplete;
+			}
+			else
+			{
+				m_status = BattleStatus.BattleComplete;
+			}
+
+			return anotherTurn;
 			
 		}
 
@@ -439,7 +530,7 @@ namespace BuckRogers
 				int toHit = NOTPOSSIBLE;
 				if(!(ci.Type == BattleType.Bombing))
 				{
-					toHit = m_combatTable[(int)attacker.UnitType, (int)defender.UnitType];
+					toHit = m_combatTable[(int)attacker.Type, (int)defender.Type];
 				}
 				else
 				{
@@ -448,7 +539,7 @@ namespace BuckRogers
 				
 				if(toHit == NOTPOSSIBLE)
 				{
-					throw new Exception("Can't attack a " + defender.UnitType + " with a " + attacker.UnitType);
+					throw new Exception("Can't attack a " + defender.Type + " with a " + attacker.Type);
 				}
 
 				int roll = Utility.RollD10();
@@ -491,6 +582,7 @@ namespace BuckRogers
 			cr.UnusedAttackers.AddAllUnits(ci.Attackers);
 			cr.Survivors.AddAllUnits(ci.Defenders);
 			
+			m_status = BattleStatus.AttackComplete;
 			return cr;
 		}
 
@@ -671,6 +763,12 @@ namespace BuckRogers
 		{
 			get { return this.m_cumulativeResult; }
 			set { this.m_cumulativeResult = value; }
+		}
+
+		public BuckRogers.BattleStatus Status
+		{
+			get { return this.m_status; }
+			set { this.m_status = value; }
 		}
 	}
 }

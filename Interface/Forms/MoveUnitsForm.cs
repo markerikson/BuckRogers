@@ -33,6 +33,7 @@ namespace BuckRogers.Interface
 		private Player m_player;
 		private System.Windows.Forms.ColumnHeader columnHeader3;
 		private System.Windows.Forms.ColumnHeader columnHeader4;
+		private System.Windows.Forms.Button m_btnAddAll;
 
 		/// <summary>
 		/// Required designer variable.
@@ -299,11 +300,12 @@ namespace BuckRogers.Interface
 			this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
 			this.m_btnOK = new System.Windows.Forms.Button();
 			this.m_btnCancel = new System.Windows.Forms.Button();
+			this.m_btnAddAll = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// m_butRemAttackers
 			// 
-			this.m_butRemAttackers.Location = new System.Drawing.Point(272, 68);
+			this.m_butRemAttackers.Location = new System.Drawing.Point(272, 92);
 			this.m_butRemAttackers.Name = "m_butRemAttackers";
 			this.m_butRemAttackers.TabIndex = 25;
 			this.m_butRemAttackers.Text = "<< Remove";
@@ -311,7 +313,7 @@ namespace BuckRogers.Interface
 			// 
 			// m_butAddAttackers
 			// 
-			this.m_butAddAttackers.Location = new System.Drawing.Point(272, 36);
+			this.m_butAddAttackers.Location = new System.Drawing.Point(272, 60);
 			this.m_butAddAttackers.Name = "m_butAddAttackers";
 			this.m_butAddAttackers.TabIndex = 24;
 			this.m_butAddAttackers.Text = "Add >>";
@@ -319,11 +321,12 @@ namespace BuckRogers.Interface
 			// 
 			// label7
 			// 
-			this.label7.Location = new System.Drawing.Point(252, 120);
+			this.label7.Location = new System.Drawing.Point(252, 124);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(116, 16);
 			this.label7.TabIndex = 23;
 			this.label7.Text = "Units to add / remove:";
+			this.label7.Click += new System.EventHandler(this.label7_Click);
 			// 
 			// m_cbNumUnits
 			// 
@@ -335,10 +338,11 @@ namespace BuckRogers.Interface
 															  "25",
 															  "100",
 															  "1000"});
-			this.m_cbNumUnits.Location = new System.Drawing.Point(252, 136);
+			this.m_cbNumUnits.Location = new System.Drawing.Point(252, 140);
 			this.m_cbNumUnits.Name = "m_cbNumUnits";
 			this.m_cbNumUnits.Size = new System.Drawing.Size(116, 21);
 			this.m_cbNumUnits.TabIndex = 22;
+			this.m_cbNumUnits.SelectedIndexChanged += new System.EventHandler(this.m_cbNumUnits_SelectedIndexChanged);
 			// 
 			// label6
 			// 
@@ -453,10 +457,19 @@ namespace BuckRogers.Interface
 			this.m_btnCancel.Text = "Cancel";
 			this.m_btnCancel.Click += new System.EventHandler(this.m_btnCancel_Click);
 			// 
+			// m_btnAddAll
+			// 
+			this.m_btnAddAll.Location = new System.Drawing.Point(272, 28);
+			this.m_btnAddAll.Name = "m_btnAddAll";
+			this.m_btnAddAll.TabIndex = 28;
+			this.m_btnAddAll.Text = "Add All >>>";
+			this.m_btnAddAll.Click += new System.EventHandler(this.m_btnAddAll_Click);
+			// 
 			// MoveUnitsForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(620, 206);
+			this.Controls.Add(this.m_btnAddAll);
 			this.Controls.Add(this.m_btnCancel);
 			this.Controls.Add(this.m_btnOK);
 			this.Controls.Add(this.m_butRemAttackers);
@@ -500,6 +513,41 @@ namespace BuckRogers.Interface
 		private void m_lvAvailableUnits_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
 		
+		}
+
+		private void m_cbNumUnits_SelectedIndexChanged(object sender, System.EventArgs e)
+		{
+		
+		}
+
+		private void label7_Click(object sender, System.EventArgs e)
+		{
+		
+		}
+
+		private void m_btnAddAll_Click(object sender, System.EventArgs e)
+		{
+			ArrayList temp = new ArrayList();
+
+			while(m_lvAvailableUnits.Items.Count > 0)
+			{
+				ListViewItem lvi = m_lvAvailableUnits.Items[0];
+				m_lvAvailableUnits.Items.Remove(lvi);
+
+				if(lvi.SubItems[2].Text == "0")
+				{
+					temp.Add(lvi);
+				}
+				else
+				{
+					m_lvSelectedUnits.Items.Add(lvi);
+				}
+			}
+
+			foreach(ListViewItem lvi in temp)
+			{
+				m_lvAvailableUnits.Items.Add(lvi);
+			}
 		}
 
 		public UnitCollection SelectedUnits

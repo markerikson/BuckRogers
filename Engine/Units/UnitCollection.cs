@@ -95,7 +95,7 @@ namespace BuckRogers
 
 				bool countUnit = false;
 
-				if(current.UnitType == ut)
+				if(current.Type == ut)
 				{
 					countUnit = true;
 				}
@@ -179,7 +179,7 @@ namespace BuckRogers
 				bool matchTerritory = true;
 
 				
-				if (ut != UnitType.None && current.UnitType != ut)
+				if (ut != UnitType.None && current.Type != ut)
 				{
 					matchType = false;
 				}
@@ -242,7 +242,7 @@ namespace BuckRogers
 			UnitCollection uc = new UnitCollection();
 			foreach(Unit u in List)
 			{
-				switch(u.UnitType)
+				switch(u.Type)
 				{
 					case UnitType.Trooper:
 					case UnitType.Gennie:
@@ -308,7 +308,7 @@ namespace BuckRogers
 			{
 				if(unit.Owner == id)
 				{
-					UnitType ut = unit.UnitType;
+					UnitType ut = unit.Type;
 					int num = 0;
 					if(!count.ContainsKey(ut))
 					{
@@ -400,7 +400,7 @@ namespace BuckRogers
 				bool doesntMatchTerritory = true;
 
 				
-				if (ut != UnitType.None && current.UnitType == ut)
+				if (ut != UnitType.None && current.Type == ut)
 				{
 					doesntMatchType = false;
 				}
@@ -478,7 +478,7 @@ namespace BuckRogers
 					transportMatches = false;
 				}
 
-				if(tr.Transportees.Count != 0 && tr.Transportees[0].UnitType != ut)
+				if(tr.Transportees.Count != 0 && tr.Transportees[0].Type != ut)
 				{
 					transportMatches = false;
 				}

@@ -31,6 +31,7 @@ namespace BuckRogers
 		public override bool CheckControl()
 		{
 			Territory t = (Territory)Surface[0];
+			this.Owner = t.Owner;
 			return t.Owner != Player.NONE;
 		}
 

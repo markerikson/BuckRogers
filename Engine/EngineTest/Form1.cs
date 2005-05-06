@@ -483,7 +483,7 @@ namespace BuckRogers
 				for(int i = 0; i < p.Units.Count; i++)
 				{
 					Unit u = p.Units[i];
-					string[] items = {p.Name, u.UnitType.ToString(), u.CurrentTerritory.Name};
+					string[] items = {p.Name, u.Type.ToString(), u.CurrentTerritory.Name};
 					ListViewItem lvi = new ListViewItem(items);
 					listView3.Items.Add(lvi);
 
