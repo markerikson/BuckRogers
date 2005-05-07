@@ -557,14 +557,18 @@ namespace BuckRogers.Interface
 			{
 				BuckRogersForm brf = null;
 				
+				/*
 				if(go.OptionalRules["UseTestingSetup"])
 				{
 					brf = new BuckRogersForm();
+					GameController.Options.OptionalRules = go.OptionalRules;
 				}
 				else
 				{
 					brf = new BuckRogersForm(go);
 				}
+				*/
+				brf = new BuckRogersForm(go);
 
 				Application.Run(brf);
 			}

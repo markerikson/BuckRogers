@@ -137,7 +137,7 @@ namespace BuckRogers.Interface
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
-			this.m_lbPlayerOrder = new PlayerListBox();
+			this.m_lbPlayerOrder = new BuckRogers.Interface.PlayerListBox();
 			this.label2 = new System.Windows.Forms.Label();
 			this.tabControl1.SuspendLayout();
 			this.SuspendLayout();
@@ -219,6 +219,7 @@ namespace BuckRogers.Interface
 			this.m_lbCurrentMoves.Name = "m_lbCurrentMoves";
 			this.m_lbCurrentMoves.Size = new System.Drawing.Size(140, 82);
 			this.m_lbCurrentMoves.TabIndex = 9;
+			this.m_lbCurrentMoves.DoubleClick += new System.EventHandler(this.m_lbCurrentMoves_DoubleClick);
 			// 
 			// m_btnTransports
 			// 
@@ -267,6 +268,7 @@ namespace BuckRogers.Interface
 			// 
 			// m_lbPlayerOrder
 			// 
+			this.m_lbPlayerOrder.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
 			this.m_lbPlayerOrder.Location = new System.Drawing.Point(88, 4);
 			this.m_lbPlayerOrder.Name = "m_lbPlayerOrder";
 			this.m_lbPlayerOrder.Size = new System.Drawing.Size(136, 95);
@@ -335,6 +337,12 @@ namespace BuckRogers.Interface
 				{
 					if(m_currentMoveTerritories.Count == 0)
 					{
+						if(t.Owner != m_controller.CurrentPlayer)
+						{
+							MessageBox.Show("Can't start a move in a territory you don't own", "Movement", 
+								MessageBoxButtons.OK, MessageBoxIcon.Warning);
+							return;
+						}
 						MoveUnitsForm muf = new MoveUnitsForm();
 
 						muf.SetupUnits(t, m_controller.CurrentPlayer);
@@ -370,11 +378,13 @@ namespace BuckRogers.Interface
 					ArrayList transferInfo = tlf.TransferInfo;
 
 					//foreach(Action a in transferInfo)
+					/*
 					for(int i = 0; i < transferInfo.Count; i++)
 					{
 						Action a = (Action)transferInfo[i];
 						AddActionToList(a);
 					}
+					*/
 
 					m_mlbMoves.Refresh();
 					m_mlbTransports.Refresh();
@@ -451,7 +461,7 @@ namespace BuckRogers.Interface
 
 				m_controller.AddAction(ma);
 
-				AddActionToList(ma);
+				//AddActionToList(ma);
 
 				
 			}
@@ -501,13 +511,13 @@ namespace BuckRogers.Interface
 		{
 			Action a = m_controller.RedoAction();
 
-			AddActionToList(a);
+			//AddActionToList(a);
 
 			m_btnUndoMove.Enabled = m_controller.CanUndo;
 			m_btnRedoMove.Enabled = m_controller.CanRedo;
 		}
 
-		private void AddActionToList(Action a)
+		public void AddActionToList(Action a)
 		{
 			if(a is MoveAction)
 			{
@@ -548,7 +558,7 @@ namespace BuckRogers.Interface
 					}
 				}
 					
-				m_mlbMoves.Items.Insert(0, "Move #" + (m_mlbMoves.Items.Count + 1).ToString(),
+				m_mlbMoves.Items.Insert(0, "Move #" + (m_controller.ActionsCount).ToString(),
 					sb.ToString());
 				m_mlbMoves.Refresh();
 
@@ -579,7 +589,7 @@ namespace BuckRogers.Interface
 					sb.Append("s");
 				}
 
-				m_mlbTransports.Items.Insert(0, "Transportation #" + (m_mlbTransports.Items.Count + 1).ToString(),
+				m_mlbTransports.Items.Insert(0, "Transportation #" + (m_controller.ActionsCount).ToString(),
 												sb.ToString());
 			}
 		}
@@ -688,6 +698,17 @@ namespace BuckRogers.Interface
 			eventInfo[0] += (m_mlbTransports.Items.Count + 1).ToString();
 			m_mlbTransports.Items.Add(eventInfo[0], eventInfo[1]);
 			m_mlbTransports.Refresh();
+		}
+
+		private void m_lbCurrentMoves_DoubleClick(object sender, System.EventArgs e)
+		{
+			int index = m_lbCurrentMoves.SelectedIndex;
+			if( index == m_lbCurrentMoves.Items.Count - 1
+				&& index != 0)
+			{
+				m_lbCurrentMoves.Items.Remove(m_lbCurrentMoves.Items[index]);
+				m_currentMoveTerritories.Remove(m_currentMoveTerritories[m_currentMoveTerritories.Count - 1]);
+			}
 		}
 	}
 	

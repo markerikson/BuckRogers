@@ -3,6 +3,7 @@ using System.Collections;
 using CenterSpace.Free;
 using skmDataStructures.Graph;
 using System.Drawing;
+using System.Xml;
 
 namespace BuckRogers
 {
@@ -15,6 +16,7 @@ namespace BuckRogers
 		GameOver,
 	}
 	public delegate bool StatusUpdateHandler(object sender, StatusUpdateEventArgs suea);
+	public delegate void DisplayActionHandler(Action a);
 	/// <summary>
 	/// Summary description for GameController.
 	/// </summary>
@@ -22,6 +24,7 @@ namespace BuckRogers
 	{
 		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
 		public event StatusUpdateHandler StatusUpdate;
+		public event DisplayActionHandler ActionAdded;
 		
 		#region Properties
 		public BuckRogers.GameMap Map
@@ -78,6 +81,16 @@ namespace BuckRogers
 			}
 		}
 
+		public int ActionsCount
+		{
+			get
+			{
+				// by the time this is called, the action is verified but 
+				// hasn't actually been added to the list
+				return m_checkedActions.Count;
+			}
+		}
+
 		public Player CurrentPlayer
 		{
 			get
@@ -121,6 +134,8 @@ namespace BuckRogers
 		private bool m_redoingAction;
 		private GamePhase m_phase;
 		private static GameOptions m_options = new GameOptions();
+		private XmlDocument m_gamelog;
+		private XmlElement m_rootNode;
 
 		private Hashlist m_battles;	
 		public TurnRoll[] m_rolls;
@@ -157,6 +172,9 @@ namespace BuckRogers
 			m_turnNumber = 0;	
 
 			m_redoingAction = false;
+
+			
+
 		}
 
 		public void SetPlayers(string[] playerNames)
@@ -183,6 +201,70 @@ namespace BuckRogers
 			}
 
 			m_phase = GamePhase.Setup;
+		}
+
+		public void InitGamelog()
+		{
+			m_gamelog = new XmlDocument();
+			m_rootNode = m_gamelog.CreateElement("Game");
+			m_gamelog.AppendChild(m_rootNode);
+
+			XmlElement setup = m_gamelog.CreateElement("Setup");
+			XmlElement options = m_gamelog.CreateElement("Options");
+			XmlElement seed = m_gamelog.CreateElement("Seed");
+			XmlElement players = m_gamelog.CreateElement("Players");
+			XmlElement assignment = m_gamelog.CreateElement("Assignment");
+			seed.InnerText = Utility.Twister.Seed.ToString();
+
+			m_rootNode.AppendChild(setup);
+			setup.AppendChild(options);
+			setup.AppendChild(seed);
+			setup.AppendChild(players);
+			setup.AppendChild(assignment);
+
+			foreach(GameOption option in m_options.OptionalRules)
+			{
+				if(option.Value)
+				{
+					XmlElement xeOption = m_gamelog.CreateElement("Option");
+					XmlAttribute name = m_gamelog.CreateAttribute("name");
+					name.Value = option.Name;
+					xeOption.Attributes.Append(name);
+					options.AppendChild(xeOption);
+				}
+			}
+
+			foreach(Player p in m_players)
+			{
+				XmlElement xePlayerInfo = m_gamelog.CreateElement("Player");
+				XmlAttribute name = m_gamelog.CreateAttribute("name");
+				name.Value = p.Name;
+				XmlAttribute color = m_gamelog.CreateAttribute("color");
+				color.Value = p.Color.Name;
+				xePlayerInfo.Attributes.Append(name);
+				xePlayerInfo.Attributes.Append(color);
+
+				players.AppendChild(xePlayerInfo);
+
+				XmlElement xePlayerTerritories = m_gamelog.CreateElement("Player");
+				XmlAttribute pname = m_gamelog.CreateAttribute("name");
+				pname.Value = p.Name;
+				xePlayerTerritories.Attributes.Append(pname);
+
+				foreach(Territory t in p.Territories.Values)
+				{
+					XmlElement xeTerritory = m_gamelog.CreateElement("Territory");
+					XmlAttribute tname = m_gamelog.CreateAttribute("name");
+					tname.Value = t.Name;
+					xeTerritory.Attributes.Append(tname);
+
+					xePlayerTerritories.AppendChild(xeTerritory);
+				}
+
+				assignment.AppendChild(xePlayerTerritories);
+			}
+
+			m_gamelog.Save(@"gamelog.xml");
 		}
 
 		public Player GetPlayer(string name)
@@ -694,7 +776,60 @@ namespace BuckRogers
 					}
 				}
 
+				// needed here just to make sure the move gets listed before a possible transport action
+				m_checkedActions.Add(action);
+				if(ActionAdded != null)
+				{
+					ActionAdded(action);
+				}
 				
+				Territory destination = (Territory)move.Territories[move.Territories.Count - 1];
+				if(destination.Type == TerritoryType.Ground)
+				{					
+					bool unloadTransports = false;
+
+					UnitCollection transports = move.Units.GetUnits(UnitType.Transport);
+					if(transports.Count > 0)
+					{
+						bool askToUnload = false;
+
+						foreach(Transport tr in transports)
+						{
+							if(tr.Transportees.Count > 0)
+							{
+								askToUnload = true;
+								break;
+							}
+						}
+						if(askToUnload)
+						{
+							if(StatusUpdate != null)
+							{
+								StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+								suea.Territory = destination;//(Player)m_currentPlayerOrder[m_idxCurrentPlayer];
+				
+								suea.StatusInfo = StatusInfo.TransportLanded;
+								unloadTransports = StatusUpdate(this, suea);
+							}	
+						}									
+					}
+
+					if(unloadTransports)
+					{
+						foreach(Transport tr in transports)
+						{
+							TransportAction ta = new TransportAction();
+							ta.Load = false;
+							ta.Owner = tr.Owner;
+							ta.MaxTransfer = tr.Transportees.Count;
+							ta.StartingTerritory = destination;
+							ta.Transport = tr;
+							ta.UnitType = tr.Transportees[0].Type;
+
+							AddAction(ta);
+						}
+					}
+				}			
 			}
 			else if(action is TransportAction)
 			{
@@ -709,13 +844,21 @@ namespace BuckRogers
 					//UnloadTransport(ta.Transport, ta.MaxTransfer);
 					UnloadTransport(ta);
 				}
+
+				m_checkedActions.Add(action);
+				if(ActionAdded != null)
+				{
+					ActionAdded(action);
+				}
 					
 			}
 			else
 			{
 				throw new ActionException("Unknown Action type in ExecuteActions");
 			}
-			m_checkedActions.Add(action);
+
+			
+
 
 			if(!m_redoingAction)
 			{

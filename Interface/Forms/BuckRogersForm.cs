@@ -98,26 +98,59 @@ namespace BuckRogers
 			//
 			InitializeComponent();
 
-			m_controller = new GameController(go);
-			m_battleController = new BattleController(m_controller);
+			bool useTesting = go.OptionalRules["UseTestingSetup"];
+			ControllerTest ct = null;
+
+			if(useTesting)
+			{
+				ct = new ControllerTest();
+				ct.Reinitialize = false;
+				m_controller = ct.GameController;
+				m_battleController = ct.BattleController;
+			}
+			else
+			{
+				m_controller = new GameController(go);
+				m_battleController = new BattleController(m_controller);
+			}
+			
 
 			InitControls();
 			InitEvents();
 
-			tabControl1.TabPages.Clear();
-			tabControl1.TabPages.Add(m_tpPlacement);
-			tabControl1.TabPages.Add(m_tpTerritory);
+			if(useTesting)
+			{
+				ct.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
+				ct.Init();
 
-			m_controller.AssignTerritories();
-			m_controller.CreateInitialUnits();
-			m_controller.RollForInitiative(false);
+				tabControl1.TabPages.Clear();
+				tabControl1.TabPages.Add(m_tpAction);
+				tabControl1.TabPages.Add(m_tpTerritory);
 
-			m_clickMode = MapClickMode.Normal;
+				m_clickMode = MapClickMode.Normal;
+
+				GameController.Options.OptionalRules = go.OptionalRules;
+				StartGame();
+
+			}
+			else
+			{
+				tabControl1.TabPages.Clear();
+				tabControl1.TabPages.Add(m_tpPlacement);
+				tabControl1.TabPages.Add(m_tpTerritory);
+
+				m_controller.AssignTerritories();
+				m_controller.CreateInitialUnits();
+				m_controller.RollForInitiative(false);
+
+				m_clickMode = MapClickMode.Normal;
 			
-			m_placementPanel.RefreshPlayerOrder();
+				m_placementPanel.RefreshPlayerOrder();
 
-			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+				statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+			}
 
+			m_controller.InitGamelog();
 		}
 
 		private void InitControls()
@@ -166,8 +199,11 @@ namespace BuckRogers
 		{
 			m_controller.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
 			m_battleController.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
+
 			m_controller.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
 			m_battleController.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
+
+			m_controller.ActionAdded += new DisplayActionHandler(m_movePanel.AddActionToList);
 		}
 
 		private void StartGame()
@@ -671,7 +707,13 @@ namespace BuckRogers
 					MessageBox.Show("The winner is " + suea.Player.Name, "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
 					break;
 				}
-				
+				case StatusInfo.TransportLanded:
+				{
+					string message = "You have loaded transports in " + suea.Territory.Name + ".  Unload them?";
+					DialogResult dr = MessageBox.Show(message, "Unload Transports?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+					return dr == DialogResult.Yes;
+				}				
 			}		
 	
 			return result;

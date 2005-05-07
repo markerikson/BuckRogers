@@ -9,6 +9,7 @@ namespace BuckRogers
 		FactoryConquered,
 		SabotageResult,
 		LeaderKilled,
+		TransportLanded,
 		GameOver,
 	};
 	/// <summary>
