@@ -1,3 +1,14 @@
+Version 0.7.3
+- ADD:  Initial work on a history / savegame mechanism
+- ADD:  File > Exit works
+- ADD:  Players can undo the last territory added to a move
+- ADD:  Transports ask to be unloaded after landing
+- CHG:  Movement dialog doesn't show if another player's territory is clicked
+- CHG:  Production form is now modeless, so players can interact with the map
+		while producing
+- BUG:  Selected options weren't being used if the sample setup was selected
+
+
 Version 0.7.2
 - ADD: 	"Add All" buttons to the combat and movement windows
 - ADD:  Initial code for optional rule "Only ground troops can conquer territories".
