@@ -3,6 +3,7 @@ using System.Collections;
 using CenterSpace.Free;
 using skmDataStructures.Graph;
 using System.Drawing;
+using System.Text;
 using System.Xml;
 
 namespace BuckRogers
@@ -137,6 +138,10 @@ namespace BuckRogers
 		private static GameOptions m_options = new GameOptions();
 		private XmlDocument m_gamelog;
 		private XmlElement m_rootNode;
+		private XmlElement m_xeTurns;
+		private XmlElement m_xeCurrentTurn;
+		private XmlElement m_xeCurrentMovement;
+		private XmlElement m_xeCurrentPlayer;
 
 		private Hashlist m_battles;	
 		public TurnRoll[] m_rolls;
@@ -266,6 +271,65 @@ namespace BuckRogers
 			}
 
 			m_gamelog.Save(@"gamelog.xml");
+		}
+
+		public void LogInitialPlacements()
+		{
+			XmlNode setup = m_rootNode.GetElementsByTagName("Setup")[0];
+
+			XmlElement placement = m_gamelog.CreateElement("Placement");
+
+			foreach(Player p in m_currentPlayerOrder)
+			{
+				XmlElement xePlayerUnits = m_gamelog.CreateElement("Player");
+				XmlAttribute pname = m_gamelog.CreateAttribute("name");
+				pname.Value = p.Name;
+				xePlayerUnits.Attributes.Append(pname);
+
+				foreach(Unit u in p.Units)
+				{
+					XmlElement xeUnit = m_gamelog.CreateElement("Unit");
+					XmlAttribute tname = m_gamelog.CreateAttribute("type");
+					XmlAttribute territory = m_gamelog.CreateAttribute("territory");
+					tname.Value = u.Type.ToString();
+					territory.Value = u.CurrentTerritory.Name;
+					xeUnit.Attributes.Append(tname);
+					xeUnit.Attributes.Append(territory);
+
+					xePlayerUnits.AppendChild(xeUnit);
+				}
+
+				placement.AppendChild(xePlayerUnits);
+			}
+
+			setup.AppendChild(placement);
+
+			m_xeTurns = m_gamelog.CreateElement("Turns");
+			m_rootNode.AppendChild(m_xeTurns);
+			m_gamelog.Save("gamelog.xml");
+		}
+
+		public void LogNextPlayer()
+		{
+			m_xeCurrentPlayer = m_gamelog.CreateElement("Player");
+			XmlAttribute name = m_gamelog.CreateAttribute("name");
+			name.Value = CurrentPlayer.Name;
+			m_xeCurrentPlayer.Attributes.Append(name);
+
+			if(m_phase == GamePhase.Movement)
+			{
+				m_xeCurrentMovement.AppendChild(m_xeCurrentPlayer);
+			}
+			else if(m_phase == GamePhase.Production)
+			{
+
+			}
+			
+		}
+
+		public void SaveLog()
+		{
+			m_gamelog.Save("gamelog.xml");
 		}
 
 		public Player GetPlayer(string name)
@@ -783,6 +847,43 @@ namespace BuckRogers
 				{
 					ActionAdded(action);
 				}
+
+				XmlElement xeAction = m_gamelog.CreateElement("Action");
+				XmlAttribute xaMoveType = m_gamelog.CreateAttribute("type");
+				xaMoveType.Value = "Movement";
+				xeAction.Attributes.Append(xaMoveType);
+				XmlAttribute xaStart = m_gamelog.CreateAttribute("start");
+				xaStart.Value = move.StartingTerritory.Name;
+				xeAction.Attributes.Append(xaStart);
+
+				XmlElement xeTerritories = m_gamelog.CreateElement("Territories");
+				xeAction.AppendChild(xeTerritories);
+
+				foreach(Territory t in move.Territories)
+				{
+					XmlElement xeTerritory = m_gamelog.CreateElement("Territory");
+					XmlAttribute xaTerritoryName = m_gamelog.CreateAttribute("name");
+					xaTerritoryName.Value = t.Name;
+					xeTerritory.Attributes.Append(xaTerritoryName);
+
+					xeTerritories.AppendChild(xeTerritory);
+				}
+
+				XmlElement xeUnits = m_gamelog.CreateElement("Units");
+				xeAction.AppendChild(xeUnits);
+
+				foreach(Unit u in move.Units)
+				{
+					XmlElement xeUnit = m_gamelog.CreateElement("Unit");
+					XmlAttribute xaUnitType = m_gamelog.CreateAttribute("type");
+					xaUnitType.Value = u.Type.ToString();
+					xeUnit.Attributes.Append(xaUnitType);
+					
+					xeUnits.AppendChild(xeUnit);
+				}
+
+				m_xeCurrentPlayer.AppendChild(xeAction);
+
 				
 				Territory destination = (Territory)move.Territories[move.Territories.Count - 1];
 				if(destination.Type == TerritoryType.Ground)
@@ -1295,8 +1396,12 @@ namespace BuckRogers
 			if(m_turnNumber != 0)
 			{
 				m_map.AdvancePlanets();
+			}			
+			else
+			{
+				InitGamelog();
+				LogInitialPlacements();
 			}
-			
 
 			CheckDeadPlayers();
 
@@ -1308,6 +1413,29 @@ namespace BuckRogers
 				m_turnNumber++;
 
 				m_phase = GamePhase.Movement;
+
+				m_xeCurrentTurn = m_gamelog.CreateElement("Turn");
+				XmlAttribute number = m_gamelog.CreateAttribute("number");
+				XmlAttribute order = m_gamelog.CreateAttribute("order");
+				number.Value = m_turnNumber.ToString();
+				
+				StringBuilder sb = new StringBuilder();
+				foreach(Player p in m_currentPlayerOrder)
+				{
+					int idx = Array.IndexOf(m_players, p);
+					sb.Append(idx);
+				}
+				order.Value = sb.ToString();
+
+				m_xeCurrentTurn.Attributes.Append(number);
+				m_xeCurrentTurn.Attributes.Append(order);
+				m_xeTurns.AppendChild(m_xeCurrentTurn);
+
+				m_xeCurrentMovement = m_gamelog.CreateElement("Movement");
+				m_xeCurrentTurn.AppendChild(m_xeCurrentMovement);
+
+				LogNextPlayer();
+				
 			}			
 			else
 			{
@@ -1321,6 +1449,7 @@ namespace BuckRogers
 				}
 				
 			}
+			m_gamelog.Save("gamelog.xml");
 		}
 
 		private bool CheckVictory()
@@ -1394,6 +1523,8 @@ namespace BuckRogers
 			else
 			{
 				m_idxCurrentPlayer++;
+
+				LogNextPlayer();
 			}
 
 			if(!morePlayers)
@@ -1403,8 +1534,6 @@ namespace BuckRogers
 				// Makes sense in a twisted way at the moment
 				morePlayers = !CheckNextPhase();
 			}
-			
-			
 
 			if(StatusUpdate != null)
 			{

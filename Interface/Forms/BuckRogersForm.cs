@@ -56,7 +56,6 @@ namespace BuckRogers
 		private System.Windows.Forms.StatusBar statusBar1;
 		private System.Windows.Forms.MainMenu mainMenu1;
 		private System.Windows.Forms.MenuItem menuItem1;
-		private System.Windows.Forms.MenuItem menuItem2;
 		private System.Windows.Forms.StatusBarPanel statusBarPanel1;
 		private System.Windows.Forms.StatusBarPanel statusBarPanel2;
 		private System.Windows.Forms.Button button1;
@@ -64,6 +63,7 @@ namespace BuckRogers
 		private System.Windows.Forms.TabPage m_tpTerritory;
 		private System.Windows.Forms.TabPage m_tpPlacement;
 		private BuckRogers.Interface.PlacementPanel m_placementPanel;
+		private System.Windows.Forms.MenuItem m_menuFileExit;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
 		
 
@@ -150,7 +150,8 @@ namespace BuckRogers
 				statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
 			}
 
-			m_controller.InitGamelog();
+			
+
 		}
 
 		private void InitControls()
@@ -208,7 +209,9 @@ namespace BuckRogers
 
 		private void StartGame()
 		{
+			//m_controller.InitGamelog();
 			m_controller.NextTurn();
+			//m_controller.LogInitialPlacements();
 
 			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
 			statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
@@ -256,7 +259,7 @@ namespace BuckRogers
 			this.statusBarPanel2 = new System.Windows.Forms.StatusBarPanel();
 			this.mainMenu1 = new System.Windows.Forms.MainMenu();
 			this.menuItem1 = new System.Windows.Forms.MenuItem();
-			this.menuItem2 = new System.Windows.Forms.MenuItem();
+			this.m_menuFileExit = new System.Windows.Forms.MenuItem();
 			this.button1 = new System.Windows.Forms.Button();
 			this.tabControl1.SuspendLayout();
 			this.m_tpPlacement.SuspendLayout();
@@ -428,13 +431,14 @@ namespace BuckRogers
 			// 
 			this.menuItem1.Index = 0;
 			this.menuItem1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-																					  this.menuItem2});
+																					  this.m_menuFileExit});
 			this.menuItem1.Text = "File";
 			// 
-			// menuItem2
+			// m_menuFileExit
 			// 
-			this.menuItem2.Index = 0;
-			this.menuItem2.Text = "Exit";
+			this.m_menuFileExit.Index = 0;
+			this.m_menuFileExit.Text = "Exit";
+			this.m_menuFileExit.Click += new System.EventHandler(this.m_menuFileExit_Click);
 			// 
 			// button1
 			// 
@@ -460,6 +464,7 @@ namespace BuckRogers
 			this.Menu = this.mainMenu1;
 			this.Name = "BuckRogersForm";
 			this.Text = "BuckRogersForm";
+			this.Closing += new System.ComponentModel.CancelEventHandler(this.BuckRogersForm_Closing);
 			this.Load += new System.EventHandler(this.BuckRogersForm_Load);
 			this.tabControl1.ResumeLayout(false);
 			this.m_tpPlacement.ResumeLayout(false);
@@ -676,6 +681,16 @@ namespace BuckRogers
 		{
 			OrbitalSystem ceres = (OrbitalSystem)m_controller.Map.Planets["Ceres"];
 			ceres.CheckControl();
+		}
+
+		private void m_menuFileExit_Click(object sender, System.EventArgs e)
+		{
+			this.Close();
+		}
+
+		private void BuckRogersForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			m_controller.SaveLog();
 		}
 
 		public BuckRogers.GameController GameController
