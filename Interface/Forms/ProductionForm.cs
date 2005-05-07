@@ -221,7 +221,9 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.m_btnNextProduction);
 			this.Controls.Add(this.label16);
 			this.Controls.Add(this.m_lbProductionOrder);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Name = "ProductionForm";
+			this.ShowInTaskbar = false;
 			this.Text = "Production";
 			this.ResumeLayout(false);
 
@@ -236,7 +238,10 @@ namespace BuckRogers.Interface
 		{
 			AddProduction();
 			m_controller.ExecuteProduction();
-			this.DialogResult = DialogResult.OK;
+			
+			//this.DialogResult = DialogResult.OK;
+			this.Hide();
+			m_controller.CheckNextPhase();
 		}
 
 		private void m_btnNextProduction_Click(object sender, System.EventArgs e)

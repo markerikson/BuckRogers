@@ -537,70 +537,9 @@ namespace BuckRogers
 
 		private void m_btnCenterCamera_Click(object sender, System.EventArgs e)
 		{
-			//MessageBox.Show(m_map.ScrollControl.ViewPosition.ToString());
-			//return;
-
 			string target = (string)m_cbCenterLocations.SelectedItem;
 
-			PointF targetLocation = new Point();
-			Size viewSize = m_map.ScrollControl.ViewSize;
-			float zoom = m_map.Canvas.Camera.ViewScale;
-			float originalWidth = viewSize.Width / zoom;
-			float originalHeight = viewSize.Height / zoom;
-
-			switch(target)
-			{
-				case "Sun":
-				{
-					targetLocation.X = 0.52f * viewSize.Width;
-					targetLocation.Y = 0.34f * viewSize.Height;//0.0f;
-					break;
-				}
-				case "Mercury":
-				{
-					targetLocation.X = viewSize.Width * 0.085f;//0;//-2180;
-					targetLocation.Y = viewSize.Height * 0.222f;//-380;
-					break;
-				}
-				case "Venus":
-				{
-					break;
-				}
-				case "Earth":
-				{
-					break;
-				}
-				case "Mars":
-				{
-					break;
-				}
-				case "Asteroids":
-				{
-					break;
-				}
-			}
-
-			
-
-
-			//targetLocation.X *= zoom;
-			//targetLocation.Y *= zoom;
-
-			//Size mapSize = m_map.ClientSize;
-			//targetLocation.X -= mapSize.Width / 2;
-			//targetLocation.Y -= mapSize.Height / 2;
-
-			Point ulCorner = new Point((int)targetLocation.X, (int)targetLocation.Y);
-
-			PointF transformedPoint = m_map.Canvas.Camera.ViewToLocal(ulCorner);
-			ulCorner.X -= m_map.Width /  2;
-			ulCorner.Y -= m_map.Height / 2;
-
-			m_map.ScrollControl.ViewPosition = ulCorner;// new Point((int)transformedPoint.X, (int)transformedPoint.Y);
-
-			//PointF local = m_map.Canvas.Camera.GlobalToLocal(targetLocation);
-			//PointF view = m_map.Canvas.Camera.LocalToView(targetLocation);
-			//m_map.Canvas.Camera.ScaleViewBy(0.999999f, view.X, view.Y);
+			m_map.CenterMapOn(target);
 		}
 
 		public void OnMoveModeChanged(object sender, MoveModeEventArgs mmea)
@@ -685,15 +624,29 @@ namespace BuckRogers
 							if(m_productionForm == null)
 							{
 								m_productionForm = new ProductionForm(m_controller);
+								m_productionForm.Owner = this;
 							}
 
 							m_productionForm.SetupProduction();
-							m_productionForm.ShowDialog();
+							m_productionForm.Show();
 
+							bool visible = m_productionForm.Visible;
+
+							tabControl1.TabPages.Remove(m_tpAction);
+							
+							break;
+						}
+						case GamePhase.EndTurn:
+						{
+							tabControl1.TabPages.Clear();
+
+							tabControl1.TabPages.Add(m_tpAction);
+							tabControl1.TabPages.Add(m_tpTerritory);
 							m_controller.NextTurn();
 							m_map.AdvancePlanets();
 							statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
 							statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
+							m_movePanel.RefreshPlayerOrder();
 							break;
 						}
 					}

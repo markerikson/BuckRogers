@@ -1622,6 +1622,93 @@ namespace BuckRogers
 			*/		
 		}
 
+		public void CenterMapOn(string target)
+		{
+			PointF targetLocation = new Point();
+			Size viewSize = ScrollControl.ViewSize;
+			float zoom = Canvas.Camera.ViewScale;
+			float originalWidth = viewSize.Width / zoom;
+			float originalHeight = viewSize.Height / zoom;
+
+			RectangleF cameraBounds = Canvas.Camera.UnionOfChildrenBounds;
+
+			switch(target)
+			{
+				case "Sun":
+				{
+					targetLocation.X = 0;//2700;//0.52f * viewSize.Width;
+					targetLocation.Y = 0;//800;//0.34f * viewSize.Height;//0.0f;
+					break;
+				}
+				case "Mercury":
+				{
+					targetLocation.X = 500;//viewSize.Width * 0.085f;//0;//-2180;
+					targetLocation.Y = 500;//viewSize.Height * 0.222f;//-380;
+					break;
+				}
+				case "Venus":
+				{
+					break;
+				}
+				case "Earth":
+				{
+					break;
+				}
+				case "Mars":
+				{
+					break;
+				}
+				case "Asteroids":
+				{
+					break;
+				}
+			}
+
+			
+
+
+			//targetLocation.X *= zoom;
+			//targetLocation.Y *= zoom;
+
+			//Size mapSize = m_map.ClientSize;
+			//targetLocation.X -= mapSize.Width / 2;
+			//targetLocation.Y -= mapSize.Height / 2;
+
+			
+			//Point ulCorner = new Point((int)targetLocation.X, (int)targetLocation.Y);
+
+			//PointF transformedPoint = Canvas.Camera.ViewToLocal(ulCorner);
+
+			PointF local = Canvas.Camera.GlobalToLocal(targetLocation);
+			PointF view = Canvas.Camera.LocalToView(local);
+			Point ulCorner = new Point((int)targetLocation.X, (int)targetLocation.Y);
+			ulCorner.X -= Canvas.Width /  2;
+			ulCorner.Y -= Canvas.Height / 2;
+
+			if(ulCorner.X < 0)
+			{
+				ulCorner.X = 0;
+			}
+
+			if(ulCorner.Y < 0)
+			{
+				ulCorner.Y = 0;
+			}
+
+			Point oldPosition = ScrollControl.ViewPosition;
+			ScrollControl.ViewPosition = ulCorner;// new Point((int)transformedPoint.X, (int)transformedPoint.Y);
+			Point newPosition = ScrollControl.ViewPosition;
+			
+			/*
+			PointF local = Canvas.Camera.GlobalToLocal(targetLocation);
+			PointF view = Canvas.Camera.LocalToView(targetLocation);
+			Canvas.Camera.ScaleViewBy(1.0f, targetLocation.X, targetLocation.Y);//view.X, view.Y);
+			*/
+
+			int i = 42;
+			int q = i;
+		}
+
 		public void SetTerritoryOwner(object sender, TerritoryEventArgs tea)
 		{
 			PPath marker = (PPath)m_territoryMarkers[tea.Name];

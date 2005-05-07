@@ -13,6 +13,7 @@ namespace BuckRogers
 		Movement,
 		Combat,
 		Production,
+		EndTurn,
 		GameOver,
 	}
 	public delegate bool StatusUpdateHandler(object sender, StatusUpdateEventArgs suea);
@@ -1447,7 +1448,14 @@ namespace BuckRogers
 				}
 				case GamePhase.Production:
 				{
-					m_phase = GamePhase.Movement;
+					m_phase = GamePhase.EndTurn;
+
+					if(StatusUpdate != null)
+					{
+						StatusUpdateEventArgs suea = new StatusUpdateEventArgs();				
+						suea.StatusInfo = StatusInfo.NextPhase;
+						StatusUpdate(this, suea);
+					}
 					break;
 				}
 				case GamePhase.Movement:
