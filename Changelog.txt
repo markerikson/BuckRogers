@@ -1,0 +1,13 @@
+Version 0.7.2
+- ADD: 	"Add All" buttons to the combat and movement windows
+- ADD:  Initial code for optional rule "Only ground troops can conquer territories".
+		Should work, but haven't tried it yet.  Note that this only applies
+		to planetside territories - asteroids and satellites can still be captured
+		by other units.
+- CHG: 	Revamp of the way the combat screen buttons are activated.  Should be
+		simpler and take fewer clicks now.
+- BUG:  Factory production dis/enabled appropriately when transported
+- BUG:  Leaders can no longer conquer territories
+- BUG:  Ownership error when building a Killer Satellite on an asteroid
+- BUG:  Production screen needed to skip factories that are being transported
+- BUG:  Combat should now handle combat where a side has only a leader
