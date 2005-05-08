@@ -1,3 +1,14 @@
+Version 0.7.4
+- ADD:  An information panel that shows a list of total units, what units are 
+		each territory, and who owns which territories.
+- ADD:  Game logging is reasonably complete.
+- ADD:  Players are disabled if they lose their leader
+- CHG:  "Add All" buttons in the combat window automatically move transports last
+- BUG:  Hopefully fixed map centering issues.
+- BUG:  Glitch in combat - phase change wasn't always calculated right.
+- BUG:  Phase change issue in the main window after combat
+
+
 Version 0.7.3
 - ADD:  Initial work on a history / savegame mechanism
 - ADD:  File > Exit works
