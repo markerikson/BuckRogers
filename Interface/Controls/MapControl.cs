@@ -72,7 +72,6 @@ namespace BuckRogers
 			m_zoomFactors = new float[]{0.1f, 0.175f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 5.0f};
 
 			m_canvas = new PCanvas();
-
 			PRoot r = new ScreenshotRoot();
 			PLayer l = new BlackLayer();
 			PCamera c = new PCamera();
@@ -82,11 +81,9 @@ namespace BuckRogers
 			c.AddLayer(l);
 
 			Canvas.Camera = c;
-
 			Canvas.PanEventHandler = new PPanEventHandler();
 			Canvas.ZoomEventHandler = new PZoomEventHandler();
 			
-
 			m_canvas.Focus();
 
 			m_scroller = new RefreshingScrollableControl(m_canvas);
@@ -94,9 +91,6 @@ namespace BuckRogers
 
 			this.SuspendLayout();
 
-			//m_canvas.Size = ClientSize;
-			//m_scroller.Size = ClientSize;
-			//m_scroller.Location = new Point(0, 0);
 			this.Controls.Add(m_scroller);
 
 			m_scroller.Anchor = 
@@ -106,22 +100,6 @@ namespace BuckRogers
 				AnchorStyles.Right;
 
 			this.ResumeLayout(false);
-
-
-			
-
-			/*
-			//PRoot root = Canvas.Root;
-			
-			//root.RemoveChild(camera.GetLayer(0));
-			//camera.RemoveLayer(0);
-			//BlackLayer bl = new BlackLayer();
-
-			Canvas.Root.AddChild(bl);
-			Canvas.Camera.AddLayer(bl);
-			//root.AddChild(bl);
-			//camera.AddLayer(bl);
-			*/
 
 			m_orbits = new PNode[7][];
 			m_planets = new PClip[5];
@@ -153,7 +131,6 @@ namespace BuckRogers
 			DrawSolarOrbit(m_vo, "VO: ", "Venus", 4, /*200*/ 12 * orbitRadiusUnit, Color.Green, true, true, false);
 			DrawSolarOrbit(m_meo, "MeO: ", "Mercury", 2, /*100*/ 5 * orbitRadiusUnit, Color.Yellow, false, true, false);
 			
-			
 			PPath center = PPath.CreateEllipse(0, 0, 10f, 10f);
 			center.MouseUp +=new PInputEventHandler(center_MouseUp);
 			center.Brush = Brushes.White;
@@ -166,7 +143,6 @@ namespace BuckRogers
 			center.Bounds = centerBounds;
 			
 			Canvas.Layer.AddChild(center);
-			
 
 			PPath ulcorner = PPath.CreateRectangle(0, 0, 20, 20);
 			ulcorner.Brush = Brushes.Red;
@@ -762,7 +738,6 @@ namespace BuckRogers
 			#endregion
 
 			
-
 			for(int i = 0; i < m_planets.Length; i++)
 			{
 				m_planets[i].MoveToFront();
@@ -772,14 +747,11 @@ namespace BuckRogers
 			PPath lowerElevator = DrawObject(40, 75, scaleFactor, "Space Elevator", Color.DarkRed, 2450, -800, false);
 
 			PComposite elevator = new PComposite();
-			
-
 			elevator.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
 
 			PComposite upperElevatorComposite = DrawLabelAndOwner(upperElevator, "Space Elevator", 2200, -1000);
 
 			Canvas.Layer.AddChild(elevator);
-
 			elevator.AddChild(upperElevatorComposite);
 			elevator.AddChild(lowerElevator);
 			
@@ -800,16 +772,12 @@ namespace BuckRogers
 			orbit.Tag = name + " Orbit";
 			orbit.MouseUp += new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
 
-
-
 			orbit.Brush = Brushes.Black;
 			orbit.Pen = Pens.White;
 
 			orbit.X += shiftX + (orbitX * scaleFactor);
 			orbit.Y += shiftY + (orbitY * scaleFactor);
 
-			
-			
 			Canvas.Layer.AddChild(orbit);
 
 		}
@@ -836,9 +804,6 @@ namespace BuckRogers
 			if(addChild)
 			{
 				PComposite composite = DrawLabelAndOwner(obj, name, shiftX, shiftY);
-
-				//obj.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
-				//Canvas.Layer.AddChild(obj);
 
 				composite.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
 				Canvas.Layer.AddChild(composite);
@@ -871,16 +836,9 @@ namespace BuckRogers
 			Font f = text.Font;
 			text.Font = new Font(f.Name, f.SizeInPoints + 2);
 
-
 			m_territoryMarkers[name] = center;
 
-			//parent.AddChild(center);
-			//parent.AddChild(text);
-
 			PComposite composite = new PComposite();
-
-			
-
 			composite.AddChild(parent);
 			composite.AddChild(text);
 			composite.AddChild(center);
@@ -891,7 +849,6 @@ namespace BuckRogers
 		private void AddPlanet(float radius, PointF[][] polygons, string[] names, PointF[] territoryCenters, 
 								Brush color, float scaleFactor, int shiftX, int shiftY)
 		{
-			//float clipRadius = 80;
 			float clipDiameter = 2 * radius;
 
 			PClip planet = new PClip();
@@ -902,38 +859,6 @@ namespace BuckRogers
 			Canvas.Layer.AddChild(planet);
 			m_planets[m_idxPlanets] = planet;
 			m_idxPlanets++;
-
-
-			
-			/*
-			cVertexList clc = new cVertexList();
-			float deg = 1.0f;
-
-			for(int i = 0; i < 360; i++)
-			{
-				
-				float numDegrees = i * deg - 90;
-
-				float x = -GetCos(numDegrees) * radius;
-				float y = GetSin(numDegrees) * radius;
-				clc.SetVertex((int)x, (int)y);
-			}
-
-			*/
-
-			/*
-			PolyDefault pdc = new PolyDefault();
-			float deg = 1.0f;
-			for(int i = 0; i < 360; i++)
-			{
-				
-				float numDegrees = i * deg - 90;
-
-				float x = -GetCos(numDegrees) * radius;
-				float y = GetSin(numDegrees) * radius;
-				pdc.add(x, y);
-			}
-			*/
 
 
 
@@ -952,64 +877,6 @@ namespace BuckRogers
 				float centerX = 0.0f;
 				float centerY = 0.0f;
 
-
-				//float totalX = 0.0f;
-				//float totalY = 0.0f;
-
-				/*
-				ConvConv cc = new ConvConv();
-				cVertexList clt = new cVertexList();
-				
-				foreach(PointF p in points)
-				{
-					clt.SetVertex((int)p.X, (int)p.Y);
-				}
-
-				cc.Start(clt, clc);
-
-				cVertexList intersectedPolygon = cc.IntersectedPolygon;
-
-				for(int j = 0; j < intersectedPolygon.Count; j++)//points.Length; j++)
-				{
-					cPointi circlePoint = intersectedPolygon.GetElement(j).v;
-					totalX += circlePoint.x;//.points[j].X;
-					totalY += circlePoint.y;//points[j].Y;
-				}
-
-				centerX = totalX / intersectedPolygon.Count;//points.Length;
-				centerY = totalY / intersectedPolygon.Count;//points.Length;
-				*/
-
-				/*
-				PolyDefault pdt = new PolyDefault();
-				foreach(PointF p in points)
-				{
-					pdt.add(p);
-				}
-
-				Poly result = Clip.intersection(pdc, pdt);
-
-				for(int j = 0; j < result.NumPoints; j++)
-				{
-					totalX += (float)result.getX(j);
-					totalY += (float)result.getY(j);
-				}
-
-				centerX = totalX / result.NumPoints;
-				centerY = totalY / result.NumPoints;
-				*/
-
-				/*
-				for(int j = 0; j < points.Length; j++)
-				{
-					totalX += points[j].X;
-					totalY += points[j].Y;
-				}
-				*/
-
-				//centerX = totalX / points.Length;
-				//centerY = totalY / points.Length;
-				
 				centerX = territoryCenters[i].X;
 				centerY = territoryCenters[i].Y;
 
@@ -1033,14 +900,12 @@ namespace BuckRogers
 				center.X = unshiftedCenter.X + shiftX;
 				center.Y = unshiftedCenter.Y + shiftY;
 
-				//center.X = centerX - (center.Width / 2) + shiftX;
-				//center.Y = centerY - (center.Width / 2) + shiftY;
 
 				territory.AddChild(center);
 
-				string label = names[i];// + "\r\n(x: " + (unshiftedCenter.X / scaleFactor)  + ", y: " + (unshiftedCenter.Y / scaleFactor) + ")";
+				string label = names[i];
 				
-				PText text = new PText(label);//names[i]);
+				PText text = new PText(label);
 				Font f = text.Font;
 				text.Font = new Font(f.Name, f.SizeInPoints + 2);
 				text.X = centerX - (text.Width / 2) + shiftX;
@@ -1052,7 +917,6 @@ namespace BuckRogers
 				territory.AddChild(text);
 				
 				territory.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
-
 
 				territory.X += shiftX;
 				territory.Y += shiftY;
@@ -1095,7 +959,6 @@ namespace BuckRogers
 			
 			Canvas.Layer.AddChild(orbit);
 
-			//nodes = new PNode[numNodes];
 
 			for(int i = 0; i < numNodes; i++)
 			{
@@ -1113,9 +976,6 @@ namespace BuckRogers
 				nodes[i] = circle;
 
 				composite.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
-				//composite.MouseEnter += new PInputEventHandler(composite_MouseEnter);
-				//composite.MouseLeave += new PInputEventHandler(composite_MouseLeave);
-				//text.Visible = false;
 
 				float numDegrees = i * deg - 90;
 
@@ -1127,8 +987,6 @@ namespace BuckRogers
 				float x = -GetCos(numDegrees) * radius;
 				float y = GetSin(numDegrees) * radius;
 
-				
-
 				RectangleF compositeBounds = composite.Bounds;
 				compositeBounds.X = centerX + x;
 				compositeBounds.Y = centerY + y;
@@ -1136,7 +994,6 @@ namespace BuckRogers
 
 				circle.AddChild(text);
 				composite.AddChild(circle);
-				
 				
 				RectangleF textBounds = text.Bounds;
 				textBounds.X = x + centerX - (textBounds.Width / 2);
@@ -1148,11 +1005,6 @@ namespace BuckRogers
 				circleBounds.Y = y - 5 + centerY;				
 				circle.Bounds = circleBounds;
 				
-
-				
-				
-				//Canvas.Layer.AddChild(text);
-				//Canvas.Layer.AddChild(circle);
 				Canvas.Layer.AddChild(composite);
 			}
 		}
@@ -1175,8 +1027,6 @@ namespace BuckRogers
 					{
 						shape[j].X *= scaleFactor;
 						shape[j].Y *= scaleFactor;
-
-
 					}
 				}
 				
@@ -1187,14 +1037,12 @@ namespace BuckRogers
 			{
 				orbit.CloseFigure();
 			}
-			//orbit.X += shiftX;
-			//orbit.Y += shiftY;
+
 			orbit.OffsetX = shiftX;
 			orbit.OffsetY = shiftY;
 
 			orbit.Tag = name;
 
-			//orbit.MouseUp += new PInputEventHandler(orbit_MouseUp);
 			orbit.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
 
 			Canvas.Layer.AddChild(orbit);
@@ -1221,11 +1069,6 @@ namespace BuckRogers
 						
 						if(isMercury)
 						{
-							/*
-							d1idx = (j + 3) % 4;
-							d2idx = (d1idx + 1) % 4;
-							*/
-
 							if(j == 0)
 							{
 								d1idx = 0;
@@ -1247,18 +1090,7 @@ namespace BuckRogers
 							d1idx = 2 * j;
 							d2idx = d1idx + 1;
 						}
-						
 
-						/*
-						if(j == 0)
-						{
-							d2idx = previousOrbit.Length - 1;
-						}
-						else
-						{
-							d2idx = 2 *j + 1;
-						}
-						*/
 
 						PPath origin = (PPath)orbit[j];
 						PPath destination1 = (PPath)previousOrbit[d1idx];
@@ -1285,11 +1117,6 @@ namespace BuckRogers
 						origin.Parent.MoveToFront();
 						destination1.Parent.MoveToFront();
 						destination2.Parent.MoveToFront();
-						//origin.MoveInFrontOf(line1);
-						//destination1.MoveInFrontOf(line1);
-
-						//origin.MoveInFrontOf(line2);
-						//destination2.MoveInFrontOf(line2);
 					}
 				}
 				else
@@ -1306,25 +1133,16 @@ namespace BuckRogers
 						float destination1Y = destination1.Y + 5;
 
 						PPath line1 = PPath.CreateLine(startX, startY, destination1X, destination1Y);
-						//PClip line1 = new PClip();
-						//line1.AddLine(startX, startY, destination1X, destination1Y);
 
 						line1.Pen = Pens.White;
 
 						Canvas.Layer.AddChild(line1);
-						//line1.MoveToBack();
-						//origin.MoveInFrontOf(line1);
-						//destination1.MoveInFrontOf(line1);
 						origin.Parent.MoveToFront();
 						destination1.Parent.MoveToFront();
-
 					}
 				}
-				
 			}
 		}
-
-
 
 		private static float GetSin(float degAngle)
 		{
@@ -1350,18 +1168,6 @@ namespace BuckRogers
 			{
 				PComposite comp = picked as PComposite;
 
-				/*
-				PText text = null;
-				foreach(PNode node in comp)
-				{
-					if(node is PText)
-					{
-						text = (PText)node;
-						break;
-					}
-				}
-				*/
-				
 				foreach(PNode node in comp)
 				{
 					if(node is PPath)
@@ -1405,8 +1211,6 @@ namespace BuckRogers
 					return;
 				}
 
-				//MessageBox.Show(text.Text);
-
 				territoryName = text.Text;
 			}
 			
@@ -1416,12 +1220,7 @@ namespace BuckRogers
 				tcea.Button = e.Button;
 
 				TerritoryClicked(this, tcea);
-			}
-				/*
-				float scale = Canvas.Camera.ViewScale;
-				MessageBox.Show("Scale: " + scale + ", x: " + path.Bounds.X + ", y: " + path.Bounds.Y);
-				*/
-			
+			}			
 		}
 
 		private void center_MouseUp(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
@@ -1561,7 +1360,6 @@ namespace BuckRogers
 			Canvas.Camera.ViewScale = 0.25f;
 		}
 
-		//private void CenterZoomedMap(float newZoom, float currentZoom, Point originalPosition, Size originalDocumentSize)
 		private void CenterZoomedMap(bool zoomIn, float scaleFactor)
 		{
 			PointF boundsCenter = PUtil.CenterOfRectangle(Canvas.Camera.Bounds);
@@ -1743,8 +1541,6 @@ namespace BuckRogers
 
 			}
 
-
-			
 			AdvancePlanets();
 		}
 
@@ -1830,15 +1626,6 @@ namespace BuckRogers
 		}
 		protected override void Paint(PPaintContext paintContext) 
 		{
-			// make sure grid gets drawn on snap to grid boundaries. And 
-			// expand a little to make sure that entire view is filled.
-			/*
-			float bx = (X - (X % gridSpacing)) - gridSpacing;
-			float by = (Y - (Y % gridSpacing)) - gridSpacing;
-			float rightBorder = X + Width + gridSpacing;
-			float bottomBorder = Y + Height + gridSpacing;
-			*/
-
 			Graphics g = paintContext.Graphics;
 			RectangleF clip = paintContext.LocalClip;
 

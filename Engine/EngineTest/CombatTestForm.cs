@@ -1758,8 +1758,9 @@ namespace BuckRogers
 			
 			foreach(Player p in m_battleController.LastResult.Casualties.GetPlayersWithUnits())
 			{
-				UnitCollection uc = (UnitCollection)m_battleController.SurvivingUnits[p];
-				uc.RemoveAllUnits(m_battleController.LastResult.Casualties.GetUnits(p));
+				//UnitCollection uc = (UnitCollection)m_battleController.SurvivingUnits[p];
+				//uc.RemoveAllUnits(m_battleController.LastResult.Casualties.GetUnits(p));
+				m_battleController.SurvivingUnits.RemoveAllUnits(m_battleController.LastResult.Casualties.GetUnits(p));
 			}
 
 			m_battleController.CurrentUnused.AddAllUnits(m_battleController.LastResult.UnusedAttackers);
@@ -1938,7 +1939,7 @@ namespace BuckRogers
 				}
 				else
 				{
-					UnitCollection playerUnits = ((UnitCollection)m_battleController.SurvivingUnits[p]);
+					UnitCollection playerUnits = m_battleController.SurvivingUnits.GetUnits(p);//((UnitCollection)m_battleController.SurvivingUnits[p]);
 				
 					if(ut == UnitType.Transport)
 					{

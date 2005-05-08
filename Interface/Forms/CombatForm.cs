@@ -964,6 +964,7 @@ namespace BuckRogers.Interface
 		{
 			m_battleController.Battles = m_controller.Battles;
 
+			m_battleController.LogNewTurn();
 			m_battleController.NextBattle();
 			UpdateCombatInformation();
 		}
@@ -1405,6 +1406,7 @@ namespace BuckRogers.Interface
 		{
 			ResetDisplay();
 			m_battleController.NextPlayer();
+			m_lbCurrentPlayer.SelectedItem = m_battleController.CurrentPlayer.Name;
 		}
 		
 		public void UpdateNextPlayerCommand(Command cmd)
@@ -1529,7 +1531,7 @@ namespace BuckRogers.Interface
 				}
 				else
 				{
-					UnitCollection playerUnits = ((UnitCollection)m_battleController.SurvivingUnits[p]);
+					UnitCollection playerUnits = m_battleController.SurvivingUnits.GetUnits(p);//((UnitCollection)m_battleController.SurvivingUnits[p]);
 				
 					if(ut == UnitType.Transport)
 					{

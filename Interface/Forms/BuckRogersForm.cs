@@ -215,6 +215,8 @@ namespace BuckRogers
 		{
 			//m_controller.InitGamelog();
 			m_controller.NextTurn();
+			m_battleController.Gamelog = m_controller.Gamelog;
+			m_battleController.InitGameLog();
 			//m_controller.LogInitialPlacements();
 
 			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;

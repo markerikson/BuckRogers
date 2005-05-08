@@ -852,7 +852,7 @@ namespace BuckRogers
 				XmlAttribute xaMoveType = m_gamelog.CreateAttribute("type");
 				xaMoveType.Value = "Movement";
 				xeAction.Attributes.Append(xaMoveType);
-				XmlAttribute xaStart = m_gamelog.CreateAttribute("start");
+				XmlAttribute xaStart = m_gamelog.CreateAttribute("territory");
 				xaStart.Value = move.StartingTerritory.Name;
 				xeAction.Attributes.Append(xaStart);
 
@@ -877,7 +877,11 @@ namespace BuckRogers
 					XmlElement xeUnit = m_gamelog.CreateElement("Unit");
 					XmlAttribute xaUnitType = m_gamelog.CreateAttribute("type");
 					xaUnitType.Value = u.Type.ToString();
+					XmlAttribute xaUnitID = m_gamelog.CreateAttribute("id");
+					xaUnitID.Value = u.ID.ToString();
 					xeUnit.Attributes.Append(xaUnitType);
+					xeUnit.Attributes.Append(xaUnitID);
+					
 					
 					xeUnits.AppendChild(xeUnit);
 				}
@@ -950,8 +954,43 @@ namespace BuckRogers
 				m_checkedActions.Add(action);
 				if(ActionAdded != null)
 				{
-					ActionAdded(action);
+					ActionAdded(action); 
 				}
+
+				XmlElement xeAction = m_gamelog.CreateElement("Action");
+				XmlAttribute xaType = m_gamelog.CreateAttribute("type");
+				xaType.Value = "Transport";
+				XmlAttribute xaTerritory = m_gamelog.CreateAttribute("territory");
+				xaTerritory.Value = ta.StartingTerritory.Name;
+				XmlAttribute xaLoad = m_gamelog.CreateAttribute("load");
+				xaLoad.Value = ta.Load.ToString();
+
+				xeAction.Attributes.Append(xaType);
+				xeAction.Attributes.Append(xaTerritory);
+				xeAction.Attributes.Append(xaLoad);
+
+				XmlElement xeUnits = m_gamelog.CreateElement("Units");
+				
+				foreach(Unit u in ta.Units)
+				{
+					XmlElement xeUnit = m_gamelog.CreateElement("Unit");
+					XmlAttribute xaUnitType = m_gamelog.CreateAttribute("type");
+					xaUnitType.Value = u.Type.ToString();
+					XmlAttribute xaMoves = m_gamelog.CreateAttribute("moves");
+					xaMoves.Value = u.MovesLeft.ToString();
+					XmlAttribute xaUnitID = m_gamelog.CreateAttribute("id");
+					xaUnitID.Value = u.ID.ToString();
+					
+					xeUnit.Attributes.Append(xaUnitType);
+					xeUnit.Attributes.Append(xaMoves);
+					xeUnit.Attributes.Append(xaUnitID);
+
+					xeUnits.AppendChild(xeUnit);
+				}
+
+				xeAction.AppendChild(xeUnits);
+				
+				m_xeCurrentPlayer.AppendChild(xeAction);
 					
 			}
 			else
@@ -1369,21 +1408,49 @@ namespace BuckRogers
 
 		public void ExecuteProduction()
 		{
+			XmlElement xeProduction = m_gamelog.CreateElement("Production");
+
 			foreach(Player p in m_currentPlayerOrder)
 			{
 				if(!p.Disabled)
 				{
+					XmlElement xePlayer = m_gamelog.CreateElement("Player");
+					XmlAttribute xaName = m_gamelog.CreateAttribute("name");
+					xaName.Value = p.Name;
+					xePlayer.Attributes.Append(xaName);
+
 					UnitCollection factories = p.Units.GetUnits(UnitType.Factory);
 
 					foreach(Factory f in factories)
 					{
-						if(f.CanProduce)
+						if(f.CanProduce && f.ProductionType != UnitType.None)
 						{
+							XmlElement xeUnit = m_gamelog.CreateElement("Unit");
+							XmlAttribute xaType = m_gamelog.CreateAttribute("type");
+							XmlAttribute xaNumber = m_gamelog.CreateAttribute("number");
+							XmlAttribute xaLocation = m_gamelog.CreateAttribute("location");
+							XmlAttribute xaDestination = m_gamelog.CreateAttribute("destination");
+							xaType.Value = f.ProductionType.ToString();
+							xaNumber.Value = f.AmountProduced.ToString();
+							xaLocation.Value = f.CurrentTerritory.Name;
+							xaDestination.Value = f.DestinationTerritory.Name;
+
+							xeUnit.Attributes.Append(xaType);
+							xeUnit.Attributes.Append(xaNumber);
+							xeUnit.Attributes.Append(xaLocation);
+							xeUnit.Attributes.Append(xaDestination);
+
+							xePlayer.AppendChild(xeUnit);
+
 							f.ExecuteProduction();
 						}
 					}
+					
+					xeProduction.AppendChild(xePlayer);
 				}
 			}
+
+			m_xeCurrentTurn.AppendChild(xeProduction);
 		}
 
 		// TODO Uncontrolled Killer Satellites become the property of the new planetary owner
@@ -1447,7 +1514,6 @@ namespace BuckRogers
 					suea.StatusInfo = StatusInfo.GameOver;
 					StatusUpdate(this, suea);
 				}
-				
 			}
 			m_gamelog.Save("gamelog.xml");
 		}
@@ -1600,6 +1666,11 @@ namespace BuckRogers
 			}
 			return doNextPhase;
 		}
-      
+
+		public System.Xml.XmlDocument Gamelog
+		{
+			get { return this.m_gamelog; }
+			set { this.m_gamelog = value; }
+		}
 	}
 }
