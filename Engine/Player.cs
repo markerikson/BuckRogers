@@ -18,6 +18,7 @@ namespace BuckRogers
 		private Hashtable m_territories;
 		private bool m_disabled;
 		private Color m_color;
+		private int m_turnDisabled;
 
 		public Player(string name)
 		{
@@ -31,6 +32,12 @@ namespace BuckRogers
 		{
 			get { return this.m_disabled; }
 			set { this.m_disabled = value; }
+		}
+
+		public int TurnDisabled
+		{
+			get { return this.m_turnDisabled; }
+			set { this.m_turnDisabled = value; }
 		}
 
 		public Hashtable Territories

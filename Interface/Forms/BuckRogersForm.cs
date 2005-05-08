@@ -651,6 +651,7 @@ namespace BuckRogers
 							{
 								m_combatForm.BeginCombat();
 								m_combatForm.ShowDialog();
+								m_controller.CheckNextPhase();
 							}
 							
 							goto case GamePhase.Production;

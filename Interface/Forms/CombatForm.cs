@@ -1118,9 +1118,27 @@ namespace BuckRogers.Interface
 
 		public void DoAddAllAttackersCommand(Command cmd)
 		{
+			ArrayList al = new ArrayList();
 			while(m_lvAttUnused.Items.Count > 0)
 			{
-				m_lvAttUnused.Items[0].Selected = true;
+				ListViewItem lvi = m_lvAttUnused.Items[0];
+
+				if(lvi.SubItems[1].Text == "Transport")
+				{
+					m_lvAttUnused.Items.Remove(lvi);
+					al.Add(lvi);
+				}
+				else
+				{
+					lvi.Selected = true;
+					MoveItems(m_lvAttUnused, m_lvAttackers, false);
+				}
+			}
+
+			foreach(ListViewItem lvi in al)
+			{
+				m_lvAttUnused.Items.Add(lvi);
+				lvi.Selected = true;
 				MoveItems(m_lvAttUnused, m_lvAttackers, false);
 			}
 		}
@@ -1128,9 +1146,27 @@ namespace BuckRogers.Interface
 		public void DoAddAllDefendersCommand(Command cmd)
 		{
 			// TODO Save Transports until last
+			ArrayList al = new ArrayList();
 			while(m_lvEnemyLive.Items.Count > 0)
 			{
-				m_lvEnemyLive.Items[0].Selected = true;
+				ListViewItem lvi = m_lvEnemyLive.Items[0];
+
+				if(lvi.SubItems[1].Text == "Transport")
+				{
+					m_lvEnemyLive.Items.Remove(lvi);
+					al.Add(lvi);
+				}
+				else
+				{
+					lvi.Selected = true;
+					MoveItems(m_lvEnemyLive, m_lvDefenders, true);
+				}
+			}
+
+			foreach(ListViewItem lvi in al)
+			{
+				m_lvEnemyLive.Items.Add(lvi);
+				lvi.Selected = true;
 				MoveItems(m_lvEnemyLive, m_lvDefenders, true);
 			}
 		}

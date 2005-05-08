@@ -598,6 +598,7 @@ namespace BuckRogers
 					Unit leader = leaders[0];
 					m_cumulativeResult.Casualties.AddUnit(leader);
 					p.Disabled = true;
+					p.TurnDisabled = m_controller.TurnNumber;
 					//leader.Destroy();
 
 					if(StatusUpdate != null)

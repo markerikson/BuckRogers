@@ -464,7 +464,15 @@ namespace BuckRogers
 			m_rollResults = new ArrayList();
 			m_rollList = new ArrayList();
 			
-			ArrayList players = new ArrayList(m_players);
+			ArrayList players = new ArrayList();//m_players);
+
+			foreach(Player p in m_players)
+			{
+				if(!p.Disabled)
+				{
+					players.Add(p);
+				}
+			}
 			RollAndCheckForTies(players);
 
 			m_rolls = (TurnRoll[])m_rollList.ToArray(typeof(TurnRoll));
@@ -478,11 +486,21 @@ namespace BuckRogers
 			{
 				for(int i = playerIndex - 1; i >= 0; i--)
 				{
+					Player p = m_players[i];
+					if(m_players[i].Disabled)
+					{
+						continue;
+					}
 					m_currentPlayerOrder.Add(m_players[i]);
 				}
 
 				for(int i = m_players.Length - 1; i > playerIndex; i--)
 				{
+					Player p = m_players[i];
+					if(m_players[i].Disabled)
+					{
+						continue;
+					}
 					m_currentPlayerOrder.Add(m_players[i]);
 				}
 			}
@@ -491,11 +509,21 @@ namespace BuckRogers
 			{
 				for(int i = playerIndex + 1; i < m_players.Length; i++)
 				{
+					Player p = m_players[i];
+					if(m_players[i].Disabled)
+					{
+						continue;
+					}
 					m_currentPlayerOrder.Add(m_players[i]);
 				}
 
 				for(int i = 0; i < playerIndex; i++)
 				{
+					Player p = m_players[i];
+					if(m_players[i].Disabled)
+					{
+						continue;
+					}
 					m_currentPlayerOrder.Add(m_players[i]);
 				}
 			}
@@ -1459,6 +1487,17 @@ namespace BuckRogers
 		{
 			m_checkedActions.Clear();
 			m_undoneActions.Clear();
+
+			foreach(Player p in m_players)
+			{
+				if(p.Disabled)
+				{
+					if(p.TurnDisabled == TurnNumber - 1)
+					{
+						p.Disabled = false;
+					}
+				}
+			}
 
 			if(m_turnNumber != 0)
 			{

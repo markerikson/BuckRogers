@@ -342,7 +342,11 @@ namespace BuckRogers.Interface
 
 			foreach(Player p in m_controller.PlayerOrder)
 			{
-				m_lbProductionOrder.Items.Add(p.Name);
+				if(!p.Disabled)
+				{
+					m_lbProductionOrder.Items.Add(p.Name);
+				}
+				
 			}
 
 			m_productionIndex = -1;
