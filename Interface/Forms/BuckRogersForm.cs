@@ -58,12 +58,13 @@ namespace BuckRogers
 		private System.Windows.Forms.MenuItem menuItem1;
 		private System.Windows.Forms.StatusBarPanel statusBarPanel1;
 		private System.Windows.Forms.StatusBarPanel statusBarPanel2;
-		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.TabPage m_tpAction;
 		private System.Windows.Forms.TabPage m_tpTerritory;
 		private System.Windows.Forms.TabPage m_tpPlacement;
 		private BuckRogers.Interface.PlacementPanel m_placementPanel;
 		private System.Windows.Forms.MenuItem m_menuFileExit;
+		private System.Windows.Forms.TabPage m_tpInformation;
+		private BuckRogers.Interface.InformationPanel m_informationPanel;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
 		
 
@@ -126,6 +127,7 @@ namespace BuckRogers
 				tabControl1.TabPages.Clear();
 				tabControl1.TabPages.Add(m_tpAction);
 				tabControl1.TabPages.Add(m_tpTerritory);
+				tabControl1.TabPages.Add(m_tpInformation);
 
 				m_clickMode = MapClickMode.Normal;
 
@@ -191,6 +193,7 @@ namespace BuckRogers
 			m_movePanel.Controller = m_controller;
 			m_map.GameController = m_controller;
 			m_placementPanel.Controller = m_controller;
+			m_informationPanel.Controller = m_controller;
 
 			m_map.PlacePlanetIcons();
 		}
@@ -217,6 +220,7 @@ namespace BuckRogers
 			statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
 			
 			m_movePanel.RefreshPlayerOrder();			
+			m_informationPanel.RefreshAllInfo();
 		}
 
 		/// <summary>
@@ -254,17 +258,19 @@ namespace BuckRogers
 			this.m_movePanel = new BuckRogers.Interface.MovePanel();
 			this.m_tpTerritory = new System.Windows.Forms.TabPage();
 			this.m_territoryPanel = new BuckRogers.Interface.TerritoryPanel();
+			this.m_tpInformation = new System.Windows.Forms.TabPage();
+			this.m_informationPanel = new BuckRogers.Interface.InformationPanel();
 			this.statusBar1 = new System.Windows.Forms.StatusBar();
 			this.statusBarPanel1 = new System.Windows.Forms.StatusBarPanel();
 			this.statusBarPanel2 = new System.Windows.Forms.StatusBarPanel();
 			this.mainMenu1 = new System.Windows.Forms.MainMenu();
 			this.menuItem1 = new System.Windows.Forms.MenuItem();
 			this.m_menuFileExit = new System.Windows.Forms.MenuItem();
-			this.button1 = new System.Windows.Forms.Button();
 			this.tabControl1.SuspendLayout();
 			this.m_tpPlacement.SuspendLayout();
 			this.m_tpAction.SuspendLayout();
 			this.m_tpTerritory.SuspendLayout();
+			this.m_tpInformation.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel2)).BeginInit();
 			this.SuspendLayout();
@@ -339,10 +345,11 @@ namespace BuckRogers
 			this.tabControl1.Controls.Add(this.m_tpPlacement);
 			this.tabControl1.Controls.Add(this.m_tpAction);
 			this.tabControl1.Controls.Add(this.m_tpTerritory);
-			this.tabControl1.Location = new System.Drawing.Point(4, 44);
+			this.tabControl1.Controls.Add(this.m_tpInformation);
+			this.tabControl1.Location = new System.Drawing.Point(4, 8);
 			this.tabControl1.Name = "tabControl1";
 			this.tabControl1.SelectedIndex = 0;
-			this.tabControl1.Size = new System.Drawing.Size(240, 624);
+			this.tabControl1.Size = new System.Drawing.Size(240, 660);
 			this.tabControl1.TabIndex = 7;
 			// 
 			// m_tpPlacement
@@ -350,7 +357,7 @@ namespace BuckRogers
 			this.m_tpPlacement.Controls.Add(this.m_placementPanel);
 			this.m_tpPlacement.Location = new System.Drawing.Point(4, 22);
 			this.m_tpPlacement.Name = "m_tpPlacement";
-			this.m_tpPlacement.Size = new System.Drawing.Size(232, 598);
+			this.m_tpPlacement.Size = new System.Drawing.Size(232, 634);
 			this.m_tpPlacement.TabIndex = 2;
 			this.m_tpPlacement.Text = "Placement";
 			// 
@@ -360,7 +367,7 @@ namespace BuckRogers
 			this.m_placementPanel.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.m_placementPanel.Location = new System.Drawing.Point(0, 0);
 			this.m_placementPanel.Name = "m_placementPanel";
-			this.m_placementPanel.Size = new System.Drawing.Size(232, 598);
+			this.m_placementPanel.Size = new System.Drawing.Size(232, 634);
 			this.m_placementPanel.TabIndex = 0;
 			// 
 			// m_tpAction
@@ -369,7 +376,7 @@ namespace BuckRogers
 			this.m_tpAction.DockPadding.Top = 10;
 			this.m_tpAction.Location = new System.Drawing.Point(4, 22);
 			this.m_tpAction.Name = "m_tpAction";
-			this.m_tpAction.Size = new System.Drawing.Size(232, 598);
+			this.m_tpAction.Size = new System.Drawing.Size(232, 634);
 			this.m_tpAction.TabIndex = 0;
 			this.m_tpAction.Text = "Actions";
 			// 
@@ -381,7 +388,7 @@ namespace BuckRogers
 			this.m_movePanel.DockPadding.Top = 282;
 			this.m_movePanel.Location = new System.Drawing.Point(0, 5);
 			this.m_movePanel.Name = "m_movePanel";
-			this.m_movePanel.Size = new System.Drawing.Size(236, 488);
+			this.m_movePanel.Size = new System.Drawing.Size(236, 524);
 			this.m_movePanel.TabIndex = 0;
 			// 
 			// m_tpTerritory
@@ -389,7 +396,7 @@ namespace BuckRogers
 			this.m_tpTerritory.Controls.Add(this.m_territoryPanel);
 			this.m_tpTerritory.Location = new System.Drawing.Point(4, 22);
 			this.m_tpTerritory.Name = "m_tpTerritory";
-			this.m_tpTerritory.Size = new System.Drawing.Size(232, 598);
+			this.m_tpTerritory.Size = new System.Drawing.Size(232, 634);
 			this.m_tpTerritory.TabIndex = 1;
 			this.m_tpTerritory.Text = "Territory";
 			// 
@@ -399,6 +406,24 @@ namespace BuckRogers
 			this.m_territoryPanel.Name = "m_territoryPanel";
 			this.m_territoryPanel.Size = new System.Drawing.Size(240, 400);
 			this.m_territoryPanel.TabIndex = 0;
+			// 
+			// m_tpInformation
+			// 
+			this.m_tpInformation.Controls.Add(this.m_informationPanel);
+			this.m_tpInformation.Location = new System.Drawing.Point(4, 22);
+			this.m_tpInformation.Name = "m_tpInformation";
+			this.m_tpInformation.Size = new System.Drawing.Size(232, 634);
+			this.m_tpInformation.TabIndex = 3;
+			this.m_tpInformation.Text = "Information";
+			// 
+			// m_informationPanel
+			// 
+			this.m_informationPanel.Controller = null;
+			this.m_informationPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.m_informationPanel.Location = new System.Drawing.Point(0, 0);
+			this.m_informationPanel.Name = "m_informationPanel";
+			this.m_informationPanel.Size = new System.Drawing.Size(232, 634);
+			this.m_informationPanel.TabIndex = 0;
 			// 
 			// statusBar1
 			// 
@@ -440,19 +465,10 @@ namespace BuckRogers
 			this.m_menuFileExit.Text = "Exit";
 			this.m_menuFileExit.Click += new System.EventHandler(this.m_menuFileExit_Click);
 			// 
-			// button1
-			// 
-			this.button1.Location = new System.Drawing.Point(284, 648);
-			this.button1.Name = "button1";
-			this.button1.TabIndex = 9;
-			this.button1.Text = "button1";
-			this.button1.Click += new System.EventHandler(this.button1_Click_1);
-			// 
 			// BuckRogersForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(1016, 696);
-			this.Controls.Add(this.button1);
 			this.Controls.Add(this.statusBar1);
 			this.Controls.Add(this.tabControl1);
 			this.Controls.Add(this.label1);
@@ -470,6 +486,7 @@ namespace BuckRogers
 			this.m_tpPlacement.ResumeLayout(false);
 			this.m_tpAction.ResumeLayout(false);
 			this.m_tpTerritory.ResumeLayout(false);
+			this.m_tpInformation.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel1)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel2)).EndInit();
 			this.ResumeLayout(false);
@@ -595,6 +612,7 @@ namespace BuckRogers
 							tabControl1.TabPages.Clear();
 							tabControl1.TabPages.Add(m_tpAction);
 							tabControl1.TabPages.Add(m_tpTerritory);
+							tabControl1.TabPages.Add(m_tpInformation);
 
 							StartGame();
 							break;
@@ -652,6 +670,7 @@ namespace BuckRogers
 							statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
 							statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
 							m_movePanel.RefreshPlayerOrder();
+							m_informationPanel.RefreshAllInfo();
 							break;
 						}
 					}

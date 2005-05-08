@@ -106,7 +106,6 @@ namespace BuckRogers.Interface
 			this.m_labTerritoryName.Name = "m_labTerritoryName";
 			this.m_labTerritoryName.Size = new System.Drawing.Size(168, 36);
 			this.m_labTerritoryName.TabIndex = 2;
-			this.m_labTerritoryName.Text = "Australian Development Facility";
 			// 
 			// m_labTerritoryOwner
 			// 
@@ -115,7 +114,6 @@ namespace BuckRogers.Interface
 			this.m_labTerritoryOwner.Name = "m_labTerritoryOwner";
 			this.m_labTerritoryOwner.Size = new System.Drawing.Size(168, 20);
 			this.m_labTerritoryOwner.TabIndex = 4;
-			this.m_labTerritoryOwner.Text = "Mark";
 			// 
 			// label3
 			// 

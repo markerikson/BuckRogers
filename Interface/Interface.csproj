@@ -109,6 +109,16 @@
         <Files>
             <Include>
                 <File
+                    RelPath = "Controls\InformationPanel.cs"
+                    SubType = "UserControl"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Controls\InformationPanel.resx"
+                    DependentUpon = "InformationPanel.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "Controls\MapControl.cs"
                     SubType = "Component"
                     BuildAction = "Compile"
@@ -306,6 +316,11 @@
                     RelPath = "Other\CommandManager.resx"
                     DependentUpon = "CommandManager.cs"
                     BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\ListViewColumnSorter.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
                 />
                 <File
                     RelPath = "Other\MoveModeEventArgs.cs"
