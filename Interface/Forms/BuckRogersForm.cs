@@ -65,6 +65,7 @@ namespace BuckRogers
 		private System.Windows.Forms.MenuItem m_menuFileExit;
 		private System.Windows.Forms.TabPage m_tpInformation;
 		private BuckRogers.Interface.InformationPanel m_informationPanel;
+		private System.Windows.Forms.Button button1;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
 		
 
@@ -266,6 +267,7 @@ namespace BuckRogers
 			this.mainMenu1 = new System.Windows.Forms.MainMenu();
 			this.menuItem1 = new System.Windows.Forms.MenuItem();
 			this.m_menuFileExit = new System.Windows.Forms.MenuItem();
+			this.button1 = new System.Windows.Forms.Button();
 			this.tabControl1.SuspendLayout();
 			this.m_tpPlacement.SuspendLayout();
 			this.m_tpAction.SuspendLayout();
@@ -465,10 +467,19 @@ namespace BuckRogers
 			this.m_menuFileExit.Text = "Exit";
 			this.m_menuFileExit.Click += new System.EventHandler(this.m_menuFileExit_Click);
 			// 
+			// button1
+			// 
+			this.button1.Location = new System.Drawing.Point(284, 648);
+			this.button1.Name = "button1";
+			this.button1.TabIndex = 9;
+			this.button1.Text = "button1";
+			this.button1.Click += new System.EventHandler(this.button1_Click_1);
+			// 
 			// BuckRogersForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(1016, 696);
+			this.Controls.Add(this.button1);
 			this.Controls.Add(this.statusBar1);
 			this.Controls.Add(this.tabControl1);
 			this.Controls.Add(this.label1);
@@ -698,8 +709,34 @@ namespace BuckRogers
 
 		private void button1_Click_1(object sender, System.EventArgs e)
 		{
-			OrbitalSystem ceres = (OrbitalSystem)m_controller.Map.Planets["Ceres"];
-			ceres.CheckControl();
+			Point p = m_map.ScrollControl.ViewPosition;
+			UMD.HCIL.Piccolo.PCamera c =  m_map.Canvas.Camera;
+			RectangleF bounds = c.Bounds;
+			float zoom = c.ViewScale;
+
+			//p.X += (int)(bounds.Width / 2);
+			//p.Y += (int)(bounds.Height / 2);
+
+			PointF local = c.ViewToLocal(p);
+			PointF global = c.LocalToGlobal(local);
+
+			PointF zoomed = global;
+			zoomed.X /= zoom;
+			zoomed.Y /= zoom;
+
+			RectangleF localr = c.ViewToLocal(bounds);
+			RectangleF globalr = c.LocalToGlobal(localr);
+			
+
+
+			StringBuilder sb = new StringBuilder();
+			//sb.AppendFormat("UL - global: {0}, local: {1}", ulg, ulz);
+			sb.AppendFormat("Bounds - top: {0}, left: {1}, , bottom: {2}, , right: {3}", 
+							globalr.Top, globalr.Left, globalr.Bottom, globalr.Bottom);
+
+			//string message = "Global: " + global.ToString() + "\r\nZoomed: " + zoomed.ToString();
+			MessageBox.Show(sb.ToString());
+
 		}
 
 		private void m_menuFileExit_Click(object sender, System.EventArgs e)

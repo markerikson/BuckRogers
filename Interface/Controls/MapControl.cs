@@ -168,6 +168,15 @@ namespace BuckRogers
 			Canvas.Layer.AddChild(center);
 			
 
+			PPath ulcorner = PPath.CreateRectangle(0, 0, 20, 20);
+			ulcorner.Brush = Brushes.Red;
+			ulcorner.Pen = Pens.Blue;
+
+			ulcorner.X += -2700;
+			ulcorner.Y += -1300;
+
+			Canvas.Layer.AddChild(ulcorner);
+
 			DrawConnectors();
 
 			AddPlanets();
@@ -1555,71 +1564,10 @@ namespace BuckRogers
 		//private void CenterZoomedMap(float newZoom, float currentZoom, Point originalPosition, Size originalDocumentSize)
 		private void CenterZoomedMap(bool zoomIn, float scaleFactor)
 		{
-			//float scaleFactor = newZoom / currentZoom;//0f;
-			
-			/*
-			if(newZoom > currentZoom)
-			{
-				scaleFactor = newZoom / currentZoom;
-			}
-			else
-			{
-				scaleFactor = currentZoom / newZoom;
-			}
-			*/
-
-			//scaleFactor += 1.0f;
 			PointF boundsCenter = PUtil.CenterOfRectangle(Canvas.Camera.Bounds);
 			PointF actualCenter = Canvas.Camera.LocalToView(boundsCenter);
 			Canvas.Camera.ScaleViewBy(scaleFactor, actualCenter.X, actualCenter.Y);
-			Canvas.Refresh();
-
-			/*
-			Size viewportSize = ClientSize;
-			
-			// Calculate the point the viewport used to be centered on
-			float oldCenterX = originalPosition.X  + (float)(viewportSize.Width / 2);
-			float oldCenterY = originalPosition.Y + (float)(viewportSize.Height / 2);
-
-			// Calculate where that point was as a percentage of the old canvas
-			float oldXPercent = (float)(oldCenterX / (float)originalDocumentSize.Width);			
-			float oldYPercent = (float)(oldCenterY / (float)originalDocumentSize.Height);
-
-			// The size has already been changed, so what is it now?
-			Size newDocumentSize = ScrollControl.ViewSize;
-
-			// Calculate the new viewport center, using the old percentage
-			int newCenterX = (int)(oldXPercent * newDocumentSize.Width);
-			int newCenterY = (int)(oldYPercent * newDocumentSize.Height);
-
-			// Calculate the upper-left point of the viewport
-			int newXPos = newCenterX - (viewportSize.Width / 2);			
-			int newYPos = newCenterY - (viewportSize.Height / 2);
-
-
-			// Attempt at ensuring the viewport doesn't overrun the 
-			// edges of the canvas - doesn't seem to help
-			if(newXPos < 0)
-			{
-				newXPos = 0;
-			}
-			if(newYPos < 0)
-			{
-				newYPos = 0;
-			}
-
-			if( (newXPos + viewportSize.Width) > newDocumentSize.Width)
-			{
-				newXPos = newDocumentSize.Width - viewportSize.Width;
-			}
-			if( (newYPos + viewportSize.Height) > newDocumentSize.Height)
-			{
-				newYPos = newDocumentSize.Height - viewportSize.Height;
-			}
-
-			// Set the new position of the viewport
-			ScrollControl.ViewPosition = new Point(newXPos, newYPos);	
-			*/		
+			Canvas.Refresh();		
 		}
 
 		public void CenterMapOn(string target)
@@ -1636,55 +1584,54 @@ namespace BuckRogers
 			{
 				case "Sun":
 				{
-					targetLocation.X = 0;//2700;//0.52f * viewSize.Width;
-					targetLocation.Y = 0;//800;//0.34f * viewSize.Height;//0.0f;
+					targetLocation.X = 2700;
+					targetLocation.Y = 1300;
 					break;
 				}
 				case "Mercury":
 				{
-					targetLocation.X = 500;//viewSize.Width * 0.085f;//0;//-2180;
-					targetLocation.Y = 500;//viewSize.Height * 0.222f;//-380;
+					targetLocation.X = 400;
+					targetLocation.Y = 710;
 					break;
 				}
 				case "Venus":
 				{
+					targetLocation.X = 500;
+					targetLocation.Y = 2700;
 					break;
 				}
 				case "Earth":
 				{
+					targetLocation.X = 4900;
+					targetLocation.Y = 2640;
 					break;
 				}
 				case "Mars":
 				{
+					targetLocation.X = 4700;
+					targetLocation.Y = 1025;
 					break;
 				}
 				case "Asteroids":
 				{
+					targetLocation.X = 2600;
+					targetLocation.Y = 2600;
 					break;
 				}
 			}
 
-			
-
-
-			//targetLocation.X *= zoom;
-			//targetLocation.Y *= zoom;
-
-			//Size mapSize = m_map.ClientSize;
-			//targetLocation.X -= mapSize.Width / 2;
-			//targetLocation.Y -= mapSize.Height / 2;
-
-			
-			//Point ulCorner = new Point((int)targetLocation.X, (int)targetLocation.Y);
-
-			//PointF transformedPoint = Canvas.Camera.ViewToLocal(ulCorner);
+			targetLocation.X *= zoom;
+			targetLocation.Y *= zoom;
 
 			PointF local = Canvas.Camera.GlobalToLocal(targetLocation);
 			PointF view = Canvas.Camera.LocalToView(local);
 			Point ulCorner = new Point((int)targetLocation.X, (int)targetLocation.Y);
-			ulCorner.X -= Canvas.Width /  2;
-			ulCorner.Y -= Canvas.Height / 2;
+			
+			RectangleF bounds = Canvas.Camera.Bounds;
+			ulCorner.X -= (int)(bounds.Width / 2);
+			ulCorner.Y -= (int)(bounds.Height / 2);
 
+			
 			if(ulCorner.X < 0)
 			{
 				ulCorner.X = 0;
@@ -1694,19 +1641,21 @@ namespace BuckRogers
 			{
 				ulCorner.Y = 0;
 			}
-
-			Point oldPosition = ScrollControl.ViewPosition;
-			ScrollControl.ViewPosition = ulCorner;// new Point((int)transformedPoint.X, (int)transformedPoint.Y);
-			Point newPosition = ScrollControl.ViewPosition;
 			
-			/*
-			PointF local = Canvas.Camera.GlobalToLocal(targetLocation);
-			PointF view = Canvas.Camera.LocalToView(targetLocation);
-			Canvas.Camera.ScaleViewBy(1.0f, targetLocation.X, targetLocation.Y);//view.X, view.Y);
-			*/
 
-			int i = 42;
-			int q = i;
+			if(ulCorner.X + bounds.Width > viewSize.Width)
+			{
+				ulCorner.X = (int)(viewSize.Width - bounds.Width);
+			}
+
+			if(ulCorner.Y + bounds.Height > viewSize.Height)
+			{
+				ulCorner.Y = (int)(viewSize.Height - bounds.Height);
+			}
+			
+			Point oldPosition = ScrollControl.ViewPosition;
+			ScrollControl.ViewPosition = ulCorner;
+			Canvas.Refresh();
 		}
 
 		public void SetTerritoryOwner(object sender, TerritoryEventArgs tea)
@@ -1722,7 +1671,6 @@ namespace BuckRogers
 		public void PlacePlanetIcons()
 		{
 			int iconRadius = 50;
-			//m_planetIcons = new Hashtable();
 			m_iconMercury = new PComposite();
 			PPath mercCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
 			
