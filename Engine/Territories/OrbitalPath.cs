@@ -11,6 +11,7 @@ namespace BuckRogers
 	{
 		public static OrbitalPath NONE = new OrbitalPath("None", 0);
 
+		
 		public Territory[] Territories
 		{
 			get { return this.m_territories; }
@@ -28,6 +29,7 @@ namespace BuckRogers
 				m_territories[index] = value;
 			}
 		}
+		
 
 		public int Length
 		{
@@ -47,11 +49,13 @@ namespace BuckRogers
 	
 		private Territory[] m_territories;
 		private string m_name;
+		private ArrayList m_planets;
 
 		public OrbitalPath(string name, int size)
 		{
 			m_territories = new Territory[size];
 			m_name = name;
+			m_planets = new ArrayList();
 		}
 
 		public int NextOrbitalNodeIndex(Node current)
@@ -82,6 +86,12 @@ namespace BuckRogers
 			}
 			currentIndex++;
 			return currentIndex;
+		}
+
+		public System.Collections.ArrayList Planets
+		{
+			get { return this.m_planets; }
+			set { this.m_planets = value; }
 		}
 
 		

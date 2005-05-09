@@ -45,6 +45,8 @@ namespace BuckRogers
 		private PNode[] m_ao;
 		private PNode[][] m_orbits;
 
+		private PText m_tooltip;
+
 		private GameController m_controller;
 
 		private PComposite m_iconMercury;
@@ -83,6 +85,17 @@ namespace BuckRogers
 			Canvas.Camera = c;
 			Canvas.PanEventHandler = new PPanEventHandler();
 			Canvas.ZoomEventHandler = new PZoomEventHandler();
+
+			m_tooltip = new PText();
+			m_tooltip.TextBrush = Brushes.White;
+			m_tooltip.Pickable = false;
+			Font font = m_tooltip.Font;
+			m_tooltip.Font = new Font(font.Name, font.SizeInPoints + 8, FontStyle.Bold);
+			c.AddChild(m_tooltip);
+
+			PBasicInputEventHandler tipEventHandler = new PBasicInputEventHandler();
+			tipEventHandler.MouseMove = new MouseMoveDelegate(MouseMoveHandler);
+			c.AddInputEventListener(tipEventHandler);
 			
 			m_canvas.Focus();
 
@@ -750,6 +763,11 @@ namespace BuckRogers
 			elevator.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
 
 			PComposite upperElevatorComposite = DrawLabelAndOwner(upperElevator, "Space Elevator", 2200, -1000);
+			upperElevator.Tag = "Space Elevator";
+			lowerElevator.Tag = "Space Elevator";
+			upperElevatorComposite.Tag = "Space Elevator";
+			elevator.Tag = "Space Elevator";
+
 
 			Canvas.Layer.AddChild(elevator);
 			elevator.AddChild(upperElevatorComposite);
@@ -818,6 +836,7 @@ namespace BuckRogers
 			center.Brush = Brushes.White;
 			Pen p = new Pen(Color.Black, 3.0f);
 			center.Pen = p;
+			center.Tag = name;
 
 			float centerX = parent.Width / 2;
 			float centerY = parent.Height / 2;
@@ -834,11 +853,13 @@ namespace BuckRogers
 			text.Y = centerY - (text.Height) + shiftY;
 			text.TextBrush = Brushes.Black;
 			Font f = text.Font;
-			text.Font = new Font(f.Name, f.SizeInPoints + 2);
+			text.Font = new Font(f.Name, f.SizeInPoints + 2, FontStyle.Bold);
+			text.Tag = name;
 
 			m_territoryMarkers[name] = center;
 
 			PComposite composite = new PComposite();
+			composite.Tag = name;
 			composite.AddChild(parent);
 			composite.AddChild(text);
 			composite.AddChild(center);
@@ -886,12 +907,14 @@ namespace BuckRogers
 				PPath territory = PPath.CreatePolygon(points);
 				territory.Brush = color;
 				territory.Pen = Pens.White;
+				territory.Tag = names[i];
 
 
 				PPath center = PPath.CreateEllipse(0, 0, 40, 40);
 				center.Brush = Brushes.White;
 				Pen p = new Pen(Color.Black, 3.0f);
 				center.Pen = p;
+				center.Tag = names[i];
 
 				PointF unshiftedCenter = new PointF();
 				unshiftedCenter.X = centerX - (center.Width / 2);
@@ -907,9 +930,27 @@ namespace BuckRogers
 				
 				PText text = new PText(label);
 				Font f = text.Font;
-				text.Font = new Font(f.Name, f.SizeInPoints + 2);
+				text.Font = new Font(f.Name, f.SizeInPoints + 6, FontStyle.Bold);
+
+				if(text.Bounds.Width > 280)
+				{
+					RectangleF bounds = text.Bounds;
+					bounds.Width = 280;
+					text.ConstrainWidthToTextWidth = false;
+					text.TextAlignment = StringAlignment.Center;
+					text.Bounds = bounds;
+				}
 				text.X = centerX - (text.Width / 2) + shiftX;
 				text.Y = centerY - (text.Height) + shiftY;
+				text.Tag = label;
+
+				/*
+				if(label == "Australian Development Facility")
+				{
+					float width = text.Bounds.Width;
+					float q = width;
+				}
+				*/
 
 				m_territoryMarkers[label] = center;
 
@@ -1004,6 +1045,11 @@ namespace BuckRogers
 				circleBounds.X = x - 5 + centerX;
 				circleBounds.Y = y - 5 + centerY;				
 				circle.Bounds = circleBounds;
+
+				string tag = orbitName + " Orbit: " + i.ToString();
+				text.Tag = tag;
+				circle.Tag = tag;
+				composite.Tag = tag;
 				
 				Canvas.Layer.AddChild(composite);
 			}
@@ -1153,65 +1199,83 @@ namespace BuckRogers
 			return (float) Math.Cos(Math.PI * degAngle / 180);
 		}
 
-		private void text_Click(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
+		public void MouseMoveHandler(object sender, PInputEventArgs e) 
 		{
-			if(e.Button != MouseButtons.Left)
-			{
-				//return;
-			}
-			//PText picked = (PText)e.PickedNode;
-			PNode picked = e.PickedNode;
+			UpdateToolTip(e);
+		}
 
-			PPath path = null;
-			
-			if(picked is PComposite)
-			{
-				PComposite comp = picked as PComposite;
+		public void UpdateToolTip(PInputEventArgs e) 
+		{
+			PNode n = e.InputManager.MouseOver.PickedNode;
 
-				foreach(PNode node in comp)
+			String tooltipString = (String) n.Tag;
+
+
+			if(tooltipString != null)
+			{
+				int idx = tooltipString.IndexOf(':');
+				if(idx != -1)
 				{
-					if(node is PPath)
-					{
-						path = (PPath)node;
-						break;
-					}
+					string[] split = tooltipString.Split(new char[]{':'});
+					split[1].Trim();
+
+					int orbitIndex = Int32.Parse(split[1]);
+
+					tooltipString = m_controller.Map.GetPlanetTag(split[0], orbitIndex);
 				}
 			}
-			else if(picked is PPath)
-			{
-				path = (PPath)picked;
-			}
 
-			if(path == null)
+
+			if(tooltipString == null)
 			{
+				m_tooltip.Visible = false;
 				return;
-			}
-
-			string territoryName = null;
-
-			if(path.Tag != null)
-			{
-				territoryName = (string)path.Tag;
 			}
 			else
 			{
-				PText text = null;
+				PointF p = e.CanvasPosition;
 
-				foreach(PNode node in path)
+				p = e.Path.CanvasToLocal(p, Canvas.Camera);
+				
+				if(m_tooltip.Text != tooltipString)
 				{
-					if(node is PText)
+					m_tooltip.Text = tooltipString;
+
+					if(m_tooltip.Bounds.Width > 350)
 					{
-						text = (PText)node;
-						break;
+						RectangleF bounds = m_tooltip.Bounds;
+						bounds.Width = 300;
+						m_tooltip.ConstrainWidthToTextWidth = false;
+						m_tooltip.TextAlignment = StringAlignment.Center;
+						m_tooltip.Bounds = bounds;
+					}
+					else
+					{
+						m_tooltip.ConstrainWidthToTextWidth = true;
+						m_tooltip.TextAlignment = StringAlignment.Near;
 					}
 				}
+				
+				float x = p.X - (m_tooltip.Width / 2);
+				float y = p.Y - m_tooltip.Height - 8;
 
-				if(text == null)
-				{
-					return;
-				}
+				m_tooltip.SetOffset((int)x, (int)y);
+				m_tooltip.Visible = true;
+				
+				RectangleF tipBounds = m_tooltip.Bounds;
+				m_tooltip.RepaintFrom(tipBounds, m_tooltip);
+			}			
+		}
 
-				territoryName = text.Text;
+		private void text_Click(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
+		{
+			PNode picked = e.PickedNode;
+			
+			string territoryName = (string)picked.Tag;
+
+			if(territoryName == null)
+			{
+				return;
 			}
 			
 			if(TerritoryClicked != null)
@@ -1349,9 +1413,6 @@ namespace BuckRogers
 				newZoom = currentZoom;
 			}
 
-			//Canvas.Camera.ViewScale = newZoom;
-			
-			//CenterZoomedMap(newZoom, currentZoom, originalPosition, originalSize);
 			CenterZoomedMap(false, 0.67f);
 		}
 
@@ -1480,6 +1541,7 @@ namespace BuckRogers
 			mercName.Y = iconRadius + mercName.Height + 4;
 			m_iconMercury.AddChild(mercCircle);
 			m_iconMercury.AddChild(mercName);
+			m_iconMercury.Tag = "Mercury";
 
 			m_iconVenus = new PComposite();
 			PPath venusCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
@@ -1491,6 +1553,7 @@ namespace BuckRogers
 			venusName.Y = iconRadius + venusName.Height + 4;
 			m_iconVenus.AddChild(venusCircle);
 			m_iconVenus.AddChild(venusName);
+			m_iconVenus.Tag = "Venus";
 			
 
 			m_iconEarth = new PComposite();
@@ -1503,6 +1566,7 @@ namespace BuckRogers
 			earthName.Y = iconRadius + earthName.Height + 4;
 			m_iconEarth.AddChild(earthCircle);
 			m_iconEarth.AddChild(earthName);
+			m_iconEarth.Tag = "Earth";
 
 			m_iconMars = new PComposite();
 			PPath marsCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
@@ -1514,6 +1578,7 @@ namespace BuckRogers
 			marsName.Y = iconRadius + marsName.Height + 4;
 			m_iconMars.AddChild(marsCircle);
 			m_iconMars.AddChild(marsName);
+			m_iconMars.Tag = "Mars";
 			
 
 			Canvas.Layer.AddChild(m_iconMercury);
@@ -1537,6 +1602,7 @@ namespace BuckRogers
 
 				m_iconAsteroids[i].AddChild(asteroidCircle);
 				m_iconAsteroids[i].AddChild(asteroidName);
+				m_iconAsteroids[i].Tag = asteroidNames[i];
 				Canvas.Layer.AddChild(m_iconAsteroids[i]);
 
 			}
@@ -1624,6 +1690,8 @@ namespace BuckRogers
 		public BlackLayer() 
 		{
 		}
+
+
 		protected override void Paint(PPaintContext paintContext) 
 		{
 			Graphics g = paintContext.Graphics;

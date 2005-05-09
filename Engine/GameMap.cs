@@ -96,6 +96,7 @@ namespace BuckRogers
 
 			Planet mercury = new Planet("Mercury", m_graph, meo, 0, mng, mns, mngv, mnsv);
 			m_planets.Add(mercury.Name, mercury);
+			meo.Planets.Add(mercury);
 
 			m_graph.AddUndirectedEdge(mngv[0], mngv[1]);
 			m_graph.AddUndirectedEdge(mngv[0], mngv[2]);
@@ -130,6 +131,7 @@ namespace BuckRogers
 		
 			Planet venus = new Planet("Venus", m_graph, vo, 2, vng, vns, vngv, vnsv);
 			m_planets.Add(venus.Name, venus);
+			vo.Planets.Add(venus);
 
 			m_graph.AddUndirectedEdge(vngv[0], vngv[1]);
 			m_graph.AddUndirectedEdge(vngv[0], vngv[2]);
@@ -183,6 +185,7 @@ namespace BuckRogers
 			Planet moon = new Planet("Moon", m_graph, eo, 0, mong, mons, mongv, monsv);
 			m_planets.Add(earth.Name, earth);
 			m_planets.Add(moon.Name, moon);
+			eo.Planets.Add(earth);
 			
 			// connect the Earth territories
 			
@@ -243,6 +246,7 @@ namespace BuckRogers
 
 			Planet mars = new Planet("Mars", m_graph, mao, 9, mang, mans, mangv, mansv);
 			m_planets.Add(mars.Name, mars);
+			mao.Planets.Add(mars);
 
 			m_graph.AddUndirectedEdge(mangv[0], mangv[1]);
 			m_graph.AddUndirectedEdge(mangv[0], mangv[2]);
@@ -286,6 +290,7 @@ namespace BuckRogers
 				asteroid.NearOrbit = ansv[0];
 				m_graph.AddUndirectedEdge(angv[0], ansv[0]);
 				m_planets.Add(asteroidNames[i], asteroid);
+				ao.Planets.Add(asteroid);
 			}
 			
 			#endregion
@@ -392,6 +397,25 @@ namespace BuckRogers
 				m_graph.AddUndirectedEdge(orbit[orbit.Length - 1], orbit[0]);
 			}
 			
+
+		}
+
+		public string GetPlanetTag(string orbitName, int orbitIndex)
+		{
+			OrbitalPath op = (OrbitalPath)orbitalPaths[orbitName];
+
+			string tag = null;
+
+			for(int i = 0; i < op.Planets.Count; i++)
+			{
+				OrbitalSystem os = (OrbitalSystem)op.Planets[i];
+				if(os.CurrentOrbitIndex == orbitIndex)
+				{
+					tag = os.Name;
+				}
+			}
+
+			return tag;
 
 		}
 
