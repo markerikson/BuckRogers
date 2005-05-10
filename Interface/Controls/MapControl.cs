@@ -18,6 +18,7 @@ using UMD.HCIL.PiccoloX.Components;
 using UMD.HCIL.Piccolo.Event;
 
 using BuckRogers.Interface;
+using GpcWrapper;
 
 namespace BuckRogers
 {
@@ -157,6 +158,14 @@ namespace BuckRogers
 			
 			Canvas.Layer.AddChild(center);
 
+			DrawConnectors();
+			AddPlanets();
+
+			Canvas.AnimatingRenderQuality = RenderQuality.HighQuality;
+			Canvas.InteractingRenderQuality = RenderQuality.HighQuality;
+
+
+			/*
 			PPath ulcorner = PPath.CreateRectangle(0, 0, 20, 20);
 			ulcorner.Brush = Brushes.Red;
 			ulcorner.Pen = Pens.Blue;
@@ -166,12 +175,19 @@ namespace BuckRogers
 
 			Canvas.Layer.AddChild(ulcorner);
 
-			DrawConnectors();
 
-			AddPlanets();
+			PImage icon = new PImage();
+			Bitmap bm = new Bitmap("infantry.png");
+			bm.MakeTransparent(Color.White);
+			icon.Image = bm;
 
-			Canvas.AnimatingRenderQuality = RenderQuality.HighQuality;
-			Canvas.InteractingRenderQuality = RenderQuality.HighQuality;
+			icon.X += 2300;
+			icon.Y += 1400;
+
+			Canvas.Layer.AddChild(icon);
+			*/
+
+
 		}
 
 		/// <summary>
@@ -708,11 +724,7 @@ namespace BuckRogers
 			#endregion
 
 			#region Draw planets and planetary orbits
-			AddPlanet(70, mercuryPoints, mercuryNames, mercuryCenters, Brushes.Goldenrod, scaleFactor, -2600, -800);
-			AddPlanet(80, venusPoints, venusNames, venusCenters, Brushes.LightGreen, scaleFactor, -2600, 1000);
-			AddPlanet(80, earthPoints, earthNames, earthCenters, Brushes.LightBlue, scaleFactor, 1900, 1100);
-			AddPlanet(55, moonPoints, moonNames, moonCenters, Brushes.LightGray, scaleFactor, 1100, 1300);
-			AddPlanet(75, marsPoints, marsNames, marsCenters, Brushes.OrangeRed, scaleFactor, 1800, -550);
+
 
 			DrawPlanetaryOrbit(mercuryNearOrbitPoints, "Near Mercury Orbit", Color.Yellow, scaleFactor, -2700, -1100, true);
 			DrawPlanetaryOrbit(mercuryFarOrbitPoints, "Far Mercury Orbit", Color.Yellow, scaleFactor, -2700, -1100, true);
@@ -726,6 +738,12 @@ namespace BuckRogers
 
 			DrawPlanetaryOrbit(marsNearOrbitPoints, "Near Mars Orbit", Color.Red, scaleFactor, 1000, -1300, true);
 			DrawPlanetaryOrbit(marsFarOrbitPoints, "Far Mars Orbit", Color.Red, scaleFactor, 1000, -1300, true);
+
+			AddPlanet(70, mercuryPoints, mercuryNames, mercuryCenters, Brushes.Goldenrod, scaleFactor, -2600, -800);
+			AddPlanet(80, venusPoints, venusNames, venusCenters, Brushes.LightGreen, scaleFactor, -2600, 1000);
+			AddPlanet(80, earthPoints, earthNames, earthCenters, Brushes.LightBlue, scaleFactor, 1900, 1100);
+			AddPlanet(55, moonPoints, moonNames, moonCenters, Brushes.LightGray, scaleFactor, 1100, 1300);
+			AddPlanet(75, marsPoints, marsNames, marsCenters, Brushes.OrangeRed, scaleFactor, 1800, -550);
 
 			DrawAsteroid(75, 75, scaleFactor, "Ceres", Color.Gray, 30, 45, -200, 1150);
 			DrawAsteroid(65, 55, scaleFactor, "Pallas", Color.Gray, -20, 20, 450, 1000);
@@ -750,11 +768,12 @@ namespace BuckRogers
 
 			#endregion
 
-			
+			/*
 			for(int i = 0; i < m_planets.Length; i++)
 			{
 				m_planets[i].MoveToFront();
 			}
+			*/
 
 			PPath upperElevator = DrawObject(90, 65, scaleFactor, "Space Elevator", Color.DarkRed, 2200, -1000, false);
 			PPath lowerElevator = DrawObject(40, 75, scaleFactor, "Space Elevator", Color.DarkRed, 2450, -800, false);
@@ -872,43 +891,47 @@ namespace BuckRogers
 		{
 			float clipDiameter = 2 * radius;
 
-			PClip planet = new PClip();
-			planet.AddEllipse(0, 0, clipDiameter * scaleFactor, clipDiameter * scaleFactor);
-			planet.X += shiftX;
-			planet.Y += shiftY;
-
-			Canvas.Layer.AddChild(planet);
-			m_planets[m_idxPlanets] = planet;
-			m_idxPlanets++;
-
-
+			PPath clipPath = PPath.CreateEllipse(0, 0, clipDiameter * scaleFactor, clipDiameter * scaleFactor);
+			GraphicsPath clipPathGP = clipPath.PathReference;
+			clipPathGP.Flatten(new Matrix(), 0.1f);
+			Polygon clip = new Polygon(clipPathGP);
 
 			for(int i = 0; i < polygons.Length; i++)
 			{
 				PointF[] points = polygons[i];
-				if(scaleFactor != 1.0f)
+
+				for(int j = 0; j < points.Length; j++)
 				{
-					for(int j = 0; j < points.Length; j++)
-					{
-						points[j].X *= scaleFactor;
-						points[j].Y *= scaleFactor;
-					}
+					points[j].X *= scaleFactor;
+					points[j].Y *= scaleFactor;
 				}
 
-				float centerX = 0.0f;
-				float centerY = 0.0f;
+				PPath originalTerritory = PPath.CreatePolygon(points);
+				originalTerritory.Brush = Brushes.Red;
 
-				centerX = territoryCenters[i].X;
-				centerY = territoryCenters[i].Y;
+				GraphicsPath gpOriginal = originalTerritory.PathReference;
+				gpOriginal.Flatten(new Matrix(), 0.1f);
+				Polygon polyOriginal = new Polygon(gpOriginal);
+			
+				Polygon polyClipped = polyOriginal.Clip(GpcOperation.Intersection, clip);
 
+				GraphicsPath gpClipped = polyClipped.ToGraphicsPath();
+
+				PPath clippedTerritory = new PPath(gpClipped);
+				clippedTerritory.Brush = color;
+				clippedTerritory.Pen = Pens.White;
+				clippedTerritory.Tag = names[i];
+
+				clippedTerritory.X += shiftX;
+				clippedTerritory.Y += shiftY;
+
+				PComposite compTerritory = new PComposite();
+				compTerritory.AddChild(clippedTerritory);
+
+				float centerX = territoryCenters[i].X;
+				float centerY = territoryCenters[i].Y;
 				centerX *= scaleFactor;
 				centerY *= scaleFactor;
-
-				PPath territory = PPath.CreatePolygon(points);
-				territory.Brush = color;
-				territory.Pen = Pens.White;
-				territory.Tag = names[i];
-
 
 				PPath center = PPath.CreateEllipse(0, 0, 40, 40);
 				center.Brush = Brushes.White;
@@ -922,9 +945,6 @@ namespace BuckRogers
 
 				center.X = unshiftedCenter.X + shiftX;
 				center.Y = unshiftedCenter.Y + shiftY;
-
-
-				territory.AddChild(center);
 
 				string label = names[i];
 				
@@ -943,26 +963,19 @@ namespace BuckRogers
 				text.X = centerX - (text.Width / 2) + shiftX;
 				text.Y = centerY - (text.Height) + shiftY;
 				text.Tag = label;
-
-				/*
-				if(label == "Australian Development Facility")
-				{
-					float width = text.Bounds.Width;
-					float q = width;
-				}
-				*/
-
-				m_territoryMarkers[label] = center;
-
 				text.TextBrush = Brushes.Black;
-				territory.AddChild(text);
-				
-				territory.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
 
-				territory.X += shiftX;
-				territory.Y += shiftY;
+				compTerritory.Tag = label;
+				compTerritory.AddChild(clippedTerritory);
+				compTerritory.AddChild(text);
+				compTerritory.AddChild(center);
+				Canvas.Layer.AddChild(compTerritory);
 
-				planet.AddChild(territory);
+				compTerritory.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
+
+				clippedTerritory.MoveToFront();
+				text.MoveToFront();
+				center.MoveToFront();
 			}
 		}
 

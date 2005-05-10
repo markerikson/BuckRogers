@@ -318,17 +318,21 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "Other\gpc.dll"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Other\GpcWrapper.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Other\ListViewColumnSorter.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
                     RelPath = "Other\MoveModeEventArgs.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
-                />
-                <File
-                    RelPath = "Other\POutlineText.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
