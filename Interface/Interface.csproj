@@ -327,6 +327,31 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Other\iconlocations1.txt"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Other\iconlocations2.txt"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Other\iconlocations3.txt"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Other\iconlocations4.txt"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Other\iconlocations5.txt"
+                    BuildAction = "Content"
+                />
+                <File
+                    RelPath = "Other\IconManager.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Other\ListViewColumnSorter.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
@@ -335,6 +360,10 @@
                     RelPath = "Other\MoveModeEventArgs.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Other\territories.txt"
+                    BuildAction = "Content"
                 />
                 <File
                     RelPath = "Other\TransportInfoEventArgs.cs"

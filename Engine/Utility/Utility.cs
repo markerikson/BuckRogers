@@ -57,5 +57,15 @@ namespace BuckRogers
 				return m_twister;
 			}
 		}
+
+		public static float GetSin(float degAngle)
+		{
+			return (float) Math.Sin(Math.PI * degAngle / 180);
+		}
+
+		public static float GetCos(float degAngle)
+		{
+			return (float) Math.Cos(Math.PI * degAngle / 180);
+		}
 	}
 }

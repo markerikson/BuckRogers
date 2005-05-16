@@ -195,6 +195,37 @@ namespace GpcWrapper
 		{
 			GpcWrapper.SavePolygon( filename, writeHoleFlags, this );
 		}
+
+		public bool Equals(Polygon other)
+		{
+			bool isEqual = true;
+
+			isEqual = (this.NofContours == other.NofContours);
+
+			for(int j = 0; isEqual && j < this.Contour.Length; j++)
+			{
+				VertexList vlThis = this.Contour[j];
+				Vertex[] verticesThis = vlThis.Vertex;
+
+				VertexList vlOther = other.Contour[j];
+				Vertex[] verticesOther = vlOther.Vertex;
+				
+				for(int k = 0; k < verticesThis.Length; k++)
+				{
+					if(verticesThis[k].X != verticesOther[k].X)
+					{
+						isEqual = false;
+					}
+
+					if(verticesThis[k].Y != verticesOther[k].Y)
+					{
+						isEqual = false;
+					}
+				}
+			}
+
+			return isEqual;
+		}
 	}
 	
 	public class Tristrip
