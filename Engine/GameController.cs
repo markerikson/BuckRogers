@@ -1739,6 +1739,8 @@ namespace BuckRogers
 				tuea.Units = uc;
 				tuea.Territory = t;
 				tuea.Added = true;
+
+				TerritoryUnitsChanged(this, tuea);
 			}
 		}
 

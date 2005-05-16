@@ -88,38 +88,46 @@ namespace BuckRogers
 
 			UnitCollection uc = units.GetUnits(UnitType.Fighter);
 
-			for (int i = 0; i < 4; i++)
-			{
-				uc[i].CurrentTerritory = deimos;
-			}
+			UnitCollection thuleUnits = new UnitCollection();
+			UnitCollection deimosUnits = new UnitCollection();
+			UnitCollection elevatorUnits = new UnitCollection();
+
+
+			uc = uc.GetUnits(4);
+			deimosUnits.AddAllUnits(uc);
 
 			uc = units.GetUnits(UnitType.Leader);
-			uc[0].CurrentTerritory = thule;
+			thuleUnits.AddAllUnits(uc);
 
 			uc = mark.Units.GetUnits(UnitType.Transport);
-			uc[0].CurrentTerritory = thule;
+			thuleUnits.AddAllUnits(uc);
 
 			uc = units.GetUnits(UnitType.Factory);
-			uc[0].CurrentTerritory = deimos;
-			uc[1].CurrentTerritory = elevator;
+			deimosUnits.AddUnit(uc[0]);
+			elevatorUnits.AddUnit(uc[1]);
 
 			uc = units.GetUnits(UnitType.Gennie);
-			uc[0].CurrentTerritory = elevator;
-			uc[1].CurrentTerritory = elevator;
-
+			elevatorUnits.AddAllUnits(uc);
 
 			uc = units.GetUnits(UnitType.Trooper);
+			deimosUnits.AddUnit(uc[0]);
 			uc[0].CurrentTerritory = deimos;
 
 			for(int i = 1; i < 4; i++)
 			{
-				uc[i].CurrentTerritory = elevator;
+				//uc[i].CurrentTerritory = elevator;
+				elevatorUnits.AddUnit(uc[i]);
 			}
 
 			for(int i = 4; i < 8; i++)
 			{
-				uc[i].CurrentTerritory = thule;
+				thuleUnits.AddUnit(uc[i]);
+				//uc[i].CurrentTerritory = thule;
 			}
+
+			m_controller.PlaceUnits(thuleUnits, thule);
+			m_controller.PlaceUnits(deimosUnits, deimos);
+			m_controller.PlaceUnits(elevatorUnits, elevator);
 
 			#endregion
 
@@ -129,41 +137,49 @@ namespace BuckRogers
 			Territory mosco = m_controller.Map["Moscoviense"];
 			Territory tycho = m_controller.Map["Tycho"];
 
+			UnitCollection africaUnits = new UnitCollection();
+			UnitCollection moscoUnits = new UnitCollection();
+			UnitCollection tychoUnits = new UnitCollection();
+
 			Player chris = m_controller.Players[1];
 			units = chris.Units;
 
 			uc = units.GetUnits(UnitType.Leader);
-			uc[0].CurrentTerritory = africa;
+			africaUnits.AddAllUnits(uc);
 
 			uc = units.GetUnits(UnitType.Gennie);
-			uc[0].CurrentTerritory = mosco;
-			uc[1].CurrentTerritory = tycho;
+			moscoUnits.AddUnit(uc[0]);
+			tychoUnits.AddUnit(uc[1]);
 
 			uc = units.GetUnits(UnitType.Factory);
-			uc[0].CurrentTerritory = mosco;
-			uc[1].CurrentTerritory = tycho;
+			moscoUnits.AddUnit(uc[0]);
+			tychoUnits.AddUnit(uc[1]);
 
 			uc = units.GetUnits(UnitType.Transport);
-			uc[0].CurrentTerritory = africa;
+			africaUnits.AddUnit(uc[0]);
 
 			uc = units.GetUnits(UnitType.Trooper);
 
 			for(int i = 0; i < 4; i++)
 			{
-				uc[i].CurrentTerritory = tycho;
+				tychoUnits.AddUnit(uc[i]);
 			}
 
 			for(int i = 4; i < 8; i++)
 			{
-				uc[i].CurrentTerritory = mosco;
+				moscoUnits.AddUnit(uc[i]);
 			}
 
 			uc = units.GetUnits(UnitType.Fighter);
 
 			for(int i = 0; i < 4; i++)
 			{
-				uc[i].CurrentTerritory = africa;
+				africaUnits.AddUnit(uc[i]);
 			}
+
+			m_controller.PlaceUnits(tychoUnits, tycho);
+			m_controller.PlaceUnits(africaUnits, africa);
+			m_controller.PlaceUnits(moscoUnits, mosco);
 
 			#endregion
 
@@ -173,41 +189,50 @@ namespace BuckRogers
 			Territory warrens = m_controller.Map["The Warrens"];
 			Territory sobkou = m_controller.Map["Sobkou Plains"];
 
+			UnitCollection hieloUnits = new UnitCollection();
+			UnitCollection warrensUnits = new UnitCollection();
+			UnitCollection sobUnits = new UnitCollection();
+
 			Player stu = m_controller.Players[2];
 			units = stu.Units;
 
 			uc = units.GetUnits(UnitType.Leader);
-			uc[0].CurrentTerritory = hielo;
+			hieloUnits.AddAllUnits(uc);
 
 			uc = units.GetUnits(UnitType.Gennie);
-			uc[0].CurrentTerritory = warrens;
-			uc[1].CurrentTerritory = sobkou;
+			warrensUnits.AddUnit(uc[0]);
+			sobUnits.AddUnit(uc[1]);
 
 			uc = units.GetUnits(UnitType.Factory);
-			uc[0].CurrentTerritory = warrens;
-			uc[1].CurrentTerritory = sobkou;
+			warrensUnits.AddUnit(uc[0]);
+			sobUnits.AddUnit(uc[1]);
 
 			uc = units.GetUnits(UnitType.Transport);
-			uc[0].CurrentTerritory = hielo;
+			hieloUnits.AddUnit(uc[0]);
 
 			uc = units.GetUnits(UnitType.Trooper);
 
 			for(int i = 0; i < 4; i++)
 			{
-				uc[i].CurrentTerritory = sobkou;
+				sobUnits.AddUnit(uc[i]);
 			}
 
 			for(int i = 4; i < 8; i++)
 			{
-				uc[i].CurrentTerritory = warrens;
+				warrensUnits.AddUnit(uc[i]);
 			}
 
 			uc = units.GetUnits(UnitType.Fighter);
 
 			for(int i = 0; i < 4; i++)
 			{
+				hieloUnits.AddUnit(uc[i]);
 				uc[i].CurrentTerritory = hielo;
 			}
+
+			m_controller.PlaceUnits(hieloUnits, hielo);
+			m_controller.PlaceUnits(warrensUnits, warrens);
+			m_controller.PlaceUnits(sobUnits, sobkou);
 
 			#endregion
 
@@ -217,41 +242,49 @@ namespace BuckRogers
 			Territory beta = m_controller.Map["Beta Regio"];
 			Territory lowlanders = m_controller.Map["Lowlanders"];
 
+			UnitCollection wreckUnits = new UnitCollection();
+			UnitCollection betaUnits = new UnitCollection();
+			UnitCollection lowUnits = new UnitCollection();
+
 			Player hannah = m_controller.Players[3];
 			units = hannah.Units;
 
 			uc = units.GetUnits(UnitType.Leader);
-			uc[0].CurrentTerritory = wreckers;
+			wreckUnits.AddUnit(uc[0]);
 
 			uc = units.GetUnits(UnitType.Gennie);
-			uc[0].CurrentTerritory = beta;
-			uc[1].CurrentTerritory = lowlanders;
+			betaUnits.AddUnit(uc[0]);
+			lowUnits.AddUnit(uc[1]);
 
 			uc = units.GetUnits(UnitType.Factory);
-			uc[0].CurrentTerritory = beta;
-			uc[1].CurrentTerritory = lowlanders;
+			betaUnits.AddUnit(uc[0]);
+			lowUnits.AddUnit(uc[1]);
 
 			uc = units.GetUnits(UnitType.Transport);
-			uc[0].CurrentTerritory = wreckers;
+			wreckUnits.AddUnit(uc[0]);
 
 			uc = units.GetUnits(UnitType.Trooper);
 
 			for(int i = 0; i < 4; i++)
 			{
-				uc[i].CurrentTerritory = lowlanders;
+				lowUnits.AddUnit(uc[i]);
 			}
 
 			for(int i = 4; i < 8; i++)
 			{
-				uc[i].CurrentTerritory = beta;
+				betaUnits.AddUnit(uc[i]);
 			}
 
 			uc = units.GetUnits(UnitType.Fighter);
 
 			for(int i = 0; i < 4; i++)
 			{
-				uc[i].CurrentTerritory = wreckers;
+				wreckUnits.AddUnit(uc[i]);
 			}
+
+			m_controller.PlaceUnits(wreckUnits, wreckers);
+			m_controller.PlaceUnits(lowUnits, lowlanders);
+			m_controller.PlaceUnits(betaUnits, beta);
 
 			#endregion
 
@@ -261,41 +294,49 @@ namespace BuckRogers
 			Territory arcologies = m_controller.Map["Independent Arcologies"];
 			Territory america = m_controller.Map["American Regency"];
 
+			UnitCollection tranqUnits = new UnitCollection();
+			UnitCollection arcUnits = new UnitCollection();
+			UnitCollection amUnits = new UnitCollection();
+
 			Player jake = m_controller.Players[4];
 			units = jake.Units;
 
 			uc = units.GetUnits(UnitType.Leader);
-			uc[0].CurrentTerritory = tranquility;
+			tranqUnits.AddUnit(uc[0]);
 
 			uc = units.GetUnits(UnitType.Gennie);
-			uc[0].CurrentTerritory = arcologies;
-			uc[1].CurrentTerritory = america;
+			arcUnits.AddUnit(uc[0]);
+			amUnits.AddUnit(uc[1]);
 
 			uc = units.GetUnits(UnitType.Factory);
-			uc[0].CurrentTerritory = arcologies;
-			uc[1].CurrentTerritory = america;
+			arcUnits.AddUnit(uc[0]);
+			amUnits.AddUnit(uc[1]);
 
 			uc = units.GetUnits(UnitType.Transport);
-			uc[0].CurrentTerritory = tranquility;
+			tranqUnits.AddUnit(uc[0]);
 
 			uc = units.GetUnits(UnitType.Trooper);
 
 			for(int i = 0; i < 4; i++)
 			{
-				uc[i].CurrentTerritory = america;
+				amUnits.AddUnit(uc[i]);
 			}
 
 			for(int i = 4; i < 8; i++)
 			{
-				uc[i].CurrentTerritory = arcologies;
+				arcUnits.AddUnit(uc[i]);
 			}
 
 			uc = units.GetUnits(UnitType.Fighter);
 
 			for(int i = 0; i < 4; i++)
 			{
-				uc[i].CurrentTerritory = tranquility;
+				tranqUnits.AddUnit(uc[i]);
 			}
+
+			m_controller.PlaceUnits(arcUnits, arcologies);
+			m_controller.PlaceUnits(amUnits, america);
+			m_controller.PlaceUnits(tranqUnits, tranquility);
 
 			#endregion
 
@@ -305,41 +346,49 @@ namespace BuckRogers
 			Territory antarctica = m_controller.Map["Antarctic Testing Zone"];
 			Territory australia = m_controller.Map["Australian Development Facility"];
 
+			UnitCollection farUnits = new UnitCollection();
+			UnitCollection antUnits = new UnitCollection();
+			UnitCollection ausUnits = new UnitCollection();
+
 			Player kathryn = m_controller.Players[5];
 			units = kathryn.Units;
 
 			uc = units.GetUnits(UnitType.Leader);
-			uc[0].CurrentTerritory = farside;
+			farUnits.AddUnit(uc[0]);
 
 			uc = units.GetUnits(UnitType.Gennie);
-			uc[0].CurrentTerritory = antarctica;
-			uc[1].CurrentTerritory = australia;
+			antUnits.AddUnit(uc[0]);
+			ausUnits.AddUnit(uc[1]);
 
 			uc = units.GetUnits(UnitType.Factory);
-			uc[0].CurrentTerritory = antarctica;
-			uc[1].CurrentTerritory = australia;
+			antUnits.AddUnit(uc[0]);
+			ausUnits.AddUnit(uc[1]);
 
 			uc = units.GetUnits(UnitType.Transport);
-			uc[0].CurrentTerritory = farside;
+			farUnits.AddUnit(uc[0]);
 
 			uc = units.GetUnits(UnitType.Trooper);
 
 			for(int i = 0; i < 4; i++)
 			{
-				uc[i].CurrentTerritory = australia;
+				ausUnits.AddUnit(uc[i]);
 			}
 
 			for(int i = 4; i < 8; i++)
 			{
-				uc[i].CurrentTerritory = antarctica;
+				antUnits.AddUnit(uc[i]);
 			}
 
 			uc = units.GetUnits(UnitType.Fighter);
 
 			for(int i = 0; i < 4; i++)
 			{
-				uc[i].CurrentTerritory = farside;
+				farUnits.AddUnit(uc[i]);
 			}
+
+			m_controller.PlaceUnits(farUnits, farside);
+			m_controller.PlaceUnits(ausUnits, australia);
+			m_controller.PlaceUnits(antUnits, antarctica);
 
 			#endregion
 

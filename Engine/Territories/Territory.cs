@@ -74,6 +74,7 @@ namespace BuckRogers
 		private UnitCollection m_units;
 		private OrbitalSystem m_system;
 		private OrbitalPath m_orbit;
+		private bool m_solarTerritory;
 
 		public static Territory NONE = new Territory("None", TerritoryType.Space);
 
@@ -87,12 +88,19 @@ namespace BuckRogers
 			this.m_type = type;
 			m_system = OrbitalSystem.NONE;
 			m_orbit = OrbitalPath.NONE;
+			m_solarTerritory = false;
 		}
 
 		public BuckRogers.OrbitalPath Orbit
 		{
 			get { return this.m_orbit; }
 			set { this.m_orbit = value; }
+		}
+
+		public bool IsSolarTerritory
+		{
+			get { return this.m_solarTerritory; }
+			set { this.m_solarTerritory = value; }
 		}
 
 		

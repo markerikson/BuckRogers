@@ -5,6 +5,15 @@ using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.IO;
 
+using UMD.HCIL.Piccolo;
+using UMD.HCIL.Piccolo.Nodes;
+using UMD.HCIL.Piccolo.Util;
+using UMD.HCIL.PiccoloX;
+using UMD.HCIL.PiccoloX.Activities;
+using UMD.HCIL.PiccoloX.Nodes;
+using UMD.HCIL.PiccoloX.Components;
+using UMD.HCIL.Piccolo.Event;
+
 using BuckRogers;
 
 namespace BuckRogers.Interface
@@ -19,9 +28,11 @@ namespace BuckRogers.Interface
 		private Hashtable m_icons;
 		private int m_iconSetNumber;
 		private GameController m_controller;
+		private MapControl m_map;
 
-		public IconManager()
+		public IconManager(MapControl map)
 		{
+			m_map = map;
 			m_territories = new Hashtable();
 			m_iconLocations = new Hashtable();
 			m_icons = new Hashtable();
@@ -29,19 +40,24 @@ namespace BuckRogers.Interface
 
 		public void CreateIcons()
 		{
-			string[] types = {"To", "Ge", "Fi", "Ba", "Tr", "Ks", "Ma", "Fa", "Le"};
+			string[] typeAbbreviations = {"To", "Ge", "Fi", "Ba", "Tr", "Ks", "Ma", "Fa", "Le"};
+			UnitType[] types = {UnitType.Trooper, UnitType.Gennie, UnitType.Fighter, UnitType.Battler, 
+								UnitType.Transport, UnitType.KillerSatellite, UnitType.Marker,
+								UnitType.Factory, UnitType.Leader};
 			Font f = new Font("Arial",	19, FontStyle.Bold,	GraphicsUnit.Point);
 
 			for(int i = 0; i < m_controller.Players.Length; i++)
 			{
 				Player p = m_controller.Players[i];
+				Hashtable ht = new Hashtable();
+
 				Brush brush = new SolidBrush(p.Color);
 
-				Bitmap[] icons = new Bitmap[types.Length];
+				Bitmap[] icons = new Bitmap[typeAbbreviations.Length];
 
-				for(int j = 0; j < types.Length; j++)
+				for(int j = 0; j < typeAbbreviations.Length; j++)
 				{	
-					string name = types[j];
+					string name = typeAbbreviations[j];
 					icons[j] = new Bitmap(48, 48);
 					Graphics g = Graphics.FromImage(icons[j]);
 
@@ -53,41 +69,17 @@ namespace BuckRogers.Interface
 					sf.Alignment = StringAlignment.Center;
 					sf.LineAlignment = StringAlignment.Center;
 					RectangleF rect = new RectangleF(1, 1, 46, 46);
-					//SizeF size = g.MeasureString(name, f, )
-					
-					/*
-					PointF location = new PointF();
-
-					if(size.Width > 48)
-					{
-						location.X = 1;
-					}
-					else
-					{
-						float difference = 48 - size.Width;
-						location.X = difference / 2;
-					}
-
-					if(size.Height > 48)
-					{
-						location.Y = 1;
-					}
-					else
-					{
-						float difference = 48 - size.Height;
-						location.Y = difference / 2;
-					}
-					*/
 					
 					g.DrawString(name, f, brush, rect, sf);
-
-					//icons[j].Save(p.Name + name + ".png", ImageFormat.Png);
-
+					
+					ht[types[j]] = icons[j];
+					
 				}
 
-				m_icons[p.Name] = icons;
+				m_icons[p.Name] = ht;
 			}
 		}
+
 
 		public void LoadUnitIconLocations()
 		{
@@ -128,18 +120,24 @@ namespace BuckRogers.Interface
 				{
 					numIcons = 4;
 				}
-				PointF[] locations = new PointF[numIcons];
+				
+				//PointF[] locations = new PointF[numIcons];
+				//IconInfo[] icons = new IconInfo[numIcons];
+				ArrayList al = new ArrayList();
 				for(int j = 0; j < numIcons; j++)
 				{
 					line = sr.ReadLine();
 					string[] splitPoints = line.Split(new char[]{','});
 
-					locations[j] = new PointF();
-					locations[j].X = Int32.Parse(splitPoints[0]);
-					locations[j].Y = Int32.Parse(splitPoints[1]);
+					IconInfo info = new IconInfo();
+					info.Original = true;
+					info.Used = false;
+					info.Location = new PointF(Int32.Parse(splitPoints[0]), Int32.Parse(splitPoints[1]));
+
+					al.Add(info);
 				}
 
-				m_iconLocations[territoryName] = locations;
+				m_iconLocations[territoryName] = al;
 
 			}
 
@@ -149,38 +147,131 @@ namespace BuckRogers.Interface
 
 		public void SetIconInfo(Territory t, Player p, UnitType ut, int numUnits)
 		{
+			IconInfo info = GetIconInfo(t, p, ut);			
+			info.Used = true;
 
+
+			info.Label.Text = numUnits.ToString();
+
+			m_map.Canvas.Refresh();
+		}
+
+		public void RemoveIcon(Territory t, Player p, UnitType ut)
+		{
+			IconInfo info = GetIconInfo(t, p, ut);
+
+			if(info.Label != null)
+			{
+				PNode parent = info.Label.Parent;
+				parent.RemoveFromParent();
+				info.Label.RemoveFromParent();
+				info.Icon.RemoveFromParent();
+			}
+
+
+			info.Used = false;
+			info.Icon = null;
+			info.Label = null;
+			info.Type = UnitType.None;
+			info.Player = Player.NONE;
+
+			m_map.Canvas.Refresh();
 		}
 
 
-		public PointF GetIconPosition(string territoryName, Player p, UnitType ut)
+		public IconInfo GetIconInfo(Territory t, Player p, UnitType ut)
 		{
-			IconLocationInfo[] locations = (IconLocationInfo[])m_territories[territoryName];
+			ArrayList locations = (ArrayList)m_iconLocations[t.Name];
 
-			PointF location = new PointF();
-
-			bool foundMatch = false;
-			for(int i = 0; i < locations.Length; i++)
+			if(locations != null)
 			{
-				IconLocationInfo ili = locations[i];
+				PointF location = new PointF();
 
-				if(ili.Player == p && (ili.Type == ut))
+				bool foundMatch = false;
+				for(int i = 0; i < locations.Count; i++)
 				{
-					location = ili.Location;
-					foundMatch = true;
-					break;
+					IconInfo info = (IconInfo)locations[i];
+
+					if(info.Player == p && (info.Type == ut))
+					{
+						location = info.Location;
+						foundMatch = true;
+						
+						return info;
+					}
+				}
+
+				if(!foundMatch)
+				{
+
+					IconInfo info = null;
+
+					for(int i = 0; i < locations.Count; i++)
+					{
+						IconInfo newInfo = (IconInfo)locations[i];
+						if(!newInfo.Used)
+						{
+							info = newInfo;							
+							break;
+						}
+					}
+
+					if(info == null)
+					{
+						info = new IconInfo();
+						info.Original = false;
+						info.Location = GenerateTerritoryPoint();
+
+						locations.Add(info);
+					}					
+
+					Hashtable ht = (Hashtable)m_icons[p.Name];
+					Bitmap b = (Bitmap)ht[ut];
+
+					info.Icon = new PImage();
+					info.Icon.Image = b;
+					info.Icon.X = info.Location.X;
+					info.Icon.Y = info.Location.Y;
+
+					info.Label = new PText("w");
+					Font f = info.Label.Font;
+					info.Label.Font = new Font(f.Name, f.SizeInPoints + 6, FontStyle.Bold);
+
+					if(t.Type == TerritoryType.Space)
+					{
+						info.Label.TextBrush = Brushes.White;
+					}
+					info.Label.X = info.Location.X + 24 - (info.Label.Width / 2);
+					info.Label.Y = info.Location.Y + 48 + 2;
+					
+					PComposite composite = new PComposite();
+					composite.AddChild(info.Icon);
+					composite.AddChild(info.Label);
+
+					PPath territory = (PPath)m_map.Territories[t.Name];
+					territory.AddChild(composite);
+
+
+					return info;
+				
 				}
 			}
-
-			if(!foundMatch)
+			// must be a previously unused solar point, because all ground/local 
+			// territories are already filled in, and so are solar points once they're used
+			else
 			{
-				location = GeneratePoint();
+				return null;
 			}
-
-			return location;
+			
+			return null;
 		}
 
-		public PointF GeneratePoint()
+		public PointF GenerateTerritoryPoint()
+		{
+			return new PointF();
+		}
+
+		public PointF GenerateSolarPoint()
 		{
 			return new PointF();
 		}
@@ -199,11 +290,23 @@ namespace BuckRogers.Interface
 		}
 	}
 
-	public class IconLocationInfo
+	public class IconInfo
 	{
-		PointF m_location;
-		Player m_player;
-		UnitType m_unitType;
+		private PointF m_location;
+		private Player m_player;
+		private UnitType m_unitType;
+		private PText m_label;
+		private PImage m_icon;
+		private bool m_original;
+		private bool m_used;
+
+		public IconInfo()
+		{
+			m_original = false;
+			m_unitType = UnitType.None;
+			m_player = Player.NONE;
+			m_used = false;
+		}
 
 		public PointF Location
 		{
@@ -221,6 +324,30 @@ namespace BuckRogers.Interface
 		{
 			get { return this.m_unitType; }
 			set { this.m_unitType = value; }
+		}
+
+		public PImage Icon
+		{
+			get { return this.m_icon; }
+			set { this.m_icon = value; }
+		}
+
+		public PText Label
+		{
+			get { return this.m_label; }
+			set { this.m_label = value; }
+		}
+
+		public bool Original
+		{
+			get { return this.m_original; }
+			set { this.m_original = value; }
+		}
+
+		public bool Used
+		{
+			get { return this.m_used; }
+			set { this.m_used = value; }
 		}		
 	}
 }

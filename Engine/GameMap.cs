@@ -384,6 +384,7 @@ namespace BuckRogers
 			{
 				orbit[i] = new Territory(orbitName + " Orbit: " + i.ToString(), TerritoryType.Space);
 				orbit[i].Orbit = orbit;
+				orbit[i].IsSolarTerritory = true;
 				m_graph.AddNode(orbit[i]);
 			}
 

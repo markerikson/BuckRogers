@@ -214,6 +214,7 @@ namespace BuckRogers
 
 			m_controller.ActionAdded += new DisplayActionHandler(m_movePanel.AddActionToList);
 			m_controller.TerritoryUnitsChanged += new TerritoryUnitsChangedHandler(m_informationPanel.UpdateUnitInfo);
+			m_controller.TerritoryUnitsChanged += new TerritoryUnitsChangedHandler(m_map.UpdateUnitInfo);
 
 		}
 

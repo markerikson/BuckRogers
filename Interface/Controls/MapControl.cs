@@ -74,7 +74,7 @@ namespace BuckRogers.Interface
 			// This call is required by the Windows.Forms Form Designer.
 			InitializeComponent();
 
-			m_iconManager = new IconManager();
+			m_iconManager = new IconManager(this);
 
 			m_territoryMarkers = new Hashtable();
 			m_territories = new Hashtable();
@@ -173,6 +173,7 @@ namespace BuckRogers.Interface
 			Canvas.InteractingRenderQuality = RenderQuality.HighQuality;
 
 
+			/*
 			
 			PPath ulcorner = PPath.CreateRectangle(0, 0, 20, 20);
 			ulcorner.Brush = Brushes.Red;
@@ -193,6 +194,7 @@ namespace BuckRogers.Interface
 			icon.Y += 1400;
 
 			Canvas.Layer.AddChild(icon);
+			*/
 			
 
 
@@ -380,6 +382,7 @@ namespace BuckRogers.Interface
 			elevator.Brush = Brushes.DarkRed;
 			PComposite elevatorParent = new PComposite();
 			elevatorParent.AddChild(elevator);
+			elevatorParent.Tag = "Space Elevator";
 			Canvas.Layer.AddChild(elevatorParent);
 
 			elevatorParent.MouseUp += new PInputEventHandler(text_Click);
@@ -1228,6 +1231,43 @@ namespace BuckRogers.Interface
 			
 		}
 
+		public void UpdateUnitInfo(object sender, TerritoryUnitsEventArgs tuea)
+		{
+			ArrayList players = tuea.Units.GetPlayersWithUnits();
+
+			foreach(Player p in players)
+			{
+				UnitCollection uc = tuea.Units.GetUnits(p);
+				Hashtable ht = uc.GetUnitTypeCount();
+
+				foreach(UnitType ut in ht.Keys)
+				{
+					int numUnits = (int)ht[ut];
+
+					if(!tuea.Added)
+					{
+						UnitCollection remainingUnits = tuea.Territory.Units.GetUnits(ut, p, null);
+						// by this time, the units have already been moved, so I don't
+						// have to do any calculations here
+						int numLeft = remainingUnits.Count;
+
+						if(numLeft == 0)
+						{
+							m_iconManager.RemoveIcon(tuea.Territory, p, ut);
+						}
+						else
+						{
+							m_iconManager.SetIconInfo(tuea.Territory, p, ut, numLeft);
+						}
+					}
+					else
+					{
+						m_iconManager.SetIconInfo(tuea.Territory, p, ut, numUnits);
+					}
+				}
+			}
+		}
+
 		public void DrawScreenshot()
 		{
 			float oldScale = m_canvas.Camera.ViewScale;
@@ -1263,6 +1303,12 @@ namespace BuckRogers.Interface
 		{
 			get { return this.m_iconManager; }
 			set { this.m_iconManager = value; }
+		}
+
+		public System.Collections.Hashtable Territories
+		{
+			get { return this.m_territories; }
+			set { this.m_territories = value; }
 		}
 
 	}
