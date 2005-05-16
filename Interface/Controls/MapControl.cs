@@ -18,10 +18,9 @@ using UMD.HCIL.PiccoloX.Nodes;
 using UMD.HCIL.PiccoloX.Components;
 using UMD.HCIL.Piccolo.Event;
 
-using BuckRogers.Interface;
 using GpcWrapper;
 
-namespace BuckRogers
+namespace BuckRogers.Interface
 {
 
 	public delegate void TerritoryClickedHandler(object sender, TerritoryEventArgs e);
@@ -68,11 +67,14 @@ namespace BuckRogers
 
 		private PCanvas m_canvas;
 		private RefreshingScrollableControl m_scroller;
+		private IconManager m_iconManager;
 
 		public MapControl()
 		{
 			// This call is required by the Windows.Forms Form Designer.
 			InitializeComponent();
+
+			m_iconManager = new IconManager();
 
 			m_territoryMarkers = new Hashtable();
 			m_territories = new Hashtable();
@@ -370,6 +372,8 @@ namespace BuckRogers
 				Canvas.Layer.AddChild(composite);
 
 				DrawLabelAndOwner2(path, name, x, y);
+
+				composite.MouseUp += new PInputEventHandler(text_Click);
 			}
 
 			PPath elevator = (PPath)m_territories["Space Elevator"];
@@ -377,6 +381,8 @@ namespace BuckRogers
 			PComposite elevatorParent = new PComposite();
 			elevatorParent.AddChild(elevator);
 			Canvas.Layer.AddChild(elevatorParent);
+
+			elevatorParent.MouseUp += new PInputEventHandler(text_Click);
 
 			DrawLabelAndOwner2(elevator, "Space Elevator", 2200, -1000);
 			PNode elevatorLabel = elevator[0];
@@ -408,6 +414,7 @@ namespace BuckRogers
 				Pen p = new Pen(Color.Black, 3.0f);
 				center.Pen = p;
 				center.Tag = territoryNames[i];
+				m_territoryMarkers[territoryNames[i]] = center;
 
 				PointF unshiftedCenter = new PointF();
 				unshiftedCenter.X = centerX - (center.Width / 2);
@@ -440,6 +447,8 @@ namespace BuckRogers
 				compTerritory.AddChild(territory);
 				compTerritory.AddChild(text);
 				compTerritory.AddChild(center);
+
+				compTerritory.MouseUp += new PInputEventHandler(text_Click);
 				Canvas.Layer.AddChild(compTerritory);
 			}
 		}
@@ -469,6 +478,9 @@ namespace BuckRogers
 			orbit.Brush = Brushes.Black;
 			orbit.Pen = Pens.White;
 
+			orbitParent.MouseUp += new PInputEventHandler(text_Click);
+			asteroidParent.MouseUp += new PInputEventHandler(text_Click);
+
 		}
 		
 		
@@ -488,6 +500,8 @@ namespace BuckRogers
 			orbit.OffsetY += shiftY;
 
 			m_orbitOffsets[name] = new PointF(shiftX, shiftY);
+
+			parent.MouseUp += new PInputEventHandler(text_Click);
 
 			//PlaceDummyIcons(name, true);
 		}
@@ -1243,6 +1257,12 @@ namespace BuckRogers
 		{
 			get { return this.m_controller; }
 			set { this.m_controller = value; }
+		}
+
+		public BuckRogers.Interface.IconManager UnitIcons
+		{
+			get { return this.m_iconManager; }
+			set { this.m_iconManager = value; }
 		}
 
 	}

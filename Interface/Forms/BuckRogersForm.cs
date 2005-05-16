@@ -116,8 +116,12 @@ namespace BuckRogers
 				m_battleController = new BattleController(m_controller);
 			}
 			
+			
 
 			InitControls();
+			m_map.UnitIcons.Controller = m_controller;
+			m_map.UnitIcons.CreateIcons();
+			m_map.UnitIcons.LoadUnitIconLocations(false, true);
 			InitEvents();
 
 			if(useTesting)
@@ -209,6 +213,8 @@ namespace BuckRogers
 			m_battleController.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
 
 			m_controller.ActionAdded += new DisplayActionHandler(m_movePanel.AddActionToList);
+			m_controller.TerritoryUnitsChanged += new TerritoryUnitsChangedHandler(m_informationPanel.UpdateUnitInfo);
+
 		}
 
 		private void StartGame()

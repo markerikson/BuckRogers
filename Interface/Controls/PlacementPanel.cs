@@ -185,10 +185,8 @@ namespace BuckRogers.Interface
 			{
 				UnitCollection uc = pf.SelectedUnits;
 
-				foreach(Unit u in uc)
-				{
-					u.CurrentTerritory = t;
-				}
+				m_controller.PlaceUnits(uc, t);
+				
 
 				if(m_controller.NextPlayer())
 				{

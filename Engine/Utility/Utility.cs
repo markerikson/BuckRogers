@@ -16,6 +16,8 @@ namespace BuckRogers
 
 		static Random rng = new Random();
 		private static MersenneTwister m_twister = new MersenneTwister();
+		private static MersenneTwister m_twister2 = new MersenneTwister();
+
 		public static void RandomizeList(IList list)
 		{
 			for (int i=list.Count-1; i > 0; i--)
@@ -66,6 +68,12 @@ namespace BuckRogers
 		public static float GetCos(float degAngle)
 		{
 			return (float) Math.Cos(Math.PI * degAngle / 180);
+		}
+
+		public static CenterSpace.Free.MersenneTwister Twister2
+		{
+			get { return m_twister2; }
+			set { m_twister2 = value; }
 		}
 	}
 }

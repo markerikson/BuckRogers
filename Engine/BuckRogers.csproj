@@ -189,6 +189,11 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "Data structures\TerritoryUnitsEventArgs.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "Data structures\TransportAction.cs"
                     SubType = "Code"
                     BuildAction = "Compile"

@@ -138,7 +138,6 @@ namespace BuckRogers.Interface
 			// 
 			// m_lvUnitLocations
 			// 
-			this.m_lvUnitLocations.AllowColumnReorder = true;
 			this.m_lvUnitLocations.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
 																								this.columnHeader4,
 																								this.columnHeader8,
@@ -276,6 +275,81 @@ namespace BuckRogers.Interface
 						lvi.SubItems.Add(numUnits.ToString());
 
 						m_lvUnitLocations.Items.Add(lvi);
+
+					}					
+				}
+			}
+		}
+
+		public void UpdateUnitInfo(object sender, TerritoryUnitsEventArgs tuea)
+		{
+			ArrayList players = tuea.Units.GetPlayersWithUnits();
+
+			foreach(Player p in players)
+			{
+				UnitCollection uc = tuea.Units.GetUnits(p);
+				Hashtable ht = uc.GetUnitTypeCount();
+
+				foreach(UnitType ut in ht.Keys)
+				{
+					ListViewItem lvi = null;
+
+					foreach(ListViewItem lvi2 in m_lvUnitLocations.Items)
+					{
+						if(lvi2.Text == p.Name 
+							&& lvi2.SubItems[2].Text == tuea.Territory.Name
+							&& lvi2.SubItems[3].Text == ut.ToString())
+						{
+							lvi = lvi2;
+							break;
+						}
+					}
+
+					if(tuea.Added)
+					{
+						int numStartingUnits = 0;
+						
+						if(lvi != null)
+						{
+							numStartingUnits = Int32.Parse(lvi.SubItems[4].Text);
+						}
+						else
+						{
+							lvi = new ListViewItem();
+							lvi.Text = p.Name;
+							lvi.SubItems.Add(tuea.Territory.System.Name);
+							lvi.SubItems.Add(tuea.Territory.Name);
+							lvi.SubItems.Add(ut.ToString());
+							lvi.SubItems.Add("0");
+							m_lvUnitLocations.Items.Add(lvi);
+						}
+
+						int numUnitsChanged = (int)ht[ut];
+						int numResultingUnits = numStartingUnits + numUnitsChanged;
+
+						lvi.SubItems[4].Text = numResultingUnits.ToString();
+					}
+					else
+					{
+						if(lvi == null)
+						{
+							continue;
+						}
+
+						int numStartingUnits = Int32.Parse(lvi.SubItems[4].Text);
+						int numUnitsChanged = (int)ht[ut];
+
+						int numResultingUnits = 0;
+						numResultingUnits = numStartingUnits - numUnitsChanged;
+
+						if(numResultingUnits <= 0)
+						{
+							m_lvUnitLocations.Items.Remove(lvi);
+						}
+						else
+						{
+							lvi.SubItems[4].Text = numResultingUnits.ToString();
+						}
 
 					}					
 				}

@@ -19,6 +19,8 @@ namespace BuckRogers
 	}
 	public delegate bool StatusUpdateHandler(object sender, StatusUpdateEventArgs suea);
 	public delegate void DisplayActionHandler(Action a);
+	public delegate void TerritoryUnitsChangedHandler(object sender, TerritoryUnitsEventArgs tuea);
+	public delegate void PlayersCreatedHandler();
 	/// <summary>
 	/// Summary description for GameController.
 	/// </summary>
@@ -27,6 +29,8 @@ namespace BuckRogers
 		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
 		public event StatusUpdateHandler StatusUpdate;
 		public event DisplayActionHandler ActionAdded;
+		public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
+		public event PlayersCreatedHandler PlayersCreated;
 		
 		#region Properties
 		public BuckRogers.GameMap Map
@@ -916,6 +920,22 @@ namespace BuckRogers
 
 				m_xeCurrentPlayer.AppendChild(xeAction);
 
+				if(TerritoryUnitsChanged != null)
+				{
+					TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
+					tuea.Units = move.Units;
+					tuea.Territory = move.StartingTerritory;
+					tuea.Added = false;
+					tuea.Player = move.Owner;
+
+					TerritoryUnitsChanged(this, tuea);
+
+					tuea.Territory = (Territory)move.Territories[move.Territories.Count - 1];
+					tuea.Added = true;
+
+					TerritoryUnitsChanged(this, tuea);
+				}
+
 				
 				Territory destination = (Territory)move.Territories[move.Territories.Count - 1];
 				if(destination.Type == TerritoryType.Ground)
@@ -1704,6 +1724,22 @@ namespace BuckRogers
 				}
 			}
 			return doNextPhase;
+		}
+
+		public void PlaceUnits(UnitCollection uc, Territory t)
+		{
+			foreach(Unit u in uc)
+			{
+				u.CurrentTerritory = t;
+			}
+
+			if(TerritoryUnitsChanged != null)
+			{
+				TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
+				tuea.Units = uc;
+				tuea.Territory = t;
+				tuea.Added = true;
+			}
 		}
 
 		public System.Xml.XmlDocument Gamelog
