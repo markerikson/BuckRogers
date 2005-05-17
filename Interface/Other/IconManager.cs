@@ -15,6 +15,7 @@ using UMD.HCIL.PiccoloX.Components;
 using UMD.HCIL.Piccolo.Event;
 
 using BuckRogers;
+using GpcWrapper;
 
 namespace BuckRogers.Interface
 {
@@ -230,7 +231,7 @@ namespace BuckRogers.Interface
 						}
 						else
 						{
-							info.Location = GenerateTerritoryPoint();
+							info.Location = GenerateTerritoryPoint(t);
 						}						
 
 						locations.Add(info);
@@ -317,9 +318,76 @@ namespace BuckRogers.Interface
 
 		}
 
-		public PointF GenerateTerritoryPoint()
+		// By this time, we don't care whether it overlaps or not
+		public PointF GenerateTerritoryPoint(Territory t)
 		{
-			return new PointF();
+			bool inTerritory = false;
+
+			PPath territoryPath = (PPath)m_map.Territories[t.Name];
+			RectangleF territoryBounds = territoryPath.Bounds;
+			Polygon polyTerritory = PathToPolygon(territoryPath);
+			PointF[] territoryPoints = PolygonToPoints(polyTerritory);
+
+			SizeF iconSize = new SizeF(48, 80);
+
+			PointF point = new PointF();
+
+			while(!inTerritory)
+			{
+				point = new PointF();
+				point.X = Utility.Twister2.Next((int)(territoryBounds.Left + 1), (int)(territoryBounds.Right - iconSize.Width - 1));
+				point.Y = Utility.Twister2.Next((int)(territoryBounds.Top + 1), (int)(territoryBounds.Bottom - iconSize.Height - 1));
+				
+				inTerritory = PointInPolygon(territoryPoints, point);
+			}
+
+			return point;
+		}
+
+		private Polygon PathToPolygon(PPath path)
+		{
+			GraphicsPath gp = path.PathReference;
+			gp.Flatten(new Matrix(), 0.1f);
+
+			Polygon poly = new Polygon(gp);
+
+			return poly;
+		}
+
+		private PointF[] PolygonToPoints(Polygon polyTerritory)
+		{
+			ArrayList al = new ArrayList();
+
+			for(int i = 0; i < polyTerritory.Contour.Length; i++)
+			{
+				VertexList vertices = polyTerritory.Contour[i];
+				
+				for(int j = 0; j < vertices.Vertex.Length; j++)
+				{
+					Vertex v = vertices.Vertex[j];
+					al.Add(new PointF((float)v.X, (float)v.Y));
+				}
+			}
+
+			PointF[] territoryPoints = (PointF[])al.ToArray(typeof(PointF));
+
+			return territoryPoints;
+		}
+
+		private bool PointInPolygon(PointF[] polygon, PointF p)
+		{
+			int i, j = 0;
+			bool c = false;
+			float x = p.X;
+			float y = p.Y;
+			for (i = 0, j = polygon.Length-1; i < polygon.Length; j = i++) 
+			{
+				if ((((polygon[i].Y <= y) && (y < polygon[j].Y)) ||
+					((polygon[j].Y <= y) && (y < polygon[i].Y))) &&
+					(x < (polygon[j].X - polygon[i].X) * (y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) + polygon[i].X))
+					c = !c;
+			}
+			return c;
 		}
 
 		public PointF GenerateSolarPoint(int iconNumber, bool random, PointF offset)

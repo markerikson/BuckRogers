@@ -1246,13 +1246,13 @@ namespace BuckRogers.Interface
 				{
 					int numUnits = (int)ht[ut];
 
+					UnitCollection remainingUnits = tuea.Territory.Units.GetUnits(ut, p, null);
+					// by this time, the units have already been moved, so I don't
+					// have to do any calculations here
+					int numLeft = remainingUnits.Count;
+
 					if(!tuea.Added)
 					{
-						UnitCollection remainingUnits = tuea.Territory.Units.GetUnits(ut, p, null);
-						// by this time, the units have already been moved, so I don't
-						// have to do any calculations here
-						int numLeft = remainingUnits.Count;
-
 						if(numLeft == 0)
 						{
 							m_iconManager.RemoveIcon(tuea.Territory, p, ut);
@@ -1264,7 +1264,8 @@ namespace BuckRogers.Interface
 					}
 					else
 					{
-						m_iconManager.SetIconInfo(tuea.Territory, p, ut, numUnits);
+						int totalUnits = numLeft;
+						m_iconManager.SetIconInfo(tuea.Territory, p, ut, totalUnits);
 					}
 				}
 			}
