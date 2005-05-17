@@ -633,6 +633,8 @@ namespace BuckRogers.Interface
 				text.Tag = tag;
 				circle.Tag = tag;
 				composite.Tag = tag;
+
+				m_territories[tag] = circle;
 				
 				Canvas.Layer.AddChild(composite);
 			}

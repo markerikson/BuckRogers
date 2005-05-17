@@ -149,6 +149,8 @@ namespace BuckRogers.Interface
 		{
 			IconInfo info = GetIconInfo(t, p, ut);			
 			info.Used = true;
+			info.Type = ut;
+			info.Player = p;
 
 
 			info.Label.Text = numUnits.ToString();
@@ -220,38 +222,24 @@ namespace BuckRogers.Interface
 					{
 						info = new IconInfo();
 						info.Original = false;
-						info.Location = GenerateTerritoryPoint();
+						if(t.IsSolarTerritory)
+						{
+							PPath node = (PPath)m_map.Territories[t.Name];
+							PointF nodeCenter = PUtil.CenterOfRectangle(node.Bounds);
+							info.Location = GenerateSolarPoint(0, true, nodeCenter);
+						}
+						else
+						{
+							info.Location = GenerateTerritoryPoint();
+						}						
 
 						locations.Add(info);
 					}					
 
-					Hashtable ht = (Hashtable)m_icons[p.Name];
-					Bitmap b = (Bitmap)ht[ut];
-
-					info.Icon = new PImage();
-					info.Icon.Image = b;
-					info.Icon.X = info.Location.X;
-					info.Icon.Y = info.Location.Y;
-
-					info.Label = new PText("w");
-					Font f = info.Label.Font;
-					info.Label.Font = new Font(f.Name, f.SizeInPoints + 6, FontStyle.Bold);
-
-					if(t.Type == TerritoryType.Space)
-					{
-						info.Label.TextBrush = Brushes.White;
-					}
-					info.Label.X = info.Location.X + 24 - (info.Label.Width / 2);
-					info.Label.Y = info.Location.Y + 48 + 2;
+					info.Player = p;
+					info.Type = ut;
+					InitializeIcon(info, t);
 					
-					PComposite composite = new PComposite();
-					composite.AddChild(info.Icon);
-					composite.AddChild(info.Label);
-
-					PPath territory = (PPath)m_map.Territories[t.Name];
-					territory.AddChild(composite);
-
-
 					return info;
 				
 				}
@@ -260,10 +248,73 @@ namespace BuckRogers.Interface
 			// territories are already filled in, and so are solar points once they're used
 			else
 			{
-				return null;
+				ArrayList al = new ArrayList();
+
+				PPath node = (PPath)m_map.Territories[t.Name];
+				PointF nodeCenter = PUtil.CenterOfRectangle(node.Bounds);
+
+				for(int i = 0; i < 6; i++)
+				{
+					PointF location = GenerateSolarPoint(i, false, nodeCenter);
+
+					IconInfo info = new IconInfo();
+					info.Original = true;
+					info.Used = false;
+					info.Location = location;
+
+					al.Add(info);
+				}
+
+				m_iconLocations[t.Name] = al;
+
+				IconInfo returnInfo = (IconInfo)al[0];
+
+				returnInfo.Player = p;
+				returnInfo.Type = ut;
+				InitializeIcon(returnInfo, t);
+				return returnInfo;
 			}
 			
 			return null;
+		}
+
+		private void InitializeIcon(IconInfo info, Territory t)
+		{
+			Hashtable ht = (Hashtable)m_icons[info.Player.Name];
+			Bitmap b = (Bitmap)ht[info.Type];
+
+			info.Icon = new PImage();
+			info.Icon.Image = b;
+			info.Icon.X = info.Location.X;
+			info.Icon.Y = info.Location.Y;
+
+			info.Label = new PText("w");
+			Font f = info.Label.Font;
+			info.Label.Font = new Font(f.Name, f.SizeInPoints + 6, FontStyle.Bold);
+
+			if(t.Type == TerritoryType.Space)
+			{
+				info.Label.TextBrush = Brushes.White;
+			}
+			info.Label.X = info.Location.X + 24 - (info.Label.Width / 2);
+
+			if(t.IsSolarTerritory)
+			{
+				info.Icon.X -= 24;
+				info.Label.X -= 24;
+			}
+			info.Label.Y = info.Location.Y + 48 + 2;
+					
+			PComposite composite = new PComposite();
+			composite.AddChild(info.Icon);
+			composite.AddChild(info.Label);
+
+			PPath territory = (PPath)m_map.Territories[t.Name];
+			territory.Parent.AddChild(composite);
+
+			info.Icon.MoveToFront();
+			info.Label.MoveToFront();
+
 		}
 
 		public PointF GenerateTerritoryPoint()
@@ -271,9 +322,36 @@ namespace BuckRogers.Interface
 			return new PointF();
 		}
 
-		public PointF GenerateSolarPoint()
+		public PointF GenerateSolarPoint(int iconNumber, bool random, PointF offset)
 		{
-			return new PointF();
+			float numDegrees = 0;
+			float radius = 60;
+
+			if(!random)
+			{
+				// multiply the nth position times number
+				// of degrees of separation for six icons,
+				// then rotate left by 45 degrees
+				numDegrees = iconNumber * 60 - 60;
+				//numDegrees += 45;
+			}
+			else
+			{
+				numDegrees = Utility.Twister2.Next(0, 360);
+			}
+
+			float x = -Utility.GetCos(numDegrees) * radius;
+			float y = Utility.GetSin(numDegrees) * radius;
+
+			// center the icon, hopefully
+			//x -= 24;
+
+			x += offset.X;
+			y += offset.Y;
+
+			y -= 24;
+
+			return new PointF(x, y);
 		}
 
 

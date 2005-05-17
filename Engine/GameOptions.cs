@@ -45,7 +45,8 @@ namespace BuckRogers
 
 		public GameOptions()
 		{
-			string[] optionShortNames = {"DifferentShipSpeeds", 
+			string[] optionShortNames = {"UseTestingSetup",
+											"DifferentShipSpeeds", 
 											"DifferentTroopSpeeds", 
 											"PassingFire", 
 											"ControlMarkersFight",
@@ -63,10 +64,11 @@ namespace BuckRogers
 											"TransportedFactoriesBuild", 
 											"FreePlanetaryFactory",
 											"KillerAsteroids",
-											"UseTestingSetup",
+											
 											"LimitedTwoPlayerSetup",
 											};
-			string[] optionDescriptions = {"Spaceships have different speeds", 
+			string[] optionDescriptions = {"Use the sample player setup and deployment",
+											"Spaceships have different speeds", 
 											"Gennies and troopers have different speeds",
 											"Moving units can be fired at",
 											"Control markers must be killed to conquer the territory",
@@ -84,7 +86,6 @@ namespace BuckRogers
 											"Factories in transports can build fighters",
 											"First player to own each planet gets a free factory",
 											"Asteroids may be launched towards the sun",
-											"Use the sample player setup and deployment",
 											"No extra units or territories in two/three player games",
 											  };
 

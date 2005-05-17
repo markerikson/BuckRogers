@@ -339,9 +339,21 @@ namespace BuckRogers.Interface
 					{
 						if(t.Owner != m_controller.CurrentPlayer)
 						{
-							MessageBox.Show("Can't start a move in a territory you don't own", "Movement", 
-								MessageBoxButtons.OK, MessageBoxIcon.Warning);
-							return;
+							string message = String.Empty;						
+							UnitCollection uc = t.Units.GetUnits(m_controller.CurrentPlayer);
+
+							if(uc.Count == 0)
+							{
+								message = "You don't have any units in that territory";
+							}
+
+							if(message != String.Empty)
+							{
+								MessageBox.Show(message, "Movement", 
+									MessageBoxButtons.OK, MessageBoxIcon.Warning);
+								return;
+							}
+							
 						}
 						MoveUnitsForm muf = new MoveUnitsForm();
 
