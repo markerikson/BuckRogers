@@ -371,6 +371,9 @@ namespace BuckRogers
 			
 			#endregion
 
+
+			Territory blackMarket = new Territory("Black Market", TerritoryType.Ground);
+			m_graph.AddNode(blackMarket);
 			
 			foreach(OrbitalSystem os in m_planets)
 			{

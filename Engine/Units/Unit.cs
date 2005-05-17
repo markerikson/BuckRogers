@@ -201,7 +201,11 @@ namespace BuckRogers
 							canProduce = false;
 						}
 					}
-					f.CanProduce = canProduce;
+					if(!f.IsBlackMarket)
+					{
+						f.CanProduce = canProduce;
+					}
+					
 				}
 			}
 		}

@@ -14,6 +14,7 @@ namespace BuckRogers
 		private Territory m_outputTerritory;
 		private static int m_productionPerTurn = 2;
 		private int m_partialProduction;
+		private bool m_blackMarket;
 
 		public Factory(Player owner)
 			: base(owner, UnitType.Factory)
@@ -22,6 +23,7 @@ namespace BuckRogers
 			m_canProduce = true;
 			m_partialProduction = 0;
 			m_outputTerritory = Territory.NONE;
+			m_blackMarket = false;
 			
 		}
 
@@ -66,19 +68,49 @@ namespace BuckRogers
 				return;
 			}
 
-			int unitCost = Unit.GetCost(m_productionType);
-
-			int i = 0;
-			for(i = m_productionPerTurn + m_partialProduction; (i - unitCost) >= 0; i -= unitCost)
+			if(m_blackMarket)
 			{
-                CreateUnit();
+				switch(m_productionType)
+				{
+					case UnitType.Trooper:
+					case UnitType.Fighter:
+					{
+						CreateUnit();
+						m_partialProduction = 0;
+						break;
+					}
+					case UnitType.Factory:
+					{
+						if(m_partialProduction > 0)
+						{
+							CreateUnit();
+							m_partialProduction = 0;
+							CanProduce = false;
+						}
+						else
+						{
+							m_partialProduction = 1;
+						}
+						break;
+					}
+				}
 			}
+			else
+			{
+				int unitCost = Unit.GetCost(m_productionType);
 
-			m_partialProduction = i;
+				int i = 0;
+				for(i = m_productionPerTurn + m_partialProduction; (i - unitCost) >= 0; i -= unitCost)
+				{
+					CreateUnit();
+				}
+
+				m_partialProduction = i;
+			}
+		
 
 			if(m_partialProduction == 0)
 			{
-				//m_productionType = UnitType.None;
 				ClearProduction();
 			}
 			
@@ -145,10 +177,41 @@ namespace BuckRogers
 				{
 					return 0.0f;
 				}
+
+				if(m_blackMarket)
+				{
+					switch(m_productionType)
+					{
+						case UnitType.Trooper:
+						case UnitType.Fighter:
+							return 1.0f;
+
+						case UnitType.Factory:
+						{
+							if(m_partialProduction > 0)
+							{
+								return 1.0f;
+							}
+							else
+							{
+								return 0.5f;
+							}
+						}
+
+						default:
+							return 0f;
+					}
+				}
 				
 				float amount = (m_productionPerTurn + m_partialProduction) / (float)Unit.GetCost(m_productionType);
 				return amount;
 			}
+		}
+
+		public bool IsBlackMarket
+		{
+			get { return this.m_blackMarket; }
+			set { this.m_blackMarket = value; }
 		}
 	}
 }

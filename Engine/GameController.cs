@@ -448,6 +448,11 @@ namespace BuckRogers
 					u = Unit.CreateNewUnit(p, UnitType.Transport);
 					u = Unit.CreateNewUnit(p, UnitType.Leader);
 				}
+
+				Factory blackMarket = (Factory)Unit.CreateNewUnit(p, UnitType.Factory);
+				blackMarket.IsBlackMarket = true;
+				blackMarket.CanProduce = false;
+				blackMarket.CurrentTerritory = m_map["Black Market"];
 				
 			}
 		}
@@ -1242,6 +1247,11 @@ namespace BuckRogers
 					{
 						continue;
 					}
+
+					if(u.CurrentTerritory.Name == "Black Market")
+					{
+						continue;
+					}
 					if(u.CurrentTerritory.Units.HasUnitsFromMultiplePlayers)
 					{
 						string name;
@@ -1380,6 +1390,24 @@ namespace BuckRogers
 			return targets;
 		}
 
+		public bool CheckBlackMarket(Player p)
+		{
+			UnitCollection factories = p.Units.GetUnits(UnitType.Factory);
+
+			if(factories.Count == 1)
+			{
+				Factory f = (Factory)factories[0];
+
+				if(f.IsBlackMarket)
+				{
+					f.CanProduce = true;
+
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public bool CheckProduction(ProductionInfo pi)//(Factory f, UnitType ut, Territory t)
 		{
 			bool validProduction = true;
@@ -1436,7 +1464,7 @@ namespace BuckRogers
 				case UnitType.Fighter:
 				case UnitType.Transport:
 				{
-					if(pi.DestinationTerritory != pi.Factory.CurrentTerritory)
+					if(pi.DestinationTerritory != pi.Factory.CurrentTerritory && !pi.Factory.IsBlackMarket)
 					{
 						throw new Exception("Must build this unit in the same territory as the factory");
 					}
@@ -1450,6 +1478,17 @@ namespace BuckRogers
 			{
 				throw new Exception("Can't build this in space");
 			}
+
+			if(pi.Factory.IsBlackMarket)
+			{
+				if(pi.Type != UnitType.Trooper 
+					&& pi.Type != UnitType.Fighter
+					&& pi.Type != UnitType.Factory)
+				{
+					throw new Exception("Can only build Troopers, Fighters, or Factories on the Black Market");
+				}
+			}
+
 
 			return validProduction;
 		}

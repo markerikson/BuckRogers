@@ -965,8 +965,11 @@ namespace BuckRogers.Interface
 			m_battleController.Battles = m_controller.Battles;
 
 			m_battleController.LogNewTurn();
-			m_battleController.NextBattle();
-			UpdateCombatInformation();
+			if(m_battleController.NextBattle())
+			{
+				UpdateCombatInformation();
+			}
+			
 		}
 
 		public void DisplayUnits(object sender, DisplayUnitsEventArgs duea)
@@ -1070,7 +1073,11 @@ namespace BuckRogers.Interface
 			}
 
 			m_lbCurrentPlayer.SelectedIndex = 0;
-			m_labCurrentPlayer.Text = m_battleController.CurrentPlayer.Name;
+			if(m_battleController.CurrentPlayer != null)
+			{
+				m_labCurrentPlayer.Text = m_battleController.CurrentPlayer.Name;
+			}
+			
 
 			EnableAttack();
 		}

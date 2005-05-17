@@ -99,28 +99,39 @@ namespace BuckRogers
 				if(al.Contains(p))
 				{
 					UnitCollection uc = m_currentBattle.Territory.Units.GetUnits(p);
-					Hashtable ht = uc.GetUnitTypeCount();
+					UnitCollection combatUnits = uc.GetCombatUnits();
 
-					if(ht.Count == 1 && ht.ContainsKey(UnitType.Leader))
+					if(combatUnits.Count == 0)
 					{
-						Unit leader = uc[0];
-						p.Disabled = true;
+						Hashtable ht = uc.GetUnitTypeCount();
 
-						if(StatusUpdate != null)
+						if(ht.ContainsKey(UnitType.Leader))
 						{
-							StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
-							suea.StatusInfo = StatusInfo.LeaderKilled;
-							suea.Player = leader.Owner;
+							Unit leader = uc.GetUnits(UnitType.Leader)[0];
+							p.Disabled = true;
 
-							StatusUpdate(this, suea);
+							if(StatusUpdate != null)
+							{
+								StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+								suea.StatusInfo = StatusInfo.LeaderKilled;
+								suea.Player = leader.Owner;
+
+								StatusUpdate(this, suea);
+							}
 						}
-					}
+					}					
 					else
 					{
 						m_playerOrder.Add(p);
 						//m_survivingUnits[p] = new UnitCollection();
 					}					
 				}
+			}
+
+			if(m_playerOrder.Count == 1)
+			{
+				m_status = BattleStatus.BattleComplete;
+				return;
 			}
 
 			switch(m_currentBattle.Type)
@@ -294,7 +305,7 @@ namespace BuckRogers
 
 				CheckPlayerOrder();
 
-				if(m_playerOrder.Count == 1)
+				if(m_playerOrder.Count == 1 || m_status == BattleStatus.BattleComplete)
 				{
 					m_status = BattleStatus.BattleComplete;
 					return true;

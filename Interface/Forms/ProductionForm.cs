@@ -28,6 +28,8 @@ namespace BuckRogers.Interface
 
 		private int m_productionIndex;
 		private GameController m_controller;
+		private UnitCollection m_factories;
+		private System.Windows.Forms.Button m_btnDismantleFactory;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -88,6 +90,7 @@ namespace BuckRogers.Interface
 			this.m_btnProduce = new System.Windows.Forms.Button();
 			this.m_cbNeighbors = new System.Windows.Forms.ComboBox();
 			this.m_cbUnitTypes = new System.Windows.Forms.ComboBox();
+			this.m_btnDismantleFactory = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// m_btnFinishProduction
@@ -206,11 +209,20 @@ namespace BuckRogers.Interface
 			this.m_cbUnitTypes.Size = new System.Drawing.Size(121, 21);
 			this.m_cbUnitTypes.TabIndex = 14;
 			// 
+			// m_btnDismantleFactory
+			// 
+			this.m_btnDismantleFactory.Location = new System.Drawing.Point(544, 168);
+			this.m_btnDismantleFactory.Name = "m_btnDismantleFactory";
+			this.m_btnDismantleFactory.TabIndex = 19;
+			this.m_btnDismantleFactory.Text = "Dismantle";
+			this.m_btnDismantleFactory.Click += new System.EventHandler(this.m_btnDismantleFactory_Click);
+			// 
 			// ProductionForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(748, 202);
 			this.ControlBox = false;
+			this.Controls.Add(this.m_btnDismantleFactory);
 			this.Controls.Add(this.label18);
 			this.Controls.Add(this.label17);
 			this.Controls.Add(this.m_btnProduce);
@@ -232,7 +244,6 @@ namespace BuckRogers.Interface
 
 
 		// TODO Black Market production
-		// TODO Dismantle factories
 		
 		private void m_btnFinishProduction_Click(object sender, System.EventArgs e)
 		{
@@ -261,11 +272,15 @@ namespace BuckRogers.Interface
 				string typeName = (string)m_cbUnitTypes.SelectedItem;
 				string destinationName = (string)m_cbNeighbors.SelectedItem;
 
-				Territory t = m_controller.Map[territoryName];
+				string playerName = (string)m_lbProductionOrder.SelectedItem;
+				Player p = m_controller.GetPlayer(playerName);
+
+				Territory t = (Territory)m_controller.Map[territoryName];
 				Territory destination = m_controller.Map[destinationName];
 				UnitType ut = (UnitType)Enum.Parse(typeof(UnitType), typeName);
-				UnitCollection factories = t.Units.GetUnits(UnitType.Factory);
+				UnitCollection factories = t.Units.GetUnits(UnitType.Factory, p, null);
 
+				// TODO This spot worries me... what if there's more than one factory?
 				Factory f = (Factory)factories[0];
 
 				ProductionInfo pi = new ProductionInfo();
@@ -298,22 +313,34 @@ namespace BuckRogers.Interface
 				int idxUnused = m_lvFactories.SelectedIndices[0];
 				ListViewItem lvi = m_lvFactories.Items[idxUnused];
 
+				Factory f = (Factory)m_factories[idxUnused];
+
 				string territoryName = lvi.Text;
 				Territory t = m_controller.Map[territoryName];
 				string playerName = (string)m_lbProductionOrder.SelectedItem;
 				Player p = m_controller.GetPlayer(playerName);
 
 				ArrayList names = new ArrayList();
-				//foreach(EdgeToNeighbor etn in t.Neighbors)
-				foreach(Territory neighbor in t.Neighbors)
+
+				if(f.IsBlackMarket)
 				{
-					//Node neighbor = etn.Neighbor;
-					if(   (neighbor.Owner == p) 
-						|| (neighbor.Type == TerritoryType.Space) )
-					{
-						names.Add(neighbor.Key);
-					}
 					
+					foreach(DictionaryEntry de in p.Territories)
+					{
+						Territory playerTerritory = (Territory)de.Value;
+						names.Add(playerTerritory.Name);
+					}
+				}
+				else
+				{
+					foreach(Territory neighbor in t.Neighbors)
+					{
+						if(   (neighbor.Owner == p) 
+							|| (neighbor.Type == TerritoryType.Space) )
+						{
+							names.Add(neighbor.Key);
+						}					
+					}
 				}
 
 				string[] namearray = (string[])names.ToArray(typeof(string));
@@ -321,15 +348,21 @@ namespace BuckRogers.Interface
 
 				m_cbNeighbors.Items.Clear();
 
-				m_cbNeighbors.Items.Add(territoryName);
+				if(territoryName != "Black Market")
+				{
+					m_cbNeighbors.Items.Add(territoryName);
+				}
+				
 				foreach(string Name in namearray)
 				{
 					m_cbNeighbors.Items.Add(Name);
 				}
+				
 
 				m_cbNeighbors.SelectedIndex = 0;
 
 				m_btnProduce.Enabled = true;
+				m_btnDismantleFactory.Enabled = true;
 			}
 			
 		}
@@ -365,9 +398,11 @@ namespace BuckRogers.Interface
 			string playerName = (string)m_lbProductionOrder.SelectedItem;
 			Player p = m_controller.GetPlayer(playerName);
 
+			m_controller.CheckBlackMarket(p);
 			UnitCollection allFactories = p.Units.GetUnits(UnitType.Factory);
 
 			UnitCollection usableFactories = new UnitCollection();
+			m_factories = new UnitCollection();
 
 			foreach(Factory f in allFactories)
 			{
@@ -392,6 +427,8 @@ namespace BuckRogers.Interface
 				lvi.SubItems.Add(f.DestinationTerritory.Name);
 
 				m_lvFactories.Items.Add(lvi);
+
+				m_factories.AddUnit(f);
 			}
 
 			if(usableFactories.Count > 0)
@@ -420,6 +457,56 @@ namespace BuckRogers.Interface
 				m_btnFinishProduction.Enabled = true;
 			}
 			
+		}
+
+		private void m_btnDismantleFactory_Click(object sender, System.EventArgs e)
+		{
+			if(m_lvFactories.SelectedIndices.Count > 0)
+			{
+				int idxUnused = m_lvFactories.SelectedIndices[0];
+				ListViewItem lvi = m_lvFactories.Items[idxUnused];
+
+				string territoryName = lvi.Text;
+				string typeName = (string)m_cbUnitTypes.SelectedItem;
+				string destinationName = (string)m_cbNeighbors.SelectedItem;
+
+
+				if(territoryName == "Black Market")
+				{
+					MessageBox.Show("Can't dismantle the Black Market", "Production", MessageBoxButtons.OK,
+									MessageBoxIcon.Information);
+					return;
+				}
+
+				DialogResult dr = MessageBox.Show("Are you REALLY sure you want to dismantle the factory in " + territoryName + "?",
+								"Dismantle Factory?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+				if(dr != DialogResult.Yes)
+				{
+					return;
+				}
+
+				Territory t = m_controller.Map[territoryName];
+				Territory destination = m_controller.Map[destinationName];
+				UnitType ut = (UnitType)Enum.Parse(typeof(UnitType), typeName);
+				UnitCollection factories = t.Units.GetUnits(UnitType.Factory);
+
+				// TODO This spot worries me... what if there's more than one factory?
+				Factory f = (Factory)factories[0];
+
+				f.Destroy();
+
+				m_lvFactories.Items.Remove(lvi);
+				m_factories.RemoveUnit(f);
+
+				string playerName = (string)m_lbProductionOrder.SelectedItem;
+				Player p = m_controller.GetPlayer(playerName);
+
+				if(m_controller.CheckBlackMarket(p))
+				{
+					AddProduction();
+				}				
+			}
 		}
 	}
 }
