@@ -6,6 +6,7 @@ namespace BuckRogers
 {
 
 	public delegate void DisplayUnitsHandler(object sender, DisplayUnitsEventArgs e);
+	public delegate void TerritoryUpdateHandler(Territory t);
 
 	public enum BattleStatus
 	{
@@ -26,6 +27,8 @@ namespace BuckRogers
 		public event DisplayUnitsHandler UnitsToDisplay;
 		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
 		public StatusUpdateHandler StatusUpdate;
+		public TerritoryUpdateHandler UpdateTerritory;
+		public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
 		
 		private int[,] m_combatTable = new int[,]	{	{6, 8, 7, NOTPOSSIBLE, 6, NOTPOSSIBLE, 3}, // Trooper
 														{5, 6, 6, NOTPOSSIBLE, 5, NOTPOSSIBLE, 2}, // Gennie
@@ -151,6 +154,23 @@ namespace BuckRogers
 		{
 			if(m_cumulativeResult.Casualties.Count > 0)
 			{
+				foreach(Unit u in m_cumulativeResult.Casualties)
+				{
+					u.CurrentTerritory = Territory.NONE;
+				}
+
+				if(TerritoryUnitsChanged != null)
+				{
+					TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
+					tuea.Units = new UnitCollection();
+					tuea.Units.AddAllUnits(m_cumulativeResult.Casualties);
+					tuea.Territory = m_currentBattle.Territory;
+					tuea.Added = false;
+					tuea.Player = m_currentBattle.Player;
+
+					TerritoryUnitsChanged(this, tuea);
+				}
+
 				XmlElement xeUnits = m_gamelog.CreateElement("Casualties");
 
 				ArrayList players = m_cumulativeResult.Casualties.GetPlayersWithUnits();
@@ -281,6 +301,13 @@ namespace BuckRogers
 							TerritoryOwnerChanged(this, tea);
 						}	
 					}
+				}
+
+
+
+				if(UpdateTerritory != null)
+				{
+					UpdateTerritory(m_currentBattle.Territory);
 				}
 			}
 

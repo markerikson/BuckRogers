@@ -119,9 +119,9 @@ namespace BuckRogers
 			
 
 			InitControls();
-			m_map.UnitIcons.Controller = m_controller;
-			m_map.UnitIcons.CreateIcons();
-			m_map.UnitIcons.LoadUnitIconLocations(false, true);
+			m_map.IconManager.Controller = m_controller;
+			m_map.IconManager.CreateIcons();
+			m_map.IconManager.LoadUnitIconLocations(false, true);
 			InitEvents();
 
 			if(useTesting)
@@ -215,6 +215,10 @@ namespace BuckRogers
 			m_controller.ActionAdded += new DisplayActionHandler(m_movePanel.AddActionToList);
 			m_controller.TerritoryUnitsChanged += new TerritoryUnitsChangedHandler(m_informationPanel.UpdateUnitInfo);
 			m_controller.TerritoryUnitsChanged += new TerritoryUnitsChangedHandler(m_map.UpdateUnitInfo);
+
+			m_battleController.UpdateTerritory += new TerritoryUpdateHandler(m_map.IconManager.RefreshIcons);
+			m_controller.UpdateTerritory += new TerritoryUpdateHandler(m_map.IconManager.RefreshIcons);
+			m_battleController.TerritoryUnitsChanged += new TerritoryUnitsChangedHandler(m_map.UpdateUnitInfo);
 
 		}
 

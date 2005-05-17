@@ -1244,29 +1244,7 @@ namespace BuckRogers.Interface
 
 				foreach(UnitType ut in ht.Keys)
 				{
-					int numUnits = (int)ht[ut];
-
-					UnitCollection remainingUnits = tuea.Territory.Units.GetUnits(ut, p, null);
-					// by this time, the units have already been moved, so I don't
-					// have to do any calculations here
-					int numLeft = remainingUnits.Count;
-
-					if(!tuea.Added)
-					{
-						if(numLeft == 0)
-						{
-							m_iconManager.RemoveIcon(tuea.Territory, p, ut);
-						}
-						else
-						{
-							m_iconManager.SetIconInfo(tuea.Territory, p, ut, numLeft);
-						}
-					}
-					else
-					{
-						int totalUnits = numLeft;
-						m_iconManager.SetIconInfo(tuea.Territory, p, ut, totalUnits);
-					}
+					m_iconManager.UpdateIconInfo(tuea.Territory, p, ut);
 				}
 			}
 		}
@@ -1302,7 +1280,7 @@ namespace BuckRogers.Interface
 			set { this.m_controller = value; }
 		}
 
-		public BuckRogers.Interface.IconManager UnitIcons
+		public BuckRogers.Interface.IconManager IconManager
 		{
 			get { return this.m_iconManager; }
 			set { this.m_iconManager = value; }

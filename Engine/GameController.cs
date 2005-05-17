@@ -30,7 +30,8 @@ namespace BuckRogers
 		public event StatusUpdateHandler StatusUpdate;
 		public event DisplayActionHandler ActionAdded;
 		public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
-		public event PlayersCreatedHandler PlayersCreated;
+		public TerritoryUpdateHandler UpdateTerritory;
+		//public event PlayersCreatedHandler PlayersCreated;
 		
 		#region Properties
 		public BuckRogers.GameMap Map
@@ -135,6 +136,7 @@ namespace BuckRogers
 		private ArrayList m_rollList;
 		private ArrayList m_checkedActions;
 		private ArrayList m_undoneActions;
+		private Hashtable m_alteredTerritories;
 		private int m_turnNumber;
 		private int m_idxCurrentPlayer;
 		private bool m_redoingAction;
@@ -178,6 +180,7 @@ namespace BuckRogers
 
 			m_checkedActions = new ArrayList();
 			m_undoneActions = new ArrayList();
+			m_alteredTerritories = new Hashtable();
 			m_winner = Player.NONE;
 			m_turnNumber = 0;	
 
@@ -933,10 +936,16 @@ namespace BuckRogers
 					tuea.Added = false;
 					tuea.Player = move.Owner;
 
+					m_alteredTerritories[move.StartingTerritory] = null;
+
 					TerritoryUnitsChanged(this, tuea);
 
-					tuea.Territory = (Territory)move.Territories[move.Territories.Count - 1];
+					Territory finalTerritory = (Territory)move.Territories[move.Territories.Count - 1];
+					tuea.Territory = finalTerritory;
 					tuea.Added = true;
+
+					m_alteredTerritories[finalTerritory] = null;
+
 
 					TerritoryUnitsChanged(this, tuea);
 				}
@@ -1005,6 +1014,7 @@ namespace BuckRogers
 				}
 
 				m_checkedActions.Add(action);
+				m_alteredTerritories[action.StartingTerritory] = null;
 				if(ActionAdded != null)
 				{
 					ActionAdded(action); 
@@ -1044,6 +1054,19 @@ namespace BuckRogers
 				xeAction.AppendChild(xeUnits);
 				
 				m_xeCurrentPlayer.AppendChild(xeAction);
+
+
+				if(TerritoryUnitsChanged != null)
+				{
+					TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
+					tuea.Units = ta.Units;
+					tuea.Territory = ta.StartingTerritory;
+					tuea.Added = !ta.Load;
+					tuea.Player = ta.Owner;
+
+					TerritoryUnitsChanged(this, tuea);
+				}
+
 					
 			}
 			else
@@ -1294,6 +1317,8 @@ namespace BuckRogers
 				{
 					foreach(BattleInfo bi in planet)
 					{
+						// Altered battles should be taken care of by the battle controller
+						//m_alteredTerritories[bi.Territory] = null;
 
 						m_battles.Add(bi.ToString(), bi);
 					}
@@ -1557,6 +1582,31 @@ namespace BuckRogers
 					}
 				}
 			}
+
+			/*
+			ArrayList updatedTerritories = new ArrayList();
+
+			foreach(Player p in m_players)
+			{
+				foreach(Territory t in p.Territories.Values)
+				{
+					if(!updatedTerritories.Contains(t) && UpdateTerritory != null)
+					{
+						updatedTerritories.Add(t);
+						UpdateTerritory(t);
+					}
+				}
+			}
+			*/
+
+			if(UpdateTerritory != null)
+			{
+				foreach(Territory t in m_alteredTerritories.Keys)
+				{
+					UpdateTerritory(t);
+				}
+			}
+			
 
 			if(m_turnNumber != 0)
 			{

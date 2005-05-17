@@ -146,43 +146,60 @@ namespace BuckRogers.Interface
 		}
 
 
-		public void SetIconInfo(Territory t, Player p, UnitType ut, int numUnits)
+		public void SetIconInfo(Territory t, Player p, UnitType ut)
 		{
-			IconInfo info = GetIconInfo(t, p, ut);			
+			IconInfo info = GetIconInfo(t, p, ut, true);			
 			info.Used = true;
 			info.Type = ut;
 			info.Player = p;
 
 
-			info.Label.Text = numUnits.ToString();
+			UnitCollection uc = t.Units.GetUnits(ut, p, null);
+			info.Label.Text = uc.Count.ToString();
 
 			m_map.Canvas.Refresh();
+		}
+
+		public void UpdateIconInfo(Territory t, Player p, UnitType ut)
+		{
+			UnitCollection uc = t.Units.GetUnits(ut, p, null);
+
+			if(uc.Count == 0)
+			{
+				RemoveIcon(t, p, ut);
+			}
+			else
+			{
+				SetIconInfo(t, p, ut);
+			}
 		}
 
 		public void RemoveIcon(Territory t, Player p, UnitType ut)
 		{
-			IconInfo info = GetIconInfo(t, p, ut);
+			IconInfo info = GetIconInfo(t, p, ut, false);
 
-			if(info.Label != null)
+			if(info != null)
 			{
-				PNode parent = info.Label.Parent;
-				parent.RemoveFromParent();
-				info.Label.RemoveFromParent();
-				info.Icon.RemoveFromParent();
+				if(info.Label != null)
+				{
+					PNode parent = info.Label.Parent;
+					parent.RemoveFromParent();
+					info.Label.RemoveFromParent();
+					info.Icon.RemoveFromParent();
+				}
+
+				info.Used = false;
+				info.Icon = null;
+				info.Label = null;
+				info.Type = UnitType.None;
+				info.Player = Player.NONE;
 			}
-
-
-			info.Used = false;
-			info.Icon = null;
-			info.Label = null;
-			info.Type = UnitType.None;
-			info.Player = Player.NONE;
 
 			m_map.Canvas.Refresh();
 		}
 
 
-		public IconInfo GetIconInfo(Territory t, Player p, UnitType ut)
+		public IconInfo GetIconInfo(Territory t, Player p, UnitType ut, bool generateNew)
 		{
 			ArrayList locations = (ArrayList)m_iconLocations[t.Name];
 
@@ -204,7 +221,7 @@ namespace BuckRogers.Interface
 					}
 				}
 
-				if(!foundMatch)
+				if(!foundMatch && generateNew)
 				{
 
 					IconInfo info = null;
@@ -243,6 +260,10 @@ namespace BuckRogers.Interface
 					
 					return info;
 				
+				}
+				else
+				{
+					return null;
 				}
 			}
 			// must be a previously unused solar point, because all ground/local 
@@ -316,6 +337,71 @@ namespace BuckRogers.Interface
 			info.Icon.MoveToFront();
 			info.Label.MoveToFront();
 
+		}
+
+		public void OrganizeIcons(Territory t)
+		{
+			ArrayList unused = new ArrayList();
+			ArrayList extras = new ArrayList();
+
+			ArrayList locations = (ArrayList)m_iconLocations[t.Name];
+
+			/*
+			for(int i = 0; i < 6; i++)
+			{
+				IconInfo info = (IconInfo)locations[i];
+
+				if(!info.Used)
+				{
+					unused.Add(info);
+				}
+			}
+			*/
+
+			for(int i = 6; i < locations.Count; i++)
+			{
+				IconInfo info = (IconInfo)locations[i];
+
+				if(info.Type != UnitType.None)
+				{
+					RemoveIcon(t, info.Player, info.Type);
+
+					SetIconInfo(t, info.Player, info.Type);
+				}
+
+			}
+		}
+
+		public void ClearIcons(Territory t)
+		{
+			ArrayList icons = (ArrayList)m_iconLocations[t.Name];
+
+			for(int i = 0; i < icons.Count; i++)
+			{
+				IconInfo info = (IconInfo)icons[i];
+
+				if(info.Type != UnitType.None)
+				{
+					RemoveIcon(t, info.Player, info.Type);
+				}				
+			}
+		}
+
+		public void RefreshIcons(Territory t)
+		{
+			ClearIcons(t);
+			ArrayList players = t.Units.GetPlayersWithUnits();
+
+			foreach(Player p in players)
+			{
+				UnitCollection uc = t.Units.GetUnits(p);
+				Hashtable ht = uc.GetUnitTypeCount();
+
+				foreach(UnitType ut in ht.Keys)
+				{
+					UpdateIconInfo(t, p, ut);
+				}
+			}
 		}
 
 		// By this time, we don't care whether it overlaps or not

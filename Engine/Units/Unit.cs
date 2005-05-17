@@ -284,8 +284,16 @@ namespace BuckRogers
 				TransportingUnit = Unit.NONE;
 			}
 			
-			m_owner.Units.RemoveUnit(this);
-			m_currentTerritory.Units.RemoveUnit(this);
+			if(m_owner != null)
+			{
+				m_owner.Units.RemoveUnit(this);
+			}
+			
+			if(m_currentTerritory != null)
+			{
+				m_currentTerritory.Units.RemoveUnit(this);
+			}
+			
 
 			m_currentTerritory = null;
 			m_owner = null;
