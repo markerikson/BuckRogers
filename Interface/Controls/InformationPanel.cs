@@ -260,6 +260,10 @@ namespace BuckRogers.Interface
 
 				foreach(Territory t in territories)
 				{
+					if(t.Name == "Black Market")
+					{
+						continue;
+					}
 					UnitCollection ucTerritory = t.Units.GetUnits(p);
 					Hashtable ht = ucTerritory.GetUnitTypeCount();
 
@@ -371,6 +375,12 @@ namespace BuckRogers.Interface
 					lvi.SubItems.Add(ut.ToString());
 
 					int numUnits = (int)ht[ut];
+
+					if(ut == UnitType.Factory)
+					{
+						// don't count the Black Market factory
+						numUnits--;
+					}
 					lvi.SubItems.Add(numUnits.ToString());
 
 					m_lvTotalUnits.Items.Add(lvi);

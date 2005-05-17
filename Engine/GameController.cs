@@ -1473,6 +1473,22 @@ namespace BuckRogers
 					{
 						throw new Exception("Must place a Killer Satellite in Near Orbit");
 					}
+
+					UnitCollection factories = pi.Factory.Owner.Units.GetUnits(UnitType.Factory);
+
+					foreach(Factory f in factories)
+					{
+						if(f == pi.Factory)
+						{
+							continue;
+						}
+
+						if(f.ProductionType == UnitType.KillerSatellite 
+							&& f.DestinationTerritory == pi.DestinationTerritory)
+						{
+							throw new Exception("Can't build two Killer Satellites in the same place");
+						}
+					}
 					
 					goto case UnitType.Battler;
 				}
@@ -1554,6 +1570,7 @@ namespace BuckRogers
 
 							xePlayer.AppendChild(xeUnit);
 
+							m_alteredTerritories[f.DestinationTerritory] = null;
 							f.ExecuteProduction();
 						}
 					}

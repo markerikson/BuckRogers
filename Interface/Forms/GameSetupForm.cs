@@ -39,13 +39,13 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.TabControl tabControl1;
 		private System.Windows.Forms.TabPage tabPage1;
 		private System.Windows.Forms.TabPage tabPage2;
-		private System.Windows.Forms.DataGrid dataGrid1;
 		private System.Windows.Forms.NumericUpDown m_nudProductionMultiplier;
 		private System.Windows.Forms.NumericUpDown m_nudProductionTurn;
 		private System.Windows.Forms.Label label10;
 		private System.Windows.Forms.Label label11;
 		private EeekSoft.WinForms.Controls.EnumEditor enumEditor1;
 		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.CheckedListBox m_chklbOptions;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -89,7 +89,13 @@ namespace BuckRogers.Interface
 			m_nudProductionTurn.Enabled = false;
 			m_nudProductionMultiplier.Enabled = false;
 
+			foreach(GameOption option in m_options.OptionalRules)
+			{
+				m_chklbOptions.Items.Add(option.Description);
+			}
 
+
+			/*
 			DataGridTableStyle dgts=new DataGridTableStyle();			
 			dgts.MappingName = m_options.OptionalRules.GetListName(null);
 
@@ -130,6 +136,7 @@ namespace BuckRogers.Interface
 				dataGrid1.TableStyles[0].GridColumnStyles[ numCols - 1 ].Width = 
 					targetWidth - runningWidthUsed; 
 			}
+			*/
 			
 		}
 
@@ -177,22 +184,21 @@ namespace BuckRogers.Interface
 			this.label9 = new System.Windows.Forms.Label();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.enumEditor1 = new EeekSoft.WinForms.Controls.EnumEditor();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this.m_chklbOptions = new System.Windows.Forms.CheckedListBox();
 			this.label11 = new System.Windows.Forms.Label();
 			this.label10 = new System.Windows.Forms.Label();
 			this.m_nudProductionTurn = new System.Windows.Forms.NumericUpDown();
 			this.m_nudProductionMultiplier = new System.Windows.Forms.NumericUpDown();
-			this.dataGrid1 = new System.Windows.Forms.DataGrid();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			((System.ComponentModel.ISupportInitialize)(this.m_nudNumTerritories)).BeginInit();
 			this.tabControl1.SuspendLayout();
 			this.tabPage1.SuspendLayout();
+			this.groupBox1.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionTurn)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionMultiplier)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGrid1)).BeginInit();
-			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -413,6 +419,16 @@ namespace BuckRogers.Interface
 			this.tabPage1.TabIndex = 0;
 			this.tabPage1.Text = "Players";
 			// 
+			// groupBox1
+			// 
+			this.groupBox1.Controls.Add(this.enumEditor1);
+			this.groupBox1.Location = new System.Drawing.Point(228, 88);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(264, 84);
+			this.groupBox1.TabIndex = 25;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Setup Options";
+			// 
 			// enumEditor1
 			// 
 			this.enumEditor1.ControlSpacing = 24;
@@ -427,16 +443,26 @@ namespace BuckRogers.Interface
 			// 
 			// tabPage2
 			// 
+			this.tabPage2.Controls.Add(this.m_chklbOptions);
 			this.tabPage2.Controls.Add(this.label11);
 			this.tabPage2.Controls.Add(this.label10);
 			this.tabPage2.Controls.Add(this.m_nudProductionTurn);
 			this.tabPage2.Controls.Add(this.m_nudProductionMultiplier);
-			this.tabPage2.Controls.Add(this.dataGrid1);
 			this.tabPage2.Location = new System.Drawing.Point(4, 22);
 			this.tabPage2.Name = "tabPage2";
 			this.tabPage2.Size = new System.Drawing.Size(496, 298);
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "Game Options";
+			// 
+			// m_chklbOptions
+			// 
+			this.m_chklbOptions.CheckOnClick = true;
+			this.m_chklbOptions.Location = new System.Drawing.Point(4, 4);
+			this.m_chklbOptions.Name = "m_chklbOptions";
+			this.m_chklbOptions.Size = new System.Drawing.Size(488, 229);
+			this.m_chklbOptions.TabIndex = 30;
+			this.m_chklbOptions.ThreeDCheckBoxes = true;
+			this.m_chklbOptions.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.m_chklbOptions_ItemCheck);
 			// 
 			// label11
 			// 
@@ -498,29 +524,6 @@ namespace BuckRogers.Interface
 																					0,
 																					0});
 			// 
-			// dataGrid1
-			// 
-			this.dataGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-				| System.Windows.Forms.AnchorStyles.Left) 
-				| System.Windows.Forms.AnchorStyles.Right)));
-			this.dataGrid1.DataMember = "";
-			this.dataGrid1.HeaderForeColor = System.Drawing.SystemColors.ControlText;
-			this.dataGrid1.Location = new System.Drawing.Point(4, 4);
-			this.dataGrid1.Name = "dataGrid1";
-			this.dataGrid1.Size = new System.Drawing.Size(468, 236);
-			this.dataGrid1.TabIndex = 25;
-			this.dataGrid1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.dataGrid1_MouseUp);
-			// 
-			// groupBox1
-			// 
-			this.groupBox1.Controls.Add(this.enumEditor1);
-			this.groupBox1.Location = new System.Drawing.Point(228, 88);
-			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(264, 84);
-			this.groupBox1.TabIndex = 25;
-			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Setup Options";
-			// 
 			// GameSetupForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
@@ -534,11 +537,10 @@ namespace BuckRogers.Interface
 			((System.ComponentModel.ISupportInitialize)(this.m_nudNumTerritories)).EndInit();
 			this.tabControl1.ResumeLayout(false);
 			this.tabPage1.ResumeLayout(false);
+			this.groupBox1.ResumeLayout(false);
 			this.tabPage2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionTurn)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionMultiplier)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.dataGrid1)).EndInit();
-			this.groupBox1.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -667,6 +669,7 @@ namespace BuckRogers.Interface
 			tabPage2.BindingContext = tabPage2.BindingContext;
 		}
 
+		/*
 		private void dataGrid1_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
 		{
 			DataGrid.HitTestInfo hti = dataGrid1.HitTest( e.X, e.Y ); 
@@ -683,10 +686,9 @@ namespace BuckRogers.Interface
 
 			bool increasedProduction = m_options.OptionalRules["IncreasedProduction"];
 			m_nudProductionTurn.Enabled = increasedProduction;
-			m_nudProductionMultiplier.Enabled = increasedProduction;
-
-		
+			m_nudProductionMultiplier.Enabled = increasedProduction;		
 		}
+		*/
 
 		private void m_cbNumPlayers_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
@@ -702,6 +704,17 @@ namespace BuckRogers.Interface
 			{
 				m_tbPlayerNames[i].Enabled = true;
 			}
+		}
+
+		private void m_chklbOptions_ItemCheck(object sender, System.Windows.Forms.ItemCheckEventArgs e)
+		{
+			GameOption option = (GameOption)m_options.OptionalRules[e.Index];
+
+			option.Value = (e.NewValue == CheckState.Checked);
+
+			bool increasedProduction = m_options.OptionalRules["IncreasedProduction"];
+			m_nudProductionTurn.Enabled = increasedProduction;
+			m_nudProductionMultiplier.Enabled = increasedProduction;
 		}
 
 

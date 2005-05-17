@@ -330,6 +330,8 @@ namespace BuckRogers
 				m_xeCurrentBattle.Attributes.Append(xaBattleType);
 				m_xeCurrentBattle.Attributes.Append(xaLocation);
 
+				m_status = BattleStatus.Setup;
+
 				CheckPlayerOrder();
 
 				if(m_playerOrder.Count == 1 || m_status == BattleStatus.BattleComplete)
