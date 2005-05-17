@@ -1,3 +1,14 @@
+Version 0.7.5
+- ADD:  Unit icons on the map
+- ADD:  Territory identification tooltip
+- ADD:  Information panel updates after moves and transportation
+- ADD:  Black Market production
+- ADD:  Dismantling factories
+- CHG:  Territory shapes are now loaded from a file rather than generated
+- CHG:  Territory shapes now have true arcs, not just hidden sections
+- BUG:  Fixed problems with "empty" combats (where a side has no combat units)
+- BUG:  Multiple Killer Satellites could be built at the same time
+
 Version 0.7.4
 - ADD:  An information panel that shows a list of total units, what units are 
 		each territory, and who owns which territories.
