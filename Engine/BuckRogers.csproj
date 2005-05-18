@@ -106,6 +106,7 @@
                 <File
                     RelPath = "AssemblyInfo.cs"
                     Link = "..\Interface\Other\AssemblyInfo.cs"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File

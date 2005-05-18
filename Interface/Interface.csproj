@@ -298,77 +298,105 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Other\Command.cs"
+                    RelPath = "Other\Code\Command.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Other\CommandExecutor.cs"
+                    RelPath = "Other\Code\CommandExecutor.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Other\CommandManager.cs"
+                    RelPath = "Other\Code\CommandManager.cs"
                     SubType = "Component"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Other\CommandManager.resx"
+                    RelPath = "Other\Code\CommandManager.resx"
                     DependentUpon = "CommandManager.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "Other\gpc.dll"
-                    BuildAction = "Content"
-                />
-                <File
-                    RelPath = "Other\GpcWrapper.cs"
+                    RelPath = "Other\Code\GpcWrapper2.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Other\iconlocations1.txt"
-                    BuildAction = "Content"
-                />
-                <File
-                    RelPath = "Other\iconlocations2.txt"
-                    BuildAction = "Content"
-                />
-                <File
-                    RelPath = "Other\iconlocations3.txt"
-                    BuildAction = "Content"
-                />
-                <File
-                    RelPath = "Other\iconlocations4.txt"
-                    BuildAction = "Content"
-                />
-                <File
-                    RelPath = "Other\iconlocations5.txt"
-                    BuildAction = "Content"
-                />
-                <File
-                    RelPath = "Other\IconManager.cs"
+                    RelPath = "Other\Code\IconManager.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Other\ListViewColumnSorter.cs"
+                    RelPath = "Other\Code\ListViewColumnSorter.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Other\MoveModeEventArgs.cs"
+                    RelPath = "Other\Code\MoveModeEventArgs.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Other\territories.txt"
-                    BuildAction = "Content"
-                />
-                <File
-                    RelPath = "Other\TransportInfoEventArgs.cs"
+                    RelPath = "Other\Code\TransportInfoEventArgs.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Other\Graphics\Battler.png"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\Graphics\Factory.png"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\Graphics\Fighter.png"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\Graphics\Gennie.png"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\Graphics\KillerSatellite.png"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\Graphics\Leader.png"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\Graphics\Transport.png"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\Graphics\Trooper.png"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\Resources\iconlocations1.txt"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\Resources\iconlocations2.txt"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\Resources\iconlocations3.txt"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\Resources\iconlocations4.txt"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\Resources\iconlocations5.txt"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Other\Resources\territories.txt"
+                    BuildAction = "EmbeddedResource"
                 />
             </Include>
         </Files>

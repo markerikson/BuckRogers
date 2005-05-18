@@ -52,7 +52,10 @@ namespace BuckRogers.Interface
 
 			for(int i = 0; i < masks.Length; i++)
 			{
-				Bitmap mask = new Bitmap(types[i].ToString() + ".png");
+				Assembly a = Assembly.GetExecutingAssembly();
+				Stream stream =
+					a.GetManifestResourceStream("BuckRogers.Interface.Other.Graphics." + types[i].ToString() + ".png");
+				Bitmap mask = new Bitmap(stream);
 				masks[i] = mask;
 			}
 
@@ -119,7 +122,7 @@ namespace BuckRogers.Interface
 		public void LoadUnitIconLocations(bool nextSet, bool randomSet)
 		{
 
-			string filename = "BuckRogers.Interface.Other.iconlocations";
+			string filename = "BuckRogers.Interface.Other.Resources.iconlocations";
 
 			if(nextSet)
 			{

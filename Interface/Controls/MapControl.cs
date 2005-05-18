@@ -8,6 +8,7 @@ using System.Data;
 using System.Windows.Forms;
 using System.Text;
 using System.IO;
+using System.Reflection;
 
 using UMD.HCIL.Piccolo;
 using UMD.HCIL.Piccolo.Nodes;
@@ -172,32 +173,6 @@ namespace BuckRogers.Interface
 			Canvas.AnimatingRenderQuality = RenderQuality.HighQuality;
 			Canvas.InteractingRenderQuality = RenderQuality.HighQuality;
 
-
-			/*
-			
-			PPath ulcorner = PPath.CreateRectangle(0, 0, 20, 20);
-			ulcorner.Brush = Brushes.Red;
-			ulcorner.Pen = Pens.Blue;
-
-			ulcorner.X += -2700;
-			ulcorner.Y += -1300;
-
-			Canvas.Layer.AddChild(ulcorner);
-
-
-			PImage icon = new PImage();
-			Bitmap bm = new Bitmap("infantry.png");
-			bm.MakeTransparent(Color.White);
-			icon.Image = bm;
-
-			icon.X += 2300;
-			icon.Y += 1400;
-
-			Canvas.Layer.AddChild(icon);
-			*/
-			
-
-
 		}
 
 		/// <summary>
@@ -226,7 +201,10 @@ namespace BuckRogers.Interface
 
 		private void LoadTerritoryPolygons()
 		{
-			StreamReader sr = new StreamReader("territories.txt");
+			Assembly a = Assembly.GetExecutingAssembly();
+			Stream stream =
+				a.GetManifestResourceStream("BuckRogers.Interface.Other.Resources.territories.txt");
+			StreamReader sr = new StreamReader(stream);//"territories.txt");
 
 			string line = sr.ReadLine();
 			int numTerritories = Int32.Parse(line);
@@ -260,8 +238,6 @@ namespace BuckRogers.Interface
 						string[] splitPoints = line.Split(pointSeparators);
 
 						points.Vertex[k] = new Vertex(Int32.Parse(splitPoints[0]), Int32.Parse(splitPoints[1]));
-						//points.Vertex[j].X = ;
-						//points.Vertex[j].Y = );
 					}
 
 					poly.AddContour(points, isHole);
@@ -505,8 +481,6 @@ namespace BuckRogers.Interface
 			m_orbitOffsets[name] = new PointF(shiftX, shiftY);
 
 			parent.MouseUp += new PInputEventHandler(text_Click);
-
-			//PlaceDummyIcons(name, true);
 		}
 
 		private void DrawLabelAndOwner2(PPath parent, string name, int shiftX, int shiftY)
@@ -538,15 +512,8 @@ namespace BuckRogers.Interface
 
 			m_territoryMarkers[name] = center;
 
-			//PComposite composite = new PComposite();
-			//composite.Tag = name;
-			//composite.AddChild(parent);
-			//composite.AddChild(text);
-			//composite.AddChild(center);
 			parent.AddChild(text);
 			parent.AddChild(center);
-
-			//return composite;
 		}
 		
 
@@ -586,7 +553,6 @@ namespace BuckRogers.Interface
 
 			for(int i = 0; i < numNodes; i++)
 			{
-				
 				composite = new PComposite();
 				
 				text = new PText(prefix + " " + i.ToString());
@@ -641,6 +607,7 @@ namespace BuckRogers.Interface
 		}
 
 
+		/*
 		private void DrawPlanetaryOrbit(PointF[][] polygons, string name, Color color, float scaleFactor, int shiftX, int shiftY, bool closeOrbit)
 		{
 			PPath orbit = new PPath();
@@ -680,6 +647,7 @@ namespace BuckRogers.Interface
 
 			
 		}
+		*/
 		private void DrawConnectors()
 		{
 			for(int i = 1; i < m_orbits.Length; i++)
@@ -774,10 +742,6 @@ namespace BuckRogers.Interface
 				}
 			}
 		}
-
-
-		
-
 
 
 		public void MouseMoveHandler(object sender, PInputEventArgs e) 
@@ -935,6 +899,7 @@ namespace BuckRogers.Interface
 
 		public void ZoomIn()
 		{
+			/*
 			// Save the details from before the zoom
 			float currentZoom = Canvas.Camera.ViewScale;
 			Point originalPosition = ScrollControl.ViewPosition;
@@ -963,11 +928,13 @@ namespace BuckRogers.Interface
 			}
 		
 			//CenterZoomedMap(newZoom, currentZoom, originalPosition, originalSize);
+			*/
 			CenterZoomedMap(true, 1.5f);
 		}
 
 		public void ZoomOut()
 		{
+			/*
 			// Save the details from before the zoom
 			Point originalPosition = ScrollControl.ViewPosition;
 			Size originalSize = ScrollControl.ViewSize;
@@ -994,6 +961,7 @@ namespace BuckRogers.Interface
 				newZoom = currentZoom;
 			}
 
+			*/
 			CenterZoomedMap(false, 0.67f);
 		}
 

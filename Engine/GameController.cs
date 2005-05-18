@@ -1600,29 +1600,16 @@ namespace BuckRogers
 				}
 			}
 
-			/*
-			ArrayList updatedTerritories = new ArrayList();
-
-			foreach(Player p in m_players)
-			{
-				foreach(Territory t in p.Territories.Values)
-				{
-					if(!updatedTerritories.Contains(t) && UpdateTerritory != null)
-					{
-						updatedTerritories.Add(t);
-						UpdateTerritory(t);
-					}
-				}
-			}
-			*/
-
 			if(UpdateTerritory != null)
 			{
 				foreach(Territory t in m_alteredTerritories.Keys)
 				{
 					UpdateTerritory(t);
 				}
+
 			}
+
+			m_alteredTerritories.Clear();
 			
 
 			if(m_turnNumber != 0)
