@@ -552,7 +552,7 @@ namespace BuckRogers
 			this.Controls.Add(this.m_btnZoomIn);
 			this.Menu = this.mainMenu1;
 			this.Name = "BuckRogersForm";
-			this.Text = "BuckRogersForm";
+			this.Text = "Buck Rogers: Battle for the 25th Century";
 			this.Closing += new System.ComponentModel.CancelEventHandler(this.BuckRogersForm_Closing);
 			this.Load += new System.EventHandler(this.BuckRogersForm_Load);
 			this.tabControl1.ResumeLayout(false);
