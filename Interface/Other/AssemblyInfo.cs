@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription("Computer conversion of the Buck Rogers board game")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ISquared Software")]
-[assembly: AssemblyProduct("Buck Rogers: Battle for the 25th Centry")]
+[assembly: AssemblyProduct("Buck Rogers: Battle for the 25th Century")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]		

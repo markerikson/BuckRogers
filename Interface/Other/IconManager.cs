@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.IO;
+using System.Reflection;
 
 using UMD.HCIL.Piccolo;
 using UMD.HCIL.Piccolo.Nodes;
@@ -41,11 +42,19 @@ namespace BuckRogers.Interface
 
 		public void CreateIcons()
 		{
-			string[] typeAbbreviations = {"To", "Ge", "Fi", "Ba", "Tr", "Ks", "Ma", "Fa", "Le"};
+			string[] typeAbbreviations = {"To", "Ge", "Fi", "Ba", "Tr", "Ks", /*"Ma,*/ "Fa", "Le"};
 			UnitType[] types = {UnitType.Trooper, UnitType.Gennie, UnitType.Fighter, UnitType.Battler, 
-								UnitType.Transport, UnitType.KillerSatellite, UnitType.Marker,
+								UnitType.Transport, UnitType.KillerSatellite, //UnitType.Marker,
 								UnitType.Factory, UnitType.Leader};
 			Font f = new Font("Arial",	19, FontStyle.Bold,	GraphicsUnit.Point);
+
+			Bitmap[] masks = new Bitmap[types.Length];
+
+			for(int i = 0; i < masks.Length; i++)
+			{
+				Bitmap mask = new Bitmap(types[i].ToString() + ".png");
+				masks[i] = mask;
+			}
 
 			for(int i = 0; i < m_controller.Players.Length; i++)
 			{
@@ -54,6 +63,25 @@ namespace BuckRogers.Interface
 
 				Brush brush = new SolidBrush(p.Color);
 
+				Bitmap[] icons = new Bitmap[masks.Length];
+
+				for(int j = 0; j < masks.Length; j++)
+				{
+					icons[j] = new Bitmap(48, 48);
+					Graphics g = Graphics.FromImage(icons[j]);
+
+
+					g.FillRectangle(brush, 0, 0, icons[j].Width, icons[j].Height);
+
+					//g.DrawImage(masks[j], 0, 0);
+					g.DrawImage(masks[j], 0, 0, 48, 48);
+
+
+					//icons[j].MakeTransparent(Color.White);
+					ht[types[j]] = icons[j];
+
+				}
+				/*
 				Bitmap[] icons = new Bitmap[typeAbbreviations.Length];
 
 				for(int j = 0; j < typeAbbreviations.Length; j++)
@@ -76,6 +104,7 @@ namespace BuckRogers.Interface
 					ht[types[j]] = icons[j];
 					
 				}
+				*/
 
 				m_icons[p.Name] = ht;
 			}
@@ -89,7 +118,8 @@ namespace BuckRogers.Interface
 
 		public void LoadUnitIconLocations(bool nextSet, bool randomSet)
 		{
-			string filename = "iconlocations";
+
+			string filename = "BuckRogers.Interface.Other.iconlocations";
 
 			if(nextSet)
 			{
@@ -103,7 +133,10 @@ namespace BuckRogers.Interface
 
 			filename += m_iconSetNumber.ToString() + ".txt";
 
-			StreamReader sr = new StreamReader(filename);
+			Assembly a = Assembly.GetExecutingAssembly();
+			Stream stream =
+				a.GetManifestResourceStream(filename);
+			StreamReader sr = new StreamReader(stream);
 
 			string line = sr.ReadLine();
 			int numTerritories = Int32.Parse(line);
@@ -297,7 +330,6 @@ namespace BuckRogers.Interface
 				return returnInfo;
 			}
 			
-			return null;
 		}
 
 		private void InitializeIcon(IconInfo info, Territory t)
