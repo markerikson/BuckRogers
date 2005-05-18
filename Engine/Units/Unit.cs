@@ -26,7 +26,14 @@ namespace BuckRogers
 	{
 		public int ID
 		{
-			get { return this.m_id; }
+			get 
+			{ 
+				return this.m_id; 
+			}
+			set
+			{
+				this.m_id = value;
+			}
 		}
 	
 		public static Unit NONE = new Unit(Player.NONE, UnitType.None);

@@ -66,6 +66,8 @@ namespace BuckRogers
 		private System.Windows.Forms.TabPage m_tpInformation;
 		private BuckRogers.Interface.InformationPanel m_informationPanel;
 		private System.Windows.Forms.Button button1;
+		private System.Windows.Forms.MenuItem m_menuFileSave;
+		private System.Windows.Forms.MenuItem m_menuFileLoad;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
 		
 
@@ -109,6 +111,13 @@ namespace BuckRogers
 				ct.Reinitialize = false;
 				m_controller = ct.GameController;
 				m_battleController = ct.BattleController;
+
+				GameController.Options.OptionalRules = go.OptionalRules;
+				GameController.Options.SetupOptions = go.SetupOptions;
+				GameController.Options.IncreasedProductionTurn = go.IncreasedProductionTurn;
+				GameController.Options.NumTerritoriesNeeded = go.NumTerritoriesNeeded;
+				GameController.Options.ProductionMultiplier = go.ProductionMultiplier;
+				GameController.Options.WinningConditions = go.WinningConditions;
 			}
 			else
 			{
@@ -128,6 +137,7 @@ namespace BuckRogers
 			{
 				ct.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
 				ct.Init();
+				m_controller.InitGamelog();
 
 				tabControl1.TabPages.Clear();
 				tabControl1.TabPages.Add(m_tpAction);
@@ -149,6 +159,8 @@ namespace BuckRogers
 				m_controller.AssignTerritories();
 				m_controller.CreateInitialUnits();
 				m_controller.RollForInitiative(false);
+
+				m_controller.InitGamelog();
 
 				m_clickMode = MapClickMode.Normal;
 			
@@ -220,6 +232,8 @@ namespace BuckRogers
 			m_controller.UpdateTerritory += new TerritoryUpdateHandler(m_map.IconManager.RefreshIcons);
 			m_battleController.TerritoryUnitsChanged += new TerritoryUnitsChangedHandler(m_map.UpdateUnitInfo);
 
+			m_controller.PlayersCreated += new PlayersCreatedHandler(m_map.IconManager.CreateIcons);
+
 		}
 
 		private void StartGame()
@@ -281,6 +295,8 @@ namespace BuckRogers
 			this.menuItem1 = new System.Windows.Forms.MenuItem();
 			this.m_menuFileExit = new System.Windows.Forms.MenuItem();
 			this.button1 = new System.Windows.Forms.Button();
+			this.m_menuFileSave = new System.Windows.Forms.MenuItem();
+			this.m_menuFileLoad = new System.Windows.Forms.MenuItem();
 			this.tabControl1.SuspendLayout();
 			this.m_tpPlacement.SuspendLayout();
 			this.m_tpAction.SuspendLayout();
@@ -471,12 +487,14 @@ namespace BuckRogers
 			// 
 			this.menuItem1.Index = 0;
 			this.menuItem1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+																					  this.m_menuFileSave,
+																					  this.m_menuFileLoad,
 																					  this.m_menuFileExit});
 			this.menuItem1.Text = "File";
 			// 
 			// m_menuFileExit
 			// 
-			this.m_menuFileExit.Index = 0;
+			this.m_menuFileExit.Index = 2;
 			this.m_menuFileExit.Text = "Exit";
 			this.m_menuFileExit.Click += new System.EventHandler(this.m_menuFileExit_Click);
 			// 
@@ -487,6 +505,18 @@ namespace BuckRogers
 			this.button1.TabIndex = 9;
 			this.button1.Text = "button1";
 			this.button1.Click += new System.EventHandler(this.button1_Click_1);
+			// 
+			// m_menuFileSave
+			// 
+			this.m_menuFileSave.Index = 0;
+			this.m_menuFileSave.Text = "Save";
+			this.m_menuFileSave.Click += new System.EventHandler(this.m_menuFileSave_Click);
+			// 
+			// m_menuFileLoad
+			// 
+			this.m_menuFileLoad.Index = 1;
+			this.m_menuFileLoad.Text = "Load";
+			this.m_menuFileLoad.Click += new System.EventHandler(this.m_menuFileLoad_Click);
 			// 
 			// BuckRogersForm
 			// 
@@ -643,6 +673,8 @@ namespace BuckRogers
 						}
 						case GamePhase.Combat:
 						{
+							m_menuFileSave.Enabled = false;
+							m_menuFileLoad.Enabled = false;
 							statusBar1.Panels[0].Text = "Combat phase";
 							//MessageBox.Show("Movement over, time for combat");
 							if(m_combatForm == null)
@@ -696,6 +728,9 @@ namespace BuckRogers
 							statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
 							m_movePanel.RefreshPlayerOrder();
 							m_informationPanel.RefreshAllInfo();
+
+							m_menuFileSave.Enabled = true;
+							m_menuFileLoad.Enabled = true;
 							break;
 						}
 					}
@@ -761,6 +796,39 @@ namespace BuckRogers
 		private void BuckRogersForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 			m_controller.SaveLog();
+		}
+
+		private void m_menuFileSave_Click(object sender, System.EventArgs e)
+		{
+			SaveFileDialog sfd = new SaveFileDialog();
+			sfd.Filter = "Buck Rogers save games (*.xml)|*.xml";
+
+			if(sfd.ShowDialog() == DialogResult.OK)
+			{
+				m_controller.SaveGame(sfd.FileName);
+			}
+
+		}
+
+		private void m_menuFileLoad_Click(object sender, System.EventArgs e)
+		{
+			OpenFileDialog ofd = new OpenFileDialog();
+			ofd.Filter = "Buck Rogers save games (*.xml)|*.xml";
+
+			if(ofd.ShowDialog() == DialogResult.OK)
+			{
+				m_map.IconManager.ClearAllIcons();
+				m_controller.LoadGame(ofd.FileName);
+
+				m_clickMode = MapClickMode.Normal;
+
+				statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+				statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
+			
+				m_movePanel.RefreshPlayerOrder();			
+				m_informationPanel.RefreshAllInfo();
+				m_map.AdvancePlanets();
+			}
 		}
 
 		public BuckRogers.GameController GameController

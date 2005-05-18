@@ -233,6 +233,11 @@ namespace BuckRogers.Interface
 			{
 				foreach(Territory t in p.Territories.Values)
 				{
+					if(t.Name == "Black Market")
+					{
+						int i = 42;
+						int q = i;
+					}
 					ListViewItem lvi = new ListViewItem();
 					lvi.Text = p.Name;
 					lvi.SubItems.Add(t.System.Name);

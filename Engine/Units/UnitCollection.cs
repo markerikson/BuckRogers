@@ -150,6 +150,20 @@ namespace BuckRogers
 		}
 		*/
 
+		public Unit GetUnitByID(int id)
+		{
+			for(int i = 0; i < List.Count; i++)
+			{
+				Unit u = (Unit)List[i];
+				if(u.ID == id)
+				{
+					return u;
+				}
+			}
+			
+			return null;
+		}
+
 		public UnitCollection GetUnits(int max)
 		{
 			return GetUnits(UnitType.None, null, null, max);

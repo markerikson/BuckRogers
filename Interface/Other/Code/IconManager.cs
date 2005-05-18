@@ -184,7 +184,12 @@ namespace BuckRogers.Interface
 
 		public void SetIconInfo(Territory t, Player p, UnitType ut)
 		{
-			IconInfo info = GetIconInfo(t, p, ut, true);			
+			IconInfo info = GetIconInfo(t, p, ut, true);	
+			if(info == null)
+			{
+				return;
+			}
+
 			info.Used = true;
 			info.Type = ut;
 			info.Player = p;
@@ -309,6 +314,10 @@ namespace BuckRogers.Interface
 				ArrayList al = new ArrayList();
 
 				PPath node = (PPath)m_map.Territories[t.Name];
+				if(node == null)
+				{
+					return null;
+				}
 				PointF nodeCenter = PUtil.CenterOfRectangle(node.Bounds);
 
 				for(int i = 0; i < 6; i++)
@@ -407,9 +416,23 @@ namespace BuckRogers.Interface
 			}
 		}
 
+		public void ClearAllIcons()
+		{
+			foreach(string name in m_iconLocations.Keys)
+			{
+				Territory t = m_controller.Map[name];
+				ClearIcons(t);
+			}
+		}
+
 		public void ClearIcons(Territory t)
 		{
 			ArrayList icons = (ArrayList)m_iconLocations[t.Name];
+
+			if(icons == null)
+			{
+				return;
+			}
 
 			for(int i = 0; i < icons.Count; i++)
 			{

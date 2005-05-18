@@ -314,6 +314,11 @@ namespace BuckRogers
 
 				return go.Value;
 			}
+			set
+			{
+				GameOption go = (GameOption)base[Key];
+				go.Value = value;
+			}
 		}  
 		
 		public OptionsHashlist()

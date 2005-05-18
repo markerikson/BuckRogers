@@ -31,7 +31,7 @@ namespace BuckRogers
 		public event DisplayActionHandler ActionAdded;
 		public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
 		public TerritoryUpdateHandler UpdateTerritory;
-		//public event PlayersCreatedHandler PlayersCreated;
+		public event PlayersCreatedHandler PlayersCreated;
 		
 		#region Properties
 		public BuckRogers.GameMap Map
@@ -123,8 +123,15 @@ namespace BuckRogers
 			get { return m_options; }
 			set { m_options = value; }
 		}
+
+		public System.Xml.XmlDocument Gamelog
+		{
+			get { return this.m_gamelog; }
+			set { this.m_gamelog = value; }
+		}
 		#endregion
 	
+		#region Members
 		private GameMap m_map;
 		private Color[] m_playerColors = {Color.CornflowerBlue, Color.Yellow, Color.Teal,  
 											Color.Violet, Color.Tan, Color.MediumVioletRed};
@@ -152,9 +159,12 @@ namespace BuckRogers
 		private Hashlist m_battles;	
 		public TurnRoll[] m_rolls;
 
+		#endregion
+
 
 		// TODO Start implementing optional rules
 
+		#region Initialization
 		public GameController()
 		{
 			Init();
@@ -216,6 +226,9 @@ namespace BuckRogers
 			m_phase = GamePhase.Setup;
 		}
 
+		#endregion
+
+		#region Logging functions
 		public void InitGamelog()
 		{
 			m_gamelog = new XmlDocument();
@@ -316,6 +329,35 @@ namespace BuckRogers
 			m_gamelog.Save("gamelog.xml");
 		}
 
+		public void LogNextTurn()
+		{
+			m_xeCurrentTurn = m_gamelog.CreateElement("Turn");
+			XmlAttribute number = m_gamelog.CreateAttribute("number");
+			XmlAttribute order = m_gamelog.CreateAttribute("order");
+			number.Value = m_turnNumber.ToString();
+				
+			StringBuilder sb = new StringBuilder();
+			for(int i = 0; i < m_currentPlayerOrder.Count; i++)
+				//foreach(Player p in m_currentPlayerOrder)
+			{
+				Player p = (Player)m_currentPlayerOrder[i];
+				int idx = Array.IndexOf(m_players, p);
+				if(i != 0)
+				{
+					sb.Append(",");
+				}
+				sb.Append(idx);
+			}
+			order.Value = sb.ToString();
+
+			m_xeCurrentTurn.Attributes.Append(number);
+			m_xeCurrentTurn.Attributes.Append(order);
+			m_xeTurns.AppendChild(m_xeCurrentTurn);
+
+			m_xeCurrentMovement = m_gamelog.CreateElement("Movement");
+			m_xeCurrentTurn.AppendChild(m_xeCurrentMovement);
+		}
+
 		public void LogNextPlayer()
 		{
 			m_xeCurrentPlayer = m_gamelog.CreateElement("Player");
@@ -338,6 +380,8 @@ namespace BuckRogers
 		{
 			m_gamelog.Save("gamelog.xml");
 		}
+
+		#endregion
 
 		public Player GetPlayer(string name)
 		{
@@ -1194,6 +1238,7 @@ namespace BuckRogers
 
 		#endregion
 
+		#region Battle functions
 		public Hashlist FindBattles()
 		{
 			/* Two possible methods for finding battles.
@@ -1415,6 +1460,9 @@ namespace BuckRogers
 			return targets;
 		}
 
+		#endregion
+
+		#region Production functions
 		public bool CheckBlackMarket(Player p)
 		{
 			UnitCollection factories = p.Units.GetUnits(UnitType.Factory);
@@ -1582,8 +1630,11 @@ namespace BuckRogers
 			m_xeCurrentTurn.AppendChild(xeProduction);
 		}
 
+		#endregion
+
 		// TODO Uncontrolled Killer Satellites become the property of the new planetary owner
 
+		#region Next turn/player functions
 		public void NextTurn()
 		{
 			m_checkedActions.Clear();
@@ -1618,7 +1669,7 @@ namespace BuckRogers
 			}			
 			else
 			{
-				InitGamelog();
+				//InitGamelog();
 				LogInitialPlacements();
 			}
 
@@ -1633,26 +1684,8 @@ namespace BuckRogers
 
 				m_phase = GamePhase.Movement;
 
-				m_xeCurrentTurn = m_gamelog.CreateElement("Turn");
-				XmlAttribute number = m_gamelog.CreateAttribute("number");
-				XmlAttribute order = m_gamelog.CreateAttribute("order");
-				number.Value = m_turnNumber.ToString();
 				
-				StringBuilder sb = new StringBuilder();
-				foreach(Player p in m_currentPlayerOrder)
-				{
-					int idx = Array.IndexOf(m_players, p);
-					sb.Append(idx);
-				}
-				order.Value = sb.ToString();
-
-				m_xeCurrentTurn.Attributes.Append(number);
-				m_xeCurrentTurn.Attributes.Append(order);
-				m_xeTurns.AppendChild(m_xeCurrentTurn);
-
-				m_xeCurrentMovement = m_gamelog.CreateElement("Movement");
-				m_xeCurrentTurn.AppendChild(m_xeCurrentMovement);
-
+				LogNextTurn();
 				LogNextPlayer();
 				
 			}			
@@ -1819,6 +1852,8 @@ namespace BuckRogers
 			return doNextPhase;
 		}
 
+		#endregion
+
 		public void PlaceUnits(UnitCollection uc, Territory t)
 		{
 			foreach(Unit u in uc)
@@ -1837,10 +1872,438 @@ namespace BuckRogers
 			}
 		}
 
-		public System.Xml.XmlDocument Gamelog
+		public void SaveGame(string filename)
 		{
-			get { return this.m_gamelog; }
-			set { this.m_gamelog = value; }
+			XmlDocument savegame = new XmlDocument();
+
+			XmlElement xeRoot = savegame.CreateElement("Game");
+			savegame.AppendChild(xeRoot);
+
+			XmlElement xeSetup = savegame.CreateElement("Setup");
+			XmlElement xeOptions = savegame.CreateElement("Options");
+
+			xeSetup.AppendChild(xeOptions);
+			xeRoot.AppendChild(xeSetup);
+
+			XmlElement xeRules = savegame.CreateElement("OptionalRules");
+			xeOptions.AppendChild(xeRules);
+			
+			foreach(GameOption option in m_options.OptionalRules)
+			{
+				if(option.Value)
+				{
+					XmlElement xeOption = savegame.CreateElement("Option");
+					XmlAttribute name = savegame.CreateAttribute("name");
+					name.Value = option.Name;
+					xeOption.Attributes.Append(name);
+					xeRules.AppendChild(xeOption);
+
+					if(option.Name == "IncreasedProduction")
+					{
+						XmlAttribute xaProd = savegame.CreateAttribute("multiplier");
+						xaProd.Value = m_options.ProductionMultiplier.ToString();
+						xeOption.Attributes.Append(xaProd);
+
+						XmlAttribute xaProdTurn = savegame.CreateAttribute("turn");
+						xaProdTurn.Value = m_options.IncreasedProductionTurn.ToString();
+						xeOption.Attributes.Append(xaProdTurn);
+					}
+				}
+			}
+
+			XmlElement xeVictory = savegame.CreateElement("VictoryConditions");
+			XmlAttribute xaVictoryType = savegame.CreateAttribute("type");
+			xaVictoryType.Value = m_options.WinningConditions.ToString();
+			xeVictory.Attributes.Append(xaVictoryType);
+			xeOptions.AppendChild(xeVictory);
+
+			if(m_options.WinningConditions == VictoryConditions.NumberOfTerritories)
+			{
+				XmlAttribute xaNumTerritories = savegame.CreateAttribute("territories");
+				xaNumTerritories.Value = m_options.NumTerritoriesNeeded.ToString();
+				xeVictory.Attributes.Append(xaNumTerritories);
+			}
+
+			XmlElement xeStartingScenario = savegame.CreateElement("StartingScenario");
+			XmlAttribute xaStartingType = savegame.CreateAttribute("type");
+			xaStartingType.Value = m_options.SetupOptions.ToString();
+			xeStartingScenario.Attributes.Append(xaStartingType);
+			xeOptions.AppendChild(xeStartingScenario);
+
+			XmlElement xePlayers = savegame.CreateElement("Players");
+			xeRoot.AppendChild(xePlayers);
+			
+			foreach(Player p in m_players)
+			{
+				XmlElement xePlayerInfo = savegame.CreateElement("Player");
+				XmlAttribute name = savegame.CreateAttribute("name");
+				name.Value = p.Name;
+				XmlAttribute color = savegame.CreateAttribute("color");
+				color.Value = p.Color.Name;
+				xePlayerInfo.Attributes.Append(name);
+				xePlayerInfo.Attributes.Append(color);
+
+				XmlAttribute xaDisabled = savegame.CreateAttribute("disabled");
+				xaDisabled.Value = p.Disabled.ToString();
+				xePlayerInfo.Attributes.Append(xaDisabled);
+
+				xePlayers.AppendChild(xePlayerInfo);
+
+				XmlElement xePlayerTerritories = savegame.CreateElement("Territories");
+
+				foreach(Territory t in p.Territories.Values)
+				{
+					XmlElement xeTerritory = savegame.CreateElement("Territory");
+					XmlAttribute tname = savegame.CreateAttribute("name");
+					tname.Value = t.Name;
+					xeTerritory.Attributes.Append(tname);
+
+					xePlayerTerritories.AppendChild(xeTerritory);
+				}
+
+				XmlElement xePlayerUnits = savegame.CreateElement("Units");
+				xePlayerInfo.AppendChild(xePlayerUnits);
+
+				foreach(Unit u in p.Units)
+				{
+					XmlElement xeUnit = savegame.CreateElement("Unit");
+
+					XmlAttribute tname = savegame.CreateAttribute("type");
+					tname.Value = u.Type.ToString();
+					XmlAttribute territory = savegame.CreateAttribute("territory");					
+					territory.Value = u.CurrentTerritory.Name;
+
+					XmlAttribute xaUnitType = savegame.CreateAttribute("type");
+					xaUnitType.Value = u.Type.ToString();
+
+					XmlAttribute xaUnitID = savegame.CreateAttribute("id");
+					xaUnitID.Value = u.ID.ToString();
+
+					XmlAttribute xaUnitMovesLeft = savegame.CreateAttribute("movesleft");
+					xaUnitMovesLeft.Value = u.MovesLeft.ToString();
+					
+					XmlAttribute xaUnitTransported = savegame.CreateAttribute("transported");
+					xaUnitTransported.Value = u.Transported.ToString();
+
+					XmlAttribute xaTransportingUnit = savegame.CreateAttribute("transportingunit");
+					if(u.Transported)
+					{
+						xaTransportingUnit.Value = u.TransportingUnit.ID.ToString();
+					}
+
+					xeUnit.Attributes.Append(xaUnitType);
+					xeUnit.Attributes.Append(xaUnitID);
+					xeUnit.Attributes.Append(tname);
+					xeUnit.Attributes.Append(territory);
+					xeUnit.Attributes.Append(xaUnitMovesLeft);
+					xeUnit.Attributes.Append(xaUnitTransported);
+					xeUnit.Attributes.Append(xaTransportingUnit);
+
+					if(u.Type == UnitType.Factory)
+					{
+						Factory f = (Factory)u;
+
+						XmlAttribute xaCanProduce = savegame.CreateAttribute("canproduce");
+						xaCanProduce.Value = f.CanProduce.ToString();
+						xeUnit.Attributes.Append(xaCanProduce);
+
+						if(f.CanProduce)
+						{
+							if(f.ProductionType != UnitType.None)
+							{
+								XmlAttribute xaProduction = savegame.CreateAttribute("production");
+								xaProduction.Value = f.ProductionType.ToString();
+								xeUnit.Attributes.Append(xaProduction);
+
+								XmlAttribute xaDestination = savegame.CreateAttribute("destination");
+								xaDestination.Value = f.DestinationTerritory.Name;
+								xeUnit.Attributes.Append(xaDestination);
+							}							
+						}						
+					}					
+					
+					xePlayerUnits.AppendChild(xeUnit);
+				}
+
+				xePlayerInfo.AppendChild(xePlayerTerritories);
+			}
+
+			//XmlElement xeCurrentTurn = (XmlElement)savegame.ImportNode(m_xeCurrentTurn, true);
+			//xeRoot.AppendChild(xeCurrentTurn);
+
+			XmlElement xeCurrentTurn = savegame.CreateElement("CurrentTurn");
+			XmlAttribute xaTurnNumber = (XmlAttribute)savegame.ImportNode(m_xeCurrentTurn.Attributes["number"], false);
+			XmlAttribute xaTurnOrder = (XmlAttribute)savegame.ImportNode(m_xeCurrentTurn.Attributes["order"], false);
+			xeCurrentTurn.Attributes.Append(xaTurnNumber);
+			xeCurrentTurn.Attributes.Append(xaTurnOrder);
+
+			XmlElement xeMostRecentPlayer = (XmlElement)m_xeCurrentMovement.ChildNodes[m_xeCurrentMovement.ChildNodes.Count - 1];
+			XmlAttribute xaPlayerName = xeMostRecentPlayer.Attributes["name"];
+			XmlAttribute xaCurrentPlayer = savegame.CreateAttribute("currentplayer");
+			xaCurrentPlayer.Value = xaPlayerName.Value;
+			xeCurrentTurn.Attributes.Append(xaCurrentPlayer);
+
+			xeRoot.AppendChild(xeCurrentTurn);
+
+			
+
+		savegame.Save(filename);
 		}
+
+		
+		public void LoadGame(string filename)
+		{
+			XmlDocument savegame = new XmlDocument();
+			savegame.Load(filename);
+
+			m_currentPlayerOrder.Clear();
+
+			foreach(OrbitalSystem os in m_map.Planets)
+			{
+				foreach(Territory t in os.Ground.Values)
+				{
+					if(TerritoryOwnerChanged != null)
+					{
+						TerritoryEventArgs tea = new TerritoryEventArgs();
+						tea.Name = t.Name;
+						tea.Owner = Player.NONE;
+
+						TerritoryOwnerChanged(this, tea);
+					}
+				}
+			}
+
+			GameOptions options = new GameOptions();
+			XmlElement optionalRules = (XmlElement)savegame.GetElementsByTagName("OptionalRules")[0];
+
+			foreach(GameOption option in options.OptionalRules)
+			{
+				option.Value = false;
+			}
+
+			foreach(XmlElement xeRule in optionalRules)
+			{
+				XmlAttribute xaName = xeRule.Attributes["name"];
+				options.OptionalRules[xaName.Value] = true;
+
+				if(xaName.Value == "IncreasedProduction")
+				{
+					XmlAttribute xaTurn = xeRule.Attributes["turn"];
+					XmlAttribute xaMultipler = xeRule.Attributes["multiplier"];
+ 
+					options.IncreasedProductionTurn = Int32.Parse(xaTurn.Value);
+					options.ProductionMultiplier = Int32.Parse(xaMultipler.Value);
+				}
+			}
+
+			XmlElement xeVictory = (XmlElement)savegame.GetElementsByTagName("VictoryConditions")[0];
+			XmlElement xeStarting = (XmlElement)savegame.GetElementsByTagName("StartingScenario")[0];
+
+			XmlAttribute xaVictoryType = xeVictory.Attributes[0];
+			XmlAttribute xeStartingType = xeStarting.Attributes[0];
+
+			VictoryConditions vc = (VictoryConditions)Enum.Parse(typeof(VictoryConditions), xaVictoryType.Value);
+			StartingScenarios ss = (StartingScenarios)Enum.Parse(typeof(StartingScenarios), xeStartingType.Value);
+
+			options.WinningConditions = vc;
+			options.SetupOptions = ss;
+
+			if(vc == VictoryConditions.NumberOfTerritories)
+			{
+				XmlAttribute xaNumTerritories = xeVictory.Attributes["territories"];
+				options.NumTerritoriesNeeded = Int32.Parse(xaNumTerritories.Value);
+			}
+
+			m_options = options;
+
+			XmlElement xePlayers = (XmlElement)savegame.GetElementsByTagName("Players")[0];
+
+			int numPlayers = xePlayers.ChildNodes.Count;
+			string[] playerNames = new string[numPlayers];
+			Color[] playerColors = new Color[numPlayers];
+
+			for(int i = 0; i < numPlayers; i++)
+			{
+				XmlElement xePlayer = (XmlElement)xePlayers.ChildNodes[i];
+				XmlAttribute xaPlayerName = xePlayer.Attributes["name"];
+				XmlAttribute xaPlayerColor = xePlayer.Attributes["color"];
+
+				playerNames[i] = xaPlayerName.Value;
+				playerColors[i] = Color.FromName(xaPlayerColor.Value);
+			}
+
+			Init();
+			SetPlayers(playerNames, playerColors);
+
+			int maxUnitID = 0;
+
+			foreach(XmlElement xePlayer in xePlayers)
+			{
+				XmlElement xeUnits = (XmlElement)xePlayer.GetElementsByTagName("Units")[0];
+				XmlElement xeTerritories = (XmlElement)xePlayer.GetElementsByTagName("Territories")[0];
+
+                XmlAttribute xaPlayerName = xePlayer.Attributes["name"];
+				Player p = GetPlayer(xaPlayerName.Value);
+
+				XmlAttribute xaDisabled = xePlayer.Attributes["disabled"];
+				p.Disabled = Boolean.Parse(xaDisabled.Value);
+
+				ArrayList transportedUnits = new ArrayList();
+
+				foreach(XmlElement xeUnit in xeUnits)
+				{
+					XmlAttribute xeUnitID = xeUnit.Attributes["id"];
+					XmlAttribute xeUnitType = xeUnit.Attributes["type"];
+					XmlAttribute xeTerritory = xeUnit.Attributes["territory"];
+					XmlAttribute xeMovesLeft = xeUnit.Attributes["movesleft"];
+					XmlAttribute xeTransported = xeUnit.Attributes["transported"];
+
+					int unitID = Int32.Parse(xeUnitID.Value);
+					
+					if(unitID > maxUnitID)
+					{
+						maxUnitID = unitID;
+					}
+
+					UnitType ut = (UnitType)Enum.Parse(typeof(UnitType), xeUnitType.Value);
+					string territory = xeTerritory.Value;
+					int movesLeft = Int32.Parse(xeMovesLeft.Value);
+					bool transported = Boolean.Parse(xeTransported.Value);
+
+					Unit u = Unit.CreateNewUnit(p, ut);
+					u.ID = unitID;
+					u.MovesLeft = movesLeft;
+
+					u.CurrentTerritory = m_map[territory];
+
+					if(transported)
+					{
+						transportedUnits.Add(xeUnit);
+					}
+					
+					if(u.Type == UnitType.Factory)
+					{
+						Factory f = u as Factory;
+
+						XmlAttribute xaCanProduce = xeUnit.Attributes["canproduce"];
+						bool canProduce = Boolean.Parse(xaCanProduce.Value);
+
+						if(canProduce)
+						{
+							f.CanProduce = canProduce;
+
+							XmlAttribute xaProductionType = xeUnit.Attributes["production"];
+							XmlAttribute xaDestination = xeUnit.Attributes["destination"];
+
+							if(xaProductionType != null)
+							{
+								UnitType productionType = (UnitType)Enum.Parse(typeof(UnitType), xaProductionType.Value);
+								Territory destination = m_map[xaDestination.Value];
+
+								// _should_ properly do the half-production
+								f.StartProduction(productionType, destination);
+								f.ExecuteProduction();
+							}
+							
+						}
+
+						if(f.CurrentTerritory.Name == "Black Market")
+						{
+							f.IsBlackMarket = true;
+							f.CanProduce = false;
+						}
+					}
+				}
+
+				foreach(XmlElement xeUnit in transportedUnits)
+				{
+					XmlAttribute xeUnitID = xeUnit.Attributes["id"];
+					XmlAttribute xeTransportID = xeUnit.Attributes["transportingunit"];
+
+					int unitID = Int32.Parse(xeUnitID.Value);
+					int transportID = Int32.Parse(xeTransportID.Value);
+
+					Unit transportedUnit = p.Units.GetUnitByID(unitID);
+					Transport transport = (Transport)p.Units.GetUnitByID(transportID);
+
+					transportedUnit.Transported = true;
+					transportedUnit.TransportingUnit = transport;
+					transportedUnit.CurrentTerritory = Territory.NONE;
+				}
+
+				foreach(XmlElement xeTerritory in xeTerritories)
+				{
+					XmlAttribute xaTerritoryName = xeTerritory.Attributes["name"];
+					Territory t = m_map[xaTerritoryName.Value];
+
+					t.Owner = p;
+
+					if(TerritoryOwnerChanged != null)
+					{
+						TerritoryEventArgs tea = new TerritoryEventArgs();
+						tea.Name = t.Name;
+						tea.Owner = p;
+
+						TerritoryOwnerChanged(this, tea);
+					}
+
+				}
+			}
+
+			XmlElement xeCurrentTurn = (XmlElement)savegame.GetElementsByTagName("CurrentTurn")[0];
+			XmlAttribute xaTurnNumber = xeCurrentTurn.Attributes["number"];
+			XmlAttribute xaTurnOrder = xeCurrentTurn.Attributes["order"];
+			XmlAttribute xaCurrentPlayer = xeCurrentTurn.Attributes["currentplayer"];
+
+			string[] splitOrder = xaTurnOrder.Value.Split(new char[]{','});
+			int[] playerOrder = new int[splitOrder.Length];
+
+			for(int i = 0; i < splitOrder.Length; i++)
+			{
+				playerOrder[i] = Int32.Parse(splitOrder[i]);
+			}
+
+			for(int i = 0; i < playerOrder.Length; i++)
+			{
+				m_currentPlayerOrder.Add(m_players[playerOrder[i]]);
+			}
+
+			Player currentPlayer = GetPlayer(xaCurrentPlayer.Value);
+			m_idxCurrentPlayer = m_currentPlayerOrder.IndexOf(currentPlayer);
+		
+			m_turnNumber = Int32.Parse(xaTurnNumber.Value);
+
+			for(int i = 1; i < m_turnNumber; i++)
+			{
+				m_map.AdvancePlanets();
+			}
+
+			m_phase = GamePhase.Movement;
+
+			if(PlayersCreated != null)
+			{
+				PlayersCreated();
+			}
+
+			if(UpdateTerritory != null)
+			{
+				foreach(Player p in m_players)
+				{
+					ArrayList al = p.Units.GetUnitTerritories();
+
+					foreach(Territory t in al)
+					{
+						UpdateTerritory(t);
+					}
+				}
+			}
+
+			InitGamelog();
+			LogInitialPlacements();
+			LogNextTurn();
+			LogNextPlayer();
+		
+		
+		} // end LoadGame()
 	}
 }

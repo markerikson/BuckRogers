@@ -20,12 +20,22 @@ namespace BuckRogers
 		private Color m_color;
 		private int m_turnDisabled;
 
+		public Player(string name, Color color)
+		{
+			Init(name, color);
+		}
 		public Player(string name)
+		{
+			Init(name, Color.White);
+		}
+
+		private void Init(string name, Color color)
 		{
 			m_name = name;
 			m_units = new UnitCollection();
 			m_territories = new Hashtable();
 			m_disabled = false;
+			m_color = color;
 		}
 
 		public bool Disabled
