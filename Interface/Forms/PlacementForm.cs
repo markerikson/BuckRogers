@@ -260,7 +260,7 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.m_lvAvailableUnits);
 			this.Name = "PlacementForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "PlacementForm";
+			this.Text = "Place Units";
 			this.Load += new System.EventHandler(this.PlacementForm_Load);
 			this.ResumeLayout(false);
 

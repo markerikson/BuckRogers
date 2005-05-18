@@ -181,7 +181,11 @@ namespace BuckRogers
 		{
 			m_options = options;
 			Init();
-			SetPlayers(m_options.PlayerNames);
+			if(m_options.PlayerNames != null)
+			{
+				SetPlayers(m_options.PlayerNames);
+			}
+			
 		}
 
 		private void Init()
@@ -191,6 +195,7 @@ namespace BuckRogers
 			m_checkedActions = new ArrayList();
 			m_undoneActions = new ArrayList();
 			m_alteredTerritories = new Hashtable();
+			m_currentPlayerOrder = new ArrayList();
 			m_winner = Player.NONE;
 			m_turnNumber = 0;	
 

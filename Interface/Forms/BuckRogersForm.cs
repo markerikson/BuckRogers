@@ -65,7 +65,6 @@ namespace BuckRogers
 		private System.Windows.Forms.MenuItem m_menuFileExit;
 		private System.Windows.Forms.TabPage m_tpInformation;
 		private BuckRogers.Interface.InformationPanel m_informationPanel;
-		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.MenuItem m_menuFileSave;
 		private System.Windows.Forms.MenuItem m_menuFileLoad;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
@@ -95,82 +94,112 @@ namespace BuckRogers
 
 		}
 
-		public BuckRogersForm(GameOptions go)
+		public BuckRogersForm(GameOptions go, string loadFileName)
 		{
 			//
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
 
+			Initialize(go, loadFileName);
+			
+		}
+
+		private void Initialize(GameOptions go, string loadFileName)
+		{
 			bool useTesting = go.OptionalRules["UseTestingSetup"];
 			ControllerTest ct = null;
 
-			if(useTesting)
+			if(loadFileName == String.Empty)
 			{
-				ct = new ControllerTest();
-				ct.Reinitialize = false;
-				m_controller = ct.GameController;
-				m_battleController = ct.BattleController;
+				if(useTesting)
+				{
+					ct = new ControllerTest();
+					ct.Reinitialize = false;
+					m_controller = ct.GameController;
+					m_battleController = ct.BattleController;
 
-				GameController.Options.OptionalRules = go.OptionalRules;
-				GameController.Options.SetupOptions = go.SetupOptions;
-				GameController.Options.IncreasedProductionTurn = go.IncreasedProductionTurn;
-				GameController.Options.NumTerritoriesNeeded = go.NumTerritoriesNeeded;
-				GameController.Options.ProductionMultiplier = go.ProductionMultiplier;
-				GameController.Options.WinningConditions = go.WinningConditions;
-			}
+					GameController.Options.OptionalRules = go.OptionalRules;
+					GameController.Options.SetupOptions = go.SetupOptions;
+					GameController.Options.IncreasedProductionTurn = go.IncreasedProductionTurn;
+					GameController.Options.NumTerritoriesNeeded = go.NumTerritoriesNeeded;
+					GameController.Options.ProductionMultiplier = go.ProductionMultiplier;
+					GameController.Options.WinningConditions = go.WinningConditions;
+				}
+				else
+				{
+					m_controller = new GameController(go);
+					m_battleController = new BattleController(m_controller);
+				}
+			}			
 			else
 			{
 				m_controller = new GameController(go);
 				m_battleController = new BattleController(m_controller);
 			}
-			
-			
 
 			InitControls();
 			m_map.IconManager.Controller = m_controller;
-			m_map.IconManager.CreateIcons();
 			m_map.IconManager.LoadUnitIconLocations(false, true);
 			InitEvents();
 
-			if(useTesting)
+			if(loadFileName == String.Empty)
 			{
-				ct.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
-				ct.Init();
-				m_controller.InitGamelog();
+				if(useTesting)
+				{
+					ct.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
+					ct.Init();
+					m_controller.InitGamelog();
 
-				tabControl1.TabPages.Clear();
-				tabControl1.TabPages.Add(m_tpAction);
-				tabControl1.TabPages.Add(m_tpTerritory);
-				tabControl1.TabPages.Add(m_tpInformation);
+					tabControl1.TabPages.Clear();
+					tabControl1.TabPages.Add(m_tpAction);
+					tabControl1.TabPages.Add(m_tpTerritory);
+					tabControl1.TabPages.Add(m_tpInformation);
 
-				m_clickMode = MapClickMode.Normal;
+					m_clickMode = MapClickMode.Normal;
 
-				GameController.Options.OptionalRules = go.OptionalRules;
-				StartGame();
+					GameController.Options.OptionalRules = go.OptionalRules;
+					m_map.IconManager.CreateIcons();
+					
+					StartGame();
 
+				}
+				else
+				{
+					tabControl1.TabPages.Clear();
+					tabControl1.TabPages.Add(m_tpPlacement);
+					tabControl1.TabPages.Add(m_tpTerritory);
+
+					m_controller.AssignTerritories();
+					m_controller.CreateInitialUnits();
+					m_controller.RollForInitiative(false);
+
+					m_map.IconManager.CreateIcons();
+					m_map.IconManager.LoadUnitIconLocations(false, true);
+
+					m_controller.InitGamelog();
+
+					m_clickMode = MapClickMode.Normal;
+			
+					m_placementPanel.RefreshPlayerOrder();
+					m_placementPanel.RefreshAvailableUnits();
+
+					statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+				}
 			}
 			else
 			{
 				tabControl1.TabPages.Clear();
-				tabControl1.TabPages.Add(m_tpPlacement);
+				tabControl1.TabPages.Add(m_tpAction);
 				tabControl1.TabPages.Add(m_tpTerritory);
-
-				m_controller.AssignTerritories();
-				m_controller.CreateInitialUnits();
-				m_controller.RollForInitiative(false);
-
-				m_controller.InitGamelog();
-
-				m_clickMode = MapClickMode.Normal;
-			
-				m_placementPanel.RefreshPlayerOrder();
-
-				statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+				tabControl1.TabPages.Add(m_tpInformation);
+				LoadGame(loadFileName);
+				m_map.IconManager.CreateIcons();
+				m_map.IconManager.LoadUnitIconLocations(false, true);
 			}
 
-			
 
+			
 		}
 
 		private void InitControls()
@@ -293,10 +322,9 @@ namespace BuckRogers
 			this.statusBarPanel2 = new System.Windows.Forms.StatusBarPanel();
 			this.mainMenu1 = new System.Windows.Forms.MainMenu();
 			this.menuItem1 = new System.Windows.Forms.MenuItem();
-			this.m_menuFileExit = new System.Windows.Forms.MenuItem();
-			this.button1 = new System.Windows.Forms.Button();
 			this.m_menuFileSave = new System.Windows.Forms.MenuItem();
 			this.m_menuFileLoad = new System.Windows.Forms.MenuItem();
+			this.m_menuFileExit = new System.Windows.Forms.MenuItem();
 			this.tabControl1.SuspendLayout();
 			this.m_tpPlacement.SuspendLayout();
 			this.m_tpAction.SuspendLayout();
@@ -492,20 +520,6 @@ namespace BuckRogers
 																					  this.m_menuFileExit});
 			this.menuItem1.Text = "File";
 			// 
-			// m_menuFileExit
-			// 
-			this.m_menuFileExit.Index = 2;
-			this.m_menuFileExit.Text = "Exit";
-			this.m_menuFileExit.Click += new System.EventHandler(this.m_menuFileExit_Click);
-			// 
-			// button1
-			// 
-			this.button1.Location = new System.Drawing.Point(284, 648);
-			this.button1.Name = "button1";
-			this.button1.TabIndex = 9;
-			this.button1.Text = "button1";
-			this.button1.Click += new System.EventHandler(this.button1_Click_1);
-			// 
 			// m_menuFileSave
 			// 
 			this.m_menuFileSave.Index = 0;
@@ -518,11 +532,16 @@ namespace BuckRogers
 			this.m_menuFileLoad.Text = "Load";
 			this.m_menuFileLoad.Click += new System.EventHandler(this.m_menuFileLoad_Click);
 			// 
+			// m_menuFileExit
+			// 
+			this.m_menuFileExit.Index = 2;
+			this.m_menuFileExit.Text = "Exit";
+			this.m_menuFileExit.Click += new System.EventHandler(this.m_menuFileExit_Click);
+			// 
 			// BuckRogersForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(1016, 696);
-			this.Controls.Add(this.button1);
 			this.Controls.Add(this.statusBar1);
 			this.Controls.Add(this.tabControl1);
 			this.Controls.Add(this.label1);
@@ -817,18 +836,23 @@ namespace BuckRogers
 
 			if(ofd.ShowDialog() == DialogResult.OK)
 			{
-				m_map.IconManager.ClearAllIcons();
-				m_controller.LoadGame(ofd.FileName);
-
-				m_clickMode = MapClickMode.Normal;
-
-				statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
-				statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
-			
-				m_movePanel.RefreshPlayerOrder();			
-				m_informationPanel.RefreshAllInfo();
-				m_map.AdvancePlanets();
+				LoadGame(ofd.FileName);
 			}
+		}
+
+		public void LoadGame(string filename)
+		{
+			m_map.IconManager.ClearAllIcons();
+			m_controller.LoadGame(filename);
+
+			m_clickMode = MapClickMode.Normal;
+
+			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+			statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
+			
+			m_movePanel.RefreshPlayerOrder();			
+			m_informationPanel.RefreshAllInfo();
+			m_map.AdvancePlanets();
 		}
 
 		public BuckRogers.GameController GameController

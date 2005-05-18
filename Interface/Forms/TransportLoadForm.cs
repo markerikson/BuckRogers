@@ -225,7 +225,7 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.m_lvUnits);
 			this.Name = "TransportLoadForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "TransportLoadForm";
+			this.Text = "Load Transports";
 			this.ResumeLayout(false);
 
 		}

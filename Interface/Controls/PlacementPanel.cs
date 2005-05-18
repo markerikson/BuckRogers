@@ -20,12 +20,12 @@ namespace BuckRogers.Interface
 
 		private System.Windows.Forms.Label label2;
 		private PlayerListBox m_lbPlayerOrder;
-		private System.Windows.Forms.ListView listView1;
 		private System.Windows.Forms.ColumnHeader columnHeader1;
 		private System.Windows.Forms.ColumnHeader columnHeader2;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Button m_btnPlaceUnits;
 		private System.Windows.Forms.Button m_btnCancelPlacement;
+		private System.Windows.Forms.ListView m_lvAvailableUnits;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -62,9 +62,9 @@ namespace BuckRogers.Interface
 		private void InitializeComponent()
 		{
 			this.label2 = new System.Windows.Forms.Label();
-			this.m_lbPlayerOrder = new PlayerListBox();//new System.Windows.Forms.ListBox();
+			this.m_lbPlayerOrder = new BuckRogers.Interface.PlayerListBox();
 			this.m_btnPlaceUnits = new System.Windows.Forms.Button();
-			this.listView1 = new System.Windows.Forms.ListView();
+			this.m_lvAvailableUnits = new System.Windows.Forms.ListView();
 			this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
 			this.label1 = new System.Windows.Forms.Label();
@@ -81,6 +81,7 @@ namespace BuckRogers.Interface
 			// 
 			// m_lbPlayerOrder
 			// 
+			this.m_lbPlayerOrder.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
 			this.m_lbPlayerOrder.Location = new System.Drawing.Point(92, 4);
 			this.m_lbPlayerOrder.Name = "m_lbPlayerOrder";
 			this.m_lbPlayerOrder.Size = new System.Drawing.Size(136, 95);
@@ -94,16 +95,16 @@ namespace BuckRogers.Interface
 			this.m_btnPlaceUnits.Text = "Place units";
 			this.m_btnPlaceUnits.Click += new System.EventHandler(this.m_btnPlaceUnits_Click);
 			// 
-			// listView1
+			// m_lvAvailableUnits
 			// 
-			this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-																						this.columnHeader1,
-																						this.columnHeader2});
-			this.listView1.Location = new System.Drawing.Point(92, 184);
-			this.listView1.Name = "listView1";
-			this.listView1.Size = new System.Drawing.Size(136, 168);
-			this.listView1.TabIndex = 18;
-			this.listView1.View = System.Windows.Forms.View.Details;
+			this.m_lvAvailableUnits.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+																								 this.columnHeader1,
+																								 this.columnHeader2});
+			this.m_lvAvailableUnits.Location = new System.Drawing.Point(92, 184);
+			this.m_lvAvailableUnits.Name = "m_lvAvailableUnits";
+			this.m_lvAvailableUnits.Size = new System.Drawing.Size(136, 168);
+			this.m_lvAvailableUnits.TabIndex = 18;
+			this.m_lvAvailableUnits.View = System.Windows.Forms.View.Details;
 			// 
 			// columnHeader1
 			// 
@@ -133,7 +134,7 @@ namespace BuckRogers.Interface
 			// 
 			this.Controls.Add(this.m_btnCancelPlacement);
 			this.Controls.Add(this.label1);
-			this.Controls.Add(this.listView1);
+			this.Controls.Add(this.m_lvAvailableUnits);
 			this.Controls.Add(this.m_btnPlaceUnits);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.m_lbPlayerOrder);
@@ -192,6 +193,7 @@ namespace BuckRogers.Interface
 				{
 					//m_lbPlayerOrder.SelectedIndex++;
 					m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
+					RefreshAvailableUnits();
 				}
 				else
 				{
@@ -237,6 +239,43 @@ namespace BuckRogers.Interface
 
 			m_lbPlayerOrder.SelectedIndex = 0;
 			//m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
+		}
+
+		public void RefreshAvailableUnits()
+		{
+			Player p = m_controller.CurrentPlayer;
+
+			UnitCollection uc = p.Units.GetUnits(Territory.NONE);
+			Hashtable ht = uc.GetUnitTypeCount();
+
+			m_lvAvailableUnits.Items.Clear();
+
+			foreach(DictionaryEntry de in ht)
+			{
+				UnitType ut = (UnitType)de.Key;
+				int numUnits = (int)de.Value;
+
+				ListViewItem lvi = new ListViewItem();
+				lvi.Text = ut.ToString();
+				/*
+				if(ut == UnitType.Factory)
+				{
+					numUnits--;
+					
+					if(numUnits == 0)
+					{
+						continue;
+					}
+				}
+				*/
+
+				
+				lvi.SubItems.Add(numUnits.ToString());
+
+				m_lvAvailableUnits.Items.Add(lvi);
+				
+			}
+	
 		}
 
 		public BuckRogers.GameController Controller

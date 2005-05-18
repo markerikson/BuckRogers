@@ -31,6 +31,7 @@ namespace BuckRogers.Interface
 		private TextBox[] m_tbPlayerNames;
 		private DataGridBoolColumn dgbc;
 		private string[] m_playerNames;
+		private string m_loadFileName;
 		private GameOptions m_options;
 		private System.Windows.Forms.Label label8;
 		private System.Windows.Forms.ComboBox m_cbVictoryConditions;
@@ -46,6 +47,7 @@ namespace BuckRogers.Interface
 		private EeekSoft.WinForms.Controls.EnumEditor enumEditor1;
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.CheckedListBox m_chklbOptions;
+		private System.Windows.Forms.Button m_btnLoadGame;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -61,6 +63,8 @@ namespace BuckRogers.Interface
 			enumEditor1.EnumType = typeof(StartingScenarios);
 			enumEditor1.EnumValue = (long)StartingScenarios.Normal;
 			enumEditor1.LableFormat = "{1}";
+
+			m_loadFileName = String.Empty;
 			
 
 			m_cbVictoryConditions.Items.Clear();
@@ -192,6 +196,7 @@ namespace BuckRogers.Interface
 			this.label10 = new System.Windows.Forms.Label();
 			this.m_nudProductionTurn = new System.Windows.Forms.NumericUpDown();
 			this.m_nudProductionMultiplier = new System.Windows.Forms.NumericUpDown();
+			this.m_btnLoadGame = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.m_nudNumTerritories)).BeginInit();
 			this.tabControl1.SuspendLayout();
 			this.tabPage1.SuspendLayout();
@@ -524,15 +529,25 @@ namespace BuckRogers.Interface
 																					0,
 																					0});
 			// 
+			// m_btnLoadGame
+			// 
+			this.m_btnLoadGame.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.m_btnLoadGame.Location = new System.Drawing.Point(332, 336);
+			this.m_btnLoadGame.Name = "m_btnLoadGame";
+			this.m_btnLoadGame.TabIndex = 25;
+			this.m_btnLoadGame.Text = "Load Game";
+			this.m_btnLoadGame.Click += new System.EventHandler(this.m_btnLoadGame_Click);
+			// 
 			// GameSetupForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(516, 362);
+			this.Controls.Add(this.m_btnLoadGame);
 			this.Controls.Add(this.tabControl1);
 			this.Controls.Add(this.button2);
 			this.Controls.Add(this.button1);
 			this.Name = "GameSetupForm";
-			this.Text = "GameSetupForm";
+			this.Text = "Buck Rogers Game Setup";
 			this.Load += new System.EventHandler(this.GameSetupForm_Load);
 			((System.ComponentModel.ISupportInitialize)(this.m_nudNumTerritories)).EndInit();
 			this.tabControl1.ResumeLayout(false);
@@ -558,19 +573,8 @@ namespace BuckRogers.Interface
 			if(gsf.DialogResult == DialogResult.OK)
 			{
 				BuckRogersForm brf = null;
-				
-				/*
-				if(go.OptionalRules["UseTestingSetup"])
-				{
-					brf = new BuckRogersForm();
-					GameController.Options.OptionalRules = go.OptionalRules;
-				}
-				else
-				{
-					brf = new BuckRogersForm(go);
-				}
-				*/
-				brf = new BuckRogersForm(go);
+
+				brf = new BuckRogersForm(go, gsf.LoadFileName);
 
 				Application.Run(brf);
 			}
@@ -717,6 +721,19 @@ namespace BuckRogers.Interface
 			m_nudProductionMultiplier.Enabled = increasedProduction;
 		}
 
+		private void m_btnLoadGame_Click(object sender, System.EventArgs e)
+		{
+			OpenFileDialog ofd = new OpenFileDialog();
+			ofd.Filter = "Buck Rogers save games (*.xml)|*.xml";
+
+			if(ofd.ShowDialog() == DialogResult.OK)
+			{
+				m_loadFileName = ofd.FileName;
+				this.DialogResult = DialogResult.OK;
+				this.Close();
+			}
+		}
+
 
 		public string[] PlayerNames
 		{
@@ -730,6 +747,12 @@ namespace BuckRogers.Interface
 		{
 			get { return this.m_options; }
 			set { this.m_options = value; }
+		}
+
+		public string LoadFileName
+		{
+			get { return this.m_loadFileName; }
+			set { this.m_loadFileName = value; }
 		}
 	}
 }
