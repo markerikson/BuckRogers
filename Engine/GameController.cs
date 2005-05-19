@@ -229,6 +229,11 @@ namespace BuckRogers
 			}
 
 			m_phase = GamePhase.Setup;
+
+			if(PlayersCreated != null)
+			{
+				PlayersCreated();
+			}
 		}
 
 		#endregion

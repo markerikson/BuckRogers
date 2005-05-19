@@ -321,6 +321,7 @@ namespace BuckRogers.Interface
 			// 
 			// button1
 			// 
+			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.button1.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.button1.Location = new System.Drawing.Point(4, 336);
 			this.button1.Name = "button1";
@@ -330,6 +331,7 @@ namespace BuckRogers.Interface
 			// 
 			// button2
 			// 
+			this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.button2.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.button2.Location = new System.Drawing.Point(92, 336);
 			this.button2.Name = "button2";
@@ -531,6 +533,7 @@ namespace BuckRogers.Interface
 			// 
 			// m_btnLoadGame
 			// 
+			this.m_btnLoadGame.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.m_btnLoadGame.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.m_btnLoadGame.Location = new System.Drawing.Point(332, 336);
 			this.m_btnLoadGame.Name = "m_btnLoadGame";
@@ -546,6 +549,7 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.tabControl1);
 			this.Controls.Add(this.button2);
 			this.Controls.Add(this.button1);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Name = "GameSetupForm";
 			this.Text = "Buck Rogers Game Setup";
 			this.Load += new System.EventHandler(this.GameSetupForm_Load);

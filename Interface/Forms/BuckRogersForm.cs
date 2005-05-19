@@ -148,6 +148,7 @@ namespace BuckRogers
 				if(useTesting)
 				{
 					ct.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
+					m_map.IconManager.CreateIcons();
 					ct.Init();
 					m_controller.InitGamelog();
 
