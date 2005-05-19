@@ -186,6 +186,8 @@ namespace BuckRogers
 					m_placementPanel.RefreshAvailableUnits();
 
 					statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+
+					m_menuFileSave.Enabled = false;
 				}
 			}
 			else
@@ -270,7 +272,7 @@ namespace BuckRogers
 		{
 			//m_controller.InitGamelog();
 			m_controller.NextTurn();
-			m_battleController.Gamelog = m_controller.Gamelog;
+			//m_battleController.Gamelog = m_controller.Gamelog;
 			m_battleController.InitGameLog();
 			//m_controller.LogInitialPlacements();
 
@@ -688,13 +690,15 @@ namespace BuckRogers
 							tabControl1.TabPages.Add(m_tpTerritory);
 							tabControl1.TabPages.Add(m_tpInformation);
 
+							m_menuFileSave.Enabled = true;
+
 							StartGame();
 							break;
 						}
 						case GamePhase.Combat:
 						{
 							m_menuFileSave.Enabled = false;
-							m_menuFileLoad.Enabled = false;
+							//m_menuFileLoad.Enabled = false;
 							statusBar1.Panels[0].Text = "Combat phase";
 							//MessageBox.Show("Movement over, time for combat");
 							if(m_combatForm == null)
@@ -750,7 +754,7 @@ namespace BuckRogers
 							m_informationPanel.RefreshAllInfo();
 
 							m_menuFileSave.Enabled = true;
-							m_menuFileLoad.Enabled = true;
+							//m_menuFileLoad.Enabled = true;
 							break;
 						}
 					}
@@ -845,6 +849,8 @@ namespace BuckRogers
 		{
 			m_map.IconManager.ClearAllIcons();
 			m_controller.LoadGame(filename);
+
+			m_battleController.InitGameLog();
 
 			m_clickMode = MapClickMode.Normal;
 

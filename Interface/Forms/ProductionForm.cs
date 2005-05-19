@@ -236,6 +236,7 @@ namespace BuckRogers.Interface
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Name = "ProductionForm";
 			this.ShowInTaskbar = false;
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Production";
 			this.ResumeLayout(false);
 

@@ -312,7 +312,13 @@ namespace BuckRogers
 			{
 				GameOption go = (GameOption)base[Key];
 
-				return go.Value;
+				if(go != null)
+				{
+					return go.Value;
+				}
+
+				return false;
+				
 			}
 			set
 			{

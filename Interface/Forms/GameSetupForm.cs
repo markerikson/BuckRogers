@@ -573,7 +573,6 @@ namespace BuckRogers.Interface
 			Application.Run(gsf);
 
 			GameOptions go = gsf.Options;
-			bool shipSpeeds = go.OptionalRules["DifferentShipSpeeds"];
 			if(gsf.DialogResult == DialogResult.OK)
 			{
 				BuckRogersForm brf = null;

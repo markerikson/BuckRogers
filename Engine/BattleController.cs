@@ -71,6 +71,7 @@ namespace BuckRogers
 		{
 			// also need to update the m_xeCurrentTurn each turn
 
+			m_gamelog = m_controller.Gamelog;
 			m_xnTurns = m_gamelog.GetElementsByTagName("Turns")[0];
 		}
 

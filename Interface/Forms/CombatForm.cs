@@ -409,7 +409,6 @@ namespace BuckRogers.Interface
 			this.m_btnRemoveAttackers.Name = "m_btnRemoveAttackers";
 			this.m_btnRemoveAttackers.TabIndex = 40;
 			this.m_btnRemoveAttackers.Text = "<< Remove";
-			this.m_btnRemoveAttackers.Click += new System.EventHandler(this.m_butRemAttackers_Click);
 			// 
 			// m_btnAddAttackers
 			// 
@@ -417,7 +416,6 @@ namespace BuckRogers.Interface
 			this.m_btnAddAttackers.Name = "m_btnAddAttackers";
 			this.m_btnAddAttackers.TabIndex = 39;
 			this.m_btnAddAttackers.Text = "Add >>";
-			this.m_btnAddAttackers.Click += new System.EventHandler(this.m_butAddAttackers_Click);
 			// 
 			// label6
 			// 
@@ -642,7 +640,6 @@ namespace BuckRogers.Interface
 			this.m_btnRemoveDefenders.Name = "m_btnRemoveDefenders";
 			this.m_btnRemoveDefenders.TabIndex = 48;
 			this.m_btnRemoveDefenders.Text = "<< Remove";
-			this.m_btnRemoveDefenders.Click += new System.EventHandler(this.m_butRemDefenders_Click);
 			// 
 			// m_btnAddDefenders
 			// 
@@ -650,7 +647,6 @@ namespace BuckRogers.Interface
 			this.m_btnAddDefenders.Name = "m_btnAddDefenders";
 			this.m_btnAddDefenders.TabIndex = 47;
 			this.m_btnAddDefenders.Text = "Add >>";
-			this.m_btnAddDefenders.Click += new System.EventHandler(this.m_butAddDefenders_Click);
 			// 
 			// label8
 			// 
@@ -825,6 +821,7 @@ namespace BuckRogers.Interface
 			this.m_labBattlesLeft.Name = "m_labBattlesLeft";
 			this.m_labBattlesLeft.Size = new System.Drawing.Size(44, 16);
 			this.m_labBattlesLeft.TabIndex = 56;
+			this.m_labBattlesLeft.Visible = false;
 			// 
 			// label15
 			// 
@@ -833,6 +830,7 @@ namespace BuckRogers.Interface
 			this.label15.Size = new System.Drawing.Size(60, 16);
 			this.label15.TabIndex = 55;
 			this.label15.Text = "Battles left:";
+			this.label15.Visible = false;
 			// 
 			// m_lbCurrentPlayer
 			// 
@@ -916,7 +914,7 @@ namespace BuckRogers.Interface
 			// CombatForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.ClientSize = new System.Drawing.Size(816, 566);
+			this.ClientSize = new System.Drawing.Size(816, 434);
 			this.ControlBox = false;
 			this.Controls.Add(this.m_btnAddAllDefenders);
 			this.Controls.Add(this.m_btnAddAllAttackers);
@@ -952,6 +950,7 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.label11);
 			this.Controls.Add(this.m_labCurrentPlayer);
 			this.Controls.Add(this.label9);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
 			this.Name = "CombatForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Combat";
@@ -1097,13 +1096,6 @@ namespace BuckRogers.Interface
 			}
 		}
 
-		private void m_butAddAttackers_Click(object sender, System.EventArgs e)
-		{
-			MoveItems(m_lvAttUnused, m_lvAttackers, false);
-
-			EnableAttack();
-		}
-
 		public void DoAddAttackersCommand(Command cmd)
 		{
 			MoveItems(m_lvAttUnused, m_lvAttackers, false);
@@ -1182,27 +1174,6 @@ namespace BuckRogers.Interface
 		public void UpdateAddRemoveCommands(Command cmd)
 		{
 			cmd.Enabled = (m_battleController.Status == BattleStatus.Setup);
-		}
-
-		private void m_butRemAttackers_Click(object sender, System.EventArgs e)
-		{
-			MoveItems(m_lvAttackers, m_lvAttUnused, false);
-
-			EnableAttack();
-		}
-
-		private void m_butAddDefenders_Click(object sender, System.EventArgs e)
-		{
-			MoveItems(m_lvEnemyLive, m_lvDefenders, true);
-
-			EnableAttack();
-		}
-
-		private void m_butRemDefenders_Click(object sender, System.EventArgs e)
-		{
-			MoveItems(m_lvDefenders, m_lvEnemyLive, true);
-
-			EnableAttack();
 		}
 
 		private void MoveItems(ListView origin, ListView destination, bool includeTerritory)
@@ -1292,11 +1263,6 @@ namespace BuckRogers.Interface
 		}
 
 		#region Combat button handlers
-		private void m_btnAttack_Click(object sender, System.EventArgs e)
-		{
-			DoAttack();
-		}
-
 		public void DoAttackCommand(Command cmd)
 		{
 			DoAttack();

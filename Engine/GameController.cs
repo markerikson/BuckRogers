@@ -883,7 +883,9 @@ namespace BuckRogers
 					{
 						bool conquerTerritory = true;
 
-						Hashtable unitCount = t.Units.GetPlayerUnitCounts();
+						Hashtable unitCount = t.Units.GetUnitTypeCount();
+
+
 						unitCount.Remove(UnitType.Leader);
 						
 						// can't conquer a territory with just a Leader
@@ -896,7 +898,9 @@ namespace BuckRogers
 						{
 							if(!(t.System is Asteroid))
 							{
-								conquerTerritory = unitCount.ContainsKey(UnitType.Trooper) || unitCount.ContainsKey(UnitType.Gennie);
+								bool isTrooper = unitCount.ContainsKey(UnitType.Trooper);
+								bool isGennie = unitCount.ContainsKey(UnitType.Gennie);
+								conquerTerritory =  isTrooper || isGennie;
 							}
 						}
 						if(conquerTerritory)
@@ -1748,6 +1752,81 @@ namespace BuckRogers
 						gameOver = true;
 						m_winner = highest;
 					}
+					break;
+				}
+				case VictoryConditions.LastLeaderLeft:
+				{
+					UnitCollection leaders = new UnitCollection();
+
+					foreach(Player p in m_players)
+					{
+						leaders.AddAllUnits(p.Units.GetUnits(UnitType.Leader));
+					}
+
+					switch(leaders.Count)
+					{
+						case 1:
+						{
+							gameOver = true;
+							m_winner = leaders[0].Owner;
+							break;
+						}
+						case 0:
+						{
+							gameOver = true;
+							m_winner = Player.NONE;
+							break;
+						}
+					}
+					break;
+				}
+				case VictoryConditions.NumberOfTerritories:
+				{
+					int numTerritories = m_options.NumTerritoriesNeeded;
+
+					m_winner = null;
+
+					foreach(Player p in m_players)
+					{
+						if(p.Territories.Count >= numTerritories)
+						{
+							m_winner = p;
+							gameOver = true;
+							break;
+						}
+					}
+
+					break;
+				}
+				case VictoryConditions.ThreePlanets:
+				{
+					int[] numDisplaysOwned = new int[m_players.Length];
+					int[] numTerritoriesOwned = new int[m_players.Length];
+
+					for(int i = 0; i < m_players.Length; i++)
+					{
+						numDisplaysOwned[i] = 0;
+						numTerritoriesOwned[i] = 0;
+					}
+
+					string[] planets = {"Mercury", "Venus", "Mars"};
+
+					for(int i = 0; i < planets.Length; i++)
+					{
+						OrbitalSystem os = (OrbitalSystem)m_map.Planets[planets[i]];
+						Player owner = os.Owner;
+
+						if(owner != Player.NONE)
+						{
+							numDisplaysOwned[Array.IndexOf(m_players, owner)]++;
+						}
+					}
+
+					OrbitalSystem earth = (OrbitalSystem)m_map.Planets["Earth"];
+					OrbitalSystem moon = (OrbitalSystem)m_map.Planets["Moon"];
+
+
+
 					break;
 				}
 			}

@@ -16,7 +16,7 @@ namespace BuckRogers
         NumberOfTerritories,
 		OneEarthYear,
 		ThreePlanets,
-		EarthMoon,
+		EarthMoonMars,
 		HomePlanetPlusTwo,
 	}
 
@@ -45,54 +45,38 @@ namespace BuckRogers
 
 		public GameOptions()
 		{
-			string[] optionShortNames = {"UseTestingSetup",
-											"DifferentShipSpeeds", 
-											"DifferentTroopSpeeds", 
-											"PassingFire", 
-											"ControlMarkersFight",
-											"ConquerWithGround", 
-											"CombatRetreat", 
-											"LimitedFactories", 
-											"IncreasedProduction", 
-											"CombineFactories",
-											"PartialPlanetControl", 
-											"SpecializedGennies", 
-											"MergeFarOrbits", 
-											"SlingshotEffect",
-											"FactoryDefense", 
-											"DeployAnywhere", 
-											"TransportedFactoriesBuild", 
-											"FreePlanetaryFactory",
-											"KillerAsteroids",
-											
-											"LimitedTwoPlayerSetup",
-											};
-			string[] optionDescriptions = {"Use the sample player setup and deployment",
-											"Spaceships have different speeds", 
-											"Gennies and troopers have different speeds",
-											"Moving units can be fired at",
-											"Control markers must be killed to conquer the territory",
-											"Only ground units can conquer planetary territories",
-											"Players can retreat from combat",
-											"Limited number of factories per planet",
-											"Increased production after turn N",
-											"Factories may combine output to produce faster",
-											"Players only need a majority of territories to own a planet",
-											"Gennies on different planets have different abilities",
-											"No cost to move from far orbit to the solar system",
-											"Ships can slingshot around planets or the Sun",
-											"Factories provide a defensive bonus",
-											"Newly produced units may be deployed anywhere",
-											"Factories in transports can build fighters",
-											"First player to own each planet gets a free factory",
-											"Asteroids may be launched towards the sun",
-											"No extra units or territories in two/three player games",
-											  };
+			string[,] optionDetails = new string[,]
+			{
+				{"UseTestingSetup",				"Use the sample player setup and deployment"},
+				{"LimitedTwoPlayerSetup",		"No extra units or territories in two/three player games"},
+				{"ConquerWithGround",				"Only ground units can conquer planetary territories"},
+				
+				/*
+				{"RandomTurnOrder",				"Turn order is completely random"},
+				{"DifferentShipSpeeds",			"Spaceships have different speeds"},
+				{"DifferentTroopSpeeds",			"Gennies and troopers have different speeds"},
+				{"PassingFire",					"Moving units can be fired at"},
+				{"ControlMarkersFight",			"Control markers must be killed to conquer the territory"},				
+				{"CombatRetreat",					"Players can retreat from combat"},
+				{"LimitedFactories",				"Limited number of factories per planet"},
+				{"IncreasedProduction",			"Increased production after turn N"},
+				{"CombineFactories",				"Factories may combine output to produce faster"},
+				{"PartialPlanetControl",			"Players only need a majority of territories to own a planet"},
+				{"SpecializedGennies",			"Gennies on different planets have different abilities"},
+				{"MergeFarOrbits",				"No cost to move from far orbit to the solar system"},
+				{"SlingshotEffect",				"Ships can slingshot around planets or the Sun",},
+				{"FactoryDefense",				"Factories provide a defensive bonus",},
+				{"DeployAnywhere",				"Newly produced units may be deployed anywhere",},
+				{"TransportedFactoriesBuild",	"Factories in transports can build fighters"},
+				{"FreePlanetaryFactory",			"First player to own each planet gets a free factory"},
+				{"KillerAsteroids",				"Asteroids may be launched towards the sun"},
+				*/
+			};
 
 			m_optionalRules = new OptionsHashlist();
-			for(int i = 0; i < optionDescriptions.Length; i++)
+			for(int i = 0; i <= optionDetails.GetUpperBound(0); i++)
 			{
-				m_optionalRules.Add(optionShortNames[i], new GameOption(optionShortNames[i],  false, optionDescriptions[i]));
+				m_optionalRules.Add(optionDetails[i, 0], new GameOption(optionDetails[i, 0],  false, optionDetails[i, 1]));
 			}
 
 			m_victoryConditions = VictoryConditions.TotalAnnihilation;

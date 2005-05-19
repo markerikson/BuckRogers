@@ -548,7 +548,7 @@ namespace BuckRogers
 			foreach(Unit unit in List)
 			{
 					Player player = unit.Owner;
-					int num = 0;
+					int num = 1;
 					if(!count.ContainsKey(player))
 					{
 						count[player] = num;
