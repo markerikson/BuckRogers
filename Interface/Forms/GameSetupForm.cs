@@ -29,7 +29,6 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.Button button2;
 		private System.Windows.Forms.ComboBox m_cbNumPlayers;
 		private TextBox[] m_tbPlayerNames;
-		private DataGridBoolColumn dgbc;
 		private string[] m_playerNames;
 		private string m_loadFileName;
 		private GameOptions m_options;
@@ -98,50 +97,6 @@ namespace BuckRogers.Interface
 				m_chklbOptions.Items.Add(option.Description);
 			}
 
-
-			/*
-			DataGridTableStyle dgts=new DataGridTableStyle();			
-			dgts.MappingName = m_options.OptionalRules.GetListName(null);
-
-			dgbc=new DataGridBoolColumn();			
-			dgbc.MappingName="Value";
-			dgbc.AllowNull=false;
-			dgbc.Width = 20;
-			dgts.GridColumnStyles.Add(dgbc);			
-
-			DataGridTextBoxColumn dgtbc=new DataGridTextBoxColumn();
-			dgtbc.MappingName ="Description";
-			dgtbc.HeaderText = "Option";
-			dgtbc.ReadOnly = true;
-			dgts.GridColumnStyles.Add(dgtbc);
-			
-			tabPage2.BindingContext = new BindingContext();			
-
-			this.dataGrid1.TableStyles.Clear();
-			this.dataGrid1.TableStyles.Add(dgts);
-			
-			dataGrid1.DataSource = m_options.OptionalRules;
-
-			int numCols = dataGrid1.TableStyles[0].GridColumnStyles.Count;//( (DataTable) dataGrid1.DataSource ).Columns.Count; 
-			//the fudge -4 is for the grid borders 
-			int targetWidth = dataGrid1.ClientSize.Width -
-				SystemInformation.VerticalScrollBarWidth - 4; 
-			dataGrid1.TableStyles[0].RowHeaderWidth = 0;
-			int runningWidthUsed = dataGrid1.TableStyles[0].RowHeaderWidth;//dataGrid1.TableStyles[ "customers" ].RowHeaderWidth; 
-            
-			for ( int i = 0; i < numCols - 1; ++i ) 
-			{
-				runningWidthUsed += 
-					dataGrid1.TableStyles[0].GridColumnStyles[ i ].Width;
-			}
-
-			if ( runningWidthUsed < targetWidth ) 
-			{
-				dataGrid1.TableStyles[0].GridColumnStyles[ numCols - 1 ].Width = 
-					targetWidth - runningWidthUsed; 
-			}
-			*/
-			
 		}
 
 		/// <summary>

@@ -381,6 +381,14 @@ namespace BuckRogers
 			{
 				os.CalculateSurfaceAreas();
 			}
+
+			string[] satelliteNames = {"Mariposas", "Hielo", "L-4 Colony", "L-5 Colony", "Deimos"};
+
+			for(int i = 0; i < satelliteNames.Length; i++)
+			{
+				Territory t = this[satelliteNames[i]];
+				t.IsSatellite = true;
+			}
 		}
 
 		private void InitOrbit(OrbitalPath orbit, string orbitName, bool connectOrbit)

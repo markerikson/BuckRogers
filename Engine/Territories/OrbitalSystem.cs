@@ -190,7 +190,14 @@ namespace BuckRogers
 			foreach(Territory t in m_surface)
 			{
 				// skip over moons and satellites
+				/*
 				if(t.Neighbors.Count == 1)
+				{
+					continue;
+				}
+				*/
+
+				if(t.IsSatellite)
 				{
 					continue;
 				}

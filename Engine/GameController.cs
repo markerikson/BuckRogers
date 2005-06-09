@@ -896,7 +896,7 @@ namespace BuckRogers
 
 						if(m_options.OptionalRules["ConquerWithGround"])
 						{
-							if(!(t.System is Asteroid))
+							if(!(t.System is Asteroid) && !t.IsSatellite)
 							{
 								bool isTrooper = unitCount.ContainsKey(UnitType.Trooper);
 								bool isGennie = unitCount.ContainsKey(UnitType.Gennie);
@@ -1825,7 +1825,75 @@ namespace BuckRogers
 					OrbitalSystem earth = (OrbitalSystem)m_map.Planets["Earth"];
 					OrbitalSystem moon = (OrbitalSystem)m_map.Planets["Moon"];
 
+					foreach(Territory t in earth.Ground.Values)
+					{
+						if(t.Owner == Player.NONE)
+						{
+							continue;
+						}
 
+						numTerritoriesOwned[Array.IndexOf(m_players, t.Owner)]++;
+					}
+
+					foreach(Territory t in moon.Ground.Values)
+					{
+						if(t.Owner == Player.NONE)
+						{
+							continue;
+						}
+
+						numTerritoriesOwned[Array.IndexOf(m_players, t.Owner)]++;
+					}
+
+					for(int i = 0; i < numTerritoriesOwned.Length; i++)
+					{
+						if(numTerritoriesOwned[i] >= 7)
+						{
+							numDisplaysOwned[i]++;
+							break;
+						}
+					}
+
+					for(int i = 0; i < numTerritoriesOwned.Length; i++)
+					{
+						numTerritoriesOwned[i] = 0;
+					}
+
+					foreach(OrbitalSystem os in m_map.Planets.Values)
+					{
+						Asteroid asteroid = os as Asteroid;
+
+						if(asteroid == null)
+						{
+							continue;
+						}
+
+						Player owner = asteroid.Owner;
+
+						if(owner != Player.NONE)
+						{
+							numTerritoriesOwned[Array.IndexOf(m_players, owner)]++;
+						}
+					}
+
+					for(int i = 0; i < numTerritoriesOwned.Length; i++)
+					{
+						if(numTerritoriesOwned[i] >= 5)
+						{
+							numDisplaysOwned[i]++;
+							break;
+						}
+					}
+
+					for(int i = 0; i < numDisplaysOwned.Length; i++)
+					{
+						if(numDisplaysOwned[i] >= 3)
+						{
+							m_winner = m_players[i];
+							gameOver = true;
+							break;
+						}
+					}
 
 					break;
 				}

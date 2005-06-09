@@ -198,7 +198,7 @@ namespace BuckRogers
 				tabControl1.TabPages.Add(m_tpInformation);
 				LoadGame(loadFileName);
 				m_map.IconManager.CreateIcons();
-				m_map.IconManager.LoadUnitIconLocations(false, true);
+				//m_map.IconManager.LoadUnitIconLocations(false, true);
 			}
 
 
