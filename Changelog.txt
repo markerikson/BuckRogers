@@ -1,3 +1,18 @@
+Version 0.7.7:
+- ADD:  Games can be loaded from the Setup window
+- ADD:  Additional victory conditions (LastLeaderLeft, 
+		NumberOfTerritories, ThreePlanets
+- CHG:  Unimplemented game options are now hidden
+- CHG:  Saving disabled during unit placement
+- CHG:  Satellite territories now checked properly during 
+		"ground only" games
+- CHG:  Unit transfer dialogs now change the appropriate items,
+		instead of creating new items
+- BUG:  Icons weren't being loaded properly when using the sample game
+- BUG:  Gamelog restarted after loading a game
+- BUG:  Code for "Ground Units Only" was checking the wrong units
+- BUG:  Unit movement buttons were triggering actions twice
+
 Version 0.7.6:
 - ADD:  Games can now be saved and loaded.
 - CHG:  Unit icons are now actual icons, rather than text labels
