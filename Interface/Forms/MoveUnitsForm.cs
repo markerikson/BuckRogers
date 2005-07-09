@@ -99,21 +99,25 @@ namespace BuckRogers.Interface
 			bool addNewItem = true;
 			if(destination.Items.Count > 0)
 			{
-				ListViewItem lastItem = destination.Items[destination.Items.Count - 1];
-			
-				//string liName = lastItem.SubItems[0].Text;
-				string liType = lastItem.SubItems[0].Text;
-				string liCount = lastItem.SubItems[1].Text;
-				string liMovesLeft = lastItem.SubItems[2].Text;
-
-				if(liType == type && liMovesLeft == numMovesLeft)
+				for(int i = 0; i < destination.Items.Count; i++)
 				{
-					addNewItem = false;
-					int numCurrent = Int32.Parse(lastItem.SubItems[1].Text);
-					numCurrent += numToMove;
+					ListViewItem targetItem = destination.Items[i];
 
-					lastItem.SubItems[1].Text = numCurrent.ToString();
-				}
+					//string liName = lastItem.SubItems[0].Text;
+					string liType = targetItem.SubItems[0].Text;
+					string liCount = targetItem.SubItems[1].Text;
+					string liMovesLeft = targetItem.SubItems[2].Text;
+
+					if (liType == type && liMovesLeft == numMovesLeft)
+					{
+						addNewItem = false;
+						int numCurrent = Int32.Parse(targetItem.SubItems[1].Text);
+						numCurrent += numToMove;
+
+						targetItem.SubItems[1].Text = numCurrent.ToString();
+						break;
+					}
+				}				
 			}
 			
 			if(addNewItem)

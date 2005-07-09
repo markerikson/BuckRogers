@@ -61,7 +61,7 @@ namespace BuckRogers.Interface
 		private Hashtable m_territories;
 		private Hashtable m_orbitOffsets;
 		
-		private int m_idxPlanets;
+		//private int m_idxPlanets;
 		private PClip[] m_planets;
 
 		private float[] m_zoomFactors;
@@ -126,7 +126,7 @@ namespace BuckRogers.Interface
 
 			m_orbits = new PNode[7][];
 			m_planets = new PClip[5];
-			m_idxPlanets = 0;
+			//m_idxPlanets = 0;
 
 			m_ao = new PNode[32];
 			m_tmo = new PNode[32];

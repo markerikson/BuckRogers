@@ -157,7 +157,7 @@ namespace BuckRogers
 		private XmlElement m_xeCurrentPlayer;
 
 		private Hashlist m_battles;	
-		public TurnRoll[] m_rolls;
+		private TurnRoll[] m_rolls;
 
 		#endregion
 

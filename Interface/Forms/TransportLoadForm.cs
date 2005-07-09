@@ -639,19 +639,25 @@ namespace BuckRogers.Interface
 			}			
 			else
 			{
-				ListViewItem lvi = m_lvUnits.Items[m_lvUnits.Items.Count - 1];
-				
-				if(lvi.Text == type && lvi.SubItems[2].Text == moves.ToString())
+				for(int i = 0; i < m_lvUnits.Items.Count; i++)
 				{
-					string sNumUnits = lvi.SubItems[1].Text;
-					int numUnits = Int32.Parse(sNumUnits);
-					numUnits++;
-					lvi.SubItems[1].Text = numUnits.ToString();
-				}
-				else
-				{
-					addNew = true;
-				}
+					ListViewItem lvi = m_lvUnits.Items[i];
+
+					if (lvi.Text == type && lvi.SubItems[2].Text == moves.ToString())
+					{
+						string sNumUnits = lvi.SubItems[1].Text;
+						int numUnits = Int32.Parse(sNumUnits);
+						numUnits++;
+						lvi.SubItems[1].Text = numUnits.ToString();
+
+						addNew = false;
+						break;
+					}
+					else
+					{
+						addNew = true;
+					}
+				}				
 			}
 
 			if(addNew)
