@@ -1221,29 +1221,36 @@ namespace BuckRogers.Interface
 			bool addNewItem = true;
 			if(destination.Items.Count > 0)
 			{
-				ListViewItem lastItem = destination.Items[destination.Items.Count - 1];
-			
-				string liName = lastItem.SubItems[0].Text;
-				string liType = lastItem.SubItems[1].Text;
+                for (int i = 0; i < destination.Items.Count; i++)
+                {
+                    //ListViewItem lastItem = destination.Items[destination.Items.Count - 1];
+                    ListViewItem lastItem = destination.Items[i];
 
-				string liTerritory = "";
+                    string liName = lastItem.SubItems[0].Text;
+                    string liType = lastItem.SubItems[1].Text;
 
-				if(includeTerritory)
-				{
-					liTerritory = lastItem.SubItems[3].Text;
-				}
+                    string liTerritory = "";
 
-				if(liName == name && liType == type)
-				{
-					if(!includeTerritory || (includeTerritory && territory == liTerritory))
-					{
-						addNewItem = false;
-						int numCurrent = Int32.Parse(lastItem.SubItems[2].Text);
-						numCurrent += numToMove;
+                    if (includeTerritory)
+                    {
+                        liTerritory = lastItem.SubItems[3].Text;
+                    }
 
-						lastItem.SubItems[2].Text = numCurrent.ToString();
-					}
-				}
+                    if (liName == name && liType == type)
+                    {
+                        if (!includeTerritory || (includeTerritory && territory == liTerritory))
+                        {
+                            addNewItem = false;
+                            int numCurrent = Int32.Parse(lastItem.SubItems[2].Text);
+                            numCurrent += numToMove;
+
+                            lastItem.SubItems[2].Text = numCurrent.ToString();
+
+                            break;
+                        }
+                    }
+                }
+				
 			}
 			
 			if(addNewItem)
