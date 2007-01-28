@@ -37,6 +37,13 @@ namespace BuckRogers.Interface
 		//just for internal use
 		private bool		m_CtrlPressed = false;
 		private bool		m_AllowMultiSelect = true;
+        private bool m_allowSelection = false;
+
+        public bool AllowSelection
+        {
+            get { return m_allowSelection; }
+            set { m_allowSelection = value; }
+        }
 
 		/// <summary>
 		/// The ctor.
@@ -102,6 +109,11 @@ namespace BuckRogers.Interface
 
 			if(e.Button != MouseButtons.Left) 
 				return;
+
+            if(!this.AllowSelection)
+            {
+                return;
+            }
 
 			//determine which item was clicked
 			int index = ItemHitTest(e.X,e.Y);
