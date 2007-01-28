@@ -608,6 +608,15 @@ namespace BuckRogers.Interface
 
 		private void m_btnEndMoves_Click(object sender, System.EventArgs e)
 		{
+            DialogResult dr = MessageBox.Show("Do you want to end your turn?", "End Turn?", MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if(dr != DialogResult.Yes)
+            {
+                return;
+            }
+
+
 			m_controller.EndMovePhase();
 			if(m_controller.NextPlayer())
 			{
