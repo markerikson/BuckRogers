@@ -1164,7 +1164,11 @@ namespace BuckRogers
 						u.CurrentTerritory = t;
 						u.MovesLeft++;
 					}
+
+                   
 				}
+
+                
 
 				//foreach(Unit u in ma.Units)
 				for(int i = 0; i < ma.Units.Count; i++)
@@ -1188,6 +1192,22 @@ namespace BuckRogers
 						TerritoryOwnerChanged(this, tea);
 					}
 				}
+
+                if (TerritoryUnitsChanged != null)
+                {
+                    TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
+                    tuea.Player = ma.Owner;
+                    tuea.Territory = (Territory)ma.Territories[ma.Territories.Count - 1];
+                    tuea.Units = ma.Units;
+                    tuea.Added = false;
+
+                    TerritoryUnitsChanged(this, tuea);
+
+                    tuea.Territory = ma.StartingTerritory;
+                    tuea.Added = true;
+
+                    TerritoryUnitsChanged(this, tuea);
+                }
 			}
 			else if(action is TransportAction)
 			{
@@ -1209,6 +1229,8 @@ namespace BuckRogers
 
 			m_checkedActions.Remove(action);
 			m_undoneActions.Add(action);
+			
+			// TODO: Need to refresh the appropriate territories here
 
 			return action;
 		}
@@ -1741,6 +1763,7 @@ namespace BuckRogers
 						// space zones
 						Player highest = m_players[0];
 
+						// TODO: What happens if there's a tie?
 						foreach(Player p in m_players)
 						{
 							if(p.Territories.Count > highest.Territories.Count)
@@ -1786,6 +1809,7 @@ namespace BuckRogers
 
 					m_winner = null;
 
+					// TODO: What happens if there's a tie?
 					foreach(Player p in m_players)
 					{
 						if(p.Territories.Count >= numTerritories)
