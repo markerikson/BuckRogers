@@ -11,12 +11,24 @@ namespace BuckRogers
 	
 	public enum VictoryConditions
 	{
+        [Description("Total Annihilation")]
 		TotalAnnihilation, 
+
+        [Description("Last Leader Left")]
 		LastLeaderLeft,
+
+        [Description("Number of Territories")]
         NumberOfTerritories,
+
+        [Description("One Earth Year")]
 		OneEarthYear,
+
+        [Description("Own Three Planets")]
 		ThreePlanets,
+
+        [Description("Own Earth, Moon, and Mars")]
 		EarthMoonMars,
+
 		HomePlanetPlusTwo,
 	}
 
@@ -45,11 +57,12 @@ namespace BuckRogers
 
 		public GameOptions()
 		{
-			string[,] optionDetails = new string[,]
+            string[,] optionDetails = new string[,]
 			{
 				{"UseTestingSetup",				"Use the sample player setup and deployment"},
 				{"LimitedTwoPlayerSetup",		"No extra units or territories in two/three player games"},
 				{"ConquerWithGround",				"Only ground units can conquer planetary territories"},
+                {"AllTerritoriesOwned",          "All ground territories have an owner at the start"},
 				
 				/*
 				{"RandomTurnOrder",				"Turn order is completely random"},

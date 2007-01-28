@@ -415,49 +415,59 @@ namespace BuckRogers
 		public void AssignTerritories()
 		{
 
-			ArrayList ground = new ArrayList();
+			ArrayList groundTerritories = new ArrayList();
 			foreach(Territory t in m_map.Graph.Nodes)
 			{
 				if(t.Type == TerritoryType.Ground)
 				{
-					ground.Add(t);
+					groundTerritories.Add(t);
 				}
 			}
-			
-			foreach(Player p in m_players)
+
+            int numPlayers = m_players.Length;
+
+            int[] territoriesNeeded = new int[numPlayers];
+			int totalTerritoriesToAssign = 0;
+
+            if (m_options.OptionalRules["AllTerritoriesOwned"])
+            {
+				totalTerritoriesToAssign = groundTerritories.Count;
+            }
+			else
 			{
 				int numTerritories = 6;
 
-				if(!m_options.OptionalRules["LimitedTwoPlayerSetup"])
+				// TODO: Maybe re-implement "LimitedTwoPlayerSetup" stuff here
+				if (m_players.Length == 2)
 				{
-					if(m_players.Length == 2)
-					{
-						numTerritories = 12;
-					}
-					else if(m_players.Length == 3)
-					{
-						numTerritories = 9;
-					}
+					numTerritories = 12;
 				}
-				
-
-				for(int i = 0; i < numTerritories; i++)
+				else if (m_players.Length == 3)
 				{
-					int idx = Utility.Twister.Next(ground.Count - 1);
-					Territory t = (Territory)ground[idx];
-					t.Owner = p;
-					ground.Remove(t);
-
-					if(TerritoryOwnerChanged != null)
-					{
-						TerritoryEventArgs tea = new TerritoryEventArgs();
-						tea.Name = t.Name;
-						tea.Owner = p;
-
-						TerritoryOwnerChanged(this, tea);
-					}
+					numTerritories = 9;
 				}
+
+				totalTerritoriesToAssign = numTerritories * numPlayers;
 			}
+
+			
+			for(int i = 0; i < totalTerritoriesToAssign; i++)
+			{
+				Player p = m_players[i % numPlayers];
+				int idx = Utility.Twister.Next(groundTerritories.Count - 1);
+				Territory t = (Territory)groundTerritories[idx];
+				t.Owner = p;
+				groundTerritories.Remove(t);
+
+				if (TerritoryOwnerChanged != null)
+				{
+					TerritoryEventArgs tea = new TerritoryEventArgs();
+					tea.Name = t.Name;
+					tea.Owner = p;
+
+					TerritoryOwnerChanged(this, tea);
+				}				
+			}			
 		}
 
 		public void CreateInitialUnits()
