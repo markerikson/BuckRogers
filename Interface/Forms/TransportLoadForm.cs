@@ -299,7 +299,10 @@ namespace BuckRogers.Interface
 					m_lvUnits.Items.Add(lvif);
 				}
 			}
-			
+
+			// start by selecting the first item on each side
+			m_tvTransports.SelectedNode = m_tvTransports.Nodes[0];
+			m_lvUnits.Items[0].Selected = true;
 		}
 
 		private void AddUnit(TreeNode node, Unit u)

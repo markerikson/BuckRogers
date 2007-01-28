@@ -68,9 +68,11 @@ namespace BuckRogers.Interface
 
 			m_cbVictoryConditions.Items.Clear();
 
-			foreach(string condition in Enum.GetNames(typeof(VictoryConditions)))
+			//foreach(string condition in Enum.GetNames(typeof(VictoryConditions)))
+			foreach(VictoryConditions vc in Enum.GetValues(typeof(VictoryConditions)))
 			{
-				m_cbVictoryConditions.Items.Add(condition);
+				string description = Utility.GetDescriptionOf(vc);
+				m_cbVictoryConditions.Items.Add(description);
 			}
 
 			m_cbVictoryConditions.SelectedIndex = 0;
@@ -545,6 +547,7 @@ namespace BuckRogers.Interface
 
 			string errorMessage = "";
 
+            // If we're testing, we don't care about the players
 			if(!Options.OptionalRules["UseTestingSetup"])
 			{
 				for(int i = 0; i < numPlayers; i++)
@@ -556,20 +559,50 @@ namespace BuckRogers.Interface
 						break;
 					}
 					al.Add(name);
+                    goto ErrorMessage;
 				}
 
-				if(al.Contains(""))
+				if(al.Contains(string.Empty))
 				{
 					errorMessage = "A player's name cannot be empty";
-				}
-
-				if(errorMessage != "")
-				{
-					MessageBox.Show(errorMessage, "Setup", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-					return;
+                    goto ErrorMessage;
 				}
 			}
+
+            // Need to know the victory condition before we can test other stuff
+            //string conditionName = (string)m_cbVictoryConditions.SelectedItem;
+            //VictoryConditions vc = (VictoryConditions)Enum.Parse(typeof(VictoryConditions), conditionName);
+
+			string conditionDescription = (string)m_cbVictoryConditions.SelectedItem;
+			VictoryConditions vc = (VictoryConditions)Utility.GetEnumFromDescription(conditionDescription, typeof(VictoryConditions));
+
+            m_options.WinningConditions = vc;
+
+            if (vc == VictoryConditions.NumberOfTerritories)
+            {
+                int numTerritories = (int)m_nudNumTerritories.Value;
+                m_options.NumTerritoriesNeeded = numTerritories;
+            }
+
+            if (Options.OptionalRules["AllTerritoriesOwned"] 
+                && vc == VictoryConditions.NumberOfTerritories)
+            {
+                if( (numPlayers == 2 && m_options.NumTerritoriesNeeded < 25)
+                    || (numPlayers == 3 && m_options.NumTerritoriesNeeded < 20))
+                {
+                    errorMessage = "Please increase the number of territories needed to win, add more players, or turn off the \"All Territories Owned\" option.";
+                    goto ErrorMessage;
+                }
+            }
+
+        ErrorMessage:
+            if (errorMessage != "")
+            {
+                MessageBox.Show(errorMessage, "Setup", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 			
+
 
 			this.DialogResult = DialogResult.OK;
 			
@@ -582,16 +615,7 @@ namespace BuckRogers.Interface
 
 			m_options.PlayerNames = m_playerNames;
 
-			string conditionName = (string)m_cbVictoryConditions.SelectedItem;
-			VictoryConditions vc = (VictoryConditions)Enum.Parse(typeof(VictoryConditions), conditionName);
 
-			m_options.WinningConditions = vc;
-
-			if(vc == VictoryConditions.NumberOfTerritories)
-			{
-				int numTerritories = (int)m_nudNumTerritories.Value;
-				m_options.NumTerritoriesNeeded = numTerritories;
-			}
 
 			if(m_options.OptionalRules["IncreasedProduction"])
 			{
@@ -612,9 +636,12 @@ namespace BuckRogers.Interface
 
 		private void m_cbVictoryConditions_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
-			string conditionName = (string)m_cbVictoryConditions.SelectedItem;
+			//string conditionName = (string)m_cbVictoryConditions.SelectedItem;
+			//VictoryConditions vc = (VictoryConditions)Enum.Parse(typeof(VictoryConditions), conditionName);
 
-			VictoryConditions vc = (VictoryConditions)Enum.Parse(typeof(VictoryConditions), conditionName);
+			string conditionDescription = (string)m_cbVictoryConditions.SelectedItem;
+			VictoryConditions vc = (VictoryConditions)Utility.GetEnumFromDescription(conditionDescription, typeof(VictoryConditions));
+
 
 			if(vc == VictoryConditions.NumberOfTerritories)
 			{
@@ -666,6 +693,8 @@ namespace BuckRogers.Interface
 			{
 				m_tbPlayerNames[i].Enabled = true;
 			}
+
+
 		}
 
 		private void m_chklbOptions_ItemCheck(object sender, System.Windows.Forms.ItemCheckEventArgs e)

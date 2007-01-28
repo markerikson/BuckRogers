@@ -1,6 +1,9 @@
 using System;
 using System.Collections;
 using CenterSpace.Free;
+using System.ComponentModel;
+using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace BuckRogers
 {
@@ -75,5 +78,91 @@ namespace BuckRogers
 			get { return m_twister2; }
 			set { m_twister2 = value; }
 		}
-	}
+
+        public static string GetEnumValueDescription(object value)
+        {
+            string result= string.Empty;
+
+            if (value != null)
+            {
+                result=value.ToString();
+                // Get the type from the object.
+                Type type = value.GetType();
+
+                try
+                {
+                    result=Enum.GetName(type,value);
+                    // Get the member on the type that corresponds to the value passed in.
+                    FieldInfo fieldInfo = type.GetField(result);
+                    // Now get the attribute on the field.
+                    object[] attributeArray=fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute),false);
+                    DescriptionAttribute attribute=null;
+
+                    if (attributeArray.Length > 0)
+                    {
+                        attribute = (DescriptionAttribute)attributeArray[0];
+                    }
+                    if (attribute!=null)
+                    {
+                        result=attribute.Description;
+                    }
+                }
+                catch (ArgumentNullException)
+                {
+                    //We shouldn't ever get here, but it means that value was null, so we'll just go with the default.
+                    result = string.Empty;
+                }
+                catch (ArgumentException)
+                {
+                    //we didn't have an enum.
+                    result=value.ToString();
+                }
+            }
+            // Return the description.
+            return result;
+        }
+
+        public static string GetDescriptionOf(Enum enumType) 
+        {
+            // By default, the result is just ToString with
+            // a space in front of each capital letter
+
+            Regex capitalLetterMatch = new Regex("\\B[A-Z]", RegexOptions.Compiled);
+            string enumDescription = capitalLetterMatch.Replace(enumType.ToString(), " $&");  
+            MemberInfo[] memberInfo = enumType.GetType().GetMember(enumType.ToString());                     
+
+            if (memberInfo != null && memberInfo.Length == 1) 
+            {
+                object[] customAttributes = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
+
+                if (customAttributes.Length == 1) 
+                {
+                    enumDescription = ((DescriptionAttribute)customAttributes[0]).Description;
+                }
+            }
+
+            return enumDescription;
+
+        }
+
+		public static Enum GetEnumFromDescription(string description, Type enumType)
+		{
+			Hashtable ht = new Hashtable();
+			Enum result = null;
+
+			foreach (Enum e in Enum.GetValues(enumType))
+			{
+				string enumDescription = GetDescriptionOf(e);
+				
+				if(description.Equals(enumDescription))
+				{
+					result = e;
+					break;
+				}
+			}
+
+			return result;
+		}
+    }
 }
+
