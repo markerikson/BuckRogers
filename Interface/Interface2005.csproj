@@ -1,0 +1,264 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>8.0.50215</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{78E322B0-5DF6-4576-A36C-5090D1D59551}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>BuckRogers</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>BuckRogers.Interface</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="UMD.HCIL.Piccolo">
+      <Name>UMD.HCIL.Piccolo</Name>
+      <HintPath>DLLs\UMD.HCIL.Piccolo.dll</HintPath>
+    </Reference>
+    <Reference Include="UMD.HCIL.PiccoloX">
+      <Name>UMD.HCIL.PiccoloX</Name>
+      <HintPath>DLLs\UMD.HCIL.PiccoloX.dll</HintPath>
+    </Reference>
+    <ProjectReference Include="..\Engine\BuckRogers2005.csproj">
+      <Name>BuckRogers</Name>
+      <Project>{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controls\InformationPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\MapControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\MovePanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\PlacementPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\PlayerListbox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\RefreshingScrollableControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\TerritoryPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\UnclickableListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\WinEnumEditoror.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\BuckRogersForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\CombatForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\GameSetupForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MoveUnitsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PlacementForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ProductionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TransportLoadForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ListBox\ItemInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ListBox\ListBoxList.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ListBox\MoveListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ListBox\ParseMessageEventArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ListBox\ResizableListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Other\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Other\Code\Command.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Other\Code\CommandExecutor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Other\Code\CommandManager.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Other\Code\GpcWrapper2.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Other\Code\IconManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Other\Code\ListViewColumnSorter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Other\Code\MoveModeEventArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Other\Code\TransportInfoEventArgs.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <EmbeddedResource Include="Controls\InformationPanel.resx">
+      <DependentUpon>InformationPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\MapControl.resx">
+      <DependentUpon>MapControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\MovePanel.resx">
+      <DependentUpon>MovePanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\PlacementPanel.resx">
+      <DependentUpon>PlacementPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\PlayerListbox.resx">
+      <DependentUpon>PlayerListbox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\TerritoryPanel.resx">
+      <DependentUpon>TerritoryPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\WinEnumEditoror.resx">
+      <DependentUpon>WinEnumEditoror.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\BuckRogersForm.resx">
+      <DependentUpon>BuckRogersForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\CombatForm.resx">
+      <DependentUpon>CombatForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\GameSetupForm.resx">
+      <DependentUpon>GameSetupForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MoveUnitsForm.resx">
+      <DependentUpon>MoveUnitsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\PlacementForm.resx">
+      <DependentUpon>PlacementForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ProductionForm.resx">
+      <DependentUpon>ProductionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TransportLoadForm.resx">
+      <DependentUpon>TransportLoadForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ListBox\ResizableListBox.resx">
+      <DependentUpon>ResizableListBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Other\Code\CommandManager.resx">
+      <DependentUpon>CommandManager.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Other\Graphics\Battler.png" />
+    <EmbeddedResource Include="Other\Graphics\Factory.png" />
+    <EmbeddedResource Include="Other\Graphics\Fighter.png" />
+    <EmbeddedResource Include="Other\Graphics\Gennie.png" />
+    <EmbeddedResource Include="Other\Graphics\KillerSatellite.png" />
+    <EmbeddedResource Include="Other\Graphics\Leader.png" />
+    <EmbeddedResource Include="Other\Graphics\Transport.png" />
+    <EmbeddedResource Include="Other\Graphics\Trooper.png" />
+    <EmbeddedResource Include="Other\Resources\iconlocations1.txt" />
+    <EmbeddedResource Include="Other\Resources\iconlocations2.txt" />
+    <EmbeddedResource Include="Other\Resources\iconlocations3.txt" />
+    <EmbeddedResource Include="Other\Resources\iconlocations4.txt" />
+    <EmbeddedResource Include="Other\Resources\iconlocations5.txt" />
+    <EmbeddedResource Include="Other\Resources\territories.txt" />
+    <Content Include="Other\App.ico" />
+  </ItemGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Interscape\MSBuildToolkit\Interscape.MSBuildToolkit.CSharp.targets" />
+</Project>

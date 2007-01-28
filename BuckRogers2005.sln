@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuckRogers2005", "Engine\BuckRogers2005.csproj", "{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interface2005", "Interface\Interface2005.csproj", "{78E322B0-5DF6-4576-A36C-5090D1D59551}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}.Debug|Any CPU.ActiveCfg = Debug|.NET 1.1
+		{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}.Debug|Any CPU.Build.0 = Debug|.NET 1.1
+		{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}.Release|Any CPU.ActiveCfg = Release|.NET 1.1
+		{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}.Release|Any CPU.Build.0 = Release|.NET 1.1
+		{78E322B0-5DF6-4576-A36C-5090D1D59551}.Debug|Any CPU.ActiveCfg = Debug|.NET 1.1
+		{78E322B0-5DF6-4576-A36C-5090D1D59551}.Debug|Any CPU.Build.0 = Debug|.NET 1.1
+		{78E322B0-5DF6-4576-A36C-5090D1D59551}.Release|Any CPU.ActiveCfg = Release|.NET 1.1
+		{78E322B0-5DF6-4576-A36C-5090D1D59551}.Release|Any CPU.Build.0 = Release|.NET 1.1
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
