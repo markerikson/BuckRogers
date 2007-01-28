@@ -25,11 +25,15 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.Button m_btnProduce;
 		private System.Windows.Forms.ComboBox m_cbNeighbors;
 		private System.Windows.Forms.ComboBox m_cbUnitTypes;
+		private ColumnHeader columnHeader1;
+		private System.Windows.Forms.Button m_btnDismantleFactory;
 
 		private int m_productionIndex;
 		private GameController m_controller;
 		private UnitCollection m_factories;
-		private System.Windows.Forms.Button m_btnDismantleFactory;
+		private ListViewColumnSorter m_sorter;
+		
+		
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -41,6 +45,9 @@ namespace BuckRogers.Interface
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
+
+			m_sorter = new ListViewColumnSorter();
+			m_lvFactories.ListViewItemSorter = m_sorter;
 
 			m_controller = gc;
 
@@ -82,6 +89,7 @@ namespace BuckRogers.Interface
 			this.m_lbProductionOrder = new BuckRogers.Interface.UnclickableListBox();
 			this.m_lvFactories = new System.Windows.Forms.ListView();
 			this.columnHeader25 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader26 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader27 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader28 = new System.Windows.Forms.ColumnHeader();
@@ -97,6 +105,7 @@ namespace BuckRogers.Interface
 			// 
 			this.m_btnFinishProduction.Location = new System.Drawing.Point(4, 168);
 			this.m_btnFinishProduction.Name = "m_btnFinishProduction";
+			this.m_btnFinishProduction.Size = new System.Drawing.Size(75, 23);
 			this.m_btnFinishProduction.TabIndex = 11;
 			this.m_btnFinishProduction.Text = "Finish";
 			this.m_btnFinishProduction.Click += new System.EventHandler(this.m_btnFinishProduction_Click);
@@ -121,12 +130,12 @@ namespace BuckRogers.Interface
 			// m_lbProductionOrder
 			// 
 			this.m_lbProductionOrder.Items.AddRange(new object[] {
-																	 "Mark",
-																	 "Chris",
-																	 "Stu",
-																	 "Hannah",
-																	 "Jake",
-																	 "Kathryn"});
+            "Mark",
+            "Chris",
+            "Stu",
+            "Hannah",
+            "Jake",
+            "Kathryn"});
 			this.m_lbProductionOrder.Location = new System.Drawing.Point(4, 20);
 			this.m_lbProductionOrder.Name = "m_lbProductionOrder";
 			this.m_lbProductionOrder.RightToLeft = System.Windows.Forms.RightToLeft.No;
@@ -136,24 +145,31 @@ namespace BuckRogers.Interface
 			// m_lvFactories
 			// 
 			this.m_lvFactories.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-																							this.columnHeader25,
-																							this.columnHeader26,
-																							this.columnHeader27,
-																							this.columnHeader28});
+            this.columnHeader25,
+            this.columnHeader1,
+            this.columnHeader26,
+            this.columnHeader27,
+            this.columnHeader28});
 			this.m_lvFactories.FullRowSelect = true;
 			this.m_lvFactories.HideSelection = false;
 			this.m_lvFactories.Location = new System.Drawing.Point(128, 4);
 			this.m_lvFactories.MultiSelect = false;
 			this.m_lvFactories.Name = "m_lvFactories";
-			this.m_lvFactories.Size = new System.Drawing.Size(412, 188);
+			this.m_lvFactories.Size = new System.Drawing.Size(474, 188);
 			this.m_lvFactories.TabIndex = 13;
 			this.m_lvFactories.View = System.Windows.Forms.View.Details;
 			this.m_lvFactories.SelectedIndexChanged += new System.EventHandler(this.m_lvFactories_SelectedIndexChanged);
+			this.m_lvFactories.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.m_lvFactories_ColumnClick);
 			// 
 			// columnHeader25
 			// 
 			this.columnHeader25.Text = "Territory";
-			this.columnHeader25.Width = 141;
+			this.columnHeader25.Width = 129;
+			// 
+			// columnHeader1
+			// 
+			this.columnHeader1.Text = "Planet";
+			this.columnHeader1.Width = 56;
 			// 
 			// columnHeader26
 			// 
@@ -163,15 +179,16 @@ namespace BuckRogers.Interface
 			// columnHeader27
 			// 
 			this.columnHeader27.Text = "Number";
+			this.columnHeader27.Width = 52;
 			// 
 			// columnHeader28
 			// 
 			this.columnHeader28.Text = "Destination";
-			this.columnHeader28.Width = 120;
+			this.columnHeader28.Width = 133;
 			// 
 			// label18
 			// 
-			this.label18.Location = new System.Drawing.Point(544, 56);
+			this.label18.Location = new System.Drawing.Point(608, 56);
 			this.label18.Name = "label18";
 			this.label18.Size = new System.Drawing.Size(100, 16);
 			this.label18.TabIndex = 18;
@@ -179,7 +196,7 @@ namespace BuckRogers.Interface
 			// 
 			// label17
 			// 
-			this.label17.Location = new System.Drawing.Point(544, 4);
+			this.label17.Location = new System.Drawing.Point(608, 4);
 			this.label17.Name = "label17";
 			this.label17.Size = new System.Drawing.Size(100, 16);
 			this.label17.TabIndex = 17;
@@ -187,8 +204,9 @@ namespace BuckRogers.Interface
 			// 
 			// m_btnProduce
 			// 
-			this.m_btnProduce.Location = new System.Drawing.Point(544, 104);
+			this.m_btnProduce.Location = new System.Drawing.Point(608, 104);
 			this.m_btnProduce.Name = "m_btnProduce";
+			this.m_btnProduce.Size = new System.Drawing.Size(75, 23);
 			this.m_btnProduce.TabIndex = 16;
 			this.m_btnProduce.Text = "Produce";
 			this.m_btnProduce.Click += new System.EventHandler(this.m_btnProduce_Click);
@@ -196,23 +214,25 @@ namespace BuckRogers.Interface
 			// m_cbNeighbors
 			// 
 			this.m_cbNeighbors.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_cbNeighbors.Location = new System.Drawing.Point(544, 72);
+			this.m_cbNeighbors.Location = new System.Drawing.Point(608, 72);
 			this.m_cbNeighbors.Name = "m_cbNeighbors";
-			this.m_cbNeighbors.Size = new System.Drawing.Size(196, 21);
+			this.m_cbNeighbors.Size = new System.Drawing.Size(153, 21);
 			this.m_cbNeighbors.TabIndex = 15;
 			// 
 			// m_cbUnitTypes
 			// 
 			this.m_cbUnitTypes.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_cbUnitTypes.Location = new System.Drawing.Point(544, 20);
+			this.m_cbUnitTypes.Location = new System.Drawing.Point(608, 20);
 			this.m_cbUnitTypes.Name = "m_cbUnitTypes";
-			this.m_cbUnitTypes.Size = new System.Drawing.Size(121, 21);
+			this.m_cbUnitTypes.Size = new System.Drawing.Size(153, 21);
 			this.m_cbUnitTypes.TabIndex = 14;
+			this.m_cbUnitTypes.SelectedIndexChanged += new EventHandler(m_cbUnitTypes_SelectedIndexChanged);
 			// 
 			// m_btnDismantleFactory
 			// 
-			this.m_btnDismantleFactory.Location = new System.Drawing.Point(544, 168);
+			this.m_btnDismantleFactory.Location = new System.Drawing.Point(608, 168);
 			this.m_btnDismantleFactory.Name = "m_btnDismantleFactory";
+			this.m_btnDismantleFactory.Size = new System.Drawing.Size(75, 23);
 			this.m_btnDismantleFactory.TabIndex = 19;
 			this.m_btnDismantleFactory.Text = "Dismantle";
 			this.m_btnDismantleFactory.Click += new System.EventHandler(this.m_btnDismantleFactory_Click);
@@ -220,7 +240,7 @@ namespace BuckRogers.Interface
 			// ProductionForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.ClientSize = new System.Drawing.Size(748, 202);
+			this.ClientSize = new System.Drawing.Size(768, 202);
 			this.ControlBox = false;
 			this.Controls.Add(this.m_btnDismantleFactory);
 			this.Controls.Add(this.label18);
@@ -241,7 +261,18 @@ namespace BuckRogers.Interface
 			this.ResumeLayout(false);
 
 		}
+
+
 		#endregion
+
+
+		private void m_cbUnitTypes_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if(m_lvFactories.SelectedIndices.Count > 0)
+			{
+				FindValidProductionTerritories();
+			}
+		}
 
 
 		// TODO Black Market production
@@ -311,54 +342,7 @@ namespace BuckRogers.Interface
 		{
 			if(m_lvFactories.SelectedIndices.Count > 0)
 			{
-				int idxUnused = m_lvFactories.SelectedIndices[0];
-				ListViewItem lvi = m_lvFactories.Items[idxUnused];
-
-				Factory f = (Factory)m_factories[idxUnused];
-
-				string territoryName = lvi.Text;
-				Territory t = m_controller.Map[territoryName];
-				string playerName = (string)m_lbProductionOrder.SelectedItem;
-				Player p = m_controller.GetPlayer(playerName);
-
-				ArrayList names = new ArrayList();
-
-				if(f.IsBlackMarket)
-				{
-					
-					foreach(DictionaryEntry de in p.Territories)
-					{
-						Territory playerTerritory = (Territory)de.Value;
-						names.Add(playerTerritory.Name);
-					}
-				}
-				else
-				{
-					foreach(Territory neighbor in t.Neighbors)
-					{
-						if(   (neighbor.Owner == p) 
-							|| (neighbor.Type == TerritoryType.Space) )
-						{
-							names.Add(neighbor.Key);
-						}					
-					}
-				}
-
-				string[] namearray = (string[])names.ToArray(typeof(string));
-				Array.Sort(namearray);
-
-				m_cbNeighbors.Items.Clear();
-
-				if(territoryName != "Black Market")
-				{
-					m_cbNeighbors.Items.Add(territoryName);
-				}
-				
-				foreach(string Name in namearray)
-				{
-					m_cbNeighbors.Items.Add(Name);
-				}
-				
+				FindValidProductionTerritories();				
 
 				m_cbNeighbors.SelectedIndex = 0;
 
@@ -366,6 +350,93 @@ namespace BuckRogers.Interface
 				m_btnDismantleFactory.Enabled = true;
 			}
 			
+		}
+
+		private void FindValidProductionTerritories()
+		{
+			int idxUnused = m_lvFactories.SelectedIndices[0];
+			ListViewItem lvi = m_lvFactories.Items[idxUnused];
+
+			Factory f = (Factory)m_factories[idxUnused];
+
+			string territoryName = lvi.Text;
+			Territory t = m_controller.Map[territoryName];
+
+			string playerName = (string)m_lbProductionOrder.SelectedItem;
+			Player p = m_controller.GetPlayer(playerName);
+
+			string unitTypeName = (string)m_cbUnitTypes.SelectedItem;
+			UnitType unitType = (UnitType)Enum.Parse(typeof(UnitType), unitTypeName);
+
+
+			ArrayList names = new ArrayList();
+
+			if (f.IsBlackMarket)
+			{
+				foreach (DictionaryEntry de in p.Territories)
+				{
+					Territory playerTerritory = (Territory)de.Value;
+					names.Add(playerTerritory.Name);
+				}
+			}
+			else
+			{
+				switch(unitType)
+				{
+					case UnitType.Trooper:
+					case UnitType.Gennie:
+					case UnitType.Fighter:
+					case UnitType.Transport:
+					{
+						names.Add(f.CurrentTerritory.Name);
+						break;
+					}
+					case UnitType.Battler:
+					case UnitType.KillerSatellite:
+					{
+						foreach (Territory neighbor in t.Neighbors)
+						{
+							if (neighbor.Type == TerritoryType.Space)
+							{
+								names.Add(neighbor.Key);
+							}
+						}
+						break;
+					}
+					case UnitType.Factory:
+					{
+						names.Add(f.CurrentTerritory.Name);
+
+						foreach (Territory neighbor in t.Neighbors)
+						{
+							if ((neighbor.Owner == p))
+							{
+								names.Add(neighbor.Key);
+							}
+						}
+						break;
+					}
+				}
+			}
+
+			string[] namearray = (string[])names.ToArray(typeof(string));
+			Array.Sort(namearray);
+
+			m_cbNeighbors.Items.Clear();
+
+			/*
+			if (territoryName != "Black Market")
+			{
+				m_cbNeighbors.Items.Add(territoryName);
+			}
+			*/
+
+			foreach (string Name in namearray)
+			{
+				m_cbNeighbors.Items.Add(Name);
+			}
+
+			m_cbNeighbors.SelectedIndex = 0;
 		}
 
 
@@ -423,6 +494,7 @@ namespace BuckRogers.Interface
 				ListViewItem lvi = new ListViewItem();
 
 				lvi.Text = f.CurrentTerritory.Name;
+				lvi.SubItems.Add(f.CurrentTerritory.System.Name);
 				lvi.SubItems.Add(f.ProductionType.ToString());
 				lvi.SubItems.Add(f.AmountProduced.ToString());
 				lvi.SubItems.Add(f.DestinationTerritory.Name);
@@ -457,6 +529,10 @@ namespace BuckRogers.Interface
 				//m_btnProduce.Enabled = true;
 				m_btnFinishProduction.Enabled = true;
 			}
+
+			m_sorter.SortColumn = 1;
+			m_sorter.Order = SortOrder.Ascending;
+			m_lvFactories.Sort();
 			
 		}
 
@@ -508,6 +584,34 @@ namespace BuckRogers.Interface
 					AddProduction();
 				}				
 			}
+		}
+
+		private void m_lvFactories_ColumnClick(object sender, ColumnClickEventArgs e)
+		{
+			ListView myListView = (ListView)sender;
+
+			// Determine if clicked column is already the column that is being sorted.
+			if (e.Column == m_sorter.SortColumn)
+			{
+				// Reverse the current sort direction for this column.
+				if (m_sorter.Order == SortOrder.Ascending)
+				{
+					m_sorter.Order = SortOrder.Descending;
+				}
+				else
+				{
+					m_sorter.Order = SortOrder.Ascending;
+				}
+			}
+			else
+			{
+				// Set the column number that is to be sorted; default to ascending.
+				m_sorter.SortColumn = e.Column;
+				m_sorter.Order = SortOrder.Ascending;
+			}
+
+			// Perform the sort with these new sort options.
+			myListView.Sort();
 		}
 	}
 }
