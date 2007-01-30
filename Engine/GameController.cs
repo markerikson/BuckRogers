@@ -1767,7 +1767,8 @@ namespace BuckRogers
 				}
 				case VictoryConditions.OneEarthYear:
 				{
-					if(m_turnNumber == 8)
+					// During turn 9, the Earth should be back at its starting point.
+					if(m_turnNumber == 9)
 					{
 						// Can't test against Player.NONE, because he "owns" all the 
 						// space zones

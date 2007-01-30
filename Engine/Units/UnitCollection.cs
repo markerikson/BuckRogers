@@ -316,6 +316,11 @@ namespace BuckRogers
 		{
 			Hashtable count = new Hashtable();
 
+			foreach(UnitType ut in Enum.GetValues(typeof(UnitType)))
+			{
+				count[ut] = 0;
+			}
+
 			//Iterator iter = List.iterator();
 			//while(iter.hasNext() )
 			foreach(Unit unit in List)
@@ -323,7 +328,12 @@ namespace BuckRogers
 				if(unit.Owner == id)
 				{
 					UnitType ut = unit.Type;
-					int num = 0;
+					int num = (int)count[ut];
+					num++;
+					count[ut] = num;
+
+					/*
+					int num = 1;
 					if(!count.ContainsKey(ut))
 					{
 						count[ut] = num;
@@ -334,8 +344,11 @@ namespace BuckRogers
 						num++;
 						count[ut] = num;
 					}
+					*/
 				}					
 			}
+
+			
 			return count;
 		}
 

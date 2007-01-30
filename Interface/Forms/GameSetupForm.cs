@@ -556,10 +556,10 @@ namespace BuckRogers.Interface
 					if(al.Contains(name))
 					{
 						errorMessage = "Can't have two players with the same name";
-						break;
+						goto ErrorMessage;
 					}
 					al.Add(name);
-                    goto ErrorMessage;
+                    
 				}
 
 				if(al.Contains(string.Empty))

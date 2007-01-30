@@ -652,6 +652,31 @@ namespace BuckRogers.Interface
 			m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
 		}
 
+		public void DisableMovePanel()
+		{
+			m_mlbMoves.Items.Clear();
+			m_mlbTransports.Items.Clear();
+
+			m_btnAcceptMoves.Enabled = false;
+			m_btnAddMove.Enabled = false;
+			m_btnCancelMove.Enabled = false;
+			m_btnDoneTransports.Enabled = false;
+			m_btnEndMoves.Enabled = false;
+			m_btnRedoMove.Enabled = false;
+			m_btnTransports.Enabled = false;
+			m_btnUndoMove.Enabled = false;
+		}
+
+		public void EnableMovePanel()
+		{
+			// Assume that we're in the middle of a normal turn.  Currently, the active
+			// player's MoveActions from this turn are not saved, just the current position
+			// of his units.  So, we don't need to worry about Undo/Redo.
+			m_btnAddMove.Enabled = true;
+			m_btnEndMoves.Enabled = true;
+			m_btnTransports.Enabled = true;
+		}
+
 		private void m_btnTransports_Click(object sender, System.EventArgs e)
 		{
 			//m_btnCancelMove.Enabled = true;

@@ -25,6 +25,7 @@ namespace BuckRogers
 		Move,
 		PlaceUnits,
 		SelectTerritories,
+		GameOver,
 	}
 
 	/// <summary>
@@ -584,32 +585,36 @@ namespace BuckRogers
 
 			Territory t = m_controller.Map[name];
 
+			if(t == null)
+			{
+				return;
+			}
+
 			if(tcea.Button == MouseButtons.Right)
 			{
 				tabControl1.SelectedTab = m_tpTerritory;
 				m_territoryPanel.DisplayUnits(t);
 			}
 
-			else if(t != null)
+			switch(m_clickMode)
 			{
-				switch(m_clickMode)
+				case MapClickMode.Normal:
+				case MapClickMode.GameOver:
 				{
-					case MapClickMode.Normal:
-					{
-						m_territoryPanel.DisplayUnits(t);
-						break;
-					}
-					case MapClickMode.Move:
-					{
-						m_movePanel.TerritoryClicked(t);
-						break;
-					}
-					case MapClickMode.PlaceUnits:
-					{
-						m_placementPanel.TerritoryClicked(t);
-						break;
-					}
+					m_territoryPanel.DisplayUnits(t);
+					break;
 				}
+				case MapClickMode.Move:
+				{
+					m_movePanel.TerritoryClicked(t);
+					break;
+				}
+				case MapClickMode.PlaceUnits:
+				{
+					m_placementPanel.TerritoryClicked(t);
+					break;
+				}
+
 
 				//MessageBox.Show("Territory: " + name + ", owner: " + t.Owner.Name);
 			}
@@ -766,6 +771,9 @@ namespace BuckRogers
 				case StatusInfo.GameOver:
 				{
 					MessageBox.Show("The winner is " + suea.Player.Name, "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+					m_movePanel.DisableMovePanel();
+					m_clickMode = MapClickMode.GameOver;
 					break;
 				}
 				case StatusInfo.TransportLanded:
@@ -860,6 +868,8 @@ namespace BuckRogers
 			m_movePanel.RefreshPlayerOrder();			
 			m_informationPanel.RefreshAllInfo();
 			m_map.AdvancePlanets();
+
+			m_movePanel.EnableMovePanel();
 		}
 
 		public BuckRogers.GameController GameController

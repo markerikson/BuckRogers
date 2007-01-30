@@ -18,8 +18,7 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.Label label12;
 		private System.Windows.Forms.Label m_labBattleType;
 		private System.Windows.Forms.Label label11;
-		private System.Windows.Forms.Label m_labCurrentPlayer;
-		private System.Windows.Forms.Label label9;
+		private System.Windows.Forms.Label m_lblHasLeader;
 		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.ListView m_lvAttackers;
 		private System.Windows.Forms.ColumnHeader columnHeader12;
@@ -103,6 +102,7 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.Button m_btnAddAttackers;
 		private System.Windows.Forms.Button m_btnAddDefenders;
 		private System.Windows.Forms.Button m_btnRemoveDefenders;
+		private Label m_lblHasLeaderText;
 		private CommandManager m_command;
 
 		public CombatForm(GameController gc, BattleController bc)
@@ -213,64 +213,64 @@ namespace BuckRogers.Interface
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem(new string[] {
-																													 "Mark",
-																													 "Trooper",
-																													 "15"}, -1);
-			System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem(new string[] {
-																													 "Mark",
-																													 "Gennie",
-																													 "5"}, -1);
-			System.Windows.Forms.ListViewItem listViewItem3 = new System.Windows.Forms.ListViewItem(new string[] {
-																													 "Mark",
-																													 "Fighter",
-																													 "10"}, -1);
-			System.Windows.Forms.ListViewItem listViewItem4 = new System.Windows.Forms.ListViewItem(new string[] {
-																													 "Mark",
-																													 "Transport",
-																													 "5"}, -1);
-			System.Windows.Forms.ListViewItem listViewItem5 = new System.Windows.Forms.ListViewItem(new string[] {
-																													 "Mark",
-																													 "Marker",
-																													 "1"}, -1);
-			System.Windows.Forms.ListViewItem listViewItem6 = new System.Windows.Forms.ListViewItem(new string[] {
-																													 "Jake",
-																													 "Fighter",
-																													 "1"}, -1);
-			System.Windows.Forms.ListViewItem listViewItem7 = new System.Windows.Forms.ListViewItem(new string[] {
-																													 "Jake",
-																													 "Transport",
-																													 "100"}, -1);
-			System.Windows.Forms.ListViewItem listViewItem8 = new System.Windows.Forms.ListViewItem(new string[] {
-																													 "Stu",
-																													 "Trooper",
-																													 "8"}, -1);
-			System.Windows.Forms.ListViewItem listViewItem9 = new System.Windows.Forms.ListViewItem(new string[] {
-																													 "Mark",
-																													 "Trooper",
-																													 "15"}, -1);
-			System.Windows.Forms.ListViewItem listViewItem10 = new System.Windows.Forms.ListViewItem(new string[] {
-																													  "Mark",
-																													  "Gennie",
-																													  "5"}, -1);
-			System.Windows.Forms.ListViewItem listViewItem11 = new System.Windows.Forms.ListViewItem(new string[] {
-																													  "Mark",
-																													  "Fighter",
-																													  "10"}, -1);
-			System.Windows.Forms.ListViewItem listViewItem12 = new System.Windows.Forms.ListViewItem(new string[] {
-																													  "Mark",
-																													  "Transport",
-																													  "5"}, -1);
-			System.Windows.Forms.ListViewItem listViewItem13 = new System.Windows.Forms.ListViewItem(new string[] {
-																													  "Mark",
-																													  "Marker",
-																													  "1"}, -1);
+			System.Windows.Forms.ListViewItem listViewItem14 = new System.Windows.Forms.ListViewItem(new string[] {
+            "Mark",
+            "Trooper",
+            "15"}, -1);
+			System.Windows.Forms.ListViewItem listViewItem15 = new System.Windows.Forms.ListViewItem(new string[] {
+            "Mark",
+            "Gennie",
+            "5"}, -1);
+			System.Windows.Forms.ListViewItem listViewItem16 = new System.Windows.Forms.ListViewItem(new string[] {
+            "Mark",
+            "Fighter",
+            "10"}, -1);
+			System.Windows.Forms.ListViewItem listViewItem17 = new System.Windows.Forms.ListViewItem(new string[] {
+            "Mark",
+            "Transport",
+            "5"}, -1);
+			System.Windows.Forms.ListViewItem listViewItem18 = new System.Windows.Forms.ListViewItem(new string[] {
+            "Mark",
+            "Marker",
+            "1"}, -1);
+			System.Windows.Forms.ListViewItem listViewItem19 = new System.Windows.Forms.ListViewItem(new string[] {
+            "Jake",
+            "Fighter",
+            "1"}, -1);
+			System.Windows.Forms.ListViewItem listViewItem20 = new System.Windows.Forms.ListViewItem(new string[] {
+            "Jake",
+            "Transport",
+            "100"}, -1);
+			System.Windows.Forms.ListViewItem listViewItem21 = new System.Windows.Forms.ListViewItem(new string[] {
+            "Stu",
+            "Trooper",
+            "8"}, -1);
+			System.Windows.Forms.ListViewItem listViewItem22 = new System.Windows.Forms.ListViewItem(new string[] {
+            "Mark",
+            "Trooper",
+            "15"}, -1);
+			System.Windows.Forms.ListViewItem listViewItem23 = new System.Windows.Forms.ListViewItem(new string[] {
+            "Mark",
+            "Gennie",
+            "5"}, -1);
+			System.Windows.Forms.ListViewItem listViewItem24 = new System.Windows.Forms.ListViewItem(new string[] {
+            "Mark",
+            "Fighter",
+            "10"}, -1);
+			System.Windows.Forms.ListViewItem listViewItem25 = new System.Windows.Forms.ListViewItem(new string[] {
+            "Mark",
+            "Transport",
+            "5"}, -1);
+			System.Windows.Forms.ListViewItem listViewItem26 = new System.Windows.Forms.ListViewItem(new string[] {
+            "Mark",
+            "Marker",
+            "1"}, -1);
 			this.m_labLocation = new System.Windows.Forms.Label();
 			this.label12 = new System.Windows.Forms.Label();
 			this.m_labBattleType = new System.Windows.Forms.Label();
 			this.label11 = new System.Windows.Forms.Label();
-			this.m_labCurrentPlayer = new System.Windows.Forms.Label();
-			this.label9 = new System.Windows.Forms.Label();
+			this.m_lblHasLeader = new System.Windows.Forms.Label();
+			this.m_lblHasLeaderText = new System.Windows.Forms.Label();
 			this.m_btnRemoveAttackers = new System.Windows.Forms.Button();
 			this.m_btnAddAttackers = new System.Windows.Forms.Button();
 			this.label6 = new System.Windows.Forms.Label();
@@ -351,16 +351,16 @@ namespace BuckRogers.Interface
 			// 
 			// m_labLocation
 			// 
-			this.m_labLocation.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+			this.m_labLocation.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.m_labLocation.Location = new System.Drawing.Point(316, 4);
 			this.m_labLocation.Name = "m_labLocation";
 			this.m_labLocation.Size = new System.Drawing.Size(208, 23);
 			this.m_labLocation.TabIndex = 34;
-			this.m_labLocation.Text = "Current Player:";
+			this.m_labLocation.Text = "American Regency";
 			// 
 			// label12
 			// 
-			this.label12.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+			this.label12.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.label12.Location = new System.Drawing.Point(240, 4);
 			this.label12.Name = "label12";
 			this.label12.Size = new System.Drawing.Size(76, 23);
@@ -369,44 +369,45 @@ namespace BuckRogers.Interface
 			// 
 			// m_labBattleType
 			// 
-			this.m_labBattleType.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+			this.m_labBattleType.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.m_labBattleType.Location = new System.Drawing.Point(100, 4);
 			this.m_labBattleType.Name = "m_labBattleType";
 			this.m_labBattleType.Size = new System.Drawing.Size(128, 23);
 			this.m_labBattleType.TabIndex = 32;
-			this.m_labBattleType.Text = "Current Player:";
+			this.m_labBattleType.Text = "Normal";
 			// 
 			// label11
 			// 
-			this.label11.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+			this.label11.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.label11.Location = new System.Drawing.Point(4, 4);
 			this.label11.Name = "label11";
 			this.label11.Size = new System.Drawing.Size(96, 23);
 			this.label11.TabIndex = 31;
 			this.label11.Text = "Battle Type:";
 			// 
-			// m_labCurrentPlayer
+			// m_lblHasLeader
 			// 
-			this.m_labCurrentPlayer.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-			this.m_labCurrentPlayer.Location = new System.Drawing.Point(656, 4);
-			this.m_labCurrentPlayer.Name = "m_labCurrentPlayer";
-			this.m_labCurrentPlayer.Size = new System.Drawing.Size(128, 23);
-			this.m_labCurrentPlayer.TabIndex = 30;
-			this.m_labCurrentPlayer.Text = "Current Player:";
+			this.m_lblHasLeader.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.m_lblHasLeader.Location = new System.Drawing.Point(668, 4);
+			this.m_lblHasLeader.Name = "m_lblHasLeader";
+			this.m_lblHasLeader.Size = new System.Drawing.Size(128, 23);
+			this.m_lblHasLeader.TabIndex = 30;
+			this.m_lblHasLeader.Text = "Current Player:";
 			// 
-			// label9
+			// m_lblHasLeaderText
 			// 
-			this.label9.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-			this.label9.Location = new System.Drawing.Point(536, 4);
-			this.label9.Name = "label9";
-			this.label9.Size = new System.Drawing.Size(120, 23);
-			this.label9.TabIndex = 29;
-			this.label9.Text = "Current Player:";
+			this.m_lblHasLeaderText.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.m_lblHasLeaderText.Location = new System.Drawing.Point(536, 4);
+			this.m_lblHasLeaderText.Name = "m_lblHasLeaderText";
+			this.m_lblHasLeaderText.Size = new System.Drawing.Size(126, 23);
+			this.m_lblHasLeaderText.TabIndex = 29;
+			this.m_lblHasLeaderText.Text = "Leader Present:";
 			// 
 			// m_btnRemoveAttackers
 			// 
 			this.m_btnRemoveAttackers.Location = new System.Drawing.Point(204, 140);
 			this.m_btnRemoveAttackers.Name = "m_btnRemoveAttackers";
+			this.m_btnRemoveAttackers.Size = new System.Drawing.Size(75, 23);
 			this.m_btnRemoveAttackers.TabIndex = 40;
 			this.m_btnRemoveAttackers.Text = "<< Remove";
 			// 
@@ -414,6 +415,7 @@ namespace BuckRogers.Interface
 			// 
 			this.m_btnAddAttackers.Location = new System.Drawing.Point(204, 108);
 			this.m_btnAddAttackers.Name = "m_btnAddAttackers";
+			this.m_btnAddAttackers.Size = new System.Drawing.Size(75, 23);
 			this.m_btnAddAttackers.TabIndex = 39;
 			this.m_btnAddAttackers.Text = "Add >>";
 			// 
@@ -428,9 +430,9 @@ namespace BuckRogers.Interface
 			// m_lvAttackers
 			// 
 			this.m_lvAttackers.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-																							this.columnHeader12,
-																							this.columnHeader13,
-																							this.columnHeader14});
+            this.columnHeader12,
+            this.columnHeader13,
+            this.columnHeader14});
 			this.m_lvAttackers.FullRowSelect = true;
 			this.m_lvAttackers.HideSelection = false;
 			this.m_lvAttackers.Location = new System.Drawing.Point(288, 52);
@@ -464,17 +466,17 @@ namespace BuckRogers.Interface
 			// m_lvAttUnused
 			// 
 			this.m_lvAttUnused.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-																							this.columnHeader11,
-																							this.columnHeader1,
-																							this.columnHeader2});
+            this.columnHeader11,
+            this.columnHeader1,
+            this.columnHeader2});
 			this.m_lvAttUnused.FullRowSelect = true;
 			this.m_lvAttUnused.HideSelection = false;
 			this.m_lvAttUnused.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-																						  listViewItem1,
-																						  listViewItem2,
-																						  listViewItem3,
-																						  listViewItem4,
-																						  listViewItem5});
+            listViewItem14,
+            listViewItem15,
+            listViewItem16,
+            listViewItem17,
+            listViewItem18});
 			this.m_lvAttUnused.Location = new System.Drawing.Point(4, 52);
 			this.m_lvAttUnused.MultiSelect = false;
 			this.m_lvAttUnused.Name = "m_lvAttUnused";
@@ -507,12 +509,12 @@ namespace BuckRogers.Interface
 			// 
 			this.m_cbNumUnits.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_cbNumUnits.Items.AddRange(new object[] {
-															  "1",
-															  "5",
-															  "10",
-															  "25",
-															  "100",
-															  "1000"});
+            "1",
+            "5",
+            "10",
+            "25",
+            "100",
+            "1000"});
 			this.m_cbNumUnits.Location = new System.Drawing.Point(204, 204);
 			this.m_cbNumUnits.Name = "m_cbNumUnits";
 			this.m_cbNumUnits.Size = new System.Drawing.Size(76, 21);
@@ -638,6 +640,7 @@ namespace BuckRogers.Interface
 			// 
 			this.m_btnRemoveDefenders.Location = new System.Drawing.Point(204, 328);
 			this.m_btnRemoveDefenders.Name = "m_btnRemoveDefenders";
+			this.m_btnRemoveDefenders.Size = new System.Drawing.Size(75, 23);
 			this.m_btnRemoveDefenders.TabIndex = 48;
 			this.m_btnRemoveDefenders.Text = "<< Remove";
 			// 
@@ -645,6 +648,7 @@ namespace BuckRogers.Interface
 			// 
 			this.m_btnAddDefenders.Location = new System.Drawing.Point(204, 296);
 			this.m_btnAddDefenders.Name = "m_btnAddDefenders";
+			this.m_btnAddDefenders.Size = new System.Drawing.Size(75, 23);
 			this.m_btnAddDefenders.TabIndex = 47;
 			this.m_btnAddDefenders.Text = "Add >>";
 			// 
@@ -659,10 +663,10 @@ namespace BuckRogers.Interface
 			// m_lvDefenders
 			// 
 			this.m_lvDefenders.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-																							this.columnHeader32,
-																							this.columnHeader33,
-																							this.columnHeader34,
-																							this.columnHeader35});
+            this.columnHeader32,
+            this.columnHeader33,
+            this.columnHeader34,
+            this.columnHeader35});
 			this.m_lvDefenders.FullRowSelect = true;
 			this.m_lvDefenders.HideSelection = false;
 			this.m_lvDefenders.Location = new System.Drawing.Point(288, 216);
@@ -701,16 +705,16 @@ namespace BuckRogers.Interface
 			// m_lvEnemyLive
 			// 
 			this.m_lvEnemyLive.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-																							this.columnHeader36,
-																							this.columnHeader37,
-																							this.columnHeader38,
-																							this.columnHeader39});
+            this.columnHeader36,
+            this.columnHeader37,
+            this.columnHeader38,
+            this.columnHeader39});
 			this.m_lvEnemyLive.FullRowSelect = true;
 			this.m_lvEnemyLive.HideSelection = false;
 			this.m_lvEnemyLive.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-																						  listViewItem6,
-																						  listViewItem7,
-																						  listViewItem8});
+            listViewItem19,
+            listViewItem20,
+            listViewItem21});
 			this.m_lvEnemyLive.Location = new System.Drawing.Point(4, 216);
 			this.m_lvEnemyLive.MultiSelect = false;
 			this.m_lvEnemyLive.Name = "m_lvEnemyLive";
@@ -747,12 +751,12 @@ namespace BuckRogers.Interface
 			// m_lvResults
 			// 
 			this.m_lvResults.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-																						  this.columnHeader40,
-																						  this.columnHeader41,
-																						  this.columnHeader42,
-																						  this.columnHeader43,
-																						  this.columnHeader44,
-																						  this.columnHeader45});
+            this.columnHeader40,
+            this.columnHeader41,
+            this.columnHeader42,
+            this.columnHeader43,
+            this.columnHeader44,
+            this.columnHeader45});
 			this.m_lvResults.HideSelection = false;
 			this.m_lvResults.Location = new System.Drawing.Point(492, 52);
 			this.m_lvResults.Name = "m_lvResults";
@@ -791,6 +795,7 @@ namespace BuckRogers.Interface
 			// 
 			this.m_btnNextBattle.Location = new System.Drawing.Point(264, 404);
 			this.m_btnNextBattle.Name = "m_btnNextBattle";
+			this.m_btnNextBattle.Size = new System.Drawing.Size(75, 23);
 			this.m_btnNextBattle.TabIndex = 54;
 			this.m_btnNextBattle.Text = "Next battle";
 			// 
@@ -798,6 +803,7 @@ namespace BuckRogers.Interface
 			// 
 			this.m_btnNextPlayer.Location = new System.Drawing.Point(176, 404);
 			this.m_btnNextPlayer.Name = "m_btnNextPlayer";
+			this.m_btnNextPlayer.Size = new System.Drawing.Size(75, 23);
 			this.m_btnNextPlayer.TabIndex = 53;
 			this.m_btnNextPlayer.Text = "Next player";
 			// 
@@ -805,6 +811,7 @@ namespace BuckRogers.Interface
 			// 
 			this.m_btnAttack.Location = new System.Drawing.Point(4, 404);
 			this.m_btnAttack.Name = "m_btnAttack";
+			this.m_btnAttack.Size = new System.Drawing.Size(75, 23);
 			this.m_btnAttack.TabIndex = 52;
 			this.m_btnAttack.Text = "Attack";
 			// 
@@ -812,6 +819,7 @@ namespace BuckRogers.Interface
 			// 
 			this.m_btnContinue.Location = new System.Drawing.Point(88, 404);
 			this.m_btnContinue.Name = "m_btnContinue";
+			this.m_btnContinue.Size = new System.Drawing.Size(75, 23);
 			this.m_btnContinue.TabIndex = 51;
 			this.m_btnContinue.Text = "Continue";
 			// 
@@ -835,13 +843,13 @@ namespace BuckRogers.Interface
 			// m_lbCurrentPlayer
 			// 
 			this.m_lbCurrentPlayer.Items.AddRange(new object[] {
-																   "Mark",
-																   "Chris",
-																   "Stu",
-																   "Hannah",
-																   "Jake",
-																   "Kathryn",
-																   "An extremely long name"});
+            "Mark",
+            "Chris",
+            "Stu",
+            "Hannah",
+            "Jake",
+            "Kathryn",
+            "An extremely long name"});
 			this.m_lbCurrentPlayer.Location = new System.Drawing.Point(688, 252);
 			this.m_lbCurrentPlayer.Name = "m_lbCurrentPlayer";
 			this.m_lbCurrentPlayer.Size = new System.Drawing.Size(120, 95);
@@ -858,17 +866,17 @@ namespace BuckRogers.Interface
 			// m_lvCasualties
 			// 
 			this.m_lvCasualties.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-																							 this.columnHeader46,
-																							 this.columnHeader47,
-																							 this.columnHeader48});
+            this.columnHeader46,
+            this.columnHeader47,
+            this.columnHeader48});
 			this.m_lvCasualties.FullRowSelect = true;
 			this.m_lvCasualties.HideSelection = false;
 			this.m_lvCasualties.Items.AddRange(new System.Windows.Forms.ListViewItem[] {
-																						   listViewItem9,
-																						   listViewItem10,
-																						   listViewItem11,
-																						   listViewItem12,
-																						   listViewItem13});
+            listViewItem22,
+            listViewItem23,
+            listViewItem24,
+            listViewItem25,
+            listViewItem26});
 			this.m_lvCasualties.Location = new System.Drawing.Point(492, 252);
 			this.m_lvCasualties.MultiSelect = false;
 			this.m_lvCasualties.Name = "m_lvCasualties";
@@ -901,6 +909,7 @@ namespace BuckRogers.Interface
 			// 
 			this.m_btnAddAllAttackers.Location = new System.Drawing.Point(204, 76);
 			this.m_btnAddAllAttackers.Name = "m_btnAddAllAttackers";
+			this.m_btnAddAllAttackers.Size = new System.Drawing.Size(75, 23);
 			this.m_btnAddAllAttackers.TabIndex = 61;
 			this.m_btnAddAllAttackers.Text = "Add All >>>";
 			// 
@@ -908,6 +917,7 @@ namespace BuckRogers.Interface
 			// 
 			this.m_btnAddAllDefenders.Location = new System.Drawing.Point(204, 264);
 			this.m_btnAddAllDefenders.Name = "m_btnAddAllDefenders";
+			this.m_btnAddAllDefenders.Size = new System.Drawing.Size(75, 23);
 			this.m_btnAddAllDefenders.TabIndex = 62;
 			this.m_btnAddAllDefenders.Text = "Add All >>>";
 			// 
@@ -948,8 +958,8 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.label12);
 			this.Controls.Add(this.m_labBattleType);
 			this.Controls.Add(this.label11);
-			this.Controls.Add(this.m_labCurrentPlayer);
-			this.Controls.Add(this.label9);
+			this.Controls.Add(this.m_lblHasLeader);
+			this.Controls.Add(this.m_lblHasLeaderText);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
 			this.Name = "CombatForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
@@ -1075,8 +1085,10 @@ namespace BuckRogers.Interface
 			m_lbCurrentPlayer.SelectedIndex = 0;
 			if(m_battleController.CurrentPlayer != null)
 			{
-				m_labCurrentPlayer.Text = m_battleController.CurrentPlayer.Name;
+				//m_lbl.Text = m_battleController.CurrentPlayer.Name;
 			}
+
+			ShowLeaderPresent();
 			
 
 			EnableAttack();
@@ -1424,6 +1436,18 @@ namespace BuckRogers.Interface
 			ResetDisplay();
 			m_battleController.NextPlayer();
 			m_lbCurrentPlayer.SelectedItem = m_battleController.CurrentPlayer.Name;
+
+			ShowLeaderPresent();
+		}
+
+		private void ShowLeaderPresent()
+		{
+			
+			Hashtable playerUnitCounts = m_battleController.CurrentBattle.Territory.Units.GetUnitTypeCount(m_battleController.CurrentPlayer);
+			int numLeaders = (int)playerUnitCounts[UnitType.Leader];
+
+			string hasLeaders = (numLeaders > 0 ? "Yes" : "No");
+			m_lblHasLeader.Text = hasLeaders;
 		}
 		
 		public void UpdateNextPlayerCommand(Command cmd)
