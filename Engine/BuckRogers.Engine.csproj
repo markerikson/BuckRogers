@@ -1,0 +1,96 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{119BEE7C-25A5-4F32-B15F-7F81C48EEB62}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>BuckRogers.Engine</RootNamespace>
+    <AssemblyName>BuckRogers.Engine</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.2.9.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Interface\Other\AssemblyInfo.cs">
+      <Link>AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="BattleController.cs" />
+    <Compile Include="ControllerTest.cs" />
+    <Compile Include="Data structures\Action.cs" />
+    <Compile Include="Data structures\AttackResult.cs" />
+    <Compile Include="Data structures\BattleInfo.cs" />
+    <Compile Include="Data structures\CombatInfo.cs" />
+    <Compile Include="Data structures\CombatResult.cs" />
+    <Compile Include="Data structures\DisplayUnitsEventArgs.cs" />
+    <Compile Include="Data structures\Hashlist.cs" />
+    <Compile Include="Data structures\MoveAction.cs" />
+    <Compile Include="Data structures\ProductionInfo.cs" />
+    <Compile Include="Data structures\StatusUpdateEventArgs.cs" />
+    <Compile Include="Data structures\TerritoryUnitsEventArgs.cs" />
+    <Compile Include="Data structures\TransportAction.cs" />
+    <Compile Include="Data structures\TurnRoll.cs" />
+    <Compile Include="Exceptions\ActionException.cs" />
+    <Compile Include="GameController.cs" />
+    <Compile Include="GameMap.cs" />
+    <Compile Include="GameOptions.cs" />
+    <Compile Include="Graph\AdjacencyList.cs" />
+    <Compile Include="Graph\EdgeToNeighbor.cs" />
+    <Compile Include="Graph\Graph.cs" />
+    <Compile Include="Graph\Node.cs" />
+    <Compile Include="Graph\NodeList.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="Territories\Asteroid.cs" />
+    <Compile Include="Territories\OrbitalPath.cs" />
+    <Compile Include="Territories\OrbitalSystem.cs" />
+    <Compile Include="Territories\Planet.cs" />
+    <Compile Include="Territories\PlanetArea.cs" />
+    <Compile Include="Territories\PlanetCollection.cs" />
+    <Compile Include="Territories\Territory.cs" />
+    <Compile Include="Territories\TerritoryEventArgs.cs" />
+    <Compile Include="Units\Factory.cs" />
+    <Compile Include="Units\Transport.cs" />
+    <Compile Include="Units\Unit.cs" />
+    <Compile Include="Units\UnitCollection.cs" />
+    <Compile Include="Utility\MersenneTwister.cs" />
+    <Compile Include="Utility\Utility.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

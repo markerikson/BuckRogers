@@ -1285,7 +1285,7 @@ namespace BuckRogers.Interface
 			Bitmap b = new Bitmap((int)displayRect.Width, (int)displayRect.Height);
 			Graphics g = Graphics.FromImage(b);
 			
-			ScaleAndDraw(g, this.UnionOfChildrenBounds, displayRect);
+			ScaleAndDraw(g, displayRect);
 
 			return b;
 		}

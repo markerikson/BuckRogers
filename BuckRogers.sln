@@ -1,37 +1,26 @@
-Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuckRogers", "Engine\BuckRogers.csproj", "{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuckRogers.Engine", "Engine\BuckRogers.Engine.csproj", "{119BEE7C-25A5-4F32-B15F-7F81C48EEB62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interface", "Interface\Interface.csproj", "{78E322B0-5DF6-4576-A36C-5090D1D59551}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngineTest", "Engine\EngineTest\EngineTest.csproj", "{C555D7E6-48C5-45B4-A7E2-B5CAFBBC4827}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuckRogers.Interface", "Interface\BuckRogers.Interface.csproj", "{7F093CFB-59C1-4A60-94A1-2AF611A68E52}"
 EndProject
 Global
-	GlobalSection(SolutionConfiguration) = preSolution
-		Debug = Debug
-		Release = Release
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(ProjectConfiguration) = postSolution
-		{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}.Debug.ActiveCfg = Debug|.NET
-		{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}.Debug.Build.0 = Debug|.NET
-		{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}.Release.ActiveCfg = Release|.NET
-		{FD54C2EA-74E8-45C1-AC4C-21737B35DC7E}.Release.Build.0 = Release|.NET
-		{78E322B0-5DF6-4576-A36C-5090D1D59551}.Debug.ActiveCfg = Debug|.NET
-		{78E322B0-5DF6-4576-A36C-5090D1D59551}.Debug.Build.0 = Debug|.NET
-		{78E322B0-5DF6-4576-A36C-5090D1D59551}.Release.ActiveCfg = Release|.NET
-		{78E322B0-5DF6-4576-A36C-5090D1D59551}.Release.Build.0 = Release|.NET
-		{C555D7E6-48C5-45B4-A7E2-B5CAFBBC4827}.Debug.ActiveCfg = Debug|.NET
-		{C555D7E6-48C5-45B4-A7E2-B5CAFBBC4827}.Debug.Build.0 = Debug|.NET
-		{C555D7E6-48C5-45B4-A7E2-B5CAFBBC4827}.Release.ActiveCfg = Release|.NET
-		{C555D7E6-48C5-45B4-A7E2-B5CAFBBC4827}.Release.Build.0 = Release|.NET
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{119BEE7C-25A5-4F32-B15F-7F81C48EEB62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{119BEE7C-25A5-4F32-B15F-7F81C48EEB62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{119BEE7C-25A5-4F32-B15F-7F81C48EEB62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{119BEE7C-25A5-4F32-B15F-7F81C48EEB62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F093CFB-59C1-4A60-94A1-2AF611A68E52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F093CFB-59C1-4A60-94A1-2AF611A68E52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F093CFB-59C1-4A60-94A1-2AF611A68E52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F093CFB-59C1-4A60-94A1-2AF611A68E52}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-	EndGlobalSection
-	GlobalSection(ExtensibilityAddIns) = postSolution
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

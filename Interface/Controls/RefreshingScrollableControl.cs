@@ -1,7 +1,12 @@
 using System;
+using System.Windows.Forms;
 using UMD.HCIL.Piccolo;
+using UMD.HCIL.Piccolo.Activities;
+using UMD.HCIL.Piccolo.Util;
 using UMD.HCIL.PiccoloX;
 using UMD.HCIL.PiccoloX.Components;
+
+
 
 namespace BuckRogers.Interface
 {
@@ -19,6 +24,7 @@ namespace BuckRogers.Interface
 		{
 		}
 
+		/*
 		protected override void hScrollBar_ValueChanged(object sender, EventArgs e)
 		{
 			base.hScrollBar_ValueChanged (sender, e);
@@ -30,7 +36,14 @@ namespace BuckRogers.Interface
 			base.vScrollBar_ValueChanged (sender, e);
 			Canvas.Refresh();
 		}
+		*/
 
+		protected override void scrollBar_Scroll(object sender, ScrollEventArgs e) 
+		{
+			base.scrollBar_Scroll(sender, e);
+
+			Canvas.Refresh();
+		}
 
 	}
 }
