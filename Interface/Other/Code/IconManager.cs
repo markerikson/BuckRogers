@@ -15,6 +15,24 @@ using UMD.HCIL.PiccoloX.Nodes;
 using UMD.HCIL.PiccoloX.Components;
 using UMD.HCIL.Piccolo.Event;
 
+#if DIRECT3D
+using UMD.HCIL.PiccoloDirect3D;
+using UMD.HCIL.PiccoloDirect3D.Nodes;
+using UMD.HCIL.PiccoloDirect3D.Util;
+
+
+using PCamera = UMD.HCIL.PiccoloDirect3D.P3Camera;
+using PCanvas = UMD.HCIL.PiccoloDirect3D.P3Canvas;
+using PForm = UMD.HCIL.PiccoloDirect3D.P3Form;
+using PNode = UMD.HCIL.PiccoloDirect3D.P3Node;
+using PImage = UMD.HCIL.PiccoloDirect3D.Nodes.P3Image;
+using PPath = UMD.HCIL.PiccoloDirect3D.Nodes.P3Path;
+using PText = UMD.HCIL.PiccoloDirect3D.Nodes.P3Text;
+using PComposite = UMD.HCIL.PiccoloDirect3D.Util.P3Composite;
+//using PPaintContext = UMD.HCIL.PiccoloDirect3D.Util.P3PaintContext;
+
+#endif
+
 using BuckRogers;
 using GpcWrapper;
 
@@ -223,7 +241,7 @@ namespace BuckRogers.Interface
 			{
 				if(info.Label != null)
 				{
-					PNode parent = info.Label.Parent;
+					PNode parent = (PNode)info.Label.Parent;
 					parent.RemoveFromParent();
 					info.Label.RemoveFromParent();
 					info.Icon.RemoveFromParent();

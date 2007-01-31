@@ -19,6 +19,27 @@ using UMD.HCIL.PiccoloX.Nodes;
 using UMD.HCIL.PiccoloX.Components;
 using UMD.HCIL.Piccolo.Event;
 
+
+
+#if DIRECT3D
+using UMD.HCIL.PiccoloDirect3D;
+using UMD.HCIL.PiccoloDirect3D.Nodes;
+using UMD.HCIL.PiccoloDirect3D.Util;
+
+
+using PCamera = UMD.HCIL.PiccoloDirect3D.P3Camera;
+using PCanvas = UMD.HCIL.PiccoloDirect3D.P3Canvas;
+using PForm = UMD.HCIL.PiccoloDirect3D.P3Form;
+using PNode = UMD.HCIL.PiccoloDirect3D.P3Node;
+using PImage = UMD.HCIL.PiccoloDirect3D.Nodes.P3Image;
+using PPath = UMD.HCIL.PiccoloDirect3D.Nodes.P3Path;
+using PText = UMD.HCIL.PiccoloDirect3D.Nodes.P3Text;
+using PComposite = UMD.HCIL.PiccoloDirect3D.Util.P3Composite;
+//using PPaintContext = UMD.HCIL.PiccoloDirect3D.Util.P3PaintContext;
+
+#endif
+
+
 using GpcWrapper;
 
 namespace BuckRogers.Interface
@@ -86,6 +107,8 @@ namespace BuckRogers.Interface
 			m_canvas = new PCanvas();
 			PRoot r = new ScreenshotRoot();
 			PLayer l = new BlackLayer();
+			//PLayer l = new PLayer();
+			l.Brush = Brushes.Black;
 			PCamera c = new PCamera();
 		
 			r.AddChild(c); 
@@ -364,8 +387,8 @@ namespace BuckRogers.Interface
 			elevatorParent.MouseUp += new PInputEventHandler(text_Click);
 
 			DrawLabelAndOwner2(elevator, "Space Elevator", 2200, -1000);
-			PNode elevatorLabel = elevator[0];
-			PNode elevatorMarker = elevator[1];
+			PNode elevatorLabel = (PNode)elevator[0];
+			PNode elevatorMarker = (PNode)elevator[1];
 			elevatorLabel.X = 2377;
 			elevatorLabel.Y = -834;
 			elevatorMarker.X = 2449;
@@ -751,7 +774,7 @@ namespace BuckRogers.Interface
 
 		public void UpdateToolTip(PInputEventArgs e) 
 		{
-			PNode n = e.InputManager.MouseOver.PickedNode;
+			PNode n = (PNode)e.InputManager.MouseOver.PickedNode;
 
 			String tooltipString = (String) n.Tag;
 
@@ -814,7 +837,7 @@ namespace BuckRogers.Interface
 
 		private void text_Click(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
 		{
-			PNode picked = e.PickedNode;
+			PNode picked = (PNode)e.PickedNode;
 			
 			string territoryName = (string)picked.Tag;
 
@@ -835,7 +858,7 @@ namespace BuckRogers.Interface
 		private void center_MouseUp(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
 		{
 
-			PNode picked = e.PickedNode;
+			PNode picked = (PNode)e.PickedNode;
 			PPath path = (PPath)picked;
 			MessageBox.Show("x: " + path.Bounds.X + ", y: " + path.Bounds.Y);
 		}
@@ -1172,10 +1195,10 @@ namespace BuckRogers.Interface
 				string name = (string)groups[i][0];
 				OrbitalSystem os = (OrbitalSystem)m_controller.Map.Planets[name];
 				PNode[] orbit = (PNode[])groups[i][ 1];
-				PNode node = orbit[os.CurrentOrbitIndex].AllNodes[0];
+				PNode node = (PNode)orbit[os.CurrentOrbitIndex].AllNodes[0];
 				PNode composite = (PNode)groups[i][ 2];
-				PNode icon = composite[0];
-				PNode text = composite[1];
+				PNode icon = (PNode)composite[0];
+				PNode text = (PNode)composite[1];
 
 				icon.CenterFullBoundsOnPoint(node.X + node.Width / 2, node.Y + node.Height / 2);
 				text.CenterFullBoundsOnPoint(node.X + node.Width / 2, node.Y + 40 + node.Height / 2);
@@ -1187,10 +1210,10 @@ namespace BuckRogers.Interface
 			for(int i = 0; i < m_iconAsteroids.Length; i++)
 			{
 				OrbitalSystem asteroid = (OrbitalSystem)m_controller.Map.Planets[asteroidNames[i]];
-				PNode node = m_ao[asteroid.CurrentOrbitIndex].AllNodes[0];
-				PNode composite = m_iconAsteroids[i];
-				PNode icon = composite[0];
-				PNode text = composite[1];
+				PNode node = (PNode)m_ao[asteroid.CurrentOrbitIndex].AllNodes[0];
+				PComposite composite = (PComposite)m_iconAsteroids[i];
+				PNode icon = (PNode)composite[0];
+				PNode text = (PNode)composite[1];
 
 				icon.CenterFullBoundsOnPoint(node.X + node.Width / 2, node.Y + node.Height / 2);
 				text.CenterFullBoundsOnPoint(node.X + node.Width / 2, node.Y + 40 + node.Height / 2);
@@ -1233,7 +1256,7 @@ namespace BuckRogers.Interface
 		public UMD.HCIL.Piccolo.PCanvas Canvas
 		{
 			get { return this.m_canvas; }
-			set { this.m_canvas = value; }
+			set { this.m_canvas = (PCanvas)value; }
 		}
 
 		public RefreshingScrollableControl ScrollControl

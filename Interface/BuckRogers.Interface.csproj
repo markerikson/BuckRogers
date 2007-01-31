@@ -13,7 +13,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>.\bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -27,11 +27,11 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="UMD.HCIL.Piccolo, Version=1.0.2587.24118, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="UMD.HCIL.Piccolo, Version=1.0.2587.29125, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>DLLs\UMD.HCIL.Piccolo.dll</HintPath>
     </Reference>
-    <Reference Include="UMD.HCIL.PiccoloX, Version=1.0.2587.24122, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="UMD.HCIL.PiccoloX, Version=1.0.2587.29126, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>DLLs\UMD.HCIL.PiccoloX.dll</HintPath>
     </Reference>
@@ -194,9 +194,6 @@
       <Project>{119BEE7C-25A5-4F32-B15F-7F81C48EEB62}</Project>
       <Name>BuckRogers.Engine</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DLLs\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
