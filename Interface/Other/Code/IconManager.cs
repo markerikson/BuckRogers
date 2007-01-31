@@ -199,6 +199,11 @@ namespace BuckRogers.Interface
 			sr.Close();
 		}
 
+		public Hashtable GetPlayerIcons(Player p)
+		{
+			return (Hashtable)m_icons[p.Name];
+		}
+
 
 		public void SetIconInfo(Territory t, Player p, UnitType ut)
 		{
@@ -216,7 +221,7 @@ namespace BuckRogers.Interface
 			UnitCollection uc = t.Units.GetUnits(ut, p, null);
 			info.Label.Text = uc.Count.ToString();
 
-			m_map.Canvas.Refresh();
+			//m_map.Canvas.Refresh();
 		}
 
 		public void UpdateIconInfo(Territory t, Player p, UnitType ut)
@@ -254,7 +259,7 @@ namespace BuckRogers.Interface
 				info.Player = Player.NONE;
 			}
 
-			m_map.Canvas.Refresh();
+			//m_map.Canvas.Refresh();
 		}
 
 
@@ -432,6 +437,8 @@ namespace BuckRogers.Interface
 				}
 
 			}
+
+			m_map.Canvas.Refresh();
 		}
 
 		public void ClearAllIcons()
@@ -461,6 +468,8 @@ namespace BuckRogers.Interface
 					RemoveIcon(t, info.Player, info.Type);
 				}				
 			}
+
+			m_map.Canvas.Refresh();
 		}
 
 		public void RefreshIcons(Territory t)
@@ -478,6 +487,8 @@ namespace BuckRogers.Interface
 					UpdateIconInfo(t, p, ut);
 				}
 			}
+
+			m_map.Canvas.Refresh();
 		}
 
 		// By this time, we don't care whether it overlaps or not

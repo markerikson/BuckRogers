@@ -975,10 +975,9 @@ namespace BuckRogers.Interface
 
 			m_battleController.LogNewTurn();
 			m_battleController.NextBattle();
-			//if(m_battleController.NextBattle())
-			//{
-				UpdateCombatInformation();
-			//}
+
+			UpdateCombatInformation();
+
 			
 		}
 

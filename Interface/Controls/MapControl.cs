@@ -1238,6 +1238,8 @@ namespace BuckRogers.Interface
 					m_iconManager.UpdateIconInfo(tuea.Territory, p, ut);
 				}
 			}
+
+			Canvas.Refresh();
 		}
 
 		public void DrawScreenshot()

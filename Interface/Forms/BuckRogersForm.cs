@@ -46,6 +46,7 @@ namespace BuckRogers
 
 		private CombatForm m_combatForm;
 		private ProductionForm m_productionForm;
+		private CombatForm2D m_combatForm2;
 
 		private MapControl m_map;
 		private MapClickMode m_clickMode;
@@ -711,22 +712,31 @@ namespace BuckRogers
 								m_combatForm = new CombatForm(m_controller, m_battleController);
 							}
 
+							if(m_combatForm2 == null)
+							{
+								m_combatForm2 = new CombatForm2D(m_controller, m_battleController, m_map.IconManager);
+							}
+
 							m_controller.FindBattles();
 
 							if(m_controller.Battles.Count == 0)
 							{
-								MessageBox.Show("No battles this turn - moving to production");
+								//MessageBox.Show("No battles this turn - moving to production");
 								m_controller.CheckNextPhase();
 								
 							}
 							else
 							{
-								m_combatForm.BeginCombat();
-								m_combatForm.ShowDialog();
-								m_controller.CheckNextPhase();
+								//m_combatForm.BeginCombat();
+								//m_combatForm.ShowDialog();
+								//m_controller.CheckNextPhase();
+
+								m_combatForm2.CombatDisplay.BeginCombat();
+								m_combatForm2.ShowDialog();
 							}
-							
-							goto case GamePhase.Production;
+
+							break;
+							//goto case GamePhase.Production;
 						}
 						case GamePhase.Production:
 						{
