@@ -7,6 +7,8 @@ namespace BuckRogers
 
 	public delegate void DisplayUnitsHandler(object sender, DisplayUnitsEventArgs e);
 	public delegate void TerritoryUpdateHandler(Territory t);
+	public delegate void BattleStatusUpdateHandler(BattleStatus status);
+	
 
 	public enum BattleStatus
 	{
@@ -15,6 +17,7 @@ namespace BuckRogers
 		AttackComplete,
 		RoundComplete,
 		BattleComplete,
+		BattleReady,
 	}
 	
 
@@ -29,6 +32,7 @@ namespace BuckRogers
 		public StatusUpdateHandler StatusUpdate;
 		public TerritoryUpdateHandler UpdateTerritory;
 		public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
+		public event BattleStatusUpdateHandler BattleStatusUpdated;
 		
 		private int[,] m_combatTable = new int[,]	{	{6, 8, 7, NOTPOSSIBLE, 6, NOTPOSSIBLE, 3}, // Trooper
 														{5, 6, 6, NOTPOSSIBLE, 5, NOTPOSSIBLE, 2}, // Gennie
@@ -86,58 +90,64 @@ namespace BuckRogers
 		private void CheckPlayerOrder()
 		{
 			m_playerOrder = new ArrayList();
-			ArrayList al;
 			
-			if(m_currentBattle.Type == BattleType.Bombing)
+			
+			if(m_currentBattle.Type == BattleType.Bombing
+				|| m_currentBattle.Type == BattleType.KillerSatellite)
 			{
-				al = m_controller.GetBombingTargets(m_currentBattle.Territory, m_currentBattle.Player).GetPlayersWithUnits();
-				al.Add(m_currentBattle.Player);
+				//al = m_controller.GetBombingTargets(m_currentBattle.Territory, m_currentBattle.Player).GetPlayersWithUnits();
+				m_playerOrder.Add(m_currentBattle.Player);
 			}
 			else
 			{
-				al = m_currentBattle.Territory.Units.GetPlayersWithUnits();
-			}
+				ArrayList al = m_currentBattle.Territory.Units.GetPlayersWithUnits();
 
-			foreach(Player p in m_controller.PlayerOrder)
-			{
-				if(al.Contains(p))
+				foreach (Player p in m_controller.PlayerOrder)
 				{
-					UnitCollection uc = m_currentBattle.Territory.Units.GetUnits(p);
-					UnitCollection combatUnits = uc.GetCombatUnits();
-
-					if(combatUnits.Count == 0)
+					if (al.Contains(p))
 					{
-						Hashtable ht = uc.GetUnitTypeCount();
+						UnitCollection uc = m_currentBattle.Territory.Units.GetUnits(p);
+						UnitCollection combatUnits = uc.GetCombatUnits();
 
-						if(ht.ContainsKey(UnitType.Leader))
+						if (combatUnits.Count == 0)
 						{
-							Unit leader = uc.GetUnits(UnitType.Leader)[0];
-							p.Disabled = true;
+							Hashtable ht = uc.GetUnitTypeCount();
 
-							if(StatusUpdate != null)
+							if (ht.ContainsKey(UnitType.Leader))
 							{
-								StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
-								suea.StatusInfo = StatusInfo.LeaderKilled;
-								suea.Player = leader.Owner;
+								Unit leader = uc.GetUnits(UnitType.Leader)[0];
+								p.Disabled = true;
 
-								StatusUpdate(this, suea);
+								if (StatusUpdate != null)
+								{
+									StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+									suea.StatusInfo = StatusInfo.LeaderKilled;
+									suea.Player = leader.Owner;
+
+									StatusUpdate(this, suea);
+								}
 							}
 						}
-					}					
-					else
-					{
-						m_playerOrder.Add(p);
-						//m_survivingUnits[p] = new UnitCollection();
-					}					
+						else
+						{
+							m_playerOrder.Add(p);
+							//m_survivingUnits[p] = new UnitCollection();
+						}
+
+						
+					}
+
+					
 				}
 			}
 
-			if(m_playerOrder.Count == 1)
+			if (m_playerOrder.Count == 1)
 			{
 				m_status = BattleStatus.BattleComplete;
 				return;
 			}
 
+			/*
 			switch(m_currentBattle.Type)
 			{
 				case BattleType.KillerSatellite:
@@ -149,6 +159,7 @@ namespace BuckRogers
 					break;
 				}
 			}
+			*/
 		}
 
 		public bool NextBattle()
@@ -159,6 +170,8 @@ namespace BuckRogers
 				{
 					u.CurrentTerritory = Territory.NONE;
 				}
+
+				// FIXME This doesn't work right with bombing!
 
 				if(TerritoryUnitsChanged != null)
 				{
@@ -335,9 +348,10 @@ namespace BuckRogers
 
 				CheckPlayerOrder();
 
-				if(m_playerOrder.Count == 1 || m_status == BattleStatus.BattleComplete)
+				//if(m_playerOrder.Count == 1 || m_status == BattleStatus.BattleComplete)
+				if(m_status == BattleStatus.BattleComplete)
 				{
-					m_status = BattleStatus.BattleComplete;
+					//m_status = BattleStatus.BattleComplete;
 					return true;
 				}
 				else
@@ -350,6 +364,34 @@ namespace BuckRogers
 
 					switch(m_currentBattle.Type)
 					{
+						case BattleType.Normal:
+						{
+							/*
+							foreach(Player p in m_playerOrder)
+							{
+								UnitCollection uc = (UnitCollection)m_survivingUnits[p];
+								UnitCollection playerUnits = t.Units.GetUnits(p);
+								uc.AddAllUnits(playerUnits.GetCombatUnits());
+							}
+							*/
+
+							UnitCollection combatUnits = t.Units.GetCombatUnits();
+							m_survivingUnits.AddAllUnits(combatUnits);
+
+							UpdateUnusedUnits();
+							DisplayUnitsByTerritory(m_survivingUnits);
+
+							UnitCollection nonCombatUnits = new UnitCollection();
+							UnitCollection leaders = t.Units.GetUnits(UnitType.Leader);
+							UnitCollection factories = t.Units.GetUnits(UnitType.Factory);
+
+							nonCombatUnits.AddAllUnits(leaders);
+							nonCombatUnits.AddAllUnits(factories);
+
+							DisplayUnitsByTerritory(nonCombatUnits, DisplayCategory.NonCombatUnits);
+
+							break;
+						}
 						case BattleType.KillerSatellite:
 						{
 							UnitCollection satellites = t.Units.GetUnits(UnitType.KillerSatellite);
@@ -371,7 +413,10 @@ namespace BuckRogers
 								m_survivingUnits.AddAllUnits(defenders)
 							}
 							*/
+							DisplayUnitsByTerritory(satellites);
+							DisplayUnitsByTerritory(defenders);
 
+							/*
 							if(UnitsToDisplay != null)
 							{
 								DisplayUnitsEventArgs duea = new DisplayUnitsEventArgs();
@@ -384,7 +429,7 @@ namespace BuckRogers
 								duea.Units = defenders;
 								UnitsToDisplay(this, duea);
 							}
-
+							*/
 							break;
 						}
 						case BattleType.Bombing:
@@ -393,27 +438,14 @@ namespace BuckRogers
 							UnitCollection defenders = m_controller.GetBombingTargets(t, m_currentPlayer);
 
 							m_currentUnused.AddAllUnits(attackers);
-
-							//UnitCollection uc = null;
-
-							//uc = (UnitCollection)m_survivingUnits[m_currentPlayer];
-							//uc.AddAllUnits(attackers);
+							
 							m_survivingUnits.AddAllUnits(attackers);
 							m_survivingUnits.AddAllUnits(defenders);
 
+							DisplayUnitsByTerritory(attackers);
+							DisplayUnitsByTerritory(defenders);
+							
 							/*
-							foreach(Player p in defenders.GetPlayersWithUnits())
-							{
-								uc = (UnitCollection)m_survivingUnits[p];
-								UnitCollection playerUnits = defenders.GetUnits(p);
-								uc.AddAllUnits(playerUnits);
-							}
-							*/
-
-							/*
-							AddUnitsToListView(attackers, m_lvAttUnused, false);
-							AddUnitsToListView(defenders, m_lvEnemyLive, true);
-							*/
 							if(UnitsToDisplay != null)
 							{
 								DisplayUnitsEventArgs duea = new DisplayUnitsEventArgs();
@@ -426,26 +458,21 @@ namespace BuckRogers
 								duea.Units = defenders;
 								UnitsToDisplay(this, duea);
 							}
-							break;
-						}
-						case BattleType.Normal:
-						{
-							/*
-							foreach(Player p in m_playerOrder)
-							{
-								UnitCollection uc = (UnitCollection)m_survivingUnits[p];
-								UnitCollection playerUnits = t.Units.GetUnits(p);
-								uc.AddAllUnits(playerUnits.GetCombatUnits());
-							}
 							*/
-							m_survivingUnits.AddAllUnits(t.Units.GetCombatUnits());
 
-							UpdateUnusedUnits();
-							DisplayUnits();
 							break;
 						}
+						
 					}
-					m_status = BattleStatus.Setup;
+
+					m_status = BattleStatus.BattleReady;
+
+					if(BattleStatusUpdated != null)
+					{
+						BattleStatusUpdated(m_status);
+					}
+
+					
 					return true;
 				}
 				
@@ -481,25 +508,29 @@ namespace BuckRogers
 				{
 					ProcessTurnResults();
 					m_status = BattleStatus.BattleComplete;
+					BattleStatusUpdated(m_status);
 				}
 				else
 				{
 					m_status = BattleStatus.RoundComplete;
+					BattleStatusUpdated(m_status);
 				}
 			}
 			else if(CurrentUnused.Count == 0)
 			{
 				m_status = BattleStatus.RoundComplete;
+				BattleStatusUpdated(m_status);
 			}
 			else
 			{
 				m_status = BattleStatus.AttackComplete;
-				DisplayUnits();
+				//DisplayUnits();
 			}
 		}
 
-		public void NextPlayer()
+		public bool NextPlayer()
 		{
+			bool anotherPlayer = false;
 			switch(CurrentBattle.Type)
 			{
 					// only one turn / player for these types
@@ -524,7 +555,9 @@ namespace BuckRogers
 						{
 							CurrentPlayer = (Player)BattleOrder[0];
 							UpdateUnusedUnits();
+							DisplayUnitsByTerritory(m_survivingUnits);
 							m_status = BattleStatus.Setup;
+							anotherPlayer = true;
 						}
 					}
 					else
@@ -532,12 +565,18 @@ namespace BuckRogers
 						CurrentPlayer = (Player)BattleOrder[index + 1];
 						UpdateUnusedUnits();
 						m_status = BattleStatus.Setup;
+						anotherPlayer = true;
 					}
 
-					DisplayUnits();
+					//anotherPlayer = anotherTurn;
+
+					//DisplayUnits();
 					break;
 				}
+
 			}
+
+			return anotherPlayer;
 		}
 
 		public void NextRound()
@@ -557,6 +596,45 @@ namespace BuckRogers
 			}
 
 			DisplaySurvivingEnemies();		
+		}
+
+		public void DisplayUnitsByTerritory(UnitCollection uc)
+		{
+			DisplayUnitsByTerritory(uc, DisplayCategory.UnusedAttackers);
+		}
+
+		public void DisplayUnitsByTerritory(UnitCollection uc, DisplayCategory category)
+		{
+			ArrayList players = uc.GetPlayersWithUnits();
+			
+			foreach(Player p in m_controller.PlayerOrder)//players)
+			{
+				UnitCollection playerUnits = uc.GetUnits(p);
+				if(playerUnits.Count == 0)
+				{
+					continue;
+				}
+
+				ArrayList playerTerritories = uc.GetUnitTerritories();
+
+				foreach(Territory t in playerTerritories)
+				{
+					UnitCollection territoryUnits = playerUnits.GetUnits(t);
+
+					if (UnitsToDisplay != null)
+					{
+						DisplayUnitsEventArgs duea = new DisplayUnitsEventArgs();
+						duea.Territory = t;
+						duea.Category = category;
+						duea.Units = territoryUnits;
+						duea.Player = p;
+						
+
+						UnitsToDisplay(this, duea);
+					}
+				}
+			}
+			
 		}
 
 		public void DisplaySurvivingEnemies()
@@ -652,6 +730,8 @@ namespace BuckRogers
 					}
 				}
 
+
+
 				m_playerOrder.Remove(p);
 			}
 		}
@@ -661,6 +741,8 @@ namespace BuckRogers
 		public bool NextTurn()
 		{
 			ProcessTurnResults();
+
+			DisplayUnitsByTerritory(m_cumulativeResult.Casualties, DisplayCategory.DeadUnits);
 
 			bool anotherTurn = true;
 			if( (m_currentBattle.Type == BattleType.KillerSatellite)
@@ -743,6 +825,7 @@ namespace BuckRogers
 				}
 
 				ci.Attackers.RemoveUnit(attacker);
+				m_currentUnused.RemoveUnit(attacker);
 				cr.UsedAttackers.AddUnit(attacker);
 
 				bool attackHit = (roll >= toHit);
@@ -886,7 +969,7 @@ namespace BuckRogers
 				}
 				case BattleType.Bombing:
 				{
-					// Need to make sure this is still valid, since it's possible that a 
+					// TODO Need to make sure this is still valid, since it's possible that a 
 					// killer satellite wiped out all battlers in the territory
 
 					break;

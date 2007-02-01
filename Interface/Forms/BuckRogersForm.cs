@@ -709,7 +709,7 @@ namespace BuckRogers
 							//MessageBox.Show("Movement over, time for combat");
 							if(m_combatForm == null)
 							{
-								m_combatForm = new CombatForm(m_controller, m_battleController);
+								//m_combatForm = new CombatForm(m_controller, m_battleController);
 							}
 
 							if(m_combatForm2 == null)
@@ -729,10 +729,12 @@ namespace BuckRogers
 							{
 								//m_combatForm.BeginCombat();
 								//m_combatForm.ShowDialog();
-								//m_controller.CheckNextPhase();
+								
 
 								m_combatForm2.CombatDisplay.BeginCombat();
 								m_combatForm2.ShowDialog();
+
+								m_controller.CheckNextPhase();
 							}
 
 							break;

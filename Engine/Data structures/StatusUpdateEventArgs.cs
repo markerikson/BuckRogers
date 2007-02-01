@@ -10,6 +10,7 @@ namespace BuckRogers
 		SabotageResult,
 		LeaderKilled,
 		TransportLanded,
+		PlayerKilled,
 		GameOver,
 	};
 	/// <summary>

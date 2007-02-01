@@ -107,6 +107,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Other\AssemblyInfo.cs" />
+    <Compile Include="Other\Code\CombatMessage.cs" />
     <Compile Include="Other\Code\Command.cs" />
     <Compile Include="Other\Code\CommandExecutor.cs" />
     <Compile Include="Other\Code\CommandManager.cs">
@@ -116,7 +117,9 @@
     <Compile Include="Other\Code\IconManager.cs" />
     <Compile Include="Other\Code\ListViewColumnSorter.cs" />
     <Compile Include="Other\Code\MoveModeEventArgs.cs" />
+    <Compile Include="Other\Code\PlayerUnitDisplay.cs" />
     <Compile Include="Other\Code\TransportInfoEventArgs.cs" />
+    <Compile Include="Other\Code\UnitInfoDisplay.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Controls\InformationPanel.resx">
