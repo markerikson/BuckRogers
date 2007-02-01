@@ -254,7 +254,13 @@ namespace BuckRogers.Interface
 			string stats = string.Format("A: {0}, S: {1}\nD: {2}, T: {3}", m_numAlive, m_numCanShoot, m_numDead, m_numTotal);
 			this.Label.Text = stats;
 
-			if(!m_resetting && (m_numTotal == 0 || (m_numAlive == 0 && m_updatingDeath)))
+			if(m_resetting)
+			{
+				UnDimUnitDisplay();
+				return;
+			}
+
+			if((m_numTotal == 0 || (m_numAlive == 0 && m_updatingDeath)))
 			{				
 				DimUnitDisplay();
 			}
@@ -316,7 +322,9 @@ namespace BuckRogers.Interface
 		public void HideDisplay()
 		{
 			Composite.RemoveFromParent();
-			m_iconCover.RemoveFromParent();
+
+
+			UnDimUnitDisplay();
 		}
 	}
 }

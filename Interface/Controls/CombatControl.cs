@@ -90,6 +90,7 @@ namespace BuckRogers.Interface
 		private PointF[] m_playerLocationsExtended;
 
 		private int m_displayedPage;
+		private int m_numPages;
 
 		private Player m_player;
 
@@ -277,14 +278,17 @@ namespace BuckRogers.Interface
 			m_lblPrevPlayers.X = 130 + (-1 * (m_lblPrevPlayers.Width / 2));
 			m_lblPrevPlayers.Y = 550;
 
-			m_canvas.Layer.AddChild(m_lblNextPlayers);
-			m_canvas.Layer.AddChild(m_lblPrevPlayers);
+			//m_canvas.Layer.AddChild(m_lblNextPlayers);
+			//m_canvas.Layer.AddChild(m_lblPrevPlayers);
 
 			m_lblNextPlayers.MouseEnter += new PInputEventHandler(OnLabelMouseEnter);
 			m_lblNextPlayers.MouseLeave += new PInputEventHandler(OnLabelMouseLeave);
 
 			m_lblPrevPlayers.MouseEnter += new PInputEventHandler(OnLabelMouseEnter);
 			m_lblPrevPlayers.MouseLeave += new PInputEventHandler(OnLabelMouseLeave);
+
+			m_lblNextPlayers.MouseUp += new PInputEventHandler(OnPageButtonClicked);
+			m_lblPrevPlayers.MouseUp += new PInputEventHandler(OnPageButtonClicked);
 
 			/*
 			CombatMessage cm = new CombatMessage(m_canvas);
@@ -306,6 +310,20 @@ namespace BuckRogers.Interface
 			m_battleController.BattleStatusUpdated += new BattleStatusUpdateHandler(OnBattleStatusUpdated);
 		}
 
+		void OnPageButtonClicked(object sender, PInputEventArgs e)
+		{
+			PText button = sender as PText;
+
+			if(button == m_lblNextPlayers)
+			{
+				DisplayPage(m_displayedPage + 1);
+			}
+			else if(button == m_lblPrevPlayers)
+			{
+				DisplayPage(m_displayedPage - 1);
+			}
+		}
+
 		void OnBattleStatusUpdated(BattleStatus status)
 		{
 			switch(status)
@@ -322,11 +340,9 @@ namespace BuckRogers.Interface
 					m_lblBattlesLeft.Text = m_battleController.Battles.Count.ToString();
 					m_lblBattleType.Text = m_battleController.CurrentBattle.Type.ToString();
 
-					if(m_displays.Count <= 6)
-					{
-						m_lblNextPlayers.RemoveFromParent();
-						m_lblPrevPlayers.RemoveFromParent();
-					}
+					
+
+					
 
 					if(m_battleController.CurrentBattle.Type == BattleType.KillerSatellite)
 					{
@@ -368,6 +384,7 @@ namespace BuckRogers.Interface
 					
 					if (!m_battleController.NextBattle())
 					{
+						ClearMessages();
 						m_battleController.CombatComplete();
 						MessageBox.Show("All battles finished");
 						Form parent = (Form)this.Parent;
@@ -394,44 +411,89 @@ namespace BuckRogers.Interface
 						pud.ShowDisplay();
 					}
 
+					m_lblNextPlayers.RemoveFromParent();
+					m_lblPrevPlayers.RemoveFromParent();
+
 					break;
 				}
 				case BattleType.Bombing:
 				{
+					int numOtherDisplays = m_displays.Count - 1;
+					m_numPages = numOtherDisplays / 5;
+					m_numPages += (numOtherDisplays % 5 > 0) ? 1 : 0;
+					m_displayedPage = 1;
+
 					PlayerUnitDisplay bomberPUD = (PlayerUnitDisplay)m_displays[0];
 
 					bomberPUD.Location = m_playerLocationsNormal[0];
 					bomberPUD.LayoutChildren();
 					bomberPUD.ShowDisplay();
 
-					int displayIndex = (m_displayedPage * 5) + 1;
-					int highestIndexForPage = (m_displayedPage + 1) * 5;
-					int maxDisplayIndex = Math.Min(highestIndexForPage, m_displays.Count - 1);
-
-					for (int i = 1; i < displayIndex; i++ )
-					{
-						PlayerUnitDisplay pud = (PlayerUnitDisplay)m_displays[i];
-						pud.HideDisplay();
-					}
-
-					for (int i = displayIndex; i <= maxDisplayIndex; i++)
-					{
-						PlayerUnitDisplay pud = (PlayerUnitDisplay)m_displays[i];
-
-						pud.Location = m_playerLocationsNormal[i];
-						pud.LayoutChildren();
-						pud.ShowDisplay();
-					}
-
-					for (int i = maxDisplayIndex + 1; i < m_displays.Count; i++)
-					{
-						PlayerUnitDisplay pud = (PlayerUnitDisplay)m_displays[i];
-						pud.HideDisplay();
-					}
+					DisplayPage(1);
 
 					break;
 				}
+			}
+		}
 
+		private void DisplayPage(int pageNum)
+		{
+			int pageIndex = pageNum - 1;
+			int displayIndex = 0;
+
+			//if (pageNum == 1)
+			//{
+				displayIndex = (pageIndex * 5) + 1;
+			//}
+			//else
+			//{
+			//	displayIndex = (pageIndex * 5);
+			//}
+			int highestIndexForPage = (pageIndex + 1) * 5;
+			int maxDisplayIndex = Math.Min(highestIndexForPage, m_displays.Count - 1);
+
+			for (int i = 1; i < displayIndex; i++)
+			{
+				PlayerUnitDisplay pud = (PlayerUnitDisplay)m_displays[i];
+				pud.HideDisplay();
+			}
+
+			int locationIndex = 1;
+			for (int i = displayIndex; i <= maxDisplayIndex; i++)
+			{
+				PlayerUnitDisplay pud = (PlayerUnitDisplay)m_displays[i];
+
+				pud.Location = m_playerLocationsNormal[locationIndex];
+				pud.LayoutChildren();
+				pud.ShowDisplay();
+
+				locationIndex++;
+			}
+
+			for (int i = maxDisplayIndex + 1; i < m_displays.Count; i++)
+			{
+				PlayerUnitDisplay pud = (PlayerUnitDisplay)m_displays[i];
+				pud.HideDisplay();
+			}
+
+			m_displayedPage = pageNum;
+
+			if(m_displayedPage < m_numPages)
+			{
+				m_canvas.Layer.AddChild(m_lblNextPlayers);
+			}
+			else
+			{
+				m_lblNextPlayers.RemoveFromParent();
+			}
+
+			if(m_displayedPage > 1)
+			{
+				m_canvas.Layer.AddChild(m_lblPrevPlayers);
+			}
+			else
+			{
+				m_lblPrevPlayers.RemoveFromParent();
 			}
 		}
 
@@ -675,6 +737,12 @@ namespace BuckRogers.Interface
 				case BattleType.Bombing:
 				{
 					CombatInfo ci = SetUpCombat(attackingUID, defendingUID, numAttacks);
+
+					if(ci == null)
+					{
+						return;
+					}
+
 					ci.Type = BattleType.Bombing;
 
 					UnitCollection leaders = m_battleController.CurrentBattle.Territory.Units.GetUnits(UnitType.Leader);
@@ -704,6 +772,12 @@ namespace BuckRogers.Interface
 						*/
 
 						ci = SetUpCombat(attackingUID, defendingUID, numAttacks);
+
+						if (ci == null)
+						{
+							return;
+						}
+
 						ci.Type = BattleType.Normal;
 
 						UnitCollection leaders = m_battleController.CurrentBattle.Territory.Units.GetUnits(UnitType.Leader);

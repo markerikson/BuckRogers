@@ -737,8 +737,8 @@ namespace BuckRogers
 								m_controller.CheckNextPhase();
 							}
 
-							break;
-							//goto case GamePhase.Production;
+							//break;
+							goto case GamePhase.Production;
 						}
 						case GamePhase.Production:
 						{

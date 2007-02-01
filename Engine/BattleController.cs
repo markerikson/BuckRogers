@@ -164,24 +164,65 @@ namespace BuckRogers
 		{
 			if(m_cumulativeResult.Casualties.Count > 0)
 			{
-				foreach(Unit u in m_cumulativeResult.Casualties)
+				if(CurrentBattle.Type == BattleType.Bombing)
 				{
-					u.CurrentTerritory = Territory.NONE;
+					if (TerritoryUnitsChanged != null)
+					{
+						ArrayList hurtPlayers = m_cumulativeResult.Casualties.GetPlayersWithUnits();
+
+						foreach (Player p in hurtPlayers)
+						{
+							UnitCollection playerUnits = m_cumulativeResult.Casualties.GetUnits(p);
+							ArrayList territories = playerUnits.GetUnitTerritories();
+
+							foreach (Territory t in territories)
+							{
+								UnitCollection territoryUnits = playerUnits.GetUnits(t);
+
+								TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
+								tuea.Units = new UnitCollection();
+								tuea.Units.AddAllUnits(playerUnits);
+								tuea.Territory = t;
+								tuea.Added = false;
+								tuea.Player = p;
+
+								foreach(Unit u in territoryUnits)
+								{
+									u.CurrentTerritory = Territory.NONE;
+								}
+
+								TerritoryUnitsChanged(this, tuea);
+							}
+						}
+					}
+				}
+				else
+				{
+					foreach (Unit u in m_cumulativeResult.Casualties)
+					{
+						u.CurrentTerritory = Territory.NONE;
+					}
+
+					// FIXME This doesn't work right with bombing!
+
+					if (TerritoryUnitsChanged != null)
+					{
+						TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
+						tuea.Units = new UnitCollection();
+						tuea.Units.AddAllUnits(m_cumulativeResult.Casualties);
+						tuea.Territory = m_currentBattle.Territory;
+						tuea.Added = false;
+						tuea.Player = m_currentBattle.Player;
+
+						TerritoryUnitsChanged(this, tuea);
+					}
 				}
 
-				// FIXME This doesn't work right with bombing!
+				
 
-				if(TerritoryUnitsChanged != null)
-				{
-					TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
-					tuea.Units = new UnitCollection();
-					tuea.Units.AddAllUnits(m_cumulativeResult.Casualties);
-					tuea.Territory = m_currentBattle.Territory;
-					tuea.Added = false;
-					tuea.Player = m_currentBattle.Player;
-
-					TerritoryUnitsChanged(this, tuea);
-				}
+				/*
+				
+				*/
 
 				XmlElement xeUnits = m_gamelog.CreateElement("Casualties");
 

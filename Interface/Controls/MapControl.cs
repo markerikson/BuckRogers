@@ -20,8 +20,9 @@ using UMD.HCIL.PiccoloX.Components;
 using UMD.HCIL.Piccolo.Event;
 
 
-
+/*
 #if DIRECT3D
+
 using UMD.HCIL.PiccoloDirect3D;
 using UMD.HCIL.PiccoloDirect3D.Nodes;
 using UMD.HCIL.PiccoloDirect3D.Util;
@@ -38,7 +39,7 @@ using PComposite = UMD.HCIL.PiccoloDirect3D.Util.P3Composite;
 //using PPaintContext = UMD.HCIL.PiccoloDirect3D.Util.P3PaintContext;
 
 #endif
-
+*/
 
 using GpcWrapper;
 
@@ -1231,6 +1232,7 @@ namespace BuckRogers.Interface
 			foreach(Player p in players)
 			{
 				UnitCollection uc = tuea.Units.GetUnits(p);
+				//uc = uc.GetUnits(tuea.Territory);
 				Hashtable ht = uc.GetUnitTypeCount();
 
 				foreach(UnitType ut in ht.Keys)
