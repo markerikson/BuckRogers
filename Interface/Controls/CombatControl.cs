@@ -327,6 +327,12 @@ namespace BuckRogers.Interface
 						m_lblNextPlayers.RemoveFromParent();
 						m_lblPrevPlayers.RemoveFromParent();
 					}
+
+					if(m_battleController.CurrentBattle.Type == BattleType.KillerSatellite)
+					{
+						MessageBox.Show("Killer Satellite preparing to fire...");
+						DoAttack(null, 0);
+					}
 					break;
 				}
 				case BattleStatus.RoundComplete:
@@ -336,6 +342,7 @@ namespace BuckRogers.Interface
 
 					MessageBox.Show("Combat round complete.  Click OK to continue.", "Round Finished", 
 									MessageBoxButtons.OK);
+					ClearMessages();
 
 					if(m_battleController.NextPlayer())
 					{
@@ -344,8 +351,12 @@ namespace BuckRogers.Interface
 						m_currentPUD = (PlayerUnitDisplay)m_displays[index];
 						m_currentPUD.Selected = true;
 					}
+					else
+					{
+						goto case BattleStatus.BattleComplete;
+					}
 
-					ClearMessages();
+					
 					break;
 				}
 				case BattleStatus.BattleComplete:
@@ -353,10 +364,12 @@ namespace BuckRogers.Interface
 					MessageBox.Show("Battle finished.  Click OK to continue.", "Battle Finished",
 									MessageBoxButtons.OK);
 
+					ResetDisplay();
+					
 					if (!m_battleController.NextBattle())
 					{
 						m_battleController.CombatComplete();
-						MessageBox.Show("Combat complete");
+						MessageBox.Show("All battles finished");
 						Form parent = (Form)this.Parent;
 						parent.DialogResult = DialogResult.OK;
 					}
@@ -477,7 +490,7 @@ namespace BuckRogers.Interface
 
 			PlayerUnitDisplay pud = new PlayerUnitDisplay(this, m_canvas);
 			//m_displays[i] = pud;
-			m_availableDisplays.Add(playerIndex, pud);
+			m_availableDisplays.Add(pud.GetHashCode(), pud);
 			pud.Composite.Tag = pud;
 
 			PText name = new PText(p.Name);
@@ -655,59 +668,66 @@ namespace BuckRogers.Interface
 			switch (m_battleController.CurrentBattle.Type)
 			{
 				case BattleType.KillerSatellite:
-					{
-						cr = m_battleController.DoKillerSatelliteCombat(m_battleController.CurrentBattle);
-						break;
-					}
+				{
+					cr = m_battleController.DoKillerSatelliteCombat(m_battleController.CurrentBattle);
+					break;
+				}
 				case BattleType.Bombing:
+				{
+					CombatInfo ci = SetUpCombat(attackingUID, defendingUID, numAttacks);
+					ci.Type = BattleType.Bombing;
+
+					UnitCollection leaders = m_battleController.CurrentBattle.Territory.Units.GetUnits(UnitType.Leader);
+					ci.AttackingLeader = (leaders.GetUnits(m_battleController.CurrentPlayer).Count > 0);
+
+					cr = m_battleController.DoBombingCombat(ci);
+					break;
+				}
+				case BattleType.Normal:
+				{
+					CombatInfo ci = null;
+					try
 					{
-						CombatInfo ci = SetUpCombat();
-						ci.Type = BattleType.Bombing;
+						/*
+						ci = new CombatInfo();
+
+						UnitCollection attackers = GetRequestedUnits(m_selectedUID.Player, attackingUID.Type, m_selectedUID.PlayerDisplay.Territory, true, numAttacks);
+						ci.Attackers.AddAllUnits(attackers);
+
+						UnitCollection defenders = GetRequestedUnits(defendingUID.Player, defendingUID.Type, defendingUID.PlayerDisplay.Territory, false, numAttacks);
+						ci.Defenders.AddAllUnits(defenders);
+
+						if (attackers.Count == 0 || defenders.Count == 0)
+						{
+							return;
+						}
+						*/
+
+						ci = SetUpCombat(attackingUID, defendingUID, numAttacks);
+						ci.Type = BattleType.Normal;
 
 						UnitCollection leaders = m_battleController.CurrentBattle.Territory.Units.GetUnits(UnitType.Leader);
 						ci.AttackingLeader = (leaders.GetUnits(m_battleController.CurrentPlayer).Count > 0);
 
-						cr = m_battleController.DoBombingCombat(ci);
-						break;
+						cr = m_battleController.ExecuteCombat(ci);
+
 					}
-				case BattleType.Normal:
+					catch (Exception ex)
 					{
-						CombatInfo ci = null;
-						try
-						{
-							ci = new CombatInfo();
-
-							UnitCollection attackers = GetRequestedUnits(m_selectedUID.Player, attackingUID.Type, m_selectedUID.PlayerDisplay.Territory, true, numAttacks);
-							ci.Attackers.AddAllUnits(attackers);
-
-							UnitCollection defenders = GetRequestedUnits(defendingUID.Player, defendingUID.Type, defendingUID.PlayerDisplay.Territory, false, numAttacks);
-							ci.Defenders.AddAllUnits(defenders);
-
-							if (attackers.Count == 0 || defenders.Count == 0)
-							{
-								return;
-							}
-
-							ci.Type = BattleType.Normal;
-
-							UnitCollection leaders = m_battleController.CurrentBattle.Territory.Units.GetUnits(UnitType.Leader);
-							ci.AttackingLeader = (leaders.GetUnits(m_battleController.CurrentPlayer).Count > 0);
-
-							cr = m_battleController.ExecuteCombat(ci);
-
-						}
-						catch (Exception ex)
-						{
-							MessageBox.Show(ex.Message);
-							return;
-						}
-
-						break;
+						MessageBox.Show(ex.Message);
+						return;
 					}
+
+					break;
+				}
 			}
 
 			if (cr != null)
 			{
+				// should only be true if it's a Killer Satellite attack
+				
+				bool killerSatellite = (defendingUID == null);
+				ArrayList m_satelliteUIDs = new ArrayList();
 				// Show messages here
 				foreach(AttackResult ar in cr.AttackResults)
 				{
@@ -716,6 +736,13 @@ namespace BuckRogers.Interface
 
 					attackingUID.Shoot();
 
+					if (killerSatellite)
+					{
+						PlayerUnitDisplay defendingPUD = GetPlayerUnitDisplay(ar.Defender.Owner, m_battleController.CurrentBattle.Territory);
+						defendingUID = (UnitInfoDisplay)defendingPUD.UIDs[ar.Defender.Type];
+						m_satelliteUIDs.Add(defendingUID);
+					}
+
 					if(ar.Hit)
 					{
 						defendingUID.KillOneUnit();
@@ -723,10 +750,21 @@ namespace BuckRogers.Interface
 				}
 
 				attackingUID.UpdateUnitStatistics();
-				defendingUID.UpdateUnitStatistics();	
-	
-				m_battleController.LastResult = cr;			
 
+				if(!killerSatellite)
+				{
+					defendingUID.UpdateUnitStatistics();
+				}
+				
+				else
+				{
+					foreach(UnitInfoDisplay uid in m_satelliteUIDs)
+					{
+						uid.UpdateUnitStatistics();
+					}
+				}						
+	
+				m_battleController.LastResult = cr;		
 				m_battleController.ProcessAttackResults();
 			}
 		}
@@ -771,9 +809,38 @@ namespace BuckRogers.Interface
 			return allMatchingUnits;
 		}
 
-		private CombatInfo SetUpCombat()
+		private CombatInfo SetUpCombat(UnitInfoDisplay attackingUID, UnitInfoDisplay defendingUID, int numAttacks)
 		{
-			throw new Exception("The method or operation is not implemented.");
+			CombatInfo ci = new CombatInfo();
+
+			UnitCollection attackers = null;
+			UnitCollection defenders = null;
+
+			try
+			{						
+				attackers = GetRequestedUnits(m_selectedUID.Player, attackingUID.Type, m_selectedUID.PlayerDisplay.Territory, true, numAttacks);
+				ci.Attackers.AddAllUnits(attackers);
+				
+				defenders = GetRequestedUnits(defendingUID.Player, defendingUID.Type, defendingUID.PlayerDisplay.Territory, false, numAttacks);
+				ci.Defenders.AddAllUnits(defenders);
+
+			}
+			catch(Exception ex)
+			{
+				if(attackers != null)
+				{
+					m_battleController.CurrentUnused.AddAllUnits(attackers);
+				}
+				
+				throw ex;
+			}
+
+			if (attackers.Count == 0 || defenders.Count == 0)
+			{
+				return null;
+			}
+
+			return ci;
 		}
 
 		// FIXME Rapid clicking sometimes puts one message at the top, out of order
@@ -973,8 +1040,9 @@ namespace BuckRogers.Interface
 
 			foreach(PlayerUnitDisplay pud in m_availableDisplays)
 			{
+				pud.ResetUnitCounts();
 				pud.HideDisplay();
-				//pud.ResetUnitCounts();
+				
 			}
 		}
 

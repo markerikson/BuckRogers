@@ -97,6 +97,8 @@ namespace BuckRogers
 			{
 				//al = m_controller.GetBombingTargets(m_currentBattle.Territory, m_currentBattle.Player).GetPlayersWithUnits();
 				m_playerOrder.Add(m_currentBattle.Player);
+
+				return;
 			}
 			else
 			{
@@ -132,12 +134,8 @@ namespace BuckRogers
 						{
 							m_playerOrder.Add(p);
 							//m_survivingUnits[p] = new UnitCollection();
-						}
-
-						
-					}
-
-					
+						}						
+					}					
 				}
 			}
 
@@ -538,7 +536,7 @@ namespace BuckRogers
 				case BattleType.Bombing:
 				{
 					NextTurn();
-					DisplaySurvivingEnemies();
+					//DisplaySurvivingEnemies();
 					m_status = BattleStatus.BattleComplete;
 					break;
 				}
@@ -620,6 +618,11 @@ namespace BuckRogers
 				foreach(Territory t in playerTerritories)
 				{
 					UnitCollection territoryUnits = playerUnits.GetUnits(t);
+
+					if(territoryUnits.Count == 0)
+					{
+						continue;
+					}
 
 					if (UnitsToDisplay != null)
 					{
@@ -825,7 +828,12 @@ namespace BuckRogers
 				}
 
 				ci.Attackers.RemoveUnit(attacker);
-				m_currentUnused.RemoveUnit(attacker);
+
+				if(m_currentUnused.ContainsUnit(attacker))
+				{
+					m_currentUnused.RemoveUnit(attacker);
+				}
+
 				cr.UsedAttackers.AddUnit(attacker);
 
 				bool attackHit = (roll >= toHit);

@@ -150,6 +150,23 @@ namespace BuckRogers
 		}
 		*/
 
+		public bool ContainsUnit(Unit unit)
+		{
+			bool contains = false;
+
+			for(int i = 0; i < List.Count; i++)
+			{
+				Unit u = (Unit)List[i];
+				if(u == unit)
+				{
+					contains = true;
+					break;
+				}
+			}
+
+			return contains;
+		}
+
 		public Unit GetUnitByID(int id)
 		{
 			for(int i = 0; i < List.Count; i++)

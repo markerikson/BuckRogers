@@ -227,6 +227,8 @@ namespace BuckRogers.Interface
 				uid.Icon.X = location;
 				uid.Icon.Y = height;
 
+				uid.UpdateCoverLocation();
+
 				uid.Label.X = location;
 				uid.Label.Y = height + 52;
 			}
@@ -320,21 +322,25 @@ namespace BuckRogers.Interface
 
 		public void HideDisplay()
 		{
+			
 			if(!m_displayed)
 			{
 				return;
 			}
+			
 
 			m_displayed = false;
 
 			m_label.RemoveFromParent();
+			m_secondaryLabel.RemoveFromParent();
 			m_composite.RemoveFromParent();
 
 			foreach (DictionaryEntry de in m_uids)
 			{
 				UnitInfoDisplay uid = (UnitInfoDisplay)de.Value;
 
-				uid.Composite.RemoveFromParent();
+				//uid.Composite.RemoveFromParent();
+				uid.HideDisplay();
 			}
 		}
 
@@ -348,6 +354,13 @@ namespace BuckRogers.Interface
 			m_displayed = true;
 
 			m_canvas.Layer.AddChild(m_composite);
+
+			if(m_secondaryLabel.Text != null)
+			{
+				m_canvas.Layer.AddChild(m_secondaryLabel);
+			}
+
+			m_canvas.Layer.AddChild(m_label);
 
 			foreach (DictionaryEntry de in m_uids)
 			{

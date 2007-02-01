@@ -32,6 +32,7 @@ namespace BuckRogers.Interface
 		private bool m_selected;
 		private bool m_dimmed;
 		private bool m_updatingDeath;
+		private bool m_resetting;
 
 		private int m_numTotal;
 		private int m_numCanShoot;
@@ -99,7 +100,9 @@ namespace BuckRogers.Interface
 
 		void m_iconCover_MouseUp(object sender, PInputEventArgs e)
 		{
-			MessageBox.Show("Cover clicked: " + this.Type.ToString());
+			string message = string.Format("Cover clicked:\nPlayer: {0}, Type: {1}\nHashcode: {2}",
+											this.Player.Name, this.Type.ToString(), this.PlayerDisplay.GetHashCode());
+			MessageBox.Show(message);
 		}
 
 
@@ -201,7 +204,11 @@ namespace BuckRogers.Interface
 
 			ResetCasualties();
 
+			m_resetting = true;
+
 			UpdateUnitStatistics();
+
+			m_resetting = false;
 		}
 
 		private void ToggleSelection()
@@ -247,7 +254,7 @@ namespace BuckRogers.Interface
 			string stats = string.Format("A: {0}, S: {1}\nD: {2}, T: {3}", m_numAlive, m_numCanShoot, m_numDead, m_numTotal);
 			this.Label.Text = stats;
 
-			if(m_numTotal == 0 || (m_numAlive == 0 && m_updatingDeath))
+			if(!m_resetting && (m_numTotal == 0 || (m_numAlive == 0 && m_updatingDeath)))
 			{				
 				DimUnitDisplay();
 			}
@@ -270,14 +277,21 @@ namespace BuckRogers.Interface
 			SolidBrush dimBrush = new SolidBrush(dimColor);
 			Label.TextBrush = dimBrush;
 
-			m_iconCover.X = Icon.X;
-			m_iconCover.Y = Icon.Y;
+			UpdateCoverLocation();
 
 			//m_composite.AddChild(m_iconCover);
 			m_canvas.Layer.AddChild(m_iconCover);
-			m_iconCover.MoveToFront();
+			
 
 			m_dimmed = true;
+		}
+
+		public void UpdateCoverLocation()
+		{
+			m_iconCover.X = Icon.X;
+			m_iconCover.Y = Icon.Y;
+
+			m_iconCover.MoveToFront();
 		}
 
 		public void UnDimUnitDisplay()
@@ -298,5 +312,11 @@ namespace BuckRogers.Interface
 			m_dimmed = false;
 		}
 
+
+		public void HideDisplay()
+		{
+			Composite.RemoveFromParent();
+			m_iconCover.RemoveFromParent();
+		}
 	}
 }
