@@ -112,7 +112,13 @@ namespace BuckRogers.Interface
 
 			set
 			{
+				if(value == m_selected)
+				{
+					return;
+				}
+
 				m_selected = value;
+
 
 				if(m_numCanShoot == 0)
 				{
@@ -215,14 +221,16 @@ namespace BuckRogers.Interface
 		{
 			if (m_selected)
 			{
-				if (m_selection == null)
-				{
+				//if (m_selection == null)
+				//{
 					m_selection = PPath.CreateRectangle(Icon.X, Icon.Y, Icon.Width, Icon.Height);
 					m_selection.Brush = Brushes.Transparent;
 
-				}
+				//}
 
 				m_selection.Pen = Pens.Red;
+
+				//m_selection.Bounds = Icon.Bounds;
 
 				m_activity = new PColorActivity(1000, 0, 5000, ActivityMode.SourceToDestinationToSource,
 																		new PulseTarget(m_selection), Color.Black);
@@ -244,6 +252,7 @@ namespace BuckRogers.Interface
 				{
 					//m_composite.RemoveChild(m_selection);
 					m_selection.RemoveFromParent();
+					m_selection = null;
 				}
 				
 			}

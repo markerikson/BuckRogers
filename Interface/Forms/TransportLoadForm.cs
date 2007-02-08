@@ -301,8 +301,12 @@ namespace BuckRogers.Interface
 			}
 
 			// start by selecting the first item on each side
-			m_tvTransports.SelectedNode = m_tvTransports.Nodes[0];
-			m_lvUnits.Items[0].Selected = true;
+			if(m_tvTransports.Nodes.Count > 0)
+			{
+				m_tvTransports.SelectedNode = m_tvTransports.Nodes[0];
+				m_lvUnits.Items[0].Selected = true;
+			}
+			
 		}
 
 		private void AddUnit(TreeNode node, Unit u)

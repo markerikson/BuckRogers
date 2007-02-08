@@ -74,6 +74,11 @@ namespace BuckRogers.Interface
 
 			set
 			{
+				if(value == m_selected)
+				{
+					return;
+				}
+
 				m_selected = value;
 
 				ToggleSelection();
@@ -284,6 +289,8 @@ namespace BuckRogers.Interface
 
 				uid.Player = this.Player;
 			}
+
+			m_selection = null;
 
 			LayoutChildren();
 		}

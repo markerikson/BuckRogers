@@ -43,6 +43,14 @@ namespace BuckRogers.Interface
 			m_combat.Bounds = ClientRectangle;
 		}
 
+		protected override void  OnShown(EventArgs e)
+		{
+ 			 base.OnShown(e);
+
+			 CombatDisplay.BeginCombat();
+			 //MessageBox.Show("CombatForm2D shown");
+		}
+
 		
 	}
 }

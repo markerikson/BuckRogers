@@ -326,9 +326,9 @@ namespace BuckRogers.Interface
 					{
 						f.StartProduction(ut, destination);
 
-						lvi.SubItems[1].Text = typeName;
-						lvi.SubItems[2].Text = f.AmountProduced.ToString();
-						lvi.SubItems[3].Text = destinationName;
+						lvi.SubItems[2].Text = typeName;
+						lvi.SubItems[3].Text = f.AmountProduced.ToString();
+						lvi.SubItems[4].Text = destinationName;
 					}
 				}
 				catch(Exception ex)
@@ -357,10 +357,16 @@ namespace BuckRogers.Interface
 			int idxUnused = m_lvFactories.SelectedIndices[0];
 			ListViewItem lvi = m_lvFactories.Items[idxUnused];
 
-			Factory f = (Factory)m_factories[idxUnused];
-
-			string territoryName = lvi.Text;
+			string territoryName = lvi.SubItems[0].Text;
 			Territory t = m_controller.Map[territoryName];
+
+			if(t == null)
+			{
+				return;
+			}
+
+			Factory f = (Factory)m_factories.GetUnits(t)[0];//(Factory)m_factories[idxUnused];
+
 
 			string playerName = (string)m_lbProductionOrder.SelectedItem;
 			Player p = m_controller.GetPlayer(playerName);

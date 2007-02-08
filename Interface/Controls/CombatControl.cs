@@ -331,10 +331,12 @@ namespace BuckRogers.Interface
 				case BattleStatus.BattleReady:
 				{
 					UpdatePlayerDisplays();
+					ClearMessages();
 
 					m_player = m_battleController.CurrentPlayer;
 					m_currentPUD = (PlayerUnitDisplay)m_displays[0];
 					m_currentPUD.Selected = true;
+					
 
 					m_lblBattleLocation.Text = m_battleController.CurrentBattle.Territory.Name;
 					m_lblBattlesLeft.Text = m_battleController.Battles.Count.ToString();
@@ -355,6 +357,7 @@ namespace BuckRogers.Interface
 				{
 					m_currentPUD.ClearUnitSelection();
 					m_currentPUD.Selected = false;
+					m_selectedUID = null;
 
 					MessageBox.Show("Combat round complete.  Click OK to continue.", "Round Finished", 
 									MessageBoxButtons.OK);
@@ -363,8 +366,12 @@ namespace BuckRogers.Interface
 					if(m_battleController.NextPlayer())
 					{
 						m_player = m_battleController.CurrentPlayer;
-						int index = m_battleController.BattleOrder.IndexOf(m_player);
-						m_currentPUD = (PlayerUnitDisplay)m_displays[index];
+						string territoryName = m_battleController.CurrentBattle.Territory.Name;
+						//int index = m_battleController.BattleOrder.IndexOf(m_player);
+						//m_currentPUD = (PlayerUnitDisplay)m_displays[index];
+
+						string pudID = m_player.Name + " - " + territoryName;
+						m_currentPUD = (PlayerUnitDisplay)m_displays[pudID];
 						m_currentPUD.Selected = true;
 					}
 					else
@@ -546,7 +553,7 @@ namespace BuckRogers.Interface
 			UnitType[] types = {UnitType.Trooper, UnitType.Gennie, UnitType.Leader, UnitType.Factory, 
 								UnitType.Fighter, UnitType.Battler, UnitType.Transport, UnitType.KillerSatellite};
 
-			Player p = m_controller.Players[playerIndex];// % m_controller.Players.Length];				
+			//Player p = m_controller.Players[playerIndex];// % m_controller.Players.Length];				
 
 			Hashtable uids = new Hashtable();
 
@@ -555,7 +562,7 @@ namespace BuckRogers.Interface
 			m_availableDisplays.Add(pud.GetHashCode(), pud);
 			pud.Composite.Tag = pud;
 
-			PText name = new PText(p.Name);
+			PText name = new PText();
 			pud.Label = name;
 			Font f = name.Font;
 			name.Font = new Font(f.Name, f.SizeInPoints + 3, FontStyle.Bold);
@@ -725,7 +732,17 @@ namespace BuckRogers.Interface
 		{
 			CombatResult cr = null;
 
-			UnitInfoDisplay attackingUID = m_selectedUID;
+			UnitInfoDisplay attackingUID;
+			
+			if(m_battleController.CurrentBattle.Type == BattleType.KillerSatellite)
+			{
+				PlayerUnitDisplay pud = (PlayerUnitDisplay)m_displays[0];
+				attackingUID = (UnitInfoDisplay)pud.UIDs[UnitType.KillerSatellite];
+			}
+			else
+			{
+				attackingUID = m_selectedUID;
+			}
 
 			switch (m_battleController.CurrentBattle.Type)
 			{
@@ -1114,6 +1131,7 @@ namespace BuckRogers.Interface
 
 			foreach(PlayerUnitDisplay pud in m_availableDisplays)
 			{
+				pud.Selected = false;
 				pud.ResetUnitCounts();
 				pud.HideDisplay();
 				

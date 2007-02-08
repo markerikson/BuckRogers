@@ -813,6 +813,30 @@ namespace BuckRogers
 					move.OriginalMovesLeft.Add(u.MovesLeft);
 				}
 
+				// Check for a player trying to sneak units past a Killer Satellite by
+				// moving them to the territory, THEN moving them past
+
+				bool canMovePast = true;
+				UnitCollection enemyUnits = move.StartingTerritory.Units.GetNonMatchingUnits(move.Owner);
+				if (move.StartingTerritory.Type == TerritoryType.Space 
+					&& enemyUnits.GetUnits(UnitType.KillerSatellite).Count > 0)
+				{
+					foreach(Unit u in move.Units)
+					{
+						if(u.MovesLeft < u.MaxMoves)
+						{
+							canMovePast = false;
+							break;
+						}
+					}
+
+					if(!canMovePast)
+					{
+						alreadyInEnemyTerritory = true;
+					}					
+				}
+
+
 				for(int i = 0; i < move.Territories.Count; i++)
 				{
 					if(alreadyInEnemyTerritory)
@@ -842,7 +866,8 @@ namespace BuckRogers
 					
 					}
 
-					if(t.Type == TerritoryType.Space && t.Units.GetUnits(UnitType.KillerSatellite).Count > 0)
+					enemyUnits = t.Units.GetNonMatchingUnits(action.Owner);
+					if(t.Type == TerritoryType.Space && enemyUnits.GetUnits(UnitType.KillerSatellite).Count > 0)
 					{
 						alreadyInEnemyTerritory = true;
 					}
@@ -1298,7 +1323,7 @@ namespace BuckRogers
 			 *
 			 */
 			string[] searchOrder = {"Mercury", "Mercury Orbit", "Venus", "Venus Orbit", "Earth", "Moon", "Earth Orbit",
-									"Trans-Earth Orbit", "Mars", "Trans-Mars Orbit", "Ceres", "Aurora", "Hygeia", "Juno", 
+									"Trans-Earth Orbit", "Mars", "Trans-Mars Orbit", "Mars Orbit", "Ceres", "Aurora", "Hygeia", "Juno", 
 									   "Vesta", "Fortuna", "Thule", "Psyche", "Pallas", "Asteroid Orbit"};
 
 
@@ -1366,9 +1391,15 @@ namespace BuckRogers
 					{
 						continue;
 					}
+					if (u.CurrentTerritory == Territory.NONE)
+					{
+						continue;
+					}
 					if(u.CurrentTerritory.Units.HasUnitsFromMultiplePlayers)
 					{
 						string name;
+
+						
 
 						
 						if(u.CurrentTerritory.System != OrbitalSystem.NONE)
@@ -1494,15 +1525,17 @@ namespace BuckRogers
 			}			
 
 			UnitCollection troopers = nearbyUnits.GetUnits(UnitType.Trooper);
-			UnitCollection gennies = nearbyUnits.GetUnits(UnitType.Factory);
+			UnitCollection gennies = nearbyUnits.GetUnits(UnitType.Gennie);
 			UnitCollection fighters = nearbyUnits.GetUnits(UnitType.Fighter);
 			UnitCollection factories = nearbyUnits.GetUnits(UnitType.Factory);
+			UnitCollection transports = nearbyUnits.GetUnits(UnitType.Transport);
 
 			UnitCollection targets = new UnitCollection();
 			targets.AddAllUnits(troopers);
 			targets.AddAllUnits(gennies);
 			targets.AddAllUnits(fighters);
 			targets.AddAllUnits(factories);
+			targets.AddAllUnits(transports);
 			return targets;
 		}
 

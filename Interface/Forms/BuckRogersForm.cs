@@ -731,7 +731,7 @@ namespace BuckRogers
 								//m_combatForm.ShowDialog();
 								
 
-								m_combatForm2.CombatDisplay.BeginCombat();
+								//m_combatForm2.CombatDisplay.BeginCombat();
 								m_combatForm2.ShowDialog();
 
 								m_controller.CheckNextPhase();
