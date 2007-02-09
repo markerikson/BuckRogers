@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Reflection;
+using System.Windows.Forms;
 
 using UMD.HCIL.Piccolo;
 using UMD.HCIL.Piccolo.Nodes;
@@ -15,6 +16,7 @@ using UMD.HCIL.PiccoloX.Nodes;
 using UMD.HCIL.PiccoloX.Components;
 using UMD.HCIL.Piccolo.Event;
 
+/*
 #if DIRECT3D
 using UMD.HCIL.PiccoloDirect3D;
 using UMD.HCIL.PiccoloDirect3D.Nodes;
@@ -32,9 +34,11 @@ using PComposite = UMD.HCIL.PiccoloDirect3D.Util.P3Composite;
 //using PPaintContext = UMD.HCIL.PiccoloDirect3D.Util.P3PaintContext;
 
 #endif
+*/
 
 using BuckRogers;
 using GpcWrapper;
+using System.Diagnostics;
 
 namespace BuckRogers.Interface
 {
@@ -204,6 +208,14 @@ namespace BuckRogers.Interface
 			return (Hashtable)m_icons[p.Name];
 		}
 
+		public Bitmap GetIcon(Player p, UnitType ut)
+		{
+			Hashtable ht = GetPlayerIcons(p);
+			Bitmap b = (Bitmap)ht[ut];
+
+			return b;
+		}
+
 
 		public void SetIconInfo(Territory t, Player p, UnitType ut)
 		{
@@ -367,7 +379,7 @@ namespace BuckRogers.Interface
 			
 		}
 
-		private void InitializeIcon(IconInfo info, Territory t)
+		public void InitializeIcon(IconInfo info)
 		{
 			Hashtable ht = (Hashtable)m_icons[info.Player.Name];
 			Bitmap b = (Bitmap)ht[info.Type];
@@ -380,6 +392,20 @@ namespace BuckRogers.Interface
 			info.Label = new PText("w");
 			Font f = info.Label.Font;
 			info.Label.Font = new Font(f.Name, f.SizeInPoints + 6, FontStyle.Bold);
+
+			PComposite composite = new PComposite();
+			composite.AddChild(info.Icon);
+			composite.AddChild(info.Label);
+			info.Composite = composite;
+
+			composite.Tag = info;
+			info.Label.Tag = info;
+			info.Icon.Tag = info;
+		}
+
+		public void InitializeIcon(IconInfo info, Territory t)
+		{
+			InitializeIcon(info);
 
 			if(t.Type == TerritoryType.Space)
 			{
@@ -394,16 +420,31 @@ namespace BuckRogers.Interface
 			}
 			info.Label.Y = info.Location.Y + 48 + 2;
 					
-			PComposite composite = new PComposite();
-			composite.AddChild(info.Icon);
-			composite.AddChild(info.Label);
+			
 
 			PPath territory = (PPath)m_map.Territories[t.Name];
-			territory.Parent.AddChild(composite);
+			territory.Parent.AddChild(info.Composite);
 
 			info.Icon.MoveToFront();
 			info.Label.MoveToFront();
 
+			
+
+			//composite.MouseUp += new PInputEventHandler(composite_MouseUp);
+		}
+
+		void composite_MouseUp(object sender, PInputEventArgs e)
+		{
+			PComposite composite = (PComposite)e.PickedNode;
+			IconInfo info = (IconInfo)composite.Tag;
+
+			if(info == null)
+			{
+				return;
+			}
+
+			string message = info.Player.Name + " - " + info.Type.ToString();
+			MessageBox.Show(message);
 		}
 
 		public void OrganizeIcons(Territory t)
@@ -609,6 +650,7 @@ namespace BuckRogers.Interface
 		}
 	}
 
+	[DebuggerDisplay("IconInfo: {m_player.Name} - {m_unitType.ToString()}") ]
 	public class IconInfo
 	{
 		private PointF m_location;
@@ -618,6 +660,7 @@ namespace BuckRogers.Interface
 		private PImage m_icon;
 		private bool m_original;
 		private bool m_used;
+		private PComposite m_composite;
 
 		public IconInfo()
 		{
@@ -625,6 +668,12 @@ namespace BuckRogers.Interface
 			m_unitType = UnitType.None;
 			m_player = Player.NONE;
 			m_used = false;
+		}
+
+		public PComposite Composite
+		{
+			get { return m_composite; }
+			set { m_composite = value; }
 		}
 
 		public PointF Location

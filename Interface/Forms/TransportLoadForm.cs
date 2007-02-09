@@ -303,7 +303,11 @@ namespace BuckRogers.Interface
 			// start by selecting the first item on each side
 			if(m_tvTransports.Nodes.Count > 0)
 			{
-				m_tvTransports.SelectedNode = m_tvTransports.Nodes[0];
+				m_tvTransports.SelectedNode = m_tvTransports.Nodes[0];				
+			}
+
+			if(m_lvUnits.Items.Count > 0)
+			{
 				m_lvUnits.Items[0].Selected = true;
 			}
 			

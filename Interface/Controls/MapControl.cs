@@ -92,6 +92,14 @@ namespace BuckRogers.Interface
 		private RefreshingScrollableControl m_scroller;
 		private IconManager m_iconManager;
 
+		private ArrayList m_movementIcons;
+
+		public ArrayList MovementIcons
+		{
+			get { return m_movementIcons; }
+			set { m_movementIcons = value; }
+		}
+
 		public MapControl()
 		{
 			// This call is required by the Windows.Forms Form Designer.
@@ -102,10 +110,11 @@ namespace BuckRogers.Interface
 			m_territoryMarkers = new Hashtable();
 			m_territories = new Hashtable();
 			m_orbitOffsets = new Hashtable();
+			m_movementIcons = new ArrayList();
 
 			m_zoomFactors = new float[]{0.1f, 0.175f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 5.0f};
 
-			m_canvas = new PCanvas();
+			m_canvas = new PCacheCanvas();//new PCanvas();
 			PRoot r = new ScreenshotRoot();
 			PLayer l = new BlackLayer();
 			//PLayer l = new PLayer();
@@ -119,6 +128,9 @@ namespace BuckRogers.Interface
 			Canvas.Camera = c;
 			Canvas.PanEventHandler = new PPanEventHandler();
 			Canvas.ZoomEventHandler = new PZoomEventHandler();
+
+			Canvas.PanEventHandler.MinDragStartDistance = 0.5f;
+			Canvas.ZoomEventHandler.MinDragStartDistance = 0.5f;
 
 			m_tooltip = new PText();
 			m_tooltip.TextBrush = Brushes.White;
@@ -770,14 +782,56 @@ namespace BuckRogers.Interface
 
 		public void MouseMoveHandler(object sender, PInputEventArgs e) 
 		{
+			UpdateMovementIcons(e);
 			UpdateToolTip(e);
+			//Canvas.Refresh();
+		}
+
+		public void UpdateMovementIcons(PInputEventArgs e)
+		{
+			//foreach(IconInfo info in m_movementIcons)
+			//{
+				//info.Icon.X += e.Delta.Width;
+				//info.Label.X += e.Delta.Width;
+
+				//info.Icon.Y += e.Delta.Height;
+				//info.Label.Y += e.Delta.Height;
+
+				PointF p = e.CanvasPosition;
+
+				p = e.Path.CanvasToLocal(p, Canvas.Camera);
+
+				for(int i = 0; i < m_movementIcons.Count; i++)
+				{
+					IconInfo info = (IconInfo)m_movementIcons[i];
+
+					float x = p.X + 8 + (i * 30);
+
+					info.Icon.Y = p.Y * 2;
+					info.Icon.X = x * 2;
+
+					info.Label.Y = (p.Y * 2 + 50);
+					//info.Label.X = ((x + 18 - (info.Label.Width / 2)) * 2);
+					info.Label.X = info.Icon.X;
+
+				}
+			//}
 		}
 
 		public void UpdateToolTip(PInputEventArgs e) 
 		{
 			PNode n = (PNode)e.InputManager.MouseOver.PickedNode;
 
-			String tooltipString = (String) n.Tag;
+			String tooltipString = null;
+			
+			if(n.Tag is IconInfo)
+			{
+				n = e.InputManager.MouseOver.NextPickedNode;//tooltipString = "testing";
+			}
+			else if(n.Tag is string)
+			{
+				tooltipString = (string)n.Tag;
+			}
 
 
 			if(tooltipString != null)
@@ -838,6 +892,13 @@ namespace BuckRogers.Interface
 
 		private void text_Click(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
 		{
+			// make sure we only handle actual clicks
+			if(Canvas.PanEventHandler.Dragging
+				|| Canvas.ZoomEventHandler.Dragging)
+			{
+				return;
+			}
+
 			PNode picked = (PNode)e.PickedNode;
 			
 			string territoryName = (string)picked.Tag;
@@ -846,11 +907,16 @@ namespace BuckRogers.Interface
 			{
 				return;
 			}
+
+			//Stack s = e.Path.NodeStackReference;
+			
+			
 			
 			if(TerritoryClicked != null)
 			{
 				TerritoryEventArgs tcea = new TerritoryEventArgs(territoryName);
 				tcea.Button = e.Button;
+				tcea.Tag = e;
 
 				TerritoryClicked(this, tcea);
 			}			

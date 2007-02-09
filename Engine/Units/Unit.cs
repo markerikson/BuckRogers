@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Diagnostics;
 
 namespace BuckRogers
 {
@@ -22,6 +23,7 @@ namespace BuckRogers
 	/// <summary>
 	/// Summary description for Unit.
 	/// </summary>
+	[DebuggerDisplay("Unit: {m_unitType.ToString()}") ]
 	public class Unit
 	{
 		public int ID

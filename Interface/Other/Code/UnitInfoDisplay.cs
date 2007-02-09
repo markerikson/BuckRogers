@@ -18,12 +18,14 @@ using UMD.HCIL.PiccoloX.Components;
 using UMD.HCIL.Piccolo.Event;
 
 using BuckRogers;
+using System.Diagnostics;
 
 namespace BuckRogers.Interface
 {
+	[DebuggerDisplay("UID: {m_pud.Player.Name} - {Type.ToString()}") ]
 	public class UnitInfoDisplay : IconInfo
 	{
-		private PComposite m_composite;
+		//private PComposite m_composite;
 		private PlayerUnitDisplay m_pud;
 		private PPath m_selection;
 		private PPath m_iconCover;
@@ -78,11 +80,7 @@ namespace BuckRogers.Interface
 			set { m_pud = value; }
 		}
 
-		public PComposite Composite
-		{
-			get { return m_composite; }
-			set { m_composite = value; }
-		}
+		
 
 
 		public UnitInfoDisplay(PCanvas canvas)
@@ -236,7 +234,7 @@ namespace BuckRogers.Interface
 																		new PulseTarget(m_selection), Color.Black);
 
 				m_canvas.Root.ActivityScheduler.AddActivity(m_activity);
-				m_composite.AddChild(m_selection);
+				Composite.AddChild(m_selection);
 			}
 			else
 			{

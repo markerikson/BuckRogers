@@ -44,7 +44,7 @@ namespace BuckRogers
 		private GameController m_controller;
 		private BattleController m_battleController;
 
-		private CombatForm m_combatForm;
+		//private CombatForm m_combatForm;
 		private ProductionForm m_productionForm;
 		private CombatForm2D m_combatForm2;
 
@@ -242,6 +242,7 @@ namespace BuckRogers
 			m_placementPanel.MoveModeChanged += new MoveModeChangedHandler(OnMoveModeChanged);
 
 			m_movePanel.Controller = m_controller;
+			m_movePanel.Map = m_map;
 			m_map.GameController = m_controller;
 			m_placementPanel.Controller = m_controller;
 			m_informationPanel.Controller = m_controller;
@@ -591,28 +592,29 @@ namespace BuckRogers
 				return;
 			}
 
-			if(tcea.Button == MouseButtons.Right)
-			{
-				tabControl1.SelectedTab = m_tpTerritory;
-				m_territoryPanel.DisplayUnits(t);
-			}
+			
 
 			switch(m_clickMode)
 			{
 				case MapClickMode.Normal:
 				case MapClickMode.GameOver:
 				{
-					m_territoryPanel.DisplayUnits(t);
+					if (tcea.Button == MouseButtons.Right)
+					{
+						tabControl1.SelectedTab = m_tpTerritory;
+						m_territoryPanel.DisplayUnits(t, tcea);
+					}
+					//m_territoryPanel.DisplayUnits(t, tcea);
 					break;
 				}
 				case MapClickMode.Move:
 				{
-					m_movePanel.TerritoryClicked(t);
+					m_movePanel.TerritoryClicked(t, tcea);
 					break;
 				}
 				case MapClickMode.PlaceUnits:
 				{
-					m_placementPanel.TerritoryClicked(t);
+					m_placementPanel.TerritoryClicked(t, tcea);
 					break;
 				}
 
@@ -707,10 +709,13 @@ namespace BuckRogers
 							//m_menuFileLoad.Enabled = false;
 							statusBar1.Panels[0].Text = "Combat phase";
 							//MessageBox.Show("Movement over, time for combat");
+							
+							/*
 							if(m_combatForm == null)
 							{
-								//m_combatForm = new CombatForm(m_controller, m_battleController);
+								m_combatForm = new CombatForm(m_controller, m_battleController);
 							}
+							*/
 
 							if(m_combatForm2 == null)
 							{

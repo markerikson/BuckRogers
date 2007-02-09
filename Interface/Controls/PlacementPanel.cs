@@ -160,7 +160,7 @@ namespace BuckRogers.Interface
 
 		}
 
-		public void TerritoryClicked(Territory t)
+		public void TerritoryClicked(Territory t, TerritoryEventArgs tcea)
 		{
 			// show placement form here
 

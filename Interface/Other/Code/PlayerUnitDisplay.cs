@@ -18,9 +18,11 @@ using UMD.HCIL.PiccoloX.Components;
 using UMD.HCIL.Piccolo.Event;
 
 using BuckRogers;
+using System.Diagnostics;
 
 namespace BuckRogers.Interface
 {
+	[DebuggerDisplay("PUD: {m_player.Name} - {m_territory.Name}") ]
 	public class PlayerUnitDisplay
 	{
 		private PComposite m_composite;

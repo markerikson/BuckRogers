@@ -138,7 +138,7 @@ namespace BuckRogers.Interface
 		}
 		#endregion
 
-		public void DisplayUnits(Territory t)
+		public void DisplayUnits(Territory t, TerritoryEventArgs tcea)
 		{
 			m_lvUnits.Items.Clear();
 

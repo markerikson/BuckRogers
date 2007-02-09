@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 
 namespace BuckRogers
 {
@@ -10,6 +11,12 @@ namespace BuckRogers
 		private string m_territoryName;
 		private Player m_owner;
 		private System.Windows.Forms.MouseButtons m_button;
+		private PointF m_point;
+		private object m_tag;
+
+		
+
+		
 
 		public TerritoryEventArgs()
 		{
@@ -37,6 +44,18 @@ namespace BuckRogers
 		{
 			get { return this.m_button; }
 			set { this.m_button = value; }
+		}
+
+		public PointF PointClicked
+		{
+			get { return m_point; }
+			set { m_point = value; }
+		}
+
+		public object Tag
+		{
+			get { return m_tag; }
+			set { m_tag = value; }
 		}
 
 		

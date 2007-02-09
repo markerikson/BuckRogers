@@ -63,20 +63,33 @@ namespace BuckRogers.Interface
 			base.Dispose( disposing );
 		}
 
-		private void MoveItems(ListView origin, ListView destination, int numToMove)
+		private int MoveItems(ListView origin, ListView destination, int index, int numToMove)
 		{
-			if(origin.SelectedIndices.Count == 0)
+			int idxUnused = -1;
+			if(index < 0)
 			{
-				return;
+				if(origin.SelectedIndices.Count == 0)
+				{
+					return 0;
+				}
+				else
+				{
+					idxUnused = origin.SelectedIndices[0];
+				}
+			}
+			else
+			{
+				idxUnused = index;
 			}
 
-			int idxUnused = origin.SelectedIndices[0];
+			 
 
 			ListViewItem lvi = origin.Items[idxUnused];
 
 			string type = lvi.SubItems[0].Text;
 			int count = Int32.Parse(lvi.SubItems[1].Text);
 			string numMovesLeft = lvi.SubItems[2].Text;
+			string contents = lvi.SubItems[3].Text;
 
 			if(numToMove > count)
 			{
@@ -107,8 +120,9 @@ namespace BuckRogers.Interface
 					string liType = targetItem.SubItems[0].Text;
 					string liCount = targetItem.SubItems[1].Text;
 					string liMovesLeft = targetItem.SubItems[2].Text;
+					string liContents = targetItem.SubItems[3].Text;
 
-					if (liType == type && liMovesLeft == numMovesLeft)
+					if (liType == type && liMovesLeft == numMovesLeft && liContents == contents)
 					{
 						addNewItem = false;
 						int numCurrent = Int32.Parse(targetItem.SubItems[1].Text);
@@ -126,9 +140,12 @@ namespace BuckRogers.Interface
 				lvi2.Text = type;
 				lvi2.SubItems.Add(numToMove.ToString());
 				lvi2.SubItems.Add(numMovesLeft);
+				lvi2.SubItems.Add(contents);
 
 				destination.Items.Add(lvi2);
 			}
+
+			return numToMove;
 		}
 
 		public void SetupUnits(Territory t, Player p)
@@ -254,6 +271,190 @@ namespace BuckRogers.Interface
 			}
 		}
 
+		public bool PreSelectUnits(Territory t, Player p, Hashtable unitCounts)
+		{
+			bool userShouldConfirm = false;
+			bool multipleTransportsEntries = false;
+
+			int numTransportEntries = 0;
+
+			foreach(ListViewItem lvi in m_lvAvailableUnits.Items)
+			{
+				if(lvi.Text == "Transport")
+				{
+					numTransportEntries++;
+				}
+			}
+
+			if(numTransportEntries > 1)
+			{
+				multipleTransportsEntries = true;
+
+				if(unitCounts.ContainsKey(UnitType.Transport))
+				{
+					userShouldConfirm = true;
+				}
+				
+			}
+
+			foreach(DictionaryEntry de in unitCounts)
+			{
+				UnitType ut = (UnitType)de.Key;
+				int numUnits = (int)de.Value;
+
+				UnitCollection playerUnits = t.Units.GetUnits(ut, p, t);
+
+				bool sameMoves = true;
+				int numMoves = playerUnits[0].MovesLeft;
+
+				for(int i = 1; i < playerUnits.Count; i++)
+				{
+					Unit u = playerUnits[i];
+
+					if(numMoves != u.MovesLeft)
+					{
+						sameMoves = false;
+						break;
+					}
+				}
+
+				if(sameMoves && !userShouldConfirm)
+				{
+					int index = -1;
+					for(int i = 0; i < m_lvAvailableUnits.Items.Count; i++)
+					{
+						ListViewItem lvi = m_lvAvailableUnits.Items[i];
+
+						if(lvi.Text == ut.ToString())
+						{
+							index = i;
+							break;
+						}
+					}
+
+					if(index >= 0)
+					{
+						m_lvAvailableUnits.Focus();
+						m_lvAvailableUnits.Items[index].Selected = true;
+
+						MoveItems(m_lvAvailableUnits, m_lvSelectedUnits, index, numUnits);	
+					}
+				}
+				else
+				{
+					// caused by transports
+					if(multipleTransportsEntries && ut == UnitType.Transport)
+					{
+						UnitCollection transports = playerUnits.GetUnits(UnitType.Transport);
+						int unitsLeftToMove = numUnits;
+
+						if(transports.Count == numUnits)
+						{
+							while(unitsLeftToMove > 0)
+							{
+								unitsLeftToMove = SelectAndMoveItems(UnitType.Transport, -1, unitsLeftToMove);
+							}
+						}
+						// let's prioritize loaded transports first, then empties by moves left
+						else
+						{
+							bool loadedTransports = true;
+							for(int i = 0; i < numTransportEntries && unitsLeftToMove > 0; i++)
+							{
+								ListViewItem transportLVI = null;
+
+								for(int j = 0; j < m_lvAvailableUnits.Items.Count && loadedTransports; j++)
+								{
+									ListViewItem lvi = m_lvAvailableUnits.Items[j];
+
+									if(lvi.Text == "Transport"
+										|| lvi.SubItems[3].Text != string.Empty)
+									{
+										transportLVI = lvi;
+										break;
+									}
+								}
+
+								if(transportLVI == null)
+								{
+									loadedTransports = false;
+
+									int maxMoves = transports[0].MaxMoves;
+									//int unitsLeftToMove = numUnits;
+
+									for (int j = maxMoves; j >= 0 && unitsLeftToMove > 0; j--)
+									{
+										unitsLeftToMove = SelectAndMoveItems(ut, j, unitsLeftToMove);
+									}
+									
+								}
+
+								if(transportLVI != null)
+								{
+									int index = m_lvAvailableUnits.Items.IndexOf(transportLVI);
+									int numAvailable = int.Parse(transportLVI.SubItems[1].Text);
+									//int numToMove = Math.Min(numAvailable, unitsLeftToMove);
+
+									unitsLeftToMove = SelectAndMoveItems(UnitType.Transport, -1, unitsLeftToMove);
+								}
+							}
+						}
+					}
+					else
+					{
+						userShouldConfirm = true;
+
+						int maxMoves = playerUnits[0].MaxMoves;
+						int unitsLeftToMove = numUnits;
+
+						for (int j = maxMoves; j >= 0 && unitsLeftToMove > 0; j--)
+						{
+							unitsLeftToMove = SelectAndMoveItems(ut, j, unitsLeftToMove);
+						}
+					}
+					
+				}
+			}
+
+			return userShouldConfirm;
+		}
+
+		private int SelectAndMoveItems(UnitType ut, int numMovesLeft, int unitsLeftToMove)
+		{
+			int index = -1;
+			for (int i = 0; i < m_lvAvailableUnits.Items.Count; i++)
+			{
+				ListViewItem lvi = m_lvAvailableUnits.Items[i];
+
+				if (lvi.Text == ut.ToString())
+					
+				{
+					if(lvi.SubItems[2].Text == numMovesLeft.ToString()
+						|| numMovesLeft == -1)
+					index = i;
+					break;
+				}
+			}
+
+			if (index >= 0)
+			{
+				m_lvAvailableUnits.Focus();
+				m_lvAvailableUnits.Items[index].Selected = true;
+
+				int numAvailable = int.Parse(m_lvAvailableUnits.Items[index].SubItems[1].Text);
+				int numToMove = Math.Min(unitsLeftToMove, numAvailable); //unitsLeftToMove - numAvailable;
+
+				if (numToMove <= 0)
+				{
+					numToMove = unitsLeftToMove;
+				}
+				int unitsMoved = MoveItems(m_lvAvailableUnits, m_lvSelectedUnits, index, numToMove);
+				unitsLeftToMove -= unitsMoved;
+			}
+
+			return unitsLeftToMove;
+		}
+
 
 		#region Windows Form Designer generated code
 		/// <summary>
@@ -330,7 +531,7 @@ namespace BuckRogers.Interface
 			this.label7.Size = new System.Drawing.Size(116, 16);
 			this.label7.TabIndex = 23;
 			this.label7.Text = "Units to add / remove:";
-			this.label7.Click += new System.EventHandler(this.label7_Click);
+			//this.label7.Click += new System.EventHandler(this.label7_Click);
 			// 
 			// m_cbNumUnits
 			// 
@@ -346,7 +547,7 @@ namespace BuckRogers.Interface
 			this.m_cbNumUnits.Name = "m_cbNumUnits";
 			this.m_cbNumUnits.Size = new System.Drawing.Size(116, 21);
 			this.m_cbNumUnits.TabIndex = 22;
-			this.m_cbNumUnits.SelectedIndexChanged += new System.EventHandler(this.m_cbNumUnits_SelectedIndexChanged);
+			//this.m_cbNumUnits.SelectedIndexChanged += new System.EventHandler(this.m_cbNumUnits_SelectedIndexChanged);
 			// 
 			// label6
 			// 
@@ -422,7 +623,7 @@ namespace BuckRogers.Interface
 			this.m_lvAvailableUnits.Size = new System.Drawing.Size(236, 136);
 			this.m_lvAvailableUnits.TabIndex = 18;
 			this.m_lvAvailableUnits.View = System.Windows.Forms.View.Details;
-			this.m_lvAvailableUnits.SelectedIndexChanged += new System.EventHandler(this.m_lvAvailableUnits_SelectedIndexChanged);
+			//this.m_lvAvailableUnits.SelectedIndexChanged += new System.EventHandler(this.m_lvAvailableUnits_SelectedIndexChanged);
 			// 
 			// columnHeader11
 			// 
@@ -505,15 +706,16 @@ namespace BuckRogers.Interface
 		private void m_butAddAttackers_Click(object sender, System.EventArgs e)
 		{
 			int numUnits = Int32.Parse((string)m_cbNumUnits.SelectedItem);
-			MoveItems(m_lvAvailableUnits, m_lvSelectedUnits, numUnits);
+			MoveItems(m_lvAvailableUnits, m_lvSelectedUnits, -1, numUnits);
 		}
 
 		private void m_butRemAttackers_Click(object sender, System.EventArgs e)
 		{
 			int numUnits = Int32.Parse((string)m_cbNumUnits.SelectedItem);
-			MoveItems(m_lvSelectedUnits, m_lvAvailableUnits, numUnits);
+			MoveItems(m_lvSelectedUnits, m_lvAvailableUnits, -1, numUnits);
 		}
 
+		/*
 		private void m_lvAvailableUnits_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
 		
@@ -528,6 +730,7 @@ namespace BuckRogers.Interface
 		{
 		
 		}
+		*/
 
 		private void m_btnAddAll_Click(object sender, System.EventArgs e)
 		{
@@ -572,6 +775,23 @@ namespace BuckRogers.Interface
 					UnitCollection typeMatches = availableUnits.GetUnits(ut, m_player, null);
 					UnitCollection movesMatches = typeMatches.GetUnitsWithMoves(numMoves);
 					UnitCollection neededUnits = movesMatches.GetUnits(numUnits);
+
+					string contents = lvi.SubItems[3].Text;
+					if(ut == UnitType.Transport && contents != string.Empty)
+					{
+						if(contents.Contains("Factory"))
+						{
+							neededUnits = neededUnits.GetTransportsWithContents(UnitType.Factory, 1);
+						}
+						else
+						{
+							string sNumTroopers = contents.Substring(0, 1);
+							int numTroopers = int.Parse(sNumTroopers);
+
+							neededUnits = neededUnits.GetTransportsWithContents(UnitType.Trooper, numTroopers);
+						}
+						
+					}
 
 					uc.AddAllUnits(neededUnits);
 					availableUnits.RemoveAllUnits(neededUnits);

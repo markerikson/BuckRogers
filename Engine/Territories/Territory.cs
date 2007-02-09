@@ -1,5 +1,6 @@
 using System;
 using skmDataStructures.Graph;
+using System.Diagnostics;
 
 namespace BuckRogers
 {
@@ -14,6 +15,7 @@ namespace BuckRogers
 	/// <summary>
 	/// Summary description for Territory.
 	/// </summary>
+	[DebuggerDisplay("Territory: {Name}")]
 	public class Territory : skmDataStructures.Graph.Node
 	{
 		

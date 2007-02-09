@@ -6,6 +6,11 @@ using System.Data;
 using System.Windows.Forms;
 using System.Text;
 
+using UMD.HCIL.Piccolo;
+using UMD.HCIL.Piccolo.Event;
+using UMD.HCIL.Piccolo.Nodes;
+using UMD.HCIL.Piccolo.Util;
+
 using BuckRogers;
 using BuckRogers.Interface;
 
@@ -21,6 +26,11 @@ namespace BuckRogers.Interface
 
 		private ArrayList m_currentMoveTerritories;
 		private UnitCollection m_unitsToMove;
+		private Hashtable m_unitsToMoveCounts;
+		private UnitCollection m_handSelectedUnits;
+		private bool m_userChangedOriginalSelection;
+		private bool m_unitTotalsWereChanged;
+		private bool m_stupidCodeGuardFlag;
 
 		private System.Windows.Forms.Button m_btnAddMove;
 		private System.Windows.Forms.Button m_btnUndoMove;
@@ -42,6 +52,14 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.TabPage tabPage2;
 		private PlayerListBox m_lbPlayerOrder;
 		private System.Windows.Forms.Label label2;
+		private MapControl m_map;
+
+
+		public MapControl Map
+		{
+			get { return m_map; }
+			set { m_map = value; }
+		}
 
 		/// <summary> 
 		/// Required designer variable.
@@ -92,6 +110,8 @@ namespace BuckRogers.Interface
 			m_lbCurrentMoves.Items.Clear();
 			m_currentMoveTerritories = new ArrayList();
 			m_unitsToMove = new UnitCollection();
+			m_handSelectedUnits = new UnitCollection();
+			m_unitsToMoveCounts = new Hashtable();
 			m_moveMode = MoveMode.Finished;
 
 			m_btnCancelMove.Enabled = false;
@@ -99,6 +119,8 @@ namespace BuckRogers.Interface
 			m_btnUndoMove.Enabled = false;
 			m_btnRedoMove.Enabled = false;
 			m_btnDoneTransports.Enabled = false;
+
+			m_userChangedOriginalSelection = false;
 
 		}
 
@@ -329,81 +351,401 @@ namespace BuckRogers.Interface
 		}
 
 
-		public void TerritoryClicked(Territory t)
+		public void TerritoryClicked(Territory t, TerritoryEventArgs tcea)
 		{
 			switch(m_moveMode)
 			{
 				case MoveMode.StartMove:
 				{
-					if(m_currentMoveTerritories.Count == 0)
-					{
-						if(t.Owner != m_controller.CurrentPlayer)
-						{
-							string message = String.Empty;						
-							UnitCollection uc = t.Units.GetUnits(m_controller.CurrentPlayer);
-
-							if(uc.Count == 0)
-							{
-								message = "You don't have any units in that territory";
-							}
-
-							if(message != String.Empty)
-							{
-								MessageBox.Show(message, "Movement", 
-									MessageBoxButtons.OK, MessageBoxIcon.Warning);
-								return;
-							}
-							
-						}
-						MoveUnitsForm muf = new MoveUnitsForm();
-
-						muf.SetupUnits(t, m_controller.CurrentPlayer);
-
-						muf.ShowDialog();
-
-						if(muf.DialogResult != DialogResult.OK)
-						{
-							return;
-						}
-
-						m_unitsToMove.Clear();
-						m_unitsToMove.AddAllUnits(muf.SelectedUnits);
-
-					}
-					m_currentMoveTerritories.Add(t);
-
-					m_lbCurrentMoves.Items.Add(t.Name);
+					OnMoveCreationClick(t, tcea);
 					break;
 				}
 				case MoveMode.StartTransport:
 				{
-					TransportLoadForm tlf = new TransportLoadForm(m_controller);
-
-					tlf.SetupUnits(t, m_controller.CurrentPlayer);
-					tlf.ShowDialog();
-
-					if(tlf.DialogResult != DialogResult.OK)
-					{
-						return;
-					}
-
-					ArrayList transferInfo = tlf.TransferInfo;
-
-					//foreach(Action a in transferInfo)
-					/*
-					for(int i = 0; i < transferInfo.Count; i++)
-					{
-						Action a = (Action)transferInfo[i];
-						AddActionToList(a);
-					}
-					*/
-
-					m_mlbMoves.Refresh();
-					m_mlbTransports.Refresh();
+					OnTransportLoadClick(t);
 					break;
 				}
 			}
 		}
+
+		private void OnTransportLoadClick(Territory t)
+		{
+			TransportLoadForm tlf = new TransportLoadForm(m_controller);
+
+			tlf.SetupUnits(t, m_controller.CurrentPlayer);
+			tlf.ShowDialog();
+
+			if (tlf.DialogResult != DialogResult.OK)
+			{
+				return;
+			}
+
+			ArrayList transferInfo = tlf.TransferInfo;
+
+			m_mlbMoves.Refresh();
+			m_mlbTransports.Refresh();
+
+			return;
+		}
+
+		private void OnMoveCreationClick(Territory t, TerritoryEventArgs tcea)
+		{
+			m_unitTotalsWereChanged = false;
+			m_stupidCodeGuardFlag = false;
+			if (m_currentMoveTerritories.Count == 0)
+			{
+				if (t.Owner != m_controller.CurrentPlayer)
+				{
+					string message = String.Empty;
+					UnitCollection uc = t.Units.GetUnits(m_controller.CurrentPlayer);
+
+					if (uc.Count == 0)
+					{
+						message = "You don't have any units in that territory";
+					}
+
+					if (message != String.Empty)
+					{
+						MessageBox.Show(message, "Movement",
+							MessageBoxButtons.OK, MessageBoxIcon.Warning);
+						return;
+					}
+				}
+
+				m_unitsToMoveCounts.Clear();
+			}
+
+			PInputEventArgs e = (PInputEventArgs)tcea.Tag;
+
+			if (m_currentMoveTerritories.Count == 0
+				|| (m_currentMoveTerritories.Count == 1 && t == (m_currentMoveTerritories[0])))
+			{
+				PNode picked = e.PickedNode;
+
+				PNodeList matchingNodes = new PNodeList();
+				PointF point = e.Position;
+				RectangleF pointRect = new RectangleF(point.X, point.Y, 1, 1);
+				picked.FindIntersectingNodes(pointRect, matchingNodes);
+				IconInfo clickedInfo = null;
+				IconInfo movementInfo = null;
+
+				if (matchingNodes.Count > 0)
+				{
+					PNode topNode = matchingNodes[0];
+
+					if (topNode.Tag is IconInfo)
+					{
+						clickedInfo = (IconInfo)topNode.Tag;
+
+						if (clickedInfo.Player != m_controller.CurrentPlayer)
+						{
+							return;
+						}
+
+						foreach (IconInfo existingInfo in m_map.MovementIcons)
+						{
+							if (existingInfo.Player == clickedInfo.Player
+								&& existingInfo.Type == clickedInfo.Type)
+							{
+								movementInfo = existingInfo;
+								break;
+							}
+						}
+					}
+				}
+
+				if (e.Button == MouseButtons.Left)
+				{
+					Hashtable newUnitCounts = null;
+
+					// territory was clicked, but no unit
+					if (clickedInfo == null && m_unitsToMoveCounts.Count == 0)
+					{
+						if ((e.Modifiers & Keys.Shift) == Keys.Shift)
+						{
+							UnitCollection uc = t.Units.GetUnits(UnitType.None, m_controller.CurrentPlayer, t);
+							UnitCollection unitsWithMoves = uc.GetUnitsWithMinMoves(1);
+
+							if (unitsWithMoves.Count > 0)
+							{
+								newUnitCounts = unitsWithMoves.GetUnitTypeCount();
+							}
+						}
+						else
+						{
+							// Show MoveUnitForm, get hashtable of results
+							MoveUnitsForm muf = new MoveUnitsForm();
+
+							muf.SetupUnits(t, m_controller.CurrentPlayer);
+
+							muf.ShowDialog();
+
+							if (muf.DialogResult != DialogResult.OK)
+							{
+								return;
+							}
+
+							m_handSelectedUnits.AddAllUnits(muf.SelectedUnits);
+							newUnitCounts = muf.SelectedUnits.GetUnitTypeCount();
+
+							m_userChangedOriginalSelection = false;
+							m_stupidCodeGuardFlag = true;
+						}
+					}
+					// unit was clicked, and none are currently shown
+					else if (clickedInfo != null && movementInfo == null)
+					{
+						// Set newUnitCounts[unitType] to 1;
+						UnitType ut = clickedInfo.Type;
+
+						UnitCollection uc = t.Units.GetUnits(ut, m_controller.CurrentPlayer, t);
+						UnitCollection unitsWithMoves = uc.GetUnitsWithMinMoves(1);
+
+						if (unitsWithMoves.Count > 0)
+						{
+							if ((e.Modifiers & Keys.Shift) == Keys.Shift)
+							{
+								newUnitCounts = unitsWithMoves.GetUnitTypeCount();
+							}
+							else
+							{
+								int numUnitsToAdd = NumUnitsToAdd(e, unitsWithMoves.Count, 0);
+								newUnitCounts = new Hashtable();
+								newUnitCounts[ut] = numUnitsToAdd;//1;
+							}
+						}
+						// no units with moves left
+						else
+						{
+							return;
+						}
+					}
+					else if (clickedInfo == null && m_unitsToMoveCounts.Count > 0)
+					{
+						// not trying to do anything here
+						return;
+					}
+
+					if (newUnitCounts != null)
+					{
+						foreach (DictionaryEntry de in newUnitCounts)
+						{
+							Player p = m_controller.CurrentPlayer;
+							UnitType ut = (UnitType)de.Key;
+							int numUnits = (int)de.Value;
+
+							// it's possible that we already had something displayed,
+							// then the user shift-clicked
+							if (!m_unitsToMoveCounts.ContainsKey(ut))
+							{
+								movementInfo = new IconInfo();
+								movementInfo.Player = p;
+								movementInfo.Type = ut;
+
+								if (m_map.MovementIcons.Count == 0)
+								{
+									movementInfo.Location = e.Position;
+								}
+								else
+								{
+									IconInfo lastInfo = (IconInfo)m_map.MovementIcons[m_map.MovementIcons.Count - 1];
+									PointF newLocation = lastInfo.Location;
+									newLocation.X += 52;
+									movementInfo.Location = newLocation;
+								}
+
+								m_map.IconManager.InitializeIcon(movementInfo);
+
+								movementInfo.Label.TextBrush = Brushes.White;
+								movementInfo.Label.ConstrainWidthToTextWidth = false;
+								movementInfo.Label.Width = movementInfo.Icon.Width;
+								movementInfo.Label.TextAlignment = StringAlignment.Center;
+
+								movementInfo.Label.ScaleBy(0.5f);
+								movementInfo.Icon.ScaleBy(0.5f);
+
+								int numDisplayedIcons = m_map.MovementIcons.Count;
+
+								m_map.Canvas.Camera.AddChild(movementInfo.Composite);
+								m_map.MovementIcons.Add(movementInfo);
+
+								m_unitsToMoveCounts[movementInfo.Type] = numUnits;
+								m_unitTotalsWereChanged = true;
+							}
+							else
+							{
+								// should be guaranteed to find something
+								foreach (IconInfo info in m_map.MovementIcons)
+								{
+									if (info.Player == p && info.Type == ut)
+									{
+										movementInfo = info;
+										break;
+									}
+								}
+							}
+
+							movementInfo.Label.Text = numUnits.ToString();
+						}
+
+						m_map.UpdateMovementIcons(e);
+					}
+					else
+					{
+						int numCurrent = int.Parse(movementInfo.Label.Text);
+						int numTotal = int.Parse(clickedInfo.Label.Text);
+
+						if (numCurrent < numTotal)
+						{
+							int numUnitsToAdd = NumUnitsToAdd(e, numTotal, numCurrent);
+
+							movementInfo.Label.Text = numUnitsToAdd.ToString();
+							UnitType ut = movementInfo.Type;
+							m_unitsToMoveCounts[ut] = numUnitsToAdd;
+							m_unitTotalsWereChanged = true;
+						}
+						else
+						{
+							// full up already, don't do anything
+							return;
+						}
+					}
+				}
+				// right mouse button
+				else
+				{
+					if (m_map.MovementIcons.Count == 0)
+					{
+						return;
+					}
+
+					if ((e.Modifiers & Keys.Shift) == Keys.Shift)
+					{
+						ClearMovementIcons();
+						m_unitsToMoveCounts.Clear();
+						m_unitTotalsWereChanged = true;
+
+						return;
+					}
+
+					if (movementInfo == null)
+					{
+						movementInfo = (IconInfo)m_map.MovementIcons[m_map.MovementIcons.Count - 1];
+					}
+
+					bool removeMovementIcon = false;
+					if ((e.Modifiers & Keys.Control) == Keys.Control)
+					{
+						removeMovementIcon = true;
+					}
+					else
+					{
+						int numToRemove = 1;
+						int numUnits = int.Parse(movementInfo.Label.Text);
+
+						if ((e.Modifiers & Keys.Alt) == Keys.Alt)
+						{
+							int oneTenthDisplayed = numUnits / 10;
+							numToRemove = Math.Max(1, oneTenthDisplayed);
+						}
+
+						numUnits -= numToRemove;
+
+						if (numUnits <= 0)
+						{
+							removeMovementIcon = true;
+						}
+						else
+						{
+							movementInfo.Label.Text = numUnits.ToString();
+							m_unitsToMoveCounts[movementInfo.Type] = numUnits;
+							m_unitTotalsWereChanged = true;
+						}
+					}
+
+					if (removeMovementIcon)
+					{
+						movementInfo.Composite.RemoveFromParent();
+						m_map.MovementIcons.Remove(movementInfo);
+						m_map.UpdateMovementIcons(e);
+
+						m_unitsToMoveCounts.Remove(movementInfo.Type);
+						m_unitTotalsWereChanged = true;
+					}
+				}
+
+				int i = 42;
+				int q = i;
+			}
+
+			bool addTerritory = true;
+
+			if (e.Button == MouseButtons.Right)
+			{
+				addTerritory = false;
+			}
+
+			if ((m_currentMoveTerritories.Count > 0)
+				&& (t == (Territory)m_currentMoveTerritories[m_currentMoveTerritories.Count - 1]))
+			{
+				addTerritory = false;
+			}
+
+			if (addTerritory)
+			{
+				m_currentMoveTerritories.Add(t);
+				m_lbCurrentMoves.Items.Add(t.Name);
+			}
+
+			if(m_unitTotalsWereChanged && !m_stupidCodeGuardFlag)
+			{
+				m_userChangedOriginalSelection = true;
+			}
+
+			return;
+		}
+
+		private int NumUnitsToAdd(PInputEventArgs e, int numTotal, int numCurrent)
+		{
+			int numToAdd = 1;
+
+			if ((e.Modifiers & Keys.Control) == Keys.Control)
+			{
+				numToAdd = numTotal - numCurrent;
+			}
+			else if ((e.Modifiers & Keys.Alt) == Keys.Alt)
+			{
+				numToAdd = 10;
+			}
+			/*
+			else if ((e.Modifiers & Keys.Shift) == Keys.Shift)
+			{
+				// add EVERYTHING here
+				MessageBox.Show("adding everything");
+				return;
+			}
+			*/
+			numCurrent += numToAdd;
+
+			if (numCurrent > numTotal)
+			{
+				numCurrent = numTotal;
+			}
+
+			return numCurrent;
+		}
+
+		public void ClearMovementIcons()
+		{
+			foreach (IconInfo displayedInfo in m_map.MovementIcons)
+			{
+				displayedInfo.Composite.RemoveFromParent();
+			}
+
+			m_map.MovementIcons.Clear();
+		}
+
+
 
 		private void m_btnCancelMove_Click(object sender, System.EventArgs e)
 		{
@@ -428,16 +770,14 @@ namespace BuckRogers.Interface
 				MoveModeChanged(this, mmea);
 			}
 
+			m_unitsToMoveCounts.Clear();
+			ClearMovementIcons();
+
 		}
 
 		private void m_btnFinishMove_Click(object sender, System.EventArgs e)
 		{
-			m_btnCancelMove.Enabled = false;
-			m_btnAcceptMoves.Enabled = false;
-
-			m_btnAddMove.Enabled = true;
-			m_btnTransports.Enabled = true;
-			m_btnEndMoves.Enabled = true;
+			
 
 			if(m_currentMoveTerritories.Count < 2)
 			{
@@ -458,6 +798,33 @@ namespace BuckRogers.Interface
 
 			try
 			{
+				if(m_handSelectedUnits.Count == 0 || m_userChangedOriginalSelection)
+				{
+					MoveUnitsForm muf = new MoveUnitsForm();
+
+					Territory startingTerritory = (Territory)m_currentMoveTerritories[0];
+					muf.SetupUnits(startingTerritory, m_controller.CurrentPlayer);
+
+					bool userShouldConfirm = muf.PreSelectUnits(startingTerritory, m_controller.CurrentPlayer, m_unitsToMoveCounts);
+
+					if (userShouldConfirm)
+					{
+						muf.ShowDialog();
+
+						if (muf.DialogResult != DialogResult.OK)
+						{
+							return;
+						}
+					}
+
+					m_handSelectedUnits.AddAllUnits(muf.SelectedUnits);
+				}
+				
+
+				m_unitsToMove.Clear();
+				m_unitsToMove.AddAllUnits(m_handSelectedUnits);
+				//newUnitCounts = muf.SelectedUnits.GetUnitTypeCount();
+
 				MoveAction ma = new MoveAction();
 				ma.Owner = m_controller.CurrentPlayer;
 				ma.StartingTerritory = (Territory)m_currentMoveTerritories[0];
@@ -497,6 +864,17 @@ namespace BuckRogers.Interface
 
 				MoveModeChanged(this, mmea);
 			}
+
+			m_btnCancelMove.Enabled = false;
+			m_btnAcceptMoves.Enabled = false;
+
+			m_btnAddMove.Enabled = true;
+			m_btnTransports.Enabled = true;
+			m_btnEndMoves.Enabled = true;
+
+			m_unitsToMoveCounts.Clear();
+
+			ClearMovementIcons();
 		
 		}
 

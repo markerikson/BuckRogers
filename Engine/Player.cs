@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Drawing;
+using System.Diagnostics;
 
 namespace BuckRogers
 {
@@ -9,6 +10,7 @@ namespace BuckRogers
 	/// </summary>
 	/// 
 
+	[DebuggerDisplay("Player: {m_name}")]
 	public class Player
 	{
 		public static Player NONE = new Player("None");

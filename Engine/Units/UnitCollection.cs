@@ -306,6 +306,21 @@ namespace BuckRogers
 			return uc;
 		}
 
+		public UnitCollection GetUnitsWithMinMoves(int numMoves)
+		{
+			UnitCollection uc = new UnitCollection();
+
+			foreach (Unit u in List)
+			{
+				if (u.MovesLeft >= numMoves)
+				{
+					uc.AddUnit(u);
+				}
+			}
+
+			return uc;
+		}
+
 		/**
 		* Returns a map of UnitType -> int.
 		*/
