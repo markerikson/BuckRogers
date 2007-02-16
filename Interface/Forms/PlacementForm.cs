@@ -279,8 +279,46 @@ namespace BuckRogers.Interface
 
 			if(numPlaced != 3)
 			{
-				MessageBox.Show("You must place exactly three units", "Placement", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-				return;
+				bool playersSelectUnits = ((GameController.Options.SetupOptions & StartingScenarios.PickStartingUnits) == StartingScenarios.PickStartingUnits);
+
+				string errorMessage = string.Empty;
+
+				if(!playersSelectUnits)
+				{
+					errorMessage = "You must place exactly three units";
+				}
+				else
+				{
+					// can never place more than three
+					if(numPlaced > 3)
+					{
+						errorMessage = "You cannot place more than three units at a time.";
+					}
+					// must have chosen less than three
+					else
+					{
+						int numUnitsLeft = m_availableUnits.Count;
+
+						if(numPlaced != numUnitsLeft)
+						{
+							if(numUnitsLeft >= 3)
+							{
+								errorMessage = "You must place exactly three units.";
+							}
+							else
+							{
+								errorMessage = "You must place all your remaining units.";
+							}							
+						}
+					}
+				}
+				
+				if(errorMessage	!= string.Empty)
+				{
+					MessageBox.Show(errorMessage, "Placement Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+					return;
+				}
+				
 			}			
 
 			this.DialogResult = DialogResult.OK;

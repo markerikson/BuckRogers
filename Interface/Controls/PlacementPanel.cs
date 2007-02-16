@@ -26,6 +26,9 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.Button m_btnPlaceUnits;
 		private System.Windows.Forms.Button m_btnCancelPlacement;
 		private System.Windows.Forms.ListView m_lvAvailableUnits;
+		private bool m_playersSelectUnits;
+		private int m_numPlayersFinishedChoosing;
+		private Button m_btnChooseUnits;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -37,6 +40,8 @@ namespace BuckRogers.Interface
 			InitializeComponent();
 
 			m_btnCancelPlacement.Enabled = false;
+
+			
 		}
 
 		/// <summary> 
@@ -69,6 +74,7 @@ namespace BuckRogers.Interface
 			this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_btnCancelPlacement = new System.Windows.Forms.Button();
+			this.m_btnChooseUnits = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// label2
@@ -91,19 +97,21 @@ namespace BuckRogers.Interface
 			// 
 			this.m_btnPlaceUnits.Location = new System.Drawing.Point(0, 120);
 			this.m_btnPlaceUnits.Name = "m_btnPlaceUnits";
+			this.m_btnPlaceUnits.Size = new System.Drawing.Size(75, 23);
 			this.m_btnPlaceUnits.TabIndex = 17;
-			this.m_btnPlaceUnits.Text = "Place units";
+			this.m_btnPlaceUnits.Text = "Place Units";
 			this.m_btnPlaceUnits.Click += new System.EventHandler(this.m_btnPlaceUnits_Click);
 			// 
 			// m_lvAvailableUnits
 			// 
 			this.m_lvAvailableUnits.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-																								 this.columnHeader1,
-																								 this.columnHeader2});
+            this.columnHeader1,
+            this.columnHeader2});
 			this.m_lvAvailableUnits.Location = new System.Drawing.Point(92, 184);
 			this.m_lvAvailableUnits.Name = "m_lvAvailableUnits";
 			this.m_lvAvailableUnits.Size = new System.Drawing.Size(136, 168);
 			this.m_lvAvailableUnits.TabIndex = 18;
+			this.m_lvAvailableUnits.UseCompatibleStateImageBehavior = false;
 			this.m_lvAvailableUnits.View = System.Windows.Forms.View.Details;
 			// 
 			// columnHeader1
@@ -126,12 +134,25 @@ namespace BuckRogers.Interface
 			// 
 			this.m_btnCancelPlacement.Location = new System.Drawing.Point(80, 120);
 			this.m_btnCancelPlacement.Name = "m_btnCancelPlacement";
+			this.m_btnCancelPlacement.Size = new System.Drawing.Size(75, 23);
 			this.m_btnCancelPlacement.TabIndex = 20;
 			this.m_btnCancelPlacement.Text = "Cancel";
 			this.m_btnCancelPlacement.Click += new System.EventHandler(this.m_btnCancelPlacement_Click);
 			// 
+			// m_btnChooseUnits
+			// 
+			this.m_btnChooseUnits.Location = new System.Drawing.Point(0, 149);
+			this.m_btnChooseUnits.Name = "m_btnChooseUnits";
+			this.m_btnChooseUnits.RightToLeft = System.Windows.Forms.RightToLeft.No;
+			this.m_btnChooseUnits.Size = new System.Drawing.Size(75, 23);
+			this.m_btnChooseUnits.TabIndex = 21;
+			this.m_btnChooseUnits.Text = "Select Units";
+			this.m_btnChooseUnits.UseVisualStyleBackColor = true;
+			this.m_btnChooseUnits.Click += new System.EventHandler(this.m_btnChooseUnits_Click);
+			// 
 			// PlacementPanel
 			// 
+			this.Controls.Add(this.m_btnChooseUnits);
 			this.Controls.Add(this.m_btnCancelPlacement);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.m_lvAvailableUnits);
@@ -170,7 +191,7 @@ namespace BuckRogers.Interface
 				return;
 			}
 
-			if(t.Units.Count >= 6)
+			if(t.Units.Count >= 6 && !m_playersSelectUnits)
 			{
 				MessageBox.Show("Can only place 6 units in a single territory", "Placement",
 								MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -193,16 +214,39 @@ namespace BuckRogers.Interface
 				{
 					//m_lbPlayerOrder.SelectedIndex++;
 					m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
-					RefreshAvailableUnits();
+					RefreshAvailableUnits();					
 				}
 				else
 				{
 					RefreshPlayerOrder();
 				}
 				
+				if(m_playersSelectUnits)
+				{
+					// TODO should probably be a better way to figure out if the player
+					// has selected units or not
+					//if(m_controller.CurrentPlayer.Units.Count <= 10)
+					if(m_numPlayersFinishedChoosing < m_controller.Players.Length)
+					{
+						m_btnPlaceUnits.Enabled = false;
+						m_btnCancelPlacement.Enabled = false;
+						m_btnChooseUnits.Enabled = true;
+						m_btnChooseUnits.Visible = true;
+					}
+					else
+					{
+						m_btnPlaceUnits.Enabled = true;
+						m_btnCancelPlacement.Enabled = false;
+						m_btnChooseUnits.Visible = false;
+					}
+				}
+				else
+				{
+					m_btnPlaceUnits.Enabled = true;
+					m_btnCancelPlacement.Enabled = false;
+				}
 
-				m_btnPlaceUnits.Enabled = true;
-				m_btnCancelPlacement.Enabled = false;
+				
 
 				if(MoveModeChanged != null)
 				{
@@ -282,6 +326,69 @@ namespace BuckRogers.Interface
 		{
 			get { return this.m_controller; }
 			set { this.m_controller = value; }
+		}
+
+		public void Initialize()
+		{
+			StartingScenarios settings = GameController.Options.SetupOptions;
+			m_playersSelectUnits = ((settings & StartingScenarios.PickStartingUnits) == StartingScenarios.PickStartingUnits);
+
+			if(m_playersSelectUnits)
+			{
+				m_btnChooseUnits.Visible = true;
+				m_btnPlaceUnits.Enabled = false;
+			}
+			else
+			{
+				m_btnChooseUnits.Visible = false;
+				m_btnPlaceUnits.Enabled = true;
+			}
+
+			RefreshPlayerOrder();
+			RefreshAvailableUnits();
+		}
+
+		private void m_btnChooseUnits_Click(object sender, EventArgs e)
+		{
+			int numUnits = 15;
+
+			if(m_controller.Players.Length < 4 
+				&& !GameController.Options.OptionalRules["LimitedTwoPlayerSetup"])
+			{
+				if(m_controller.Players.Length == 2)
+				{
+					numUnits = 45;
+				}
+				else if(m_controller.Players.Length == 3)
+				{
+					numUnits = 30;
+				}
+			}
+
+			numUnits = 5;
+			UnitSelectionForm usf = new UnitSelectionForm(numUnits);
+			DialogResult dr = usf.ShowDialog();
+
+			if(dr == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			Player p = m_controller.CurrentPlayer;
+
+			m_controller.CreateUnits(p, UnitType.Fighter, usf.TotalFighters);
+			m_controller.CreateUnits(p, UnitType.Transport, usf.TotalTransports);
+			m_controller.CreateUnits(p, UnitType.Trooper, usf.TotalTroopers);
+			m_controller.CreateUnits(p, UnitType.Gennie, usf.TotalGennies);
+
+			m_numPlayersFinishedChoosing++;
+
+			RefreshAvailableUnits();
+
+			m_btnChooseUnits.Enabled = false;
+			m_btnPlaceUnits.Enabled = true;
+			int i = 42;
+			int q = i;
 		}
 	}
 }

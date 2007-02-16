@@ -470,6 +470,14 @@ namespace BuckRogers
 			}			
 		}
 
+		public void CreateUnits(Player p, UnitType ut, int numUnits)
+		{
+			for(int i = 0; i < numUnits; i++)
+			{
+				Unit.CreateNewUnit(p, ut);
+			}
+		}
+
 		public void CreateInitialUnits()
 		{
 			int numPlayersModifier = 1;
@@ -485,10 +493,33 @@ namespace BuckRogers
 					numPlayersModifier = 3;
 				}
 			}
+
+			bool playersPickUnits = ((m_options.SetupOptions & StartingScenarios.PickStartingUnits) == StartingScenarios.PickStartingUnits);
 			
 			foreach(Player p in m_players)
 			{
 				Unit u = null;
+
+				for (int i = 0; i < numPlayersModifier; i++)
+				{
+					u = Unit.CreateNewUnit(p, UnitType.Leader);
+				}
+
+				for (int i = 0; i < 2 * numPlayersModifier; i++)
+				{
+					u = Unit.CreateNewUnit(p, UnitType.Factory);
+				}
+
+				Factory blackMarket = (Factory)Unit.CreateNewUnit(p, UnitType.Factory);
+				blackMarket.IsBlackMarket = true;
+				blackMarket.CanProduce = false;
+				blackMarket.CurrentTerritory = m_map["Black Market"];
+
+				if(playersPickUnits)
+				{
+					continue;
+				}
+				
 
 				for(int i = 0; i < 8 * numPlayersModifier; i++)
 				{
@@ -502,25 +533,13 @@ namespace BuckRogers
 
 				for(int i = 0; i < 2 * numPlayersModifier; i++)
 				{
-					u = Unit.CreateNewUnit(p, UnitType.Factory);
-				}
-
-				for(int i = 0; i < 2 * numPlayersModifier; i++)
-				{
 					u = Unit.CreateNewUnit(p, UnitType.Gennie);
 				}
 
 				for(int i = 0; i < numPlayersModifier; i++)
 				{
 					u = Unit.CreateNewUnit(p, UnitType.Transport);
-					u = Unit.CreateNewUnit(p, UnitType.Leader);
 				}
-
-				Factory blackMarket = (Factory)Unit.CreateNewUnit(p, UnitType.Factory);
-				blackMarket.IsBlackMarket = true;
-				blackMarket.CanProduce = false;
-				blackMarket.CurrentTerritory = m_map["Black Market"];
-				
 			}
 		}
 

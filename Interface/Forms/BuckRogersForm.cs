@@ -184,8 +184,9 @@ namespace BuckRogers
 
 					m_clickMode = MapClickMode.Normal;
 			
-					m_placementPanel.RefreshPlayerOrder();
-					m_placementPanel.RefreshAvailableUnits();
+					//m_placementPanel.RefreshPlayerOrder();
+					//m_placementPanel.RefreshAvailableUnits();
+					m_placementPanel.Initialize();
 
 					statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
 

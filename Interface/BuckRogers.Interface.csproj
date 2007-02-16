@@ -73,9 +73,9 @@
     <Compile Include="Forms\BuckRogersForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\CombatForm.cs">
+    <None Include="Forms\CombatForm.cs">
       <SubType>Form</SubType>
-    </Compile>
+    </None>
     <Compile Include="Forms\CombatForm2D.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -96,6 +96,12 @@
     </Compile>
     <Compile Include="Forms\TransportLoadForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\UnitSelectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\UnitSelectionForm.Designer.cs">
+      <DependentUpon>UnitSelectionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ListBox\ItemInfo.cs" />
     <Compile Include="ListBox\ListBoxList.cs" />
@@ -196,6 +202,10 @@
     <EmbeddedResource Include="Forms\CombatForm2D.resx">
       <SubType>Designer</SubType>
       <DependentUpon>CombatForm2D.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\UnitSelectionForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>UnitSelectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Other\Graphics\Battler.png" />
     <EmbeddedResource Include="Other\Graphics\Factory.png" />

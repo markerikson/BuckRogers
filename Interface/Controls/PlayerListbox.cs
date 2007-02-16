@@ -22,8 +22,14 @@ namespace BuckRogers.Interface
 			
 		}
 
+
 		protected override void OnDrawItem(DrawItemEventArgs e) 
 		{
+			if(this.DesignMode)
+			{
+				base.OnDrawItem(e);
+				return;
+			}
 			Graphics g = e.Graphics;
 			Color blockColor = Color.Empty;
 			Color textColor = Color.Black;
