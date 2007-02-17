@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<OptionalRules>
+	<Category name="Setup">
+		<OptionalRule name="UseTestingSetup" description="Use the sample player setup and deployment" excludes="LimitedTwoPlayerSetup,AllTerritoriesOwned,PickStartingUnits,PickStartingTerritories"/>
+		<OptionalRule name="LimitedTwoPlayerSetup" description="No extra units in two/three player games" excludes="PickStartingUnits,UseTestingSetup"/>
+		<OptionalRule name="AllTerritoriesOwned" description="All ground territories have an owner at the start" excludes="VariableStartingTerritories"/>
+		<OptionalRule name="VariableStartingTerritories" description="Players start with N territories" excludes="AllTerritoriesOwned">
+			<Value name="numTerritories" description="Number of territories" type="int" min="3" max="21" start="6" />
+		</OptionalRule>
+		<OptionalRule name="StationaryPlanets" description="Planets do not move"/>
+		<OptionalRule name="PickStartingUnits" description="Players can pick their starting units" excludes="UseTestingSetup">
+			<Value name="numUnits" description="Number of units" type="int" min="5" max="100" start="15"/>			
+		</OptionalRule>
+		<OptionalRule name="PickStartingTerritories" description="Players can pick their starting territories" excludes="UseTestingSetup"/>
+		<!-- <OptionalRule name="RandomTurnOrder" description="Turn order is completely random"/> -->
+	</Category>
+	<Category name="Factories">
+
+		<OptionalRule name="IncreasedProduction" description="Increased production after turn N">
+			<Value name="startingTurn" description="Starting turn" type="int" min="1" max="99" start="4"/>
+			<Value name="multiplier" description="Production multiplier" type="int" min="1" max="10" start="2" />
+		</OptionalRule>
+		<!--
+		<OptionalRule name="CombineFactories" description="Factories may combine output to produce faster" excludes="IncreasedProduction" />
+		<OptionalRule name="FactoryDefense" description="Factories provide a defensive bonus"/>
+		<OptionalRule name="DeployAnywhere" description="Newly produced units may be deployed anywhere you control"/>
+		<OptionalRule name="TransportedFactoriesBuild" description="Factories in transports can build fighters"/>
+		<OptionalRule name="FreePlanetaryFactory" description="First player to own a given planet gets a free factory"/>
+		<OptionalRule name="LimitedFactories" description="Limited number of factories per planet"/>
+		-->
+	</Category>
+	<Category name="Units" >
+		<OptionalRule name="ConquerWithGround" description="Only ground units can conquer planetary territories"/>
+		<!--
+		<OptionalRule name="PassingFire" description="Moving units can be fired at"/>
+		<OptionalRule name="ControlMarkersFight" description="Control markers must be killed to conquer the territory"/>
+		<OptionalRule name="CombatRetreat" description="Players can retreat from combat"/>
+		<OptionalRule name="SpecializedGennies" description="Gennies on different planets have different abilities"/>
+		<OptionalRule name="DifferentTroopSpeeds" description="Gennies and troopers have different speeds"/>
+		<OptionalRule name="DifferentShipSpeeds" description="Spaceships have different speeds"/>
+		<OptionalRule name="SlingshotEffect" description="Ships can slingshot around planets or the Sun"/>
+		-->
+	</Category>
+	<Category name="Other" >
+		<OptionalRule name="MergeFarOrbits" description="No cost to move from far orbit to the solar system"/>
+		<!--
+		<OptionalRule name="PartialPlanetControl" description="Players only need a majority of territories to own a planet"/>
+		<OptionalRule name="KillerAsteroids" description="Asteroids may be launched towards the sun"/>
+		-->
+
+
+
+	</Category>
+</OptionalRules>
