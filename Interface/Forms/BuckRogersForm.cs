@@ -122,7 +122,7 @@ namespace BuckRogers
 					m_battleController = ct.BattleController;
 
 					GameController.Options.OptionalRules = go.OptionalRules;
-					GameController.Options.SetupOptions = go.SetupOptions;
+					//GameController.Options.SetupOptions = go.SetupOptions;
 					GameController.Options.IncreasedProductionTurn = go.IncreasedProductionTurn;
 					GameController.Options.NumTerritoriesNeeded = go.NumTerritoriesNeeded;
 					GameController.Options.ProductionMultiplier = go.ProductionMultiplier;

@@ -72,11 +72,12 @@ namespace BuckRogers.Interface
 
 			Bitmap[] masks = new Bitmap[types.Length];
 
+			Assembly a = Assembly.GetExecutingAssembly();
+
 			for(int i = 0; i < masks.Length; i++)
 			{
-				Assembly a = Assembly.GetExecutingAssembly();
-				Stream stream =
-					a.GetManifestResourceStream("BuckRogers.Interface.Other.Graphics." + types[i].ToString() + ".png");
+				string resourceName = "BuckRogers.Interface.Other.Graphics." + types[i].ToString() + ".png";
+				Stream stream =	a.GetManifestResourceStream(resourceName);
 				Bitmap mask = new Bitmap(stream);
 				masks[i] = mask;
 			}

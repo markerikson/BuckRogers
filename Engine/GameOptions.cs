@@ -1,5 +1,8 @@
 using System;
 using System.ComponentModel;
+using System.IO;
+using System.Reflection;
+using System.Xml;
 
 namespace BuckRogers
 {
@@ -32,23 +35,37 @@ namespace BuckRogers
 		HomePlanetPlusTwo,
 	}
 
+	/*
 	[Flags]
 	public enum StartingScenarios
 	{
 		[Browsable(false)]
 		Normal = 0,
+
 		[Description("Planets do not move")]
 		NoPlanetaryMovement = 1,
+
 		[Description("Players can pick their starting units")]
 		PickStartingUnits = 2,
+
+		[Description("Players can pick their starting territories")]
+		PickStartingTerritories = 4,
 	}
+	*/
 
 	public class GameOptions
 	{
 		private OptionsHashlist m_optionalRules;
+		private Hashlist m_categories;
+
+		public Hashlist Categories
+		{
+			get { return m_categories; }
+			set { m_categories = value; }
+		}
 
 		private VictoryConditions m_victoryConditions;
-		private StartingScenarios m_startingScenarios;
+		//private StartingScenarios m_startingScenarios;
 
 		private int m_productionMultiplier;
 		private int m_increasedProductionTurn;
@@ -87,16 +104,89 @@ namespace BuckRogers
 			};
 
 			m_optionalRules = new OptionsHashlist();
+			m_categories = new Hashlist();
+
+
+			/*
 			for(int i = 0; i <= optionDetails.GetUpperBound(0); i++)
 			{
-				m_optionalRules.Add(optionDetails[i, 0], new GameOption(optionDetails[i, 0],  false, optionDetails[i, 1]));
+				m_optionalRules.Add(optionDetails[i, 0], new GameOption(optionDetails[i, 0], optionDetails[i, 1],  false));
 			}
+			*/
 
+			LoadOptionsXML();
 			m_victoryConditions = VictoryConditions.TotalAnnihilation;
-			m_startingScenarios = StartingScenarios.Normal;
+			//m_startingScenarios = StartingScenarios.Normal;
 
 			m_productionMultiplier = 1;
 			m_increasedProductionTurn = 1;
+		}
+
+		private void LoadOptionsXML()
+		{
+			Assembly a = Assembly.GetExecutingAssembly();
+
+			string resourceName = "BuckRogers.Engine.OptionalRules.xml";
+			Stream stream = a.GetManifestResourceStream(resourceName);
+
+			XmlDocument xd = new XmlDocument();
+			xd.Load(stream);
+
+			XmlElement xeOptionalRules = (XmlElement)xd.GetElementsByTagName("OptionalRules")[0];
+
+			XmlNodeList xnlCategories = xeOptionalRules.GetElementsByTagName("Category");
+
+			foreach (XmlElement xeCategory in xnlCategories)
+			{
+				string categoryName = xeCategory.Attributes["name"].Value;
+				//Hashlist categoryList = new Hashlist();
+				OptionCategory category = new OptionCategory();
+				category.Name = categoryName;
+				m_categories.Add(categoryName, category);
+
+				XmlNodeList xnlOptions = xeCategory.GetElementsByTagName("OptionalRule");
+
+				foreach (XmlElement xeOption in xnlOptions)
+				{
+					string optionName = xeOption.Attributes["name"].Value;
+					string optionDescription = xeOption.Attributes["description"].Value;
+
+					GameOption option = new GameOption(optionName, optionDescription, false);
+					option.Category = categoryName;
+					m_optionalRules.Add(optionName, option);
+					category.Options.Add(optionName, option);
+
+					if(xeOption.Attributes["excludes"] != null)
+					{
+						option.Excludes = xeOption.Attributes["excludes"].Value;
+					}
+
+					XmlNodeList xnlValues = xeOption.GetElementsByTagName("Value");
+
+					foreach(XmlElement xeValue in xnlValues)
+					{
+						string valueName = xeValue.Attributes["name"].Value;
+						string valueDescription = xeValue.Attributes["description"].Value;
+						
+						string sMin = xeValue.Attributes["min"].Value;
+						string sMax = xeValue.Attributes["max"].Value;
+						string sStart = xeValue.Attributes["start"].Value;
+						
+						OptionValue ov = new OptionValue();
+						ov.Name = valueName;
+						ov.Description = valueDescription;
+
+						ov.Min = int.Parse(sMin);
+						ov.Max = int.Parse(sMax);
+						ov.Start = int.Parse(sStart);
+
+
+						option.Values.Add(valueName, ov);
+					}
+				}
+			}
+
+
 		}
 
 
@@ -130,11 +220,13 @@ namespace BuckRogers
 			set { this.m_optionalRules = value; }
 		}
 
+		/*
 		public BuckRogers.StartingScenarios SetupOptions
 		{
 			get { return this.m_startingScenarios; }
 			set { this.m_startingScenarios = value; }
 		}
+		*/
 
 		public string[] PlayerNames
 		{
@@ -145,11 +237,20 @@ namespace BuckRogers
 
 	public class GameOption
 	{
-		public GameOption(string name, bool val, string description)
+		private string m_name;
+		private bool m_value;
+		private string m_description;
+		private string m_category;
+		private Hashlist m_values;
+		private string m_excludes;
+
+		public GameOption(string name, string description, bool val)
 		{
 			m_name = name;
 			m_description = description;
 			m_value = val;
+			m_values = new Hashlist();
+			m_excludes = string.Empty;
 		}
 		public string Description
 		{
@@ -168,11 +269,92 @@ namespace BuckRogers
 			get { return this.m_value; }
 			set { this.m_value = value; }
 		}
-	
-		private string m_name;
-		private bool m_value;
-		private string m_description;
-		
+
+		public string Category
+		{
+			get { return m_category; }
+			set { m_category = value; }
+		}
+
+		public Hashlist Values
+		{
+			get { return m_values; }
+			set { m_values = value; }
+		}
+
+		public string Excludes
+		{
+			get { return m_excludes; }
+			set { m_excludes = value; }
+		}
 	}
 
+	public class OptionCategory
+	{
+		private string m_name;
+		private Hashlist m_options;
+
+		public string Name
+		{
+			get { return m_name; }
+			set { m_name = value; }
+		}		
+
+		public Hashlist Options
+		{
+			get { return m_options; }
+			set { m_options = value; }
+		}
+
+		public OptionCategory()
+		{
+			m_options = new Hashlist();
+		}
+	};
+
+	public class OptionValue
+	{
+		private int m_value;
+		private string m_name;
+		private string m_description;
+		private int m_min;
+		private int m_start;
+		private int m_max;
+
+		public int Min
+		{
+			get { return m_min; }
+			set { m_min = value; }
+		}		
+
+		public int Max
+		{
+			get { return m_max; }
+			set { m_max = value; }
+		}		
+
+		public int Start
+		{
+			get { return m_start; }
+			set { m_start = value; }
+		}
+
+		public string Name
+		{
+			get { return m_name; }
+			set { m_name = value; }
+		}		
+
+		public string Description
+		{
+			get { return m_description; }
+			set { m_description = value; }
+		}		
+
+		public int Value
+		{
+			get { return m_value; }
+			set { m_value = value; }
+		}
+	};
 }

@@ -39,6 +39,8 @@ namespace BuckRogers.Interface
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(802, 576);
 			this.Name = "CombatForm2D";
+			this.ShowInTaskbar = false;
+			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
 			this.Text = "CombatForm2D";
 			this.ResumeLayout(false);
 

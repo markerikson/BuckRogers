@@ -330,8 +330,10 @@ namespace BuckRogers.Interface
 
 		public void Initialize()
 		{
-			StartingScenarios settings = GameController.Options.SetupOptions;
-			m_playersSelectUnits = ((settings & StartingScenarios.PickStartingUnits) == StartingScenarios.PickStartingUnits);
+			//StartingScenarios settings = GameController.Options.SetupOptions;
+			//m_playersSelectUnits = ((settings & StartingScenarios.PickStartingUnits) == StartingScenarios.PickStartingUnits);
+
+			m_playersSelectUnits = GameController.Options.OptionalRules["PickStartingUnits"];
 
 			if(m_playersSelectUnits)
 			{

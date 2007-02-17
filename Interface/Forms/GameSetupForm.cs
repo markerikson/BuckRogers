@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 using BuckRogers;
 
 namespace BuckRogers.Interface
@@ -12,6 +13,7 @@ namespace BuckRogers.Interface
 	/// </summary>
 	public class GameSetupForm : System.Windows.Forms.Form
 	{
+		#region private members
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Label label3;
@@ -25,8 +27,8 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.TextBox m_tbPlayer4;
 		private System.Windows.Forms.TextBox m_tbPlayer5;
 		private System.Windows.Forms.TextBox m_tbPlayer6;
-		private System.Windows.Forms.Button button1;
-		private System.Windows.Forms.Button button2;
+		private System.Windows.Forms.Button m_btnOK;
+		private System.Windows.Forms.Button m_btnCancel;
 		private System.Windows.Forms.ComboBox m_cbNumPlayers;
 		private TextBox[] m_tbPlayerNames;
 		private string[] m_playerNames;
@@ -36,21 +38,19 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.ComboBox m_cbVictoryConditions;
 		private System.Windows.Forms.Label label9;
 		private System.Windows.Forms.NumericUpDown m_nudNumTerritories;
-		private System.Windows.Forms.TabControl tabControl1;
-		private System.Windows.Forms.TabPage tabPage1;
-		private System.Windows.Forms.TabPage tabPage2;
-		private System.Windows.Forms.NumericUpDown m_nudProductionMultiplier;
-		private System.Windows.Forms.NumericUpDown m_nudProductionTurn;
-		private System.Windows.Forms.Label label10;
-		private System.Windows.Forms.Label label11;
-		private EeekSoft.WinForms.Controls.EnumEditor enumEditor1;
-		private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.CheckedListBox m_chklbOptions;
 		private System.Windows.Forms.Button m_btnLoadGame;
+		private RangeLimitedUpDown m_nudNodeValue;
+		private TreeView m_tvOptions;
+		private bool m_upDownDisplayed;
+		private TreeNode m_selectedNode;
+		private Hashtable m_optionNodes;
+		private Label label10;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
 		private System.ComponentModel.Container components = null;
+
+		#endregion
 
 		public GameSetupForm()
 		{
@@ -59,16 +59,13 @@ namespace BuckRogers.Interface
 			//
 			InitializeComponent();
 
-			enumEditor1.EnumType = typeof(StartingScenarios);
-			enumEditor1.EnumValue = (long)StartingScenarios.Normal;
-			enumEditor1.LableFormat = "{1}";
+			m_nudNodeValue = new RangeLimitedUpDown();
+			m_optionNodes = new Hashtable();
 
-			m_loadFileName = String.Empty;
-			
+			m_loadFileName = String.Empty;			
 
 			m_cbVictoryConditions.Items.Clear();
 
-			//foreach(string condition in Enum.GetNames(typeof(VictoryConditions)))
 			foreach(VictoryConditions vc in Enum.GetValues(typeof(VictoryConditions)))
 			{
 				string description = Utility.GetDescriptionOf(vc);
@@ -77,7 +74,6 @@ namespace BuckRogers.Interface
 
 			m_cbVictoryConditions.SelectedIndex = 0;
 			
-
 			m_tbPlayerNames = new TextBox[6];
 			m_tbPlayerNames[0] = m_tbPlayer1;
 			m_tbPlayerNames[1] = m_tbPlayer2;
@@ -89,16 +85,36 @@ namespace BuckRogers.Interface
 			m_cbNumPlayers.SelectedIndex = 0;
 
 			m_options = new GameOptions();
-			//m_props = new PropertyTable();
 
-			m_nudProductionTurn.Enabled = false;
-			m_nudProductionMultiplier.Enabled = false;
+			m_tvOptions.CheckBoxes = true;
 
-			foreach(GameOption option in m_options.OptionalRules)
+			for (int i = 0; i < m_options.Categories.Count; i++ )
 			{
-				m_chklbOptions.Items.Add(option.Description);
+				OptionCategory category = (OptionCategory)m_options.Categories[i];
+
+				TreeNode categoryNode = new TreeNode(category.Name);
+				m_tvOptions.Nodes.Add(categoryNode);
+
+				foreach (GameOption option in category.Options)
+				{
+					TreeNode optionNode = new TreeNode(option.Description);
+					optionNode.Tag = option.Name;
+					m_optionNodes[option.Name] = optionNode;
+
+					categoryNode.Nodes.Add(optionNode);
+				}
 			}
 
+			m_tvOptions.ExpandAll();
+
+			for (int i = 0; i < m_tvOptions.Nodes.Count; i++)
+			{
+				TreeNode categoryNode = m_tvOptions.Nodes[i];
+				TreeNode_SetStateImageIndex(categoryNode, 0);
+			}
+
+			// HACK Dunno why, but the first node needs this done a second time
+			TreeNode_SetStateImageIndex(m_tvOptions.Nodes[0], 0);
 		}
 
 		/// <summary>
@@ -137,35 +153,21 @@ namespace BuckRogers.Interface
 			this.label5 = new System.Windows.Forms.Label();
 			this.label6 = new System.Windows.Forms.Label();
 			this.label7 = new System.Windows.Forms.Label();
-			this.button1 = new System.Windows.Forms.Button();
-			this.button2 = new System.Windows.Forms.Button();
+			this.m_btnOK = new System.Windows.Forms.Button();
+			this.m_btnCancel = new System.Windows.Forms.Button();
 			this.label8 = new System.Windows.Forms.Label();
 			this.m_cbVictoryConditions = new System.Windows.Forms.ComboBox();
 			this.m_nudNumTerritories = new System.Windows.Forms.NumericUpDown();
 			this.label9 = new System.Windows.Forms.Label();
-			this.tabControl1 = new System.Windows.Forms.TabControl();
-			this.tabPage1 = new System.Windows.Forms.TabPage();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
-			this.enumEditor1 = new EeekSoft.WinForms.Controls.EnumEditor();
-			this.tabPage2 = new System.Windows.Forms.TabPage();
-			this.m_chklbOptions = new System.Windows.Forms.CheckedListBox();
-			this.label11 = new System.Windows.Forms.Label();
-			this.label10 = new System.Windows.Forms.Label();
-			this.m_nudProductionTurn = new System.Windows.Forms.NumericUpDown();
-			this.m_nudProductionMultiplier = new System.Windows.Forms.NumericUpDown();
+			this.m_tvOptions = new System.Windows.Forms.TreeView();
 			this.m_btnLoadGame = new System.Windows.Forms.Button();
+			this.label10 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.m_nudNumTerritories)).BeginInit();
-			this.tabControl1.SuspendLayout();
-			this.tabPage1.SuspendLayout();
-			this.groupBox1.SuspendLayout();
-			this.tabPage2.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionTurn)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionMultiplier)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// label1
 			// 
-			this.label1.Location = new System.Drawing.Point(4, 40);
+			this.label1.Location = new System.Drawing.Point(15, 44);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(60, 16);
 			this.label1.TabIndex = 0;
@@ -173,7 +175,7 @@ namespace BuckRogers.Interface
 			// 
 			// label2
 			// 
-			this.label2.Location = new System.Drawing.Point(4, 60);
+			this.label2.Location = new System.Drawing.Point(15, 64);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(60, 16);
 			this.label2.TabIndex = 2;
@@ -181,56 +183,56 @@ namespace BuckRogers.Interface
 			// 
 			// m_tbPlayer1
 			// 
-			this.m_tbPlayer1.Location = new System.Drawing.Point(80, 36);
+			this.m_tbPlayer1.Location = new System.Drawing.Point(91, 40);
 			this.m_tbPlayer1.Name = "m_tbPlayer1";
+			this.m_tbPlayer1.Size = new System.Drawing.Size(100, 20);
 			this.m_tbPlayer1.TabIndex = 6;
-			this.m_tbPlayer1.Text = "";
 			// 
 			// m_tbPlayer2
 			// 
-			this.m_tbPlayer2.Location = new System.Drawing.Point(80, 60);
+			this.m_tbPlayer2.Location = new System.Drawing.Point(91, 64);
 			this.m_tbPlayer2.Name = "m_tbPlayer2";
+			this.m_tbPlayer2.Size = new System.Drawing.Size(100, 20);
 			this.m_tbPlayer2.TabIndex = 7;
-			this.m_tbPlayer2.Text = "";
 			// 
 			// m_tbPlayer3
 			// 
-			this.m_tbPlayer3.Location = new System.Drawing.Point(80, 84);
+			this.m_tbPlayer3.Location = new System.Drawing.Point(91, 88);
 			this.m_tbPlayer3.Name = "m_tbPlayer3";
+			this.m_tbPlayer3.Size = new System.Drawing.Size(100, 20);
 			this.m_tbPlayer3.TabIndex = 8;
-			this.m_tbPlayer3.Text = "";
 			// 
 			// m_tbPlayer4
 			// 
-			this.m_tbPlayer4.Location = new System.Drawing.Point(80, 108);
+			this.m_tbPlayer4.Location = new System.Drawing.Point(91, 112);
 			this.m_tbPlayer4.Name = "m_tbPlayer4";
+			this.m_tbPlayer4.Size = new System.Drawing.Size(100, 20);
 			this.m_tbPlayer4.TabIndex = 9;
-			this.m_tbPlayer4.Text = "";
 			// 
 			// m_tbPlayer5
 			// 
-			this.m_tbPlayer5.Location = new System.Drawing.Point(80, 132);
+			this.m_tbPlayer5.Location = new System.Drawing.Point(91, 136);
 			this.m_tbPlayer5.Name = "m_tbPlayer5";
+			this.m_tbPlayer5.Size = new System.Drawing.Size(100, 20);
 			this.m_tbPlayer5.TabIndex = 10;
-			this.m_tbPlayer5.Text = "";
 			// 
 			// m_tbPlayer6
 			// 
-			this.m_tbPlayer6.Location = new System.Drawing.Point(80, 156);
+			this.m_tbPlayer6.Location = new System.Drawing.Point(91, 160);
 			this.m_tbPlayer6.Name = "m_tbPlayer6";
+			this.m_tbPlayer6.Size = new System.Drawing.Size(100, 20);
 			this.m_tbPlayer6.TabIndex = 11;
-			this.m_tbPlayer6.Text = "";
 			// 
 			// m_cbNumPlayers
 			// 
 			this.m_cbNumPlayers.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_cbNumPlayers.Items.AddRange(new object[] {
-																"2",
-																"3",
-																"4",
-																"5",
-																"6"});
-			this.m_cbNumPlayers.Location = new System.Drawing.Point(104, 8);
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"});
+			this.m_cbNumPlayers.Location = new System.Drawing.Point(115, 12);
 			this.m_cbNumPlayers.Name = "m_cbNumPlayers";
 			this.m_cbNumPlayers.Size = new System.Drawing.Size(76, 21);
 			this.m_cbNumPlayers.TabIndex = 12;
@@ -238,7 +240,7 @@ namespace BuckRogers.Interface
 			// 
 			// label3
 			// 
-			this.label3.Location = new System.Drawing.Point(4, 12);
+			this.label3.Location = new System.Drawing.Point(15, 16);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(100, 16);
 			this.label3.TabIndex = 13;
@@ -246,7 +248,7 @@ namespace BuckRogers.Interface
 			// 
 			// label4
 			// 
-			this.label4.Location = new System.Drawing.Point(4, 108);
+			this.label4.Location = new System.Drawing.Point(15, 112);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(60, 16);
 			this.label4.TabIndex = 15;
@@ -254,7 +256,7 @@ namespace BuckRogers.Interface
 			// 
 			// label5
 			// 
-			this.label5.Location = new System.Drawing.Point(4, 84);
+			this.label5.Location = new System.Drawing.Point(15, 88);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(60, 16);
 			this.label5.TabIndex = 14;
@@ -262,7 +264,7 @@ namespace BuckRogers.Interface
 			// 
 			// label6
 			// 
-			this.label6.Location = new System.Drawing.Point(4, 156);
+			this.label6.Location = new System.Drawing.Point(15, 160);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(60, 16);
 			this.label6.TabIndex = 17;
@@ -270,35 +272,37 @@ namespace BuckRogers.Interface
 			// 
 			// label7
 			// 
-			this.label7.Location = new System.Drawing.Point(4, 132);
+			this.label7.Location = new System.Drawing.Point(15, 136);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(60, 16);
 			this.label7.TabIndex = 16;
 			this.label7.Text = "Player 5:";
 			// 
-			// button1
+			// m_btnOK
 			// 
-			this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.button1.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button1.Location = new System.Drawing.Point(4, 336);
-			this.button1.Name = "button1";
-			this.button1.TabIndex = 18;
-			this.button1.Text = "OK";
-			this.button1.Click += new System.EventHandler(this.button1_Click);
+			this.m_btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.m_btnOK.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.m_btnOK.Location = new System.Drawing.Point(4, 292);
+			this.m_btnOK.Name = "m_btnOK";
+			this.m_btnOK.Size = new System.Drawing.Size(75, 23);
+			this.m_btnOK.TabIndex = 18;
+			this.m_btnOK.Text = "OK";
+			this.m_btnOK.Click += new System.EventHandler(this.button1_Click);
 			// 
-			// button2
+			// m_btnCancel
 			// 
-			this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.button2.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button2.Location = new System.Drawing.Point(92, 336);
-			this.button2.Name = "button2";
-			this.button2.TabIndex = 19;
-			this.button2.Text = "Cancel";
-			this.button2.Click += new System.EventHandler(this.button2_Click);
+			this.m_btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.m_btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.m_btnCancel.Location = new System.Drawing.Point(92, 292);
+			this.m_btnCancel.Name = "m_btnCancel";
+			this.m_btnCancel.Size = new System.Drawing.Size(75, 23);
+			this.m_btnCancel.TabIndex = 19;
+			this.m_btnCancel.Text = "Cancel";
+			this.m_btnCancel.Click += new System.EventHandler(this.button2_Click);
 			// 
 			// label8
 			// 
-			this.label8.Location = new System.Drawing.Point(228, 12);
+			this.label8.Location = new System.Drawing.Point(15, 194);
 			this.label8.Name = "label8";
 			this.label8.Size = new System.Drawing.Size(100, 16);
 			this.label8.TabIndex = 20;
@@ -307,217 +311,110 @@ namespace BuckRogers.Interface
 			// m_cbVictoryConditions
 			// 
 			this.m_cbVictoryConditions.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.m_cbVictoryConditions.Location = new System.Drawing.Point(332, 8);
+			this.m_cbVictoryConditions.Location = new System.Drawing.Point(18, 213);
 			this.m_cbVictoryConditions.Name = "m_cbVictoryConditions";
-			this.m_cbVictoryConditions.Size = new System.Drawing.Size(124, 21);
+			this.m_cbVictoryConditions.Size = new System.Drawing.Size(173, 21);
 			this.m_cbVictoryConditions.TabIndex = 21;
 			this.m_cbVictoryConditions.SelectedIndexChanged += new System.EventHandler(this.m_cbVictoryConditions_SelectedIndexChanged);
 			// 
 			// m_nudNumTerritories
 			// 
-			this.m_nudNumTerritories.Location = new System.Drawing.Point(384, 44);
-			this.m_nudNumTerritories.Maximum = new System.Decimal(new int[] {
-																				42,
-																				0,
-																				0,
-																				0});
-			this.m_nudNumTerritories.Minimum = new System.Decimal(new int[] {
-																				15,
-																				0,
-																				0,
-																				0});
+			this.m_nudNumTerritories.Location = new System.Drawing.Point(18, 266);
+			this.m_nudNumTerritories.Maximum = new decimal(new int[] {
+            42,
+            0,
+            0,
+            0});
+			this.m_nudNumTerritories.Minimum = new decimal(new int[] {
+            15,
+            0,
+            0,
+            0});
 			this.m_nudNumTerritories.Name = "m_nudNumTerritories";
 			this.m_nudNumTerritories.Size = new System.Drawing.Size(72, 20);
 			this.m_nudNumTerritories.TabIndex = 22;
-			this.m_nudNumTerritories.Value = new System.Decimal(new int[] {
-																			  15,
-																			  0,
-																			  0,
-																			  0});
+			this.m_nudNumTerritories.Value = new decimal(new int[] {
+            15,
+            0,
+            0,
+            0});
 			// 
 			// label9
 			// 
-			this.label9.Location = new System.Drawing.Point(228, 44);
+			this.label9.Location = new System.Drawing.Point(15, 247);
 			this.label9.Name = "label9";
 			this.label9.Size = new System.Drawing.Size(144, 16);
 			this.label9.TabIndex = 23;
 			this.label9.Text = "Number of territories to win:";
 			// 
-			// tabControl1
+			// treeView1
 			// 
-			this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-				| System.Windows.Forms.AnchorStyles.Left) 
-				| System.Windows.Forms.AnchorStyles.Right)));
-			this.tabControl1.Controls.Add(this.tabPage1);
-			this.tabControl1.Controls.Add(this.tabPage2);
-			this.tabControl1.Location = new System.Drawing.Point(4, 8);
-			this.tabControl1.Name = "tabControl1";
-			this.tabControl1.SelectedIndex = 0;
-			this.tabControl1.Size = new System.Drawing.Size(504, 324);
-			this.tabControl1.TabIndex = 24;
-			// 
-			// tabPage1
-			// 
-			this.tabPage1.Controls.Add(this.groupBox1);
-			this.tabPage1.Controls.Add(this.m_tbPlayer3);
-			this.tabPage1.Controls.Add(this.m_tbPlayer6);
-			this.tabPage1.Controls.Add(this.m_tbPlayer4);
-			this.tabPage1.Controls.Add(this.m_tbPlayer1);
-			this.tabPage1.Controls.Add(this.label2);
-			this.tabPage1.Controls.Add(this.m_cbNumPlayers);
-			this.tabPage1.Controls.Add(this.label4);
-			this.tabPage1.Controls.Add(this.label7);
-			this.tabPage1.Controls.Add(this.label5);
-			this.tabPage1.Controls.Add(this.label6);
-			this.tabPage1.Controls.Add(this.m_tbPlayer5);
-			this.tabPage1.Controls.Add(this.m_tbPlayer2);
-			this.tabPage1.Controls.Add(this.label3);
-			this.tabPage1.Controls.Add(this.label1);
-			this.tabPage1.Controls.Add(this.label9);
-			this.tabPage1.Controls.Add(this.m_cbVictoryConditions);
-			this.tabPage1.Controls.Add(this.label8);
-			this.tabPage1.Controls.Add(this.m_nudNumTerritories);
-			this.tabPage1.Location = new System.Drawing.Point(4, 22);
-			this.tabPage1.Name = "tabPage1";
-			this.tabPage1.Size = new System.Drawing.Size(496, 298);
-			this.tabPage1.TabIndex = 0;
-			this.tabPage1.Text = "Players";
-			// 
-			// groupBox1
-			// 
-			this.groupBox1.Controls.Add(this.enumEditor1);
-			this.groupBox1.Location = new System.Drawing.Point(228, 88);
-			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(264, 84);
-			this.groupBox1.TabIndex = 25;
-			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Setup Options";
-			// 
-			// enumEditor1
-			// 
-			this.enumEditor1.ControlSpacing = 24;
-			this.enumEditor1.EditorType = EeekSoft.WinForms.Controls.EnumEditorType.Flags;
-			this.enumEditor1.EnumType = null;
-			this.enumEditor1.EnumValue = ((long)(0));
-			this.enumEditor1.LableFormat = "{1}";
-			this.enumEditor1.Location = new System.Drawing.Point(8, 24);
-			this.enumEditor1.Name = "enumEditor1";
-			this.enumEditor1.Size = new System.Drawing.Size(248, 52);
-			this.enumEditor1.TabIndex = 24;
-			// 
-			// tabPage2
-			// 
-			this.tabPage2.Controls.Add(this.m_chklbOptions);
-			this.tabPage2.Controls.Add(this.label11);
-			this.tabPage2.Controls.Add(this.label10);
-			this.tabPage2.Controls.Add(this.m_nudProductionTurn);
-			this.tabPage2.Controls.Add(this.m_nudProductionMultiplier);
-			this.tabPage2.Location = new System.Drawing.Point(4, 22);
-			this.tabPage2.Name = "tabPage2";
-			this.tabPage2.Size = new System.Drawing.Size(496, 298);
-			this.tabPage2.TabIndex = 1;
-			this.tabPage2.Text = "Game Options";
-			// 
-			// m_chklbOptions
-			// 
-			this.m_chklbOptions.CheckOnClick = true;
-			this.m_chklbOptions.Location = new System.Drawing.Point(4, 4);
-			this.m_chklbOptions.Name = "m_chklbOptions";
-			this.m_chklbOptions.Size = new System.Drawing.Size(488, 229);
-			this.m_chklbOptions.TabIndex = 30;
-			this.m_chklbOptions.ThreeDCheckBoxes = true;
-			this.m_chklbOptions.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.m_chklbOptions_ItemCheck);
-			// 
-			// label11
-			// 
-			this.label11.Location = new System.Drawing.Point(48, 272);
-			this.label11.Name = "label11";
-			this.label11.Size = new System.Drawing.Size(176, 16);
-			this.label11.TabIndex = 29;
-			this.label11.Text = "First turn for increased production";
-			// 
-			// label10
-			// 
-			this.label10.Location = new System.Drawing.Point(52, 248);
-			this.label10.Name = "label10";
-			this.label10.Size = new System.Drawing.Size(124, 16);
-			this.label10.TabIndex = 28;
-			this.label10.Text = "Production multiplier";
-			// 
-			// m_nudProductionTurn
-			// 
-			this.m_nudProductionTurn.Location = new System.Drawing.Point(4, 268);
-			this.m_nudProductionTurn.Maximum = new System.Decimal(new int[] {
-																				25,
-																				0,
-																				0,
-																				0});
-			this.m_nudProductionTurn.Minimum = new System.Decimal(new int[] {
-																				1,
-																				0,
-																				0,
-																				0});
-			this.m_nudProductionTurn.Name = "m_nudProductionTurn";
-			this.m_nudProductionTurn.Size = new System.Drawing.Size(44, 20);
-			this.m_nudProductionTurn.TabIndex = 27;
-			this.m_nudProductionTurn.Value = new System.Decimal(new int[] {
-																			  1,
-																			  0,
-																			  0,
-																			  0});
-			// 
-			// m_nudProductionMultiplier
-			// 
-			this.m_nudProductionMultiplier.Location = new System.Drawing.Point(4, 244);
-			this.m_nudProductionMultiplier.Maximum = new System.Decimal(new int[] {
-																					  5,
-																					  0,
-																					  0,
-																					  0});
-			this.m_nudProductionMultiplier.Minimum = new System.Decimal(new int[] {
-																					  1,
-																					  0,
-																					  0,
-																					  0});
-			this.m_nudProductionMultiplier.Name = "m_nudProductionMultiplier";
-			this.m_nudProductionMultiplier.Size = new System.Drawing.Size(44, 20);
-			this.m_nudProductionMultiplier.TabIndex = 26;
-			this.m_nudProductionMultiplier.Value = new System.Decimal(new int[] {
-																					1,
-																					0,
-																					0,
-																					0});
+			this.m_tvOptions.CheckBoxes = true;
+			this.m_tvOptions.Location = new System.Drawing.Point(221, 40);
+			this.m_tvOptions.Name = "treeView1";
+			this.m_tvOptions.ShowPlusMinus = false;
+			this.m_tvOptions.ShowRootLines = false;
+			this.m_tvOptions.Size = new System.Drawing.Size(384, 246);
+			this.m_tvOptions.TabIndex = 32;
+			this.m_tvOptions.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView1_NodeMouseDoubleClick);
+			this.m_tvOptions.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterCheck);
+			this.m_tvOptions.BeforeCollapse += new System.Windows.Forms.TreeViewCancelEventHandler(this.treeView1_BeforeCollapse);
+			this.m_tvOptions.Click += new System.EventHandler(this.treeView1_Click);
 			// 
 			// m_btnLoadGame
 			// 
 			this.m_btnLoadGame.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.m_btnLoadGame.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.m_btnLoadGame.Location = new System.Drawing.Point(332, 336);
+			this.m_btnLoadGame.Location = new System.Drawing.Point(331, 292);
 			this.m_btnLoadGame.Name = "m_btnLoadGame";
+			this.m_btnLoadGame.Size = new System.Drawing.Size(75, 23);
 			this.m_btnLoadGame.TabIndex = 25;
 			this.m_btnLoadGame.Text = "Load Game";
 			this.m_btnLoadGame.Click += new System.EventHandler(this.m_btnLoadGame_Click);
 			// 
+			// label10
+			// 
+			this.label10.AutoSize = true;
+			this.label10.Location = new System.Drawing.Point(218, 16);
+			this.label10.Name = "label10";
+			this.label10.Size = new System.Drawing.Size(75, 13);
+			this.label10.TabIndex = 33;
+			this.label10.Text = "Game options:";
+			// 
 			// GameSetupForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.ClientSize = new System.Drawing.Size(516, 362);
+			this.ClientSize = new System.Drawing.Size(617, 318);
+			this.Controls.Add(this.label10);
+			this.Controls.Add(this.m_tvOptions);
 			this.Controls.Add(this.m_btnLoadGame);
-			this.Controls.Add(this.tabControl1);
-			this.Controls.Add(this.button2);
-			this.Controls.Add(this.button1);
+			this.Controls.Add(this.m_tbPlayer3);
+			this.Controls.Add(this.m_tbPlayer6);
+			this.Controls.Add(this.m_btnCancel);
+			this.Controls.Add(this.m_tbPlayer4);
+			this.Controls.Add(this.m_btnOK);
+			this.Controls.Add(this.m_tbPlayer1);
+			this.Controls.Add(this.m_nudNumTerritories);
+			this.Controls.Add(this.label2);
+			this.Controls.Add(this.label8);
+			this.Controls.Add(this.m_cbNumPlayers);
+			this.Controls.Add(this.m_cbVictoryConditions);
+			this.Controls.Add(this.label4);
+			this.Controls.Add(this.label9);
+			this.Controls.Add(this.label7);
+			this.Controls.Add(this.label1);
+			this.Controls.Add(this.label5);
+			this.Controls.Add(this.label3);
+			this.Controls.Add(this.label6);
+			this.Controls.Add(this.m_tbPlayer2);
+			this.Controls.Add(this.m_tbPlayer5);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Name = "GameSetupForm";
 			this.Text = "Buck Rogers Game Setup";
 			this.Load += new System.EventHandler(this.GameSetupForm_Load);
 			((System.ComponentModel.ISupportInitialize)(this.m_nudNumTerritories)).EndInit();
-			this.tabControl1.ResumeLayout(false);
-			this.tabPage1.ResumeLayout(false);
-			this.groupBox1.ResumeLayout(false);
-			this.tabPage2.ResumeLayout(false);
-			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionTurn)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.m_nudProductionMultiplier)).EndInit();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 		#endregion
@@ -570,9 +467,6 @@ namespace BuckRogers.Interface
 			}
 
             // Need to know the victory condition before we can test other stuff
-            //string conditionName = (string)m_cbVictoryConditions.SelectedItem;
-            //VictoryConditions vc = (VictoryConditions)Enum.Parse(typeof(VictoryConditions), conditionName);
-
 			string conditionDescription = (string)m_cbVictoryConditions.SelectedItem;
 			VictoryConditions vc = (VictoryConditions)Utility.GetEnumFromDescription(conditionDescription, typeof(VictoryConditions));
 
@@ -619,11 +513,13 @@ namespace BuckRogers.Interface
 
 			if(m_options.OptionalRules["IncreasedProduction"])
 			{
-				m_options.IncreasedProductionTurn = (int)m_nudProductionTurn.Value;
-				m_options.ProductionMultiplier = (int)m_nudProductionMultiplier.Value;
-			}
+				GameOption optionProduction = (GameOption)m_options.OptionalRules.Get("IncreasedProduction");
+				OptionValue turnValue = (OptionValue)optionProduction.Values["startingTurn"];
+				OptionValue multiplierValue = (OptionValue)optionProduction.Values["multiplier"];
 
-			m_options.SetupOptions = (StartingScenarios)enumEditor1.EnumValue;
+				m_options.IncreasedProductionTurn = turnValue.Value;
+				m_options.ProductionMultiplier = multiplierValue.Value;
+			}
 
 			this.Close();
 		}
@@ -636,13 +532,9 @@ namespace BuckRogers.Interface
 
 		private void m_cbVictoryConditions_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
-			//string conditionName = (string)m_cbVictoryConditions.SelectedItem;
-			//VictoryConditions vc = (VictoryConditions)Enum.Parse(typeof(VictoryConditions), conditionName);
-
 			string conditionDescription = (string)m_cbVictoryConditions.SelectedItem;
 			VictoryConditions vc = (VictoryConditions)Utility.GetEnumFromDescription(conditionDescription, typeof(VictoryConditions));
-
-
+			
 			if(vc == VictoryConditions.NumberOfTerritories)
 			{
 				m_nudNumTerritories.Enabled = true;
@@ -655,29 +547,7 @@ namespace BuckRogers.Interface
 
 		private void GameSetupForm_Load(object sender, System.EventArgs e)
 		{
-			tabPage2.BindingContext = tabPage2.BindingContext;
 		}
-
-		/*
-		private void dataGrid1_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			DataGrid.HitTestInfo hti = dataGrid1.HitTest( e.X, e.Y ); 
-			try 
-			{ 
-				if ( hti.Type == DataGrid.HitTestType.Cell && 
-					hti.Column ==  0) 
-					dataGrid1[ hti.Row, hti.Column ] = ! (bool) dataGrid1[ hti.Row, hti.Column ]; 
-			}                                                                                                    
-			catch( Exception ex ) 
-			{ 
-				MessageBox.Show( ex.Message ); 
-			} 
-
-			bool increasedProduction = m_options.OptionalRules["IncreasedProduction"];
-			m_nudProductionTurn.Enabled = increasedProduction;
-			m_nudProductionMultiplier.Enabled = increasedProduction;		
-		}
-		*/
 
 		private void m_cbNumPlayers_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
@@ -694,9 +564,9 @@ namespace BuckRogers.Interface
 				m_tbPlayerNames[i].Enabled = true;
 			}
 
-
 		}
-
+		
+		/*
 		private void m_chklbOptions_ItemCheck(object sender, System.Windows.Forms.ItemCheckEventArgs e)
 		{
 			GameOption option = (GameOption)m_options.OptionalRules[e.Index];
@@ -704,9 +574,8 @@ namespace BuckRogers.Interface
 			option.Value = (e.NewValue == CheckState.Checked);
 
 			bool increasedProduction = m_options.OptionalRules["IncreasedProduction"];
-			m_nudProductionTurn.Enabled = increasedProduction;
-			m_nudProductionMultiplier.Enabled = increasedProduction;
 		}
+		*/
 
 		private void m_btnLoadGame_Click(object sender, System.EventArgs e)
 		{
@@ -740,6 +609,183 @@ namespace BuckRogers.Interface
 		{
 			get { return this.m_loadFileName; }
 			set { this.m_loadFileName = value; }
+		}
+
+		private void button3_Click(object sender, EventArgs e)
+		{
+			NumberEntryForm nef = new NumberEntryForm();
+			nef.Initialize("This is a really, really long string of text, used to test out the label auto-size functionality in the NumberEntryForm",
+							1, 50, 10);
+
+			nef.ShowDialog();
+		}
+
+		[DllImport("User32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern int SendMessage(IntPtr hwnd, int msg, IntPtr wParam, ref TVITEM lParam);
+		private void TreeNode_SetStateImageIndex(TreeNode node, int index)
+		{
+			TVITEM tvi = new TVITEM();
+			tvi.hItem = node.Handle;
+			tvi.mask = TVIF_STATE;
+			tvi.stateMask = TVIS_STATEIMAGEMASK;
+			tvi.state = index << 12;
+			SendMessage(node.TreeView.Handle, TVM_SETITEM, IntPtr.Zero, ref tvi);
+		}
+
+		public const int TVIF_STATE = 8;
+		public const int TVIS_STATEIMAGEMASK = 61440;
+		public const int TV_FIRST = 4352;
+		public const int TVM_SETITEM = TV_FIRST + 63;
+		[StructLayout(LayoutKind.Sequential)]
+		public struct TVITEM
+		{
+			public int mask;
+			public IntPtr hItem;
+			public int state;
+			public int stateMask;
+			[MarshalAs(UnmanagedType.LPTStr)]
+			public string lpszText;
+			public int cchTextMax;
+			public int iImage;
+			public int iSelectedImage;
+			public int cChildren;
+			public IntPtr lParam;
+		}
+
+		private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+		{
+			if(e.Node.Level < 2)
+			{
+				return;
+			}
+
+			m_selectedNode = e.Node;
+
+			string nodeText = e.Node.Text;
+			string ruleName = (string)m_selectedNode.Parent.Tag;
+			string valueName = (string)m_selectedNode.Tag;
+			GameOption option = (GameOption)m_options.OptionalRules.Get(ruleName);
+			OptionValue ov = (OptionValue)option.Values[valueName];
+
+			string[] delimiters = {":"};
+			string[] textHalves = nodeText.Split(delimiters, StringSplitOptions.None);
+			string labelText = textHalves[0];
+			string valueText = textHalves[1].Trim();
+			int value = int.Parse(valueText);
+
+			Size size = TextRenderer.MeasureText(labelText, e.Node.NodeFont);
+
+			Point numberLocation = new Point();
+			numberLocation.X = e.Node.Bounds.X + size.Width;
+			numberLocation.Y = e.Node.Bounds.Y;
+			
+			m_nudNodeValue.Value = value;
+			m_nudNodeValue.Minimum = ov.Min;
+			m_nudNodeValue.Maximum = ov.Max;
+			
+			m_nudNodeValue.Height = e.Node.Bounds.Height;	
+			m_nudNodeValue.Location = numberLocation;			
+			m_nudNodeValue.Width = 40;
+
+			m_tvOptions.Controls.Add(m_nudNodeValue);
+			m_nudNodeValue.Show();
+
+			m_upDownDisplayed = true;
+		}
+
+		private void treeView1_BeforeCollapse(object sender, TreeViewCancelEventArgs e)
+		{
+			e.Cancel = true;
+		}
+
+		private void treeView1_AfterCheck(object sender, TreeViewEventArgs e)
+		{
+			if(!(e.Node.Tag is string))
+			{
+				return;
+			}
+
+			string optionName = (string)e.Node.Tag;
+			GameOption option = (GameOption)m_options.OptionalRules.Get(optionName);
+
+			option.Value = e.Node.Checked;
+
+			if(option.Values.Count > 0)
+			{
+				if(e.Node.Checked)
+				{
+					foreach(OptionValue ov in option.Values)
+					{
+						TreeNode valueNode = new TreeNode();
+
+						string text = string.Format("{0}: {1}", ov.Description, ov.Start);
+						valueNode.Text = text;
+						valueNode.Tag = ov.Name;
+
+						e.Node.Nodes.Add(valueNode);
+
+						TreeNode_SetStateImageIndex(valueNode, 0);
+
+					}
+
+					m_tvOptions.ExpandAll();
+				}
+				else
+				{
+					e.Node.Nodes.Clear();
+				}
+			}
+
+			
+
+			if(e.Node.Checked)
+			{
+				string[] delimiters = { "," };
+				string[] exclusions = option.Excludes.Split(delimiters, StringSplitOptions.None);
+
+				foreach (string exclusion in exclusions)
+				{
+					TreeNode optionNode = (TreeNode)m_optionNodes[exclusion];
+
+					if(optionNode == null)
+					{
+						continue;
+					}
+
+					if (optionNode.Checked)
+					{
+						optionNode.Checked = false;
+					}
+
+				}
+			}
+			
+		}
+
+		private void treeView1_Click(object sender, EventArgs e)
+		{
+			if(m_upDownDisplayed)
+			{
+				m_nudNodeValue.Hide();
+				m_tvOptions.Controls.Remove(m_nudNodeValue);
+
+				string nodeText = m_selectedNode.Text;
+				string[] delimiters = { ":" };
+				string[] textHalves = nodeText.Split(delimiters, StringSplitOptions.None);
+				string labelText = textHalves[0];
+
+				string text = string.Format("{0}: {1}", labelText, m_nudNodeValue.Value);
+				m_selectedNode.Text = text;
+
+				string ruleName = (string)m_selectedNode.Parent.Tag;
+				string valueName = (string)m_selectedNode.Tag;
+				GameOption option = (GameOption)m_options.OptionalRules.Get(ruleName);
+				OptionValue ov = (OptionValue)option.Values[valueName];
+				ov.Value = (int)m_nudNodeValue.Value;
+
+				m_selectedNode = null;
+				m_upDownDisplayed = false;
+			}
 		}
 	}
 }

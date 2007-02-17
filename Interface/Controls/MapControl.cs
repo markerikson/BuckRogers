@@ -114,7 +114,7 @@ namespace BuckRogers.Interface
 
 			m_zoomFactors = new float[]{0.1f, 0.175f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 5.0f};
 
-			m_canvas = new PCacheCanvas();//new PCanvas();
+			m_canvas = new PCanvas();
 			PRoot r = new ScreenshotRoot();
 			PLayer l = new BlackLayer();
 			//PLayer l = new PLayer();
@@ -147,6 +147,9 @@ namespace BuckRogers.Interface
 
 			m_scroller = new RefreshingScrollableControl(m_canvas);
 			m_scroller.Scrollable = true;
+
+			m_scroller.MouseWheel += new MouseEventHandler(m_scroller_MouseWheel);
+			m_canvas.MouseWheel += new MouseEventHandler(m_scroller_MouseWheel);
 
 			this.SuspendLayout();
 
@@ -209,6 +212,24 @@ namespace BuckRogers.Interface
 			Canvas.AnimatingRenderQuality = RenderQuality.HighQuality;
 			Canvas.InteractingRenderQuality = RenderQuality.HighQuality;
 
+		}
+
+		void m_scroller_MouseWheel(object sender, MouseEventArgs e)
+		{
+			//throw new Exception("The method or operation is not implemented.");
+			float scaleFactor = 1.0f;
+
+			if(e.Delta > 0)
+			{
+				scaleFactor = 1.5f;
+			}
+			else
+			{
+				scaleFactor = 0.67f;
+			}
+
+			CenterZoomedMap(true, scaleFactor, e.X, e.Y);
+			
 		}
 
 		/// <summary>
@@ -1060,12 +1081,17 @@ namespace BuckRogers.Interface
 			Canvas.Camera.ViewScale = 0.25f;
 		}
 
+		private void CenterZoomedMap(bool zoomIn, float scaleFactor, float x, float y)
+		{
+			Canvas.Camera.ScaleViewBy(scaleFactor, x, y);
+			Canvas.Refresh();
+		}
+
 		private void CenterZoomedMap(bool zoomIn, float scaleFactor)
 		{
 			PointF boundsCenter = PUtil.CenterOfRectangle(Canvas.Camera.Bounds);
 			PointF actualCenter = Canvas.Camera.LocalToView(boundsCenter);
-			Canvas.Camera.ScaleViewBy(scaleFactor, actualCenter.X, actualCenter.Y);
-			Canvas.Refresh();		
+			CenterZoomedMap(zoomIn, scaleFactor, actualCenter.X, actualCenter.Y);
 		}
 
 		public void CenterMapOn(string target)

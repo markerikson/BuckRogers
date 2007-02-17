@@ -279,7 +279,7 @@ namespace BuckRogers.Interface
 
 			if(numPlaced != 3)
 			{
-				bool playersSelectUnits = ((GameController.Options.SetupOptions & StartingScenarios.PickStartingUnits) == StartingScenarios.PickStartingUnits);
+				bool playersSelectUnits = GameController.Options.OptionalRules["PickStartingUnits"];//((GameController.Options.SetupOptions & StartingScenarios.PickStartingUnits) == StartingScenarios.PickStartingUnits);
 
 				string errorMessage = string.Empty;
 

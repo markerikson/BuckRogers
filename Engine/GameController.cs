@@ -162,8 +162,6 @@ namespace BuckRogers
 		#endregion
 
 
-		// TODO Start implementing optional rules
-
 		#region Initialization
 		public GameController()
 		{
@@ -494,7 +492,8 @@ namespace BuckRogers
 				}
 			}
 
-			bool playersPickUnits = ((m_options.SetupOptions & StartingScenarios.PickStartingUnits) == StartingScenarios.PickStartingUnits);
+
+			bool playersPickUnits = m_options.OptionalRules["PickStartingUnits"];//((m_options.SetupOptions & StartingScenarios.PickStartingUnits) == StartingScenarios.PickStartingUnits);
 			
 			foreach(Player p in m_players)
 			{
@@ -2168,11 +2167,13 @@ namespace BuckRogers
 				xeVictory.Attributes.Append(xaNumTerritories);
 			}
 
+			/*
 			XmlElement xeStartingScenario = savegame.CreateElement("StartingScenario");
 			XmlAttribute xaStartingType = savegame.CreateAttribute("type");
 			xaStartingType.Value = m_options.SetupOptions.ToString();
 			xeStartingScenario.Attributes.Append(xaStartingType);
 			xeOptions.AppendChild(xeStartingScenario);
+			*/
 
 			XmlElement xePlayers = savegame.CreateElement("Players");
 			xeRoot.AppendChild(xePlayers);
@@ -2341,16 +2342,16 @@ namespace BuckRogers
 			}
 
 			XmlElement xeVictory = (XmlElement)savegame.GetElementsByTagName("VictoryConditions")[0];
-			XmlElement xeStarting = (XmlElement)savegame.GetElementsByTagName("StartingScenario")[0];
+			//XmlElement xeStarting = (XmlElement)savegame.GetElementsByTagName("StartingScenario")[0];
 
 			XmlAttribute xaVictoryType = xeVictory.Attributes[0];
-			XmlAttribute xeStartingType = xeStarting.Attributes[0];
+			//XmlAttribute xeStartingType = xeStarting.Attributes[0];
 
 			VictoryConditions vc = (VictoryConditions)Enum.Parse(typeof(VictoryConditions), xaVictoryType.Value);
-			StartingScenarios ss = (StartingScenarios)Enum.Parse(typeof(StartingScenarios), xeStartingType.Value);
+			//StartingScenarios ss = (StartingScenarios)Enum.Parse(typeof(StartingScenarios), xeStartingType.Value);
 
 			options.WinningConditions = vc;
-			options.SetupOptions = ss;
+			//options.SetupOptions = ss;
 
 			if(vc == VictoryConditions.NumberOfTerritories)
 			{

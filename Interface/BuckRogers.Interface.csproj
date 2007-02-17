@@ -58,6 +58,9 @@
     <Compile Include="Controls\PlayerListbox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\RangeLimitedUpDown.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\RefreshingScrollableControl.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -66,9 +69,6 @@
     </Compile>
     <Compile Include="Controls\UnclickableListBox.cs">
       <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Controls\WinEnumEditoror.cs">
-      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Forms\BuckRogersForm.cs">
       <SubType>Form</SubType>
@@ -87,6 +87,12 @@
     </Compile>
     <Compile Include="Forms\MoveUnitsForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\NumberEntryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\NumberEntryForm.Designer.cs">
+      <DependentUpon>NumberEntryForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\PlacementForm.cs">
       <SubType>Form</SubType>
@@ -152,10 +158,6 @@
       <DependentUpon>TerritoryPanel.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\WinEnumEditoror.resx">
-      <DependentUpon>WinEnumEditoror.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Forms\BuckRogersForm.resx">
       <DependentUpon>BuckRogersForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -202,6 +204,10 @@
     <EmbeddedResource Include="Forms\CombatForm2D.resx">
       <SubType>Designer</SubType>
       <DependentUpon>CombatForm2D.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\NumberEntryForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>NumberEntryForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\UnitSelectionForm.resx">
       <SubType>Designer</SubType>

@@ -242,6 +242,11 @@ namespace BuckRogers
 
 		#endregion
 
+		public object Get(object key)
+		{
+			return m_oValues[key];
+		}
+
 		
 		public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors) 
 		{
