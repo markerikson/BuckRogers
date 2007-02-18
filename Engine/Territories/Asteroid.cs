@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using skmDataStructures.Graph;
+using System.Diagnostics;
 
 namespace BuckRogers
 {
 	/// <summary>
 	/// Summary description for Asteroid.
 	/// </summary>
+	[DebuggerDisplay("Asteroid: {Name}")]
 	public class Asteroid : OrbitalSystem
 	{
 		public Asteroid(string name, Graph graph, OrbitalPath op, int startingOrbitIndex, 

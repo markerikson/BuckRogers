@@ -770,6 +770,7 @@ namespace BuckRogers.Interface
 				MoveModeChanged(this, mmea);
 			}
 
+			m_handSelectedUnits.Clear();
 			m_unitsToMoveCounts.Clear();
 			ClearMovementIcons();
 
@@ -823,6 +824,7 @@ namespace BuckRogers.Interface
 
 				m_unitsToMove.Clear();
 				m_unitsToMove.AddAllUnits(m_handSelectedUnits);
+				m_handSelectedUnits.Clear();
 				//newUnitCounts = muf.SelectedUnits.GetUnitTypeCount();
 
 				MoveAction ma = new MoveAction();
@@ -1126,6 +1128,7 @@ namespace BuckRogers.Interface
 
 		private void m_lbCurrentMoves_DoubleClick(object sender, System.EventArgs e)
 		{
+			/*
 			int index = m_lbCurrentMoves.SelectedIndex;
 			if( index == m_lbCurrentMoves.Items.Count - 1
 				&& index != 0)
@@ -1133,6 +1136,23 @@ namespace BuckRogers.Interface
 				m_lbCurrentMoves.Items.Remove(m_lbCurrentMoves.Items[index]);
 				m_currentMoveTerritories.Remove(m_currentMoveTerritories[m_currentMoveTerritories.Count - 1]);
 			}
+			*/
+
+			if(m_lbCurrentMoves.Items.Count > 0)
+			{
+				int index = m_lbCurrentMoves.Items.Count - 1;
+
+				m_lbCurrentMoves.Items.RemoveAt(index);
+				m_currentMoveTerritories.Remove(m_currentMoveTerritories[m_currentMoveTerritories.Count - 1]);
+			}
+
+			if(m_lbCurrentMoves.Items.Count == 0)
+			{
+				m_handSelectedUnits.Clear();
+				m_unitsToMoveCounts.Clear();
+				ClearMovementIcons();
+			}
+
 		}
 	}
 	

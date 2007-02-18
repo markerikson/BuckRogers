@@ -2,12 +2,14 @@ using System;
 using System.Collections;
 using System.Windows.Forms;
 using skmDataStructures.Graph;
+using System.Diagnostics;
 
 namespace BuckRogers
 {
 	/// <summary>
 	/// Summary description for OrbitalSystem.
 	/// </summary>
+	[DebuggerDisplay("OrbitalSystem: {Name}")]
 	public class OrbitalSystem
 	{
 		
@@ -25,9 +27,6 @@ namespace BuckRogers
 		
 		private Territory m_nearOrbit;
 
-		/// <summary>
-		/// Property FarOrbit; (Node)
-		/// </summary>
 		public Territory NearOrbit
 		{
 			get

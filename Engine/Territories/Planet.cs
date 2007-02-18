@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using skmDataStructures.Graph;
+using System.Diagnostics;
 
 namespace BuckRogers
 {
 	/// <summary>
 	/// Summary description for Planet.
 	/// </summary>
+	[DebuggerDisplay("Planet: {Name}")]
 	public class Planet : OrbitalSystem
 	{
 		//private string[] names;

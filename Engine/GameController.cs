@@ -889,6 +889,29 @@ namespace BuckRogers
 					{
 						alreadyInEnemyTerritory = true;
 					}
+
+					bool noCostForMove = false;
+
+					if(m_options.OptionalRules["MergeFarOrbits"] 
+						&& t.Type == TerritoryType.Space)
+					{
+						Territory t2;
+
+						if(i > 0)
+						{
+							t2 = (Territory)move.Territories[i - 1];
+						}
+						else
+						{
+							t2 = move.StartingTerritory;
+						}
+
+						if( (t.System == OrbitalSystem.NONE && t2.System != OrbitalSystem.NONE)
+							|| (t.System != OrbitalSystem.NONE && t2.System == OrbitalSystem.NONE))
+						{
+							noCostForMove = true;
+						}
+					}
 			
 					for(int j = 0; j < move.Units.Count; j++)
 					{
@@ -926,7 +949,11 @@ namespace BuckRogers
 						}
 
 						u.CurrentTerritory = t;
-						u.MovesLeft--;
+
+						if(!noCostForMove)
+						{
+							u.MovesLeft--;
+						}						
 
 					}
 
