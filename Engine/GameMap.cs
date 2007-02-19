@@ -435,6 +435,11 @@ namespace BuckRogers
 
 		public void AdvancePlanets()
 		{
+			if(GameController.Options.OptionalRules["StationaryPlanets"])
+			{
+				return;
+			}
+
 			foreach(string s in m_planets.Keys)
 			{
 				if(s == "Moon")

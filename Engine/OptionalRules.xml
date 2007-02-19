@@ -11,7 +11,7 @@
 		<OptionalRule name="PickStartingUnits" description="Players can pick their starting units" excludes="UseTestingSetup">
 			<Value name="numUnits" description="Number of units" type="int" min="5" max="100" start="15"/>			
 		</OptionalRule>
-		<OptionalRule name="PickStartingTerritories" description="Players can pick their starting territories" excludes="UseTestingSetup"/>
+		<!-- <OptionalRule name="PickStartingTerritories" description="Players can pick their starting territories" excludes="UseTestingSetup"/> -->
 		<!-- <OptionalRule name="RandomTurnOrder" description="Turn order is completely random"/> -->
 	</Category>
 	<Category name="Factories">

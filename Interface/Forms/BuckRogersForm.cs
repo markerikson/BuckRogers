@@ -16,7 +16,7 @@ using UMD.HCIL.PiccoloX.Components;
 using BuckRogers;
 using BuckRogers.Interface;
 
-namespace BuckRogers
+namespace BuckRogers.Interface
 {
 
 	public enum MapClickMode
