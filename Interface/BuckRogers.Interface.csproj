@@ -70,6 +70,12 @@
     <Compile Include="Controls\UnclickableListBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Forms\AboutForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\AboutForm.Designer.cs">
+      <DependentUpon>AboutForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\BuckRogersForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -197,9 +203,16 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Other\App.ico" />
+    <EmbeddedResource Include="Other\Graphics\Buck Rogers Logo %28small%29.png" />
+    <EmbeddedResource Include="Other\Graphics\ISquared logo.png" />
+    <None Include="Resources\ISquared logo.png" />
     <EmbeddedResource Include="Controls\CombatControl.resx">
       <SubType>Designer</SubType>
       <DependentUpon>CombatControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\AboutForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>AboutForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\CombatForm2D.resx">
       <SubType>Designer</SubType>
@@ -233,6 +246,9 @@
       <Project>{119BEE7C-25A5-4F32-B15F-7F81C48EEB62}</Project>
       <Name>BuckRogers.Engine</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

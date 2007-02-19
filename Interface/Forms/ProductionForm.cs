@@ -449,6 +449,8 @@ namespace BuckRogers.Interface
 		public void SetupProduction()
 		{
 			m_lbProductionOrder.Items.Clear();
+			m_lvFactories.Items.Clear();
+			
 			m_btnFinishProduction.Enabled = false;
 
 			foreach(Player p in m_controller.PlayerOrder)
@@ -460,12 +462,23 @@ namespace BuckRogers.Interface
 				
 			}
 
-			m_productionIndex = -1;
+			if(m_lbProductionOrder.Items.Count > 0)
+			{
+				m_productionIndex = -1;
 
-			m_btnProduce.Enabled = false;
-			m_btnNextProduction.Enabled = true;
+				m_btnProduce.Enabled = false;
+				m_btnNextProduction.Enabled = true;
 
-			NextProduction();
+				NextProduction();
+			}
+			else
+			{
+				string error = "No players are able to produce!";
+				MessageBox.Show(error, "Production", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+				m_btnFinishProduction.Enabled = true;
+				m_btnNextProduction.Enabled = false;
+			}			
 		}
 
 		private void AddProduction()

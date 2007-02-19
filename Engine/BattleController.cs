@@ -61,6 +61,13 @@ namespace BuckRogers
 		private XmlElement m_xeBattles;
 		private XmlElement m_xeCurrentBattle;
 		private int m_numRolls;
+		private bool m_attacksAlwaysHit;
+
+		public bool AttacksAlwaysHit
+		{
+			get { return m_attacksAlwaysHit; }
+			set { m_attacksAlwaysHit = value; }
+		}
 
 		public BattleController(GameController gc)
 		{
@@ -878,6 +885,12 @@ namespace BuckRogers
 				cr.UsedAttackers.AddUnit(attacker);
 
 				bool attackHit = (roll >= toHit);
+
+				if(m_attacksAlwaysHit)
+				{
+					attackHit = true;
+				}
+
 				AttackResult ar = new AttackResult();
 				ar.Attacker = attacker;
 				ar.Defender = defender;

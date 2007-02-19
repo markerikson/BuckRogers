@@ -1,3 +1,5 @@
+//#define DEBUGCOMBAT
+
 using System;
 using System.Drawing;
 using System.Drawing.Design;
@@ -16,6 +18,8 @@ using UMD.HCIL.PiccoloX.Components;
 using BuckRogers;
 using BuckRogers.Interface;
 
+
+
 namespace BuckRogers.Interface
 {
 
@@ -33,10 +37,10 @@ namespace BuckRogers.Interface
 	/// </summary>
 	public class BuckRogersForm : System.Windows.Forms.Form
 	{
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+		private static string m_versionString = "0.8 (Beta)";
+
+		
+		private IContainer components;
 		private System.Windows.Forms.Button m_btnZoomIn;
 		private System.Windows.Forms.Button m_btnZoomOut;
 		private System.Windows.Forms.Button m_btnDefaultZoom;
@@ -69,7 +73,14 @@ namespace BuckRogers.Interface
 		private BuckRogers.Interface.InformationPanel m_informationPanel;
 		private System.Windows.Forms.MenuItem m_menuFileSave;
 		private System.Windows.Forms.MenuItem m_menuFileLoad;
+		private MenuItem menuItem2;
+		private MenuItem m_menuHelpAbout;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
+
+		public static string VersionString
+		{
+			get { return BuckRogersForm.m_versionString; }
+		}
 		
 
 		public BuckRogersForm()
@@ -139,6 +150,10 @@ namespace BuckRogers.Interface
 				m_controller = new GameController(go);
 				m_battleController = new BattleController(m_controller);
 			}
+
+#if DEBUGCOMBAT
+			m_battleController.AttacksAlwaysHit = true;
+#endif
 
 			InitControls();
 			m_map.IconManager.Controller = m_controller;
@@ -309,6 +324,7 @@ namespace BuckRogers.Interface
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
 			this.m_btnZoomIn = new System.Windows.Forms.Button();
 			this.m_btnZoomOut = new System.Windows.Forms.Button();
 			this.m_btnDefaultZoom = new System.Windows.Forms.Button();
@@ -327,11 +343,13 @@ namespace BuckRogers.Interface
 			this.statusBar1 = new System.Windows.Forms.StatusBar();
 			this.statusBarPanel1 = new System.Windows.Forms.StatusBarPanel();
 			this.statusBarPanel2 = new System.Windows.Forms.StatusBarPanel();
-			this.mainMenu1 = new System.Windows.Forms.MainMenu();
+			this.mainMenu1 = new System.Windows.Forms.MainMenu(this.components);
 			this.menuItem1 = new System.Windows.Forms.MenuItem();
 			this.m_menuFileSave = new System.Windows.Forms.MenuItem();
 			this.m_menuFileLoad = new System.Windows.Forms.MenuItem();
 			this.m_menuFileExit = new System.Windows.Forms.MenuItem();
+			this.menuItem2 = new System.Windows.Forms.MenuItem();
+			this.m_menuHelpAbout = new System.Windows.Forms.MenuItem();
 			this.tabControl1.SuspendLayout();
 			this.m_tpPlacement.SuspendLayout();
 			this.m_tpAction.SuspendLayout();
@@ -346,6 +364,7 @@ namespace BuckRogers.Interface
 			this.m_btnZoomIn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_btnZoomIn.Location = new System.Drawing.Point(424, 648);
 			this.m_btnZoomIn.Name = "m_btnZoomIn";
+			this.m_btnZoomIn.Size = new System.Drawing.Size(75, 23);
 			this.m_btnZoomIn.TabIndex = 0;
 			this.m_btnZoomIn.Text = "Zoom In";
 			this.m_btnZoomIn.Click += new System.EventHandler(this.m_btnZoomIn_Click);
@@ -355,6 +374,7 @@ namespace BuckRogers.Interface
 			this.m_btnZoomOut.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_btnZoomOut.Location = new System.Drawing.Point(504, 648);
 			this.m_btnZoomOut.Name = "m_btnZoomOut";
+			this.m_btnZoomOut.Size = new System.Drawing.Size(75, 23);
 			this.m_btnZoomOut.TabIndex = 1;
 			this.m_btnZoomOut.Text = "Zoom Out";
 			this.m_btnZoomOut.Click += new System.EventHandler(this.m_btnZoomOut_Click);
@@ -362,7 +382,7 @@ namespace BuckRogers.Interface
 			// m_btnDefaultZoom
 			// 
 			this.m_btnDefaultZoom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.m_btnDefaultZoom.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+			this.m_btnDefaultZoom.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.m_btnDefaultZoom.Location = new System.Drawing.Point(584, 648);
 			this.m_btnDefaultZoom.Name = "m_btnDefaultZoom";
 			this.m_btnDefaultZoom.Size = new System.Drawing.Size(80, 23);
@@ -375,6 +395,7 @@ namespace BuckRogers.Interface
 			this.m_btnCenterCamera.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_btnCenterCamera.Location = new System.Drawing.Point(920, 648);
 			this.m_btnCenterCamera.Name = "m_btnCenterCamera";
+			this.m_btnCenterCamera.Size = new System.Drawing.Size(75, 23);
 			this.m_btnCenterCamera.TabIndex = 3;
 			this.m_btnCenterCamera.Text = "Center";
 			this.m_btnCenterCamera.Click += new System.EventHandler(this.m_btnCenterCamera_Click);
@@ -384,12 +405,12 @@ namespace BuckRogers.Interface
 			this.m_cbCenterLocations.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.m_cbCenterLocations.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.m_cbCenterLocations.Items.AddRange(new object[] {
-																	 "Sun",
-																	 "Mercury",
-																	 "Venus",
-																	 "Earth",
-																	 "Mars",
-																	 "Asteroids"});
+            "Sun",
+            "Mercury",
+            "Venus",
+            "Earth",
+            "Mars",
+            "Asteroids"});
 			this.m_cbCenterLocations.Location = new System.Drawing.Point(792, 648);
 			this.m_cbCenterLocations.Name = "m_cbCenterLocations";
 			this.m_cbCenterLocations.Size = new System.Drawing.Size(121, 21);
@@ -406,8 +427,8 @@ namespace BuckRogers.Interface
 			// 
 			// tabControl1
 			// 
-			this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-				| System.Windows.Forms.AnchorStyles.Left)));
+			this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+						| System.Windows.Forms.AnchorStyles.Left)));
 			this.tabControl1.Controls.Add(this.m_tpPlacement);
 			this.tabControl1.Controls.Add(this.m_tpAction);
 			this.tabControl1.Controls.Add(this.m_tpTerritory);
@@ -439,9 +460,9 @@ namespace BuckRogers.Interface
 			// m_tpAction
 			// 
 			this.m_tpAction.Controls.Add(this.m_movePanel);
-			this.m_tpAction.DockPadding.Top = 10;
 			this.m_tpAction.Location = new System.Drawing.Point(4, 22);
 			this.m_tpAction.Name = "m_tpAction";
+			this.m_tpAction.Padding = new System.Windows.Forms.Padding(0, 10, 0, 0);
 			this.m_tpAction.Size = new System.Drawing.Size(232, 634);
 			this.m_tpAction.TabIndex = 0;
 			this.m_tpAction.Text = "Actions";
@@ -450,10 +471,10 @@ namespace BuckRogers.Interface
 			// 
 			this.m_movePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
 			this.m_movePanel.Controller = null;
-			this.m_movePanel.DockPadding.Bottom = 4;
-			this.m_movePanel.DockPadding.Top = 282;
 			this.m_movePanel.Location = new System.Drawing.Point(0, 5);
+			this.m_movePanel.Map = null;
 			this.m_movePanel.Name = "m_movePanel";
+			this.m_movePanel.Padding = new System.Windows.Forms.Padding(0, 282, 0, 4);
 			this.m_movePanel.Size = new System.Drawing.Size(236, 524);
 			this.m_movePanel.TabIndex = 0;
 			// 
@@ -496,8 +517,8 @@ namespace BuckRogers.Interface
 			this.statusBar1.Location = new System.Drawing.Point(0, 674);
 			this.statusBar1.Name = "statusBar1";
 			this.statusBar1.Panels.AddRange(new System.Windows.Forms.StatusBarPanel[] {
-																						  this.statusBarPanel1,
-																						  this.statusBarPanel2});
+            this.statusBarPanel1,
+            this.statusBarPanel2});
 			this.statusBar1.ShowPanels = true;
 			this.statusBar1.Size = new System.Drawing.Size(1016, 22);
 			this.statusBar1.TabIndex = 8;
@@ -505,26 +526,29 @@ namespace BuckRogers.Interface
 			// 
 			// statusBarPanel1
 			// 
+			this.statusBarPanel1.Name = "statusBarPanel1";
 			this.statusBarPanel1.Text = "statusBarPanel1";
 			this.statusBarPanel1.Width = 200;
 			// 
 			// statusBarPanel2
 			// 
+			this.statusBarPanel2.Name = "statusBarPanel2";
 			this.statusBarPanel2.Text = "statusBarPanel2";
 			this.statusBarPanel2.Width = 120;
 			// 
 			// mainMenu1
 			// 
 			this.mainMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-																					  this.menuItem1});
+            this.menuItem1,
+            this.menuItem2});
 			// 
 			// menuItem1
 			// 
 			this.menuItem1.Index = 0;
 			this.menuItem1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-																					  this.m_menuFileSave,
-																					  this.m_menuFileLoad,
-																					  this.m_menuFileExit});
+            this.m_menuFileSave,
+            this.m_menuFileLoad,
+            this.m_menuFileExit});
 			this.menuItem1.Text = "File";
 			// 
 			// m_menuFileSave
@@ -544,6 +568,19 @@ namespace BuckRogers.Interface
 			this.m_menuFileExit.Index = 2;
 			this.m_menuFileExit.Text = "Exit";
 			this.m_menuFileExit.Click += new System.EventHandler(this.m_menuFileExit_Click);
+			// 
+			// menuItem2
+			// 
+			this.menuItem2.Index = 1;
+			this.menuItem2.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.m_menuHelpAbout});
+			this.menuItem2.Text = "Help";
+			// 
+			// m_menuHelpAbout
+			// 
+			this.m_menuHelpAbout.Index = 0;
+			this.m_menuHelpAbout.Text = "About";
+			this.m_menuHelpAbout.Click += new System.EventHandler(this.m_menuHelpAbout_Click);
 			// 
 			// BuckRogersForm
 			// 
@@ -900,6 +937,13 @@ namespace BuckRogers.Interface
 		{
 			get { return this.m_battleController; }
 			set { this.m_battleController = value; }
+		}
+
+		private void m_menuHelpAbout_Click(object sender, EventArgs e)
+		{
+			AboutForm af = new AboutForm();
+
+			af.ShowDialog();
 		}
 	}
 }
