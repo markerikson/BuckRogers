@@ -7,6 +7,7 @@
     <NoStandardLibraries>false</NoStandardLibraries>
     <AssemblyName>BuckRogers</AssemblyName>
     <RootNamespace>BuckRogers.Interface</RootNamespace>
+    <ApplicationIcon>Other\Graphics\bucklogo.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -79,9 +80,6 @@
     <Compile Include="Forms\BuckRogersForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <None Include="Forms\CombatForm.cs">
-      <SubType>Form</SubType>
-    </None>
     <Compile Include="Forms\CombatForm2D.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -90,6 +88,12 @@
     </Compile>
     <Compile Include="Forms\GameSetupForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\HowToPlayForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\HowToPlayForm.Designer.cs">
+      <DependentUpon>HowToPlayForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\MoveUnitsForm.cs">
       <SubType>Form</SubType>
@@ -133,6 +137,7 @@
     </Compile>
     <Compile Include="Other\Code\GpcWrapper2.cs" />
     <Compile Include="Other\Code\IconManager.cs" />
+    <Compile Include="Other\Code\InterfaceUtility.cs" />
     <Compile Include="Other\Code\ListViewColumnSorter.cs" />
     <Compile Include="Other\Code\MoveModeEventArgs.cs" />
     <Compile Include="Other\Code\PlayerUnitDisplay.cs" />
@@ -168,10 +173,6 @@
       <DependentUpon>BuckRogersForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\CombatForm.resx">
-      <DependentUpon>CombatForm.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Forms\GameSetupForm.resx">
       <DependentUpon>GameSetupForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -203,9 +204,14 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Other\App.ico" />
+    <EmbeddedResource Include="Other\Graphics\bucklogo.ico" />
+    <EmbeddedResource Include="Other\Resources\HowToPlay.txt" />
+    <EmbeddedResource Include="Forms\HowToPlayForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>HowToPlayForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Other\Graphics\Buck Rogers Logo %28small%29.png" />
     <EmbeddedResource Include="Other\Graphics\ISquared logo.png" />
-    <None Include="Resources\ISquared logo.png" />
     <EmbeddedResource Include="Controls\CombatControl.resx">
       <SubType>Designer</SubType>
       <DependentUpon>CombatControl.cs</DependentUpon>
@@ -249,6 +255,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

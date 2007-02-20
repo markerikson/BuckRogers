@@ -46,6 +46,8 @@ namespace BuckRogers.Interface
 			//
 			InitializeComponent();
 
+			this.Icon = InterfaceUtility.GetApplicationIcon();
+
 			m_sorter = new ListViewColumnSorter();
 			m_lvFactories.ListViewItemSorter = m_sorter;
 

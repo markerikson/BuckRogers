@@ -1,0 +1,61 @@
+Game Overview
+
+Buck Rogers is a game of strategy and future combat.  Your goal is to conquer the Solar System, using a variety of space and ground units like Fighters, Battlers, Gennies, and Troopers.  Victory will require careful planning, strategic vision, and just a bit of luck in combat.
+
+During a turn, each player has a chance to move his units around the board.  After the last person finishes moving, combat occurs in any place that has units from multiple players.  After all the battles are completed, each player has a chance to produce new units from his factories.
+
+
+Starting a New Game
+
+To start a new game, select the number of players and enter their names into the list.  The order of players is important - the player order for each turn is based on it.
+
+Select a victory condition and any additional options from this screen.  Some of the rules only affect the initial setup.  Others may change various aspects of how the game is played.  For more information, check the rule descriptions for the board game.  Once the conditions are set the way you want, click "OK".  
+
+The game setup screen will disappear and be replaced by the main game window.  Each player takes turns placing their units in a territory, three units at a time.  After all the units have been placed, the game begins.
+
+
+Moving Units
+
+To create a new move, click the "Add Move" button.  Then, select the units you want to move.  This can be done in two ways.  If you click on a territory that has units you own, the "Move Units" window will appear.  Here you can see a list of all of your units in that territory.  Use the "Add" and "Remove" buttons to select which units to move.  Besides the "Move Units" window, you can also click directly on the unit icons to select units of that type.  A single click on a unit icon selects 1 unit of that type.  ALT-clicking adds 10 units of that type, CTRL-clicking selects all units of that type, and SHIFT-clicking will select all units in the territory that are able to move.  
+
+Once the units are selected, click on the territories you want the units to move through.  Each territory will be listed in the Movement Panel on the left side of the screen.  If you make a mistake, double-click the territory list to remove the last territory added.
+
+Once all the territories are chosen, click the "Accept" button.  The units are moved, and a summary of the move's information is listed at the bottom of the Movement Panel.  Or, click the "Cancel" button to cancel the move.
+
+You can also load and unload units with Transports.  Click the "Transport" button, then click on a territory containing a Transport.  A window will pop up that shows any Transports there and their contents, as well as any units available to be loaded.  Transport actions are listed in the "Transports" tab at the bottom of the Movement Panel.  When you're finished loading transports, click "Done".
+
+If you decide you want to take back a move or a transport action, you can click the "Undo" button to undo the most recent move.  If you want, you can "undo" all the way back to the start of your turn.  Or, after undoing a move, you can "Redo" it.
+
+When you're finished moving, click the "End Turn" button.
+
+
+Combat
+
+You can't expect to take over the Solar System without fighting a few battles first.  Combat takes place after the last player is finished moving.  One battle at a time is displayed in the Combat Screen.  A series of icons displays the number of units present for each player involved.  Each unit type displays the following information:
+
+* "A": How many units of this type are alive
+* "S": How many units of this type can still shoot during this round
+* "D": How many units of this type were killed this round
+* "T": How many units of this type existed at the start
+
+During a player's turn, all of his units can shoot at enemy units.  When his last unit has fired, or the last enemy unit is killed, that player's turn is over.  The next player then takes his turn to shoot, including any units that were just killed.  Any unit alive at the start of a combat round will have a chance to shoot before the round is over.
+
+The active player's name is highlighted in red.  To fight, click on one of your unit icons that can shoot (ie, not your Leader or a Factory).  That unit icon will also be highlighted.  Then, click on the icon of the unit you want to attack.  The attack's results will be displayed in the middle of the Combat Screen.  Right-clicking on an opposing unit will attack with up to 10 of your units at once (or, if you have less than 10 of that type left to shoot with, however many you have left).
+
+After a battle is complete, the next battle will be displayed.
+
+If there are no battles during this turn, this section is skipped.  
+
+
+Production
+
+The last phase of a turn is production.  Each player can produce units at his factories.  Players take turns producing units in the same order that they moved.  
+
+Each of the current player's factories are listed in the middle of the Production Screen.  Click on a factory, then select which unit type to produce for this turn.  For some unit types, you can also select which territory it should be placed in.  Click "Produce" to set this factory's production.  When finished, click "Next Player" or "Finish" as appropriate.
+
+If you want, you can dismantle one of your factories.  Select a factory, then click the "Dismantle" button.  Most of the time, you probably don't want to do this :)
+
+
+End Of Turn
+
+After clicking "Finish", each player has his new units automatically created and placed on the map.  The planets advance in their orbits, the player order is calculated for the next turn, and the first player's movement phase begins.

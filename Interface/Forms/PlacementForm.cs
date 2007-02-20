@@ -42,6 +42,8 @@ namespace BuckRogers.Interface
 			//
 			InitializeComponent();
 
+			this.Icon = InterfaceUtility.GetApplicationIcon();
+
 			m_lvAvailableUnits.Items.Clear();
 			m_lvSelectedUnits.Items.Clear();
 		}

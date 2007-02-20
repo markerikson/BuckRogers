@@ -73,6 +73,8 @@ namespace BuckRogers.Interface
 		{
 			InitializeComponent();
 
+			this.Icon = InterfaceUtility.GetApplicationIcon();
+
 			UpdateTotals();
 		}
 

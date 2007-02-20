@@ -51,6 +51,7 @@ namespace BuckRogers.Interface
 		//private CombatForm m_combatForm;
 		private ProductionForm m_productionForm;
 		private CombatForm2D m_combatForm2;
+		private HowToPlayForm m_howToPlay;
 
 		private MapControl m_map;
 		private MapClickMode m_clickMode;
@@ -75,6 +76,7 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.MenuItem m_menuFileLoad;
 		private MenuItem menuItem2;
 		private MenuItem m_menuHelpAbout;
+		private MenuItem m_menuHelpHow;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
 
 		public static string VersionString
@@ -86,6 +88,8 @@ namespace BuckRogers.Interface
 		public BuckRogersForm()
 		{
 			InitializeComponent();
+
+			
 
 			ControllerTest ct = new ControllerTest();
 			ct.Reinitialize = false;
@@ -113,6 +117,7 @@ namespace BuckRogers.Interface
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
+			this.Icon = InterfaceUtility.GetApplicationIcon();
 
 			Initialize(go, loadFileName);
 			
@@ -350,6 +355,7 @@ namespace BuckRogers.Interface
 			this.m_menuFileExit = new System.Windows.Forms.MenuItem();
 			this.menuItem2 = new System.Windows.Forms.MenuItem();
 			this.m_menuHelpAbout = new System.Windows.Forms.MenuItem();
+			this.m_menuHelpHow = new System.Windows.Forms.MenuItem();
 			this.tabControl1.SuspendLayout();
 			this.m_tpPlacement.SuspendLayout();
 			this.m_tpAction.SuspendLayout();
@@ -573,14 +579,21 @@ namespace BuckRogers.Interface
 			// 
 			this.menuItem2.Index = 1;
 			this.menuItem2.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.m_menuHelpHow,
             this.m_menuHelpAbout});
 			this.menuItem2.Text = "Help";
 			// 
 			// m_menuHelpAbout
 			// 
-			this.m_menuHelpAbout.Index = 0;
+			this.m_menuHelpAbout.Index = 1;
 			this.m_menuHelpAbout.Text = "About";
 			this.m_menuHelpAbout.Click += new System.EventHandler(this.m_menuHelpAbout_Click);
+			// 
+			// m_menuHelpHow
+			// 
+			this.m_menuHelpHow.Index = 0;
+			this.m_menuHelpHow.Text = "How To Play";
+			this.m_menuHelpHow.Click += new System.EventHandler(this.m_menuHelpHow_Click);
 			// 
 			// BuckRogersForm
 			// 
@@ -944,6 +957,16 @@ namespace BuckRogers.Interface
 			AboutForm af = new AboutForm();
 
 			af.ShowDialog();
+		}
+
+		private void m_menuHelpHow_Click(object sender, EventArgs e)
+		{
+			if(m_howToPlay == null)
+			{
+				m_howToPlay = new HowToPlayForm();
+			}
+			
+			m_howToPlay.Show();
 		}
 	}
 }

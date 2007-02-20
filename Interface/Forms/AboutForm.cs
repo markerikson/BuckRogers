@@ -16,6 +16,8 @@ namespace BuckRogers.Interface
 		{
 			InitializeComponent();
 
+			this.Icon = InterfaceUtility.GetApplicationIcon();
+
 			Assembly asm = Assembly.GetExecutingAssembly();
 			string isquaredLogo = "BuckRogers.Interface.Other.Graphics.ISquared logo.png";
 			Stream stream = asm.GetManifestResourceStream(isquaredLogo);

@@ -14,6 +14,8 @@ namespace BuckRogers.Interface
 		{
 			InitializeComponent();
 
+			this.Icon = InterfaceUtility.GetApplicationIcon();
+
 			//m_labText.Height = 40;
 		}
 

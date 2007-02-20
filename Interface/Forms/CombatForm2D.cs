@@ -25,6 +25,8 @@ namespace BuckRogers.Interface
 		{
 			InitializeComponent();
 
+			this.Icon = InterfaceUtility.GetApplicationIcon();
+
 			m_controller = gc;
 			m_battleController = bc;
 
