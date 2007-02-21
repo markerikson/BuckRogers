@@ -1,76 +1,128 @@
+Version 0.8.0:
+
+- ADD: 	Replaced the old spreadsheet-like Combat Screen with a graphical 
+	   	point-n-click one that's infinitely nicer
+- ADD:	Added graphical unit movement selection (click on icons to select units,
+		selected units' icons and counters attach to the cursor)
+- ADD:	Added an option for players to select what units they want to start with
+- ADD:	Added the option "No cost to move between outer orbit / solar system"
+- ADD:	Added the option "Planets don't move"
+- ADD:	Added the "About" and "How to Play" windows (including a game logo)
+- ADD:	Added an icon for the game.  Not great, but it works.
+
+- CHG: 	Now runs on the .NET Framework 2.0
+- CHG: 	Movement code checks to make sure units can't sneak past Killer Satellites
+- CHG:	Reworked the Options/Optional Rules interface and internal design
+
+- FIX: 	Bombing apparently didn't really work right, and the affected territories 
+	   	weren't being refreshed properly either
+- FIX: 	Fixed a couple of battle finding glitches (forgot "Mars Orbit", don't want 
+		battles in Territory.NONE)
+- FIX: 	Fixed a problem with getting bombing targets (forgot transports, had 
+		factories twice instead of fighters) 
+- FIX:	Fixed a display issue in the Production screen
+- FIX:	Fixed a crash when selecting items in the Transport screen
+- FIX:	Production screen logic couldn't handle it if all players were disabled
+
+
 Version 0.7.8:
-- ADD: Clicking "End Turn" now requests confirmation
-- ADD: Added an option to have all territories owned at the start
-- ADD: Production list now shows each territory's planet, and can be sorted
-- ADD: Production destination only shows valid territories
-- CHG: Action lists can no longer be selected (didn't do anything anyway)
-- CHG: Combat window now shows if a player's leader is present
-- CHG: Game window is now locked down after the game is over
-- CHG: "One Earth Year" condition now lasts one additional turn
-- CHG: Internal tweaks
-- FIX: Undoing a move now refreshes the territories involved
-- FIX: Unit lists should always combine items of the same type
+
+- ADD: 	Clicking "End Turn" now requests confirmation
+- ADD: 	Added an option to have all territories owned at the start
+- ADD: 	Production list now shows each territory's planet, and can be sorted
+- ADD: 	Production destination only shows valid territories
+
+- CHG: 	Action lists can no longer be selected (didn't do anything anyway)
+- CHG: 	Combat window now shows if a player's leader is present
+- CHG: 	Game window is now locked down after the game is over
+- CHG: 	"One Earth Year" condition now lasts one additional turn
+- CHG: 	Internal tweaks
+
+- FIX: 	Undoing a move now refreshes the territories involved
+- FIX: 	Unit lists should always combine items of the same type
+
+
 
 Version 0.7.7:
+
 - ADD:  Games can be loaded from the Setup window
 - ADD:  Additional victory conditions (LastLeaderLeft, 
 		NumberOfTerritories, ThreePlanets
+
 - CHG:  Unimplemented game options are now hidden
 - CHG:  Saving disabled during unit placement
 - CHG:  Satellite territories now checked properly during 
 		"ground only" games
 - CHG:  Unit transfer dialogs now change the appropriate items,
 		instead of creating new items
+
 - FIX:  Icons weren't being loaded properly when using the sample game
 - FIX:  Gamelog restarted after loading a game
 - FIX:  Code for "Ground Units Only" was checking the wrong units
 - FIX:  Unit movement buttons were triggering actions twice
 
+
 Version 0.7.6:
+
 - ADD:  Games can now be saved and loaded.
+
 - CHG:  Unit icons are now actual icons, rather than text labels
 
+
 Version 0.7.5
+
 - ADD:  Unit icons on the map
 - ADD:  Territory identification tooltip
 - ADD:  Information panel updates after moves and transportation
 - ADD:  Black Market production
 - ADD:  Dismantling factories
+
 - CHG:  Territory shapes are now loaded from a file rather than generated
 - CHG:  Territory shapes now have true arcs, not just hidden sections
+
 - FIX:  Fixed problems with "empty" combats (where a side has no combat units)
 - FIX:  Multiple Killer Satellites could be built at the same time
 
+
 Version 0.7.4
+
 - ADD:  An information panel that shows a list of total units, what units are 
 		each territory, and who owns which territories.
 - ADD:  Game logging is reasonably complete.
 - ADD:  Players are disabled if they lose their leader
+
 - CHG:  "Add All" buttons in the combat window automatically move transports last
+
 - FIX:  Hopefully fixed map centering issues.
 - FIX:  Glitch in combat - phase change wasn't always calculated right.
 - FIX:  Phase change issue in the main window after combat
 
 
 Version 0.7.3
+
 - ADD:  Initial work on a history / savegame mechanism
 - ADD:  File > Exit works
 - ADD:  Players can undo the last territory added to a move
 - ADD:  Transports ask to be unloaded after landing
+
 - CHG:  Movement dialog doesn't show if another player's territory is clicked
 - CHG:  Production form is now modeless, so players can interact with the map
 		while producing
+
 - FIX:  Selected options weren't being used if the sample setup was selected
 
 
 Version 0.7.2
+
 - ADD: 	"Add All" buttons to the combat and movement windows
-- ADD:  Initial code for optional rule "Only ground troops can conquer territories".
-		Should work, but haven't tried it yet.  Note that this only applies
-		to planetside territories - asteroids and satellites can still be captured
-		by other units.
+- ADD:  Initial code for optional rule "Only ground troops can conquer 
+		territories".  Should work, but haven't tried it yet.  Note that this only 
+		applies to planetside territories - asteroids and satellites can still be 
+		captured by other units.
+
 - CHG: 	Revamp of the way the combat screen buttons are activated.  Should be
 		simpler and take fewer clicks now.
+
 - FIX:  Factory production dis/enabled appropriately when transported
 - FIX:  Leaders can no longer conquer territories
 - FIX:  Ownership error when building a Killer Satellite on an asteroid

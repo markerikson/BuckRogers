@@ -95,7 +95,7 @@ namespace BuckRogers.Interface
 			this.Name = "NumberEntryForm";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-			this.Text = "NumberEntryForm";
+			this.Text = "Number Entry";
 			((System.ComponentModel.ISupportInitialize)(this.m_nudNumber)).EndInit();
 			this.ResumeLayout(false);
 

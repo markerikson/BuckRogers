@@ -923,6 +923,7 @@ namespace BuckRogers.Interface
 
 		public void LoadGame(string filename)
 		{
+			m_movePanel.ResetMovementInfo();
 			m_map.IconManager.ClearAllIcons();
 			m_controller.LoadGame(filename);
 

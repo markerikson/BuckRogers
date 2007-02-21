@@ -2,7 +2,7 @@ Buck Rogers: Battle for the 25th Century
 http://www.isquaredsoftware.com
 Version 0.8.0 (Beta)
 
-"Buck Rogers: Battle for the 25th Century" is a trademark of the Dille Family Trust, and is used without permission.
+Buck Rogers is a trademark of the Dille Family Trust. The Buck Rogers: Battle for the 25th Century board game is a product of TSR. Used without permission.
 
 
 System Requirements

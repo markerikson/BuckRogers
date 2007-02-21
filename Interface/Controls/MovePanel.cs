@@ -621,8 +621,9 @@ namespace BuckRogers.Interface
 
 					if ((e.Modifiers & Keys.Shift) == Keys.Shift)
 					{
-						ClearMovementIcons();
-						m_unitsToMoveCounts.Clear();
+						//ClearMovementIcons();
+						//m_unitsToMoveCounts.Clear();
+						ResetMovementInfo();
 						m_unitTotalsWereChanged = true;
 
 						return;
@@ -733,6 +734,13 @@ namespace BuckRogers.Interface
 			}
 
 			return numCurrent;
+		}
+
+		public void ResetMovementInfo()
+		{
+			m_handSelectedUnits.Clear();
+			m_unitsToMoveCounts.Clear();
+			ClearMovementIcons();
 		}
 
 		public void ClearMovementIcons()
@@ -1148,9 +1156,10 @@ namespace BuckRogers.Interface
 
 			if(m_lbCurrentMoves.Items.Count == 0)
 			{
-				m_handSelectedUnits.Clear();
-				m_unitsToMoveCounts.Clear();
-				ClearMovementIcons();
+				//m_handSelectedUnits.Clear();
+				//m_unitsToMoveCounts.Clear();
+				//ClearMovementIcons();
+				ResetMovementInfo();
 			}
 
 		}

@@ -200,7 +200,7 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
 			this.Name = "UnitSelectionForm";
-			this.Text = "UnitSelectionForm";
+			this.Text = "Unit Selection";
 			((System.ComponentModel.ISupportInitialize)(this.m_nudFighters)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.m_nudTransports)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.m_nudTroopers)).EndInit();
