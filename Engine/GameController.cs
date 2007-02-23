@@ -5,6 +5,7 @@ using skmDataStructures.Graph;
 using System.Drawing;
 using System.Text;
 using System.Xml;
+using System.Collections.Generic;
 
 namespace BuckRogers
 {
@@ -29,6 +30,7 @@ namespace BuckRogers
 		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
 		public event StatusUpdateHandler StatusUpdate;
 		public event DisplayActionHandler ActionAdded;
+		public event DisplayActionHandler ActionUndone;
 		public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
 		public TerritoryUpdateHandler UpdateTerritory;
 		public event PlayersCreatedHandler PlayersCreated;
@@ -129,6 +131,13 @@ namespace BuckRogers
 			get { return this.m_gamelog; }
 			set { this.m_gamelog = value; }
 		}
+
+		public string ValidationMessage
+		{
+			get { return m_validationMessage; }
+			set { m_validationMessage = value; }
+		}
+
 		#endregion
 	
 		#region Members
@@ -156,11 +165,14 @@ namespace BuckRogers
 		private XmlElement m_xeCurrentMovement;
 		private XmlElement m_xeCurrentPlayer;
 
+		private string m_validationMessage;
+
+
+
 		private Hashlist m_battles;	
 		private TurnRoll[] m_rolls;
 
 		#endregion
-
 
 		#region Initialization
 		public GameController()
@@ -391,6 +403,7 @@ namespace BuckRogers
 
 		#endregion
 
+		#region misc functions
 		public Player GetPlayer(string name)
 		{
 			Player result = Player.NONE;
@@ -407,6 +420,7 @@ namespace BuckRogers
 			return result;
 		}
 
+		#endregion
 
 		#region Setup functions
 
@@ -539,6 +553,24 @@ namespace BuckRogers
 				{
 					u = Unit.CreateNewUnit(p, UnitType.Transport);
 				}
+			}
+		}
+
+		public void PlaceUnits(UnitCollection uc, Territory t)
+		{
+			foreach (Unit u in uc)
+			{
+				u.CurrentTerritory = t;
+			}
+
+			if (TerritoryUnitsChanged != null)
+			{
+				TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
+				tuea.Units = uc;
+				tuea.Territory = t;
+				tuea.Added = true;
+
+				TerritoryUnitsChanged(this, tuea);
 			}
 		}
 
@@ -753,7 +785,9 @@ namespace BuckRogers
 					}
 					break;
 				}
-			}			
+			}	
+		
+
 		}
 
 		public void UnloadTransport(TransportAction ta)
@@ -817,410 +851,36 @@ namespace BuckRogers
 
 		public void AddAction(Action action)
 		{
+			// The ideal usage pattern will have the interface validating
+			// the move first, then adding it here.  But, just to be safe,
+			// it's worth validating it again here just to be sure.
+
+			if(!ValidateAction(action))
+			{
+				throw new ActionException(m_validationMessage);
+			}
+
+
 			if(action is MoveAction)
 			{
-				MoveAction move = (MoveAction)action;
-
-				bool alreadyInEnemyTerritory = false;
-				Territory previousTerritory = move.StartingTerritory;
-
-				string exceptionString = String.Empty;
-
-				foreach(Unit u in move.Units)
-				{
-					move.OriginalMovesLeft.Add(u.MovesLeft);
-				}
-
-				// Check for a player trying to sneak units past a Killer Satellite by
-				// moving them to the territory, THEN moving them past
-
-				bool canMovePast = true;
-				UnitCollection enemyUnits = move.StartingTerritory.Units.GetNonMatchingUnits(move.Owner);
-				if (move.StartingTerritory.Type == TerritoryType.Space 
-					&& enemyUnits.GetUnits(UnitType.KillerSatellite).Count > 0)
-				{
-					foreach(Unit u in move.Units)
-					{
-						if(u.MovesLeft < u.MaxMoves)
-						{
-							canMovePast = false;
-							break;
-						}
-					}
-
-					if(!canMovePast)
-					{
-						alreadyInEnemyTerritory = true;
-					}					
-				}
-
-
-				for(int i = 0; i < move.Territories.Count; i++)
-				{
-					if(alreadyInEnemyTerritory)
-					{
-						exceptionString = "Can't move units in and out of a territory with enemy units";
-						goto MoveError;
-					}
-
-					Territory t = (Territory)move.Territories[i];
-
-					if(!t.AdjacentTo(previousTerritory))
-					{
-						exceptionString = "Can't move between non-adjacent territories (" 
-							+ previousTerritory.Name + " -> " + t.Name + ")";
-						goto MoveError;
-					}	
-
-					if(t.Type == TerritoryType.Ground)//t.Owner != move.Owner)
-					{
-						ArrayList players = t.Units.GetPlayersWithUnits();
-						//Console.WriteLine("Players: " + players.Count);
-
-						if(players.Count > 0)
-						{
-							alreadyInEnemyTerritory = true;
-						}						
-					
-					}
-
-					enemyUnits = t.Units.GetNonMatchingUnits(action.Owner);
-					if(t.Type == TerritoryType.Space && enemyUnits.GetUnits(UnitType.KillerSatellite).Count > 0)
-					{
-						alreadyInEnemyTerritory = true;
-					}
-
-					bool noCostForMove = false;
-
-					if(m_options.OptionalRules["MergeFarOrbits"] 
-						&& t.Type == TerritoryType.Space)
-					{
-						Territory t2;
-
-						if(i > 0)
-						{
-							t2 = (Territory)move.Territories[i - 1];
-						}
-						else
-						{
-							t2 = move.StartingTerritory;
-						}
-
-						if( (t.System == OrbitalSystem.NONE && t2.System != OrbitalSystem.NONE)
-							|| (t.System != OrbitalSystem.NONE && t2.System == OrbitalSystem.NONE))
-						{
-							noCostForMove = true;
-						}
-					}
-			
-					for(int j = 0; j < move.Units.Count; j++)
-					{
-						Unit u = move.Units[j];
-						//Console.WriteLine(u.UnitType.ToString());
-						//Console.WriteLine(u.MaxMoves);
-
-						if(u.MaxMoves == 0)
-						{
-							//throw new ActionException("Can't move an immobile unit");
-							exceptionString = "Can't move an immobile unit";
-							goto MoveError;
-						}
-
-						if(t.Type == TerritoryType.Space && !u.IsSpaceCapable)
-						{
-							//throw new ActionException("Can't move a ground unit into space");
-							exceptionString = "Can't move a ground unit into space";
-							goto MoveError;
-						}
-
-						if(u.Type == UnitType.Battler && t.Type == TerritoryType.Ground )
-						{
-							//throw new ActionException("Can't move a battler onto the ground");
-							exceptionString = "Can't move a battler onto the ground";
-							goto MoveError;
+				MoveAction ma = (MoveAction)action;
+				AddMoveAction(ma);
 							
-						}
-
-						if(u.MovesLeft == 0)
-						{
-							//throw new ActionException("Unit has no moves left.  Unit: " + u.Info);
-							exceptionString = "Unit has no moves left.  Unit: " + u.Info;
-							goto MoveError;
-						}
-
-						u.CurrentTerritory = t;
-
-						if(!noCostForMove)
-						{
-							u.MovesLeft--;
-						}						
-
-					}
-
-					if(t.Type == TerritoryType.Ground 
-						&& t.Owner != move.Owner 
-						&& t.Units.GetPlayerUnitCounts().Count == 1)
-					{
-						bool conquerTerritory = true;
-
-						Hashtable unitCount = t.Units.GetUnitTypeCount();
-
-
-						unitCount.Remove(UnitType.Leader);
-						
-						// can't conquer a territory with just a Leader
-						if(unitCount.Count == 0)
-						{
-							conquerTerritory = false;
-						}
-
-						if(m_options.OptionalRules["ConquerWithGround"])
-						{
-							if(!(t.System is Asteroid) && !t.IsSatellite)
-							{
-								bool isTrooper = unitCount.ContainsKey(UnitType.Trooper);
-								bool isGennie = unitCount.ContainsKey(UnitType.Gennie);
-								conquerTerritory =  isTrooper || isGennie;
-							}
-						}
-						if(conquerTerritory)
-						{
-							move.ConqueredTerritories[t] = t.Owner;
-						}
-						
-					}
-
-					previousTerritory = t;
-				}
-
-			MoveError:
-				if(exceptionString != String.Empty)
-				{
-					for(int i = 0; i < move.OriginalMovesLeft.Count; i++)
-					{
-						move.Units[i].MovesLeft = (int)move.OriginalMovesLeft[i];
-						move.Units[i].CurrentTerritory = move.StartingTerritory;
-					}
-
-					throw new ActionException(exceptionString);
-				}
-
-				foreach(Territory conquered in move.ConqueredTerritories.Keys)
-				{
-					conquered.Owner = move.Owner;
-
-					if(TerritoryOwnerChanged != null)
-					{
-						TerritoryEventArgs tea = new TerritoryEventArgs();
-						tea.Name = conquered.Name;
-						tea.Owner = move.Owner;
-
-						TerritoryOwnerChanged(this, tea);
-					}
-				}
-
-				// needed here just to make sure the move gets listed before a possible transport action
-				m_checkedActions.Add(action);
-				if(ActionAdded != null)
-				{
-					ActionAdded(action);
-				}
-
-				XmlElement xeAction = m_gamelog.CreateElement("Action");
-				XmlAttribute xaMoveType = m_gamelog.CreateAttribute("type");
-				xaMoveType.Value = "Movement";
-				xeAction.Attributes.Append(xaMoveType);
-				XmlAttribute xaStart = m_gamelog.CreateAttribute("territory");
-				xaStart.Value = move.StartingTerritory.Name;
-				xeAction.Attributes.Append(xaStart);
-
-				XmlElement xeTerritories = m_gamelog.CreateElement("Territories");
-				xeAction.AppendChild(xeTerritories);
-
-				foreach(Territory t in move.Territories)
-				{
-					XmlElement xeTerritory = m_gamelog.CreateElement("Territory");
-					XmlAttribute xaTerritoryName = m_gamelog.CreateAttribute("name");
-					xaTerritoryName.Value = t.Name;
-					xeTerritory.Attributes.Append(xaTerritoryName);
-
-					xeTerritories.AppendChild(xeTerritory);
-				}
-
-				XmlElement xeUnits = m_gamelog.CreateElement("Units");
-				xeAction.AppendChild(xeUnits);
-
-				foreach(Unit u in move.Units)
-				{
-					XmlElement xeUnit = m_gamelog.CreateElement("Unit");
-					XmlAttribute xaUnitType = m_gamelog.CreateAttribute("type");
-					xaUnitType.Value = u.Type.ToString();
-					XmlAttribute xaUnitID = m_gamelog.CreateAttribute("id");
-					xaUnitID.Value = u.ID.ToString();
-					xeUnit.Attributes.Append(xaUnitType);
-					xeUnit.Attributes.Append(xaUnitID);
-					
-					
-					xeUnits.AppendChild(xeUnit);
-				}
-
-				m_xeCurrentPlayer.AppendChild(xeAction);
-
-				if(TerritoryUnitsChanged != null)
-				{
-					TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
-					tuea.Units = move.Units;
-					tuea.Territory = move.StartingTerritory;
-					tuea.Added = false;
-					tuea.Player = move.Owner;
-
-					m_alteredTerritories[move.StartingTerritory] = null;
-
-					TerritoryUnitsChanged(this, tuea);
-
-					Territory finalTerritory = (Territory)move.Territories[move.Territories.Count - 1];
-					tuea.Territory = finalTerritory;
-					tuea.Added = true;
-
-					m_alteredTerritories[finalTerritory] = null;
-
-
-					TerritoryUnitsChanged(this, tuea);
-				}
-
-				
-				Territory destination = (Territory)move.Territories[move.Territories.Count - 1];
-				if(destination.Type == TerritoryType.Ground)
-				{					
-					bool unloadTransports = false;
-
-					UnitCollection transports = move.Units.GetUnits(UnitType.Transport);
-					if(transports.Count > 0)
-					{
-						bool askToUnload = false;
-
-						foreach(Transport tr in transports)
-						{
-							if(tr.Transportees.Count > 0)
-							{
-								askToUnload = true;
-								break;
-							}
-						}
-						if(askToUnload)
-						{
-							if(StatusUpdate != null)
-							{
-								StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
-								suea.Territory = destination;//(Player)m_currentPlayerOrder[m_idxCurrentPlayer];
-				
-								suea.StatusInfo = StatusInfo.TransportLanded;
-								unloadTransports = StatusUpdate(this, suea);
-							}	
-						}									
-					}
-
-					if(unloadTransports)
-					{
-						foreach(Transport tr in transports)
-						{
-							TransportAction ta = new TransportAction();
-							ta.Load = false;
-							ta.Owner = tr.Owner;
-							ta.MaxTransfer = tr.Transportees.Count;
-							ta.StartingTerritory = destination;
-							ta.Transport = tr;
-							ta.UnitType = tr.Transportees[0].Type;
-
-							AddAction(ta);
-						}
-					}
-				}			
 			}
 			else if(action is TransportAction)
 			{
 				TransportAction ta = (TransportAction)action;
-				if(ta.Load)
-				{
-					//LoadTransport(ta.Transport, ta.Units, ta.UnitType);
-					LoadTransport(ta);
-				}
-				else
-				{
-					//UnloadTransport(ta.Transport, ta.MaxTransfer);
-					UnloadTransport(ta);
-				}
-
-				m_checkedActions.Add(action);
-				m_alteredTerritories[action.StartingTerritory] = null;
-				if(ActionAdded != null)
-				{
-					ActionAdded(action); 
-				}
-
-				XmlElement xeAction = m_gamelog.CreateElement("Action");
-				XmlAttribute xaType = m_gamelog.CreateAttribute("type");
-				xaType.Value = "Transport";
-				XmlAttribute xaTerritory = m_gamelog.CreateAttribute("territory");
-				xaTerritory.Value = ta.StartingTerritory.Name;
-				XmlAttribute xaLoad = m_gamelog.CreateAttribute("load");
-				xaLoad.Value = ta.Load.ToString();
-
-				xeAction.Attributes.Append(xaType);
-				xeAction.Attributes.Append(xaTerritory);
-				xeAction.Attributes.Append(xaLoad);
-
-				XmlElement xeUnits = m_gamelog.CreateElement("Units");
-				
-				foreach(Unit u in ta.Units)
-				{
-					XmlElement xeUnit = m_gamelog.CreateElement("Unit");
-					XmlAttribute xaUnitType = m_gamelog.CreateAttribute("type");
-					xaUnitType.Value = u.Type.ToString();
-					XmlAttribute xaMoves = m_gamelog.CreateAttribute("moves");
-					xaMoves.Value = u.MovesLeft.ToString();
-					XmlAttribute xaUnitID = m_gamelog.CreateAttribute("id");
-					xaUnitID.Value = u.ID.ToString();
-					
-					xeUnit.Attributes.Append(xaUnitType);
-					xeUnit.Attributes.Append(xaMoves);
-					xeUnit.Attributes.Append(xaUnitID);
-
-					xeUnits.AppendChild(xeUnit);
-				}
-
-				xeAction.AppendChild(xeUnits);
-				
-				m_xeCurrentPlayer.AppendChild(xeAction);
-
-
-				if(TerritoryUnitsChanged != null)
-				{
-					TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
-					tuea.Units = ta.Units;
-					tuea.Territory = ta.StartingTerritory;
-					tuea.Added = !ta.Load;
-					tuea.Player = ta.Owner;
-
-					TerritoryUnitsChanged(this, tuea);
-				}
-
-					
+				AddTransportAction(ta);					
 			}
 			else
 			{
 				throw new ActionException("Unknown Action type in ExecuteActions");
 			}
 
-			
-
-
 			if(!m_redoingAction)
 			{
 				m_undoneActions.Clear();
-			}
-			
-			
+			}			
 		}
 
 		public Action UndoAction()
@@ -1234,73 +894,11 @@ namespace BuckRogers
 
 			if(action is MoveAction)
 			{
-				MoveAction ma = (MoveAction)action;
-
-				for(int i = ma.Territories.Count - 1; i >= 0; i--)
-				{
-					Territory t = (Territory)ma.Territories[i];
-					foreach(Unit u in ma.Units)
-					{
-						u.CurrentTerritory = t;
-						u.MovesLeft++;
-					}
-
-                   
-				}
-
-                
-
-				//foreach(Unit u in ma.Units)
-				for(int i = 0; i < ma.Units.Count; i++)
-				{
-					Unit u = ma.Units[i];
-					u.CurrentTerritory = ma.StartingTerritory;
-					//u.MovesLeft = (int)ma.OriginalMovesLeft[i];
-				}
-
-				foreach(Territory t in ma.ConqueredTerritories.Keys)
-				{
-					Player originalOwner = (Player)ma.ConqueredTerritories[t];
-					t.Owner = originalOwner;
-
-					if(TerritoryOwnerChanged != null)
-					{
-						TerritoryEventArgs tea = new TerritoryEventArgs();
-						tea.Name = t.Name;
-						tea.Owner = originalOwner;
-
-						TerritoryOwnerChanged(this, tea);
-					}
-				}
-
-                if (TerritoryUnitsChanged != null)
-                {
-                    TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
-                    tuea.Player = ma.Owner;
-                    tuea.Territory = (Territory)ma.Territories[ma.Territories.Count - 1];
-                    tuea.Units = ma.Units;
-                    tuea.Added = false;
-
-                    TerritoryUnitsChanged(this, tuea);
-
-                    tuea.Territory = ma.StartingTerritory;
-                    tuea.Added = true;
-
-                    TerritoryUnitsChanged(this, tuea);
-                }
+				UndoMoveAction((MoveAction)action);				
 			}
 			else if(action is TransportAction)
 			{
-				TransportAction ta = (TransportAction)action;
-
-				if(ta.Load)
-				{
-					UnloadTransport(ta);
-				}
-				else
-				{
-					LoadTransport(ta);
-				}
+				UndoTransportAction((TransportAction)action);				
 			}
 			else
 			{
@@ -1310,9 +908,640 @@ namespace BuckRogers
 			m_checkedActions.Remove(action);
 			m_undoneActions.Add(action);
 			
+
+			if(ActionUndone != null)
+			{
+				ActionUndone(action);
+			}
 			// TODO: Need to refresh the appropriate territories here
 
 			return action;
+		}
+
+		public bool ValidateAction(Action action)
+		{
+			bool actionSuccessful = false;
+			try
+			{
+				// okay, okay, so using exceptions for flow control probably isn't the 
+				// best idea.  But it'll work, though.
+				if (action is MoveAction)
+				{
+					ValidateMoveAction((MoveAction)action);
+				}
+				else if (action is TransportAction)
+				{
+					ValidateTransportAction((TransportAction)action);
+				}
+
+				// Both Validate*Action functions throw an exception if there's an error.
+				// So, if we're here, it must be successful.
+				// TODO Could maybe make them return the error message, and check if it's empty?
+				actionSuccessful = true;
+				action.Validated = true;
+			}
+			catch(ActionException ae)
+			{
+				m_validationMessage = ae.Message;
+				actionSuccessful = false;
+			}
+
+			return actionSuccessful;
+		}
+
+		private bool ValidateTransportAction(TransportAction ta)
+		{
+			Transport transport = ta.Transport;
+			UnitCollection units = ta.Units;
+			UnitType type = ta.UnitType;
+
+			int numCurrent = transport.Transportees.Count;
+
+			string errorMessage = string.Empty;
+
+			if(ta.Load)
+			{
+				switch (type)
+				{
+					case UnitType.Trooper:
+					{
+						UnitCollection troopers = units.GetUnits(UnitType.Trooper);
+						int numNew = troopers.Count;
+						int numTotal = numCurrent + numNew;
+						int numFactories = units.GetUnits(UnitType.Factory).Count;
+
+						UnitCollection transportedFactories = transport.Transportees.GetUnits(UnitType.Factory);
+
+						if (numCurrent > 5 || numTotal > 5)
+						{
+							errorMessage = "Can't load more than 5 troopers on this transport";
+						}
+						else if(numFactories > 0 || transportedFactories.Count > 0)
+						{
+							errorMessage = "Can't load troopers and factories on the same transport";
+						}
+
+						break;
+					}
+					case UnitType.Factory:
+					{
+						UnitCollection factories = units.GetUnits(UnitType.Factory);
+
+						if (factories.Count > 1)
+						{
+							errorMessage = "Can't load more than one factory onto a transport";
+						}
+
+						if (numCurrent > 0)
+						{
+							errorMessage = "Can't load a factory onto a transport with units";							
+						}
+
+						break;
+					}
+				}
+			}	
+			else
+			{
+				Territory t = ta.StartingTerritory;
+
+				if (t.Type != TerritoryType.Ground)
+				{
+					errorMessage = "Transports can only be unloaded in ground territories";
+				}
+
+				if (transport.Transportees.Count == 0)
+				{
+					errorMessage = "Can't unload an empty transport";
+				}
+			}
+
+			if (errorMessage != string.Empty)
+			{
+				throw new ActionException(errorMessage);
+			}
+
+			return true;
+		}
+
+		private bool ValidateMoveAction(MoveAction move)
+		{
+			bool alreadyInEnemyTerritory = false;
+			Territory previousTerritory = move.StartingTerritory;
+
+			string exceptionString = String.Empty;
+
+			/*
+			foreach (Unit u in move.Units)
+			{
+				move.OriginalMovesLeft.Add(u.MovesLeft);
+			}
+			*/
+
+			if(move.Units.Count == 0)
+			{
+				exceptionString = "Can't create a move without any units!";
+				goto MoveError;
+			}
+
+			if(move.Territories.Count == 0)
+			{
+				exceptionString = "Can't create a move with no territories!";
+				goto MoveError;
+			}
+
+			// Check for a player trying to sneak units past a Killer Satellite by
+			// moving them to the territory, THEN moving them past
+
+			bool canMovePast = true;
+			UnitCollection enemyUnits = move.StartingTerritory.Units.GetNonMatchingUnits(move.Owner);
+			if (move.StartingTerritory.Type == TerritoryType.Space
+				&& enemyUnits.GetUnits(UnitType.KillerSatellite).Count > 0)
+			{
+				foreach (Unit u in move.Units)
+				{
+					if (u.MovesLeft < u.MaxMoves)
+					{
+						canMovePast = false;
+						break;
+					}
+				}
+
+				if (!canMovePast)
+				{
+					alreadyInEnemyTerritory = true;
+				}
+			}
+
+			List<int> movesLeft = new List<int>();
+
+			for(int i = 0; i < move.Units.Count; i++)
+			{
+				movesLeft.Add(move.Units[i].MovesLeft);	
+			}
+
+			for (int i = 0; i < move.Territories.Count; i++)
+			{
+				if (alreadyInEnemyTerritory)
+				{
+					exceptionString = "Can't move units in and out of a territory with enemy units";
+					goto MoveError;
+				}
+
+				Territory t = (Territory)move.Territories[i];
+
+				if (!t.AdjacentTo(previousTerritory))
+				{
+					exceptionString = "Can't move between non-adjacent territories ("
+						+ previousTerritory.Name + " -> " + t.Name + ")";
+					goto MoveError;
+				}
+
+				if (t.Type == TerritoryType.Ground)
+				{
+					ArrayList players = t.Units.GetPlayersWithUnits();
+					players.Remove(move.Owner);
+
+					if (players.Count > 0)
+					{
+						alreadyInEnemyTerritory = true;
+					}
+				}
+
+				enemyUnits = t.Units.GetNonMatchingUnits(move.Owner);
+				if (t.Type == TerritoryType.Space && enemyUnits.GetUnits(UnitType.KillerSatellite).Count > 0)
+				{
+					alreadyInEnemyTerritory = true;
+				}
+
+				bool noCostForMove = false;
+
+				if (m_options.OptionalRules["MergeFarOrbits"]
+					&& t.Type == TerritoryType.Space)
+				{
+					Territory t2;
+
+					if (i > 0)
+					{
+						t2 = (Territory)move.Territories[i - 1];
+					}
+					else
+					{
+						t2 = move.StartingTerritory;
+					}
+
+					if ((t.System == OrbitalSystem.NONE && t2.System != OrbitalSystem.NONE)
+						|| (t.System != OrbitalSystem.NONE && t2.System == OrbitalSystem.NONE))
+					{
+						noCostForMove = true;
+					}
+				}
+
+				
+
+				for (int j = 0; j < move.Units.Count; j++)
+				{
+					Unit u = move.Units[j];
+
+					if (u.MaxMoves == 0)
+					{
+						exceptionString = "Can't move an immobile unit";
+						goto MoveError;
+					}
+
+					if (t.Type == TerritoryType.Space && !u.IsSpaceCapable)
+					{
+						exceptionString = "Can't move a ground unit into space";
+						goto MoveError;
+					}
+
+					if (u.Type == UnitType.Battler && t.Type == TerritoryType.Ground)
+					{
+						exceptionString = "Can't move a battler onto the ground";
+						goto MoveError;
+					}
+
+					if (movesLeft[j] == 0)
+					{
+						exceptionString = string.Format("At least one of your {0}s can't go this far", u.Type);//"Unit has no moves left.  Unit: " + u.Info;
+						goto MoveError;
+					}
+
+					
+					//u.CurrentTerritory = t;
+
+					// We NEED to subtract the moves here so we can 
+					if (!noCostForMove)
+					{
+						movesLeft[j]--;
+					}
+					
+				}
+
+				previousTerritory = t;
+			}
+
+
+		MoveError:
+			if (exceptionString != String.Empty)
+			{
+				throw new ActionException(exceptionString);
+			}
+
+			return true;
+		}
+
+		private void AddMoveAction(MoveAction move)
+		{
+			Territory previousTerritory = move.StartingTerritory;
+
+
+			// Step through all the territories in the move
+			for (int i = 0; i < move.Territories.Count; i++)
+			{
+				Territory t = (Territory)move.Territories[i];
+				bool noCostForMove = false;
+
+				// Check for freebie move between Far Orbit <-> Solar System
+				if (m_options.OptionalRules["MergeFarOrbits"]
+					&& t.Type == TerritoryType.Space)
+				{
+					Territory t2;
+
+					if (i > 0)
+					{
+						t2 = (Territory)move.Territories[i - 1];
+					}
+					else
+					{
+						t2 = move.StartingTerritory;
+					}
+
+					if ((t.System == OrbitalSystem.NONE && t2.System != OrbitalSystem.NONE)
+						|| (t.System != OrbitalSystem.NONE && t2.System == OrbitalSystem.NONE))
+					{
+						noCostForMove = true;
+					}
+				}
+
+				// Move everybody
+				for (int j = 0; j < move.Units.Count; j++)
+				{
+					Unit u = move.Units[j];
+
+					u.CurrentTerritory = t;
+
+					if (!noCostForMove)
+					{
+						u.MovesLeft--;
+					}
+				}
+
+				// Check to to see if the territory is conquered during this move
+				if (t.Type == TerritoryType.Ground
+					&& t.Owner != move.Owner
+					&& t.Units.GetPlayerUnitCounts().Count == 1)
+				{
+					bool conquerTerritory = true;
+
+					Hashtable unitCount = t.Units.GetUnitTypeCount();
+
+
+					unitCount.Remove(UnitType.Leader);
+
+					// can't conquer a territory with just a Leader
+					if (unitCount.Count == 0)
+					{
+						conquerTerritory = false;
+					}
+
+					if (m_options.OptionalRules["ConquerWithGround"])
+					{
+						if (!(t.System is Asteroid) && !t.IsSatellite)
+						{
+							bool isTrooper = unitCount.ContainsKey(UnitType.Trooper);
+							bool isGennie = unitCount.ContainsKey(UnitType.Gennie);
+							conquerTerritory = isTrooper || isGennie;
+						}
+					}
+					if (conquerTerritory)
+					{
+						move.ConqueredTerritories[t] = t.Owner;
+					}
+				}
+
+				previousTerritory = t;
+			}
+
+			foreach (Territory conquered in move.ConqueredTerritories.Keys)
+			{
+				conquered.Owner = move.Owner;
+
+				if (TerritoryOwnerChanged != null)
+				{
+					TerritoryEventArgs tea = new TerritoryEventArgs();
+					tea.Name = conquered.Name;
+					tea.Owner = move.Owner;
+
+					TerritoryOwnerChanged(this, tea);
+				}
+			}
+
+			// needed here just to make sure the move gets listed before a possible transport action
+			m_checkedActions.Add(move);
+			if (ActionAdded != null)
+			{
+				ActionAdded(move);
+			}
+
+			XmlElement xeAction = m_gamelog.CreateElement("Action");
+			XmlAttribute xaMoveType = m_gamelog.CreateAttribute("type");
+			xaMoveType.Value = "Movement";
+			xeAction.Attributes.Append(xaMoveType);
+			XmlAttribute xaStart = m_gamelog.CreateAttribute("territory");
+			xaStart.Value = move.StartingTerritory.Name;
+			xeAction.Attributes.Append(xaStart);
+
+			XmlElement xeTerritories = m_gamelog.CreateElement("Territories");
+			xeAction.AppendChild(xeTerritories);
+
+			foreach (Territory t in move.Territories)
+			{
+				XmlElement xeTerritory = m_gamelog.CreateElement("Territory");
+				XmlAttribute xaTerritoryName = m_gamelog.CreateAttribute("name");
+				xaTerritoryName.Value = t.Name;
+				xeTerritory.Attributes.Append(xaTerritoryName);
+
+				xeTerritories.AppendChild(xeTerritory);
+			}
+
+			XmlElement xeUnits = m_gamelog.CreateElement("Units");
+			xeAction.AppendChild(xeUnits);
+
+			foreach (Unit u in move.Units)
+			{
+				XmlElement xeUnit = m_gamelog.CreateElement("Unit");
+				XmlAttribute xaUnitType = m_gamelog.CreateAttribute("type");
+				xaUnitType.Value = u.Type.ToString();
+				XmlAttribute xaUnitID = m_gamelog.CreateAttribute("id");
+				xaUnitID.Value = u.ID.ToString();
+				xeUnit.Attributes.Append(xaUnitType);
+				xeUnit.Attributes.Append(xaUnitID);
+
+				xeUnits.AppendChild(xeUnit);
+			}
+
+			m_xeCurrentPlayer.AppendChild(xeAction);
+
+			if (TerritoryUnitsChanged != null)
+			{
+				TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
+				tuea.Units = move.Units;
+				tuea.Territory = move.StartingTerritory;
+				tuea.Added = false;
+				tuea.Player = move.Owner;
+
+				m_alteredTerritories[move.StartingTerritory] = null;
+
+				TerritoryUnitsChanged(this, tuea);
+
+				Territory finalTerritory = (Territory)move.Territories[move.Territories.Count - 1];
+				tuea.Territory = finalTerritory;
+				tuea.Added = true;
+
+				m_alteredTerritories[finalTerritory] = null;
+
+
+				TerritoryUnitsChanged(this, tuea);
+			}
+
+
+			Territory destination = (Territory)move.Territories[move.Territories.Count - 1];
+			if (destination.Type == TerritoryType.Ground)
+			{
+				bool unloadTransports = false;
+
+				UnitCollection transports = move.Units.GetUnits(UnitType.Transport);
+				if (transports.Count > 0)
+				{
+					bool askToUnload = false;
+
+					foreach (Transport tr in transports)
+					{
+						if (tr.Transportees.Count > 0)
+						{
+							askToUnload = true;
+							break;
+						}
+					}
+					if (askToUnload)
+					{
+						if (StatusUpdate != null)
+						{
+							StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+							suea.Territory = destination;//(Player)m_currentPlayerOrder[m_idxCurrentPlayer];
+
+							suea.StatusInfo = StatusInfo.TransportLanded;
+							unloadTransports = StatusUpdate(this, suea);
+						}
+					}
+				}
+
+				if (unloadTransports)
+				{
+					foreach (Transport tr in transports)
+					{
+						TransportAction ta = new TransportAction();
+						ta.Load = false;
+						ta.Owner = tr.Owner;
+						ta.MaxTransfer = tr.Transportees.Count;
+						ta.StartingTerritory = destination;
+						ta.Transport = tr;
+						ta.UnitType = tr.Transportees[0].Type;
+
+						AddAction(ta);
+					}
+				}
+			}
+		}
+
+		private void UndoMoveAction(MoveAction ma)
+		{
+			for (int i = ma.Territories.Count - 1; i >= 0; i--)
+			{
+				Territory t = (Territory)ma.Territories[i];
+				foreach (Unit u in ma.Units)
+				{
+					u.CurrentTerritory = t;
+					u.MovesLeft++;
+				}
+			}
+
+			for (int i = 0; i < ma.Units.Count; i++)
+			{
+				Unit u = ma.Units[i];
+				u.CurrentTerritory = ma.StartingTerritory;
+			}
+
+			foreach (Territory t in ma.ConqueredTerritories.Keys)
+			{
+				Player originalOwner = (Player)ma.ConqueredTerritories[t];
+				t.Owner = originalOwner;
+
+				if (TerritoryOwnerChanged != null)
+				{
+					TerritoryEventArgs tea = new TerritoryEventArgs();
+					tea.Name = t.Name;
+					tea.Owner = originalOwner;
+
+					TerritoryOwnerChanged(this, tea);
+				}
+			}
+
+			if (TerritoryUnitsChanged != null)
+			{
+				TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
+				tuea.Player = ma.Owner;
+				tuea.Territory = (Territory)ma.Territories[ma.Territories.Count - 1];
+				tuea.Units = ma.Units;
+				tuea.Added = false;
+
+				TerritoryUnitsChanged(this, tuea);
+
+				tuea.Territory = ma.StartingTerritory;
+				tuea.Added = true;
+
+				TerritoryUnitsChanged(this, tuea);
+			}
+		}
+
+		private void AddTransportAction(TransportAction ta)
+		{
+			if (ta.Load)
+			{
+				LoadTransport(ta);
+			}
+			else
+			{
+				UnloadTransport(ta);
+			}
+
+			m_checkedActions.Add(ta);
+			m_alteredTerritories[ta.StartingTerritory] = null;
+			if (ActionAdded != null)
+			{
+				ActionAdded(ta);
+			}
+
+			XmlElement xeAction = m_gamelog.CreateElement("Action");
+			XmlAttribute xaType = m_gamelog.CreateAttribute("type");
+			xaType.Value = "Transport";
+			XmlAttribute xaTerritory = m_gamelog.CreateAttribute("territory");
+			xaTerritory.Value = ta.StartingTerritory.Name;
+			XmlAttribute xaLoad = m_gamelog.CreateAttribute("load");
+			xaLoad.Value = ta.Load.ToString();
+
+			xeAction.Attributes.Append(xaType);
+			xeAction.Attributes.Append(xaTerritory);
+			xeAction.Attributes.Append(xaLoad);
+
+			XmlElement xeUnits = m_gamelog.CreateElement("Units");
+
+			foreach (Unit u in ta.Units)
+			{
+				XmlElement xeUnit = m_gamelog.CreateElement("Unit");
+				XmlAttribute xaUnitType = m_gamelog.CreateAttribute("type");
+				xaUnitType.Value = u.Type.ToString();
+				XmlAttribute xaMoves = m_gamelog.CreateAttribute("moves");
+				xaMoves.Value = u.MovesLeft.ToString();
+				XmlAttribute xaUnitID = m_gamelog.CreateAttribute("id");
+				xaUnitID.Value = u.ID.ToString();
+
+				xeUnit.Attributes.Append(xaUnitType);
+				xeUnit.Attributes.Append(xaMoves);
+				xeUnit.Attributes.Append(xaUnitID);
+
+				xeUnits.AppendChild(xeUnit);
+			}
+
+			xeAction.AppendChild(xeUnits);
+
+			m_xeCurrentPlayer.AppendChild(xeAction);
+
+
+			if (TerritoryUnitsChanged != null)
+			{
+				TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
+				tuea.Units = ta.Units;
+				tuea.Territory = ta.StartingTerritory;
+				tuea.Added = !ta.Load;
+				tuea.Player = ta.Owner;
+
+				TerritoryUnitsChanged(this, tuea);
+			}
+		}
+
+		private void UndoTransportAction(TransportAction ta)
+		{
+			if (ta.Load)
+			{
+				UnloadTransport(ta);
+			}
+			else
+			{
+				LoadTransport(ta);
+			}
+
+			if (TerritoryUnitsChanged != null)
+			{
+				TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
+				tuea.Player = ta.Owner;
+				tuea.Territory = ta.StartingTerritory;
+				tuea.Units = ta.Units;
+				tuea.Added = !ta.Load;
+
+				TerritoryUnitsChanged(this, tuea);
+			}
 		}
 
 		public Action RedoAction()
@@ -2124,23 +2353,7 @@ namespace BuckRogers
 
 		#endregion
 
-		public void PlaceUnits(UnitCollection uc, Territory t)
-		{
-			foreach(Unit u in uc)
-			{
-				u.CurrentTerritory = t;
-			}
-
-			if(TerritoryUnitsChanged != null)
-			{
-				TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
-				tuea.Units = uc;
-				tuea.Territory = t;
-				tuea.Added = true;
-
-				TerritoryUnitsChanged(this, tuea);
-			}
-		}
+		#region savegame functions
 
 		public void SaveGame(string filename)
 		{
@@ -2319,7 +2532,7 @@ namespace BuckRogers
 
 			
 
-		savegame.Save(filename);
+			savegame.Save(filename);
 		}
 
 		
@@ -2577,5 +2790,10 @@ namespace BuckRogers
 		
 		
 		} // end LoadGame()
+#endregion
+
+
 	}
+
+
 }

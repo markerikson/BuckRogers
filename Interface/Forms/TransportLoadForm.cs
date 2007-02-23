@@ -28,7 +28,7 @@ namespace BuckRogers.Interface
 		private Territory m_territory;
 		private Player m_player;
 		private GameController m_controller;
-		private ArrayList m_transferInfo;
+		private Stack m_transferInfo;
 
 		private System.Windows.Forms.Button m_btnLoadMax;
 		private System.Windows.Forms.Button m_btnCancel;
@@ -241,7 +241,7 @@ namespace BuckRogers.Interface
 			m_territory = t;
 			m_player = p;
 
-			m_transferInfo = new ArrayList();
+			m_transferInfo = new Stack();
 			m_transports = t.Units.GetUnits(UnitType.Transport, p, null);
 			m_troopers = t.Units.GetUnits(UnitType.Trooper, p, null);
 			m_factories = t.Units.GetUnits(UnitType.Factory, p, null);
@@ -399,29 +399,22 @@ namespace BuckRogers.Interface
 			UnitCollection tempUC = containerCollection.GetUnitsWithMoves(numMoves);
 			UnitCollection transportees = tempUC.GetUnits(1);
 			
-			try
-			{
-				TransportAction ta = new TransportAction();
-				ta.Owner = m_player;
-				ta.StartingTerritory = m_territory;
 
-				int idxTransport = m_tvTransports.Nodes.IndexOf(transport);
-				ta.Transport = (Transport)m_transports[idxTransport];
-				ta.Units = transportees;
-				ta.UnitType = ut;
-				ta.Load = true;
-				ta.MaxTransfer = 1;
+			TransportAction ta = new TransportAction();
+			ta.Owner = m_player;
+			ta.StartingTerritory = m_territory;
 
-				m_controller.AddAction(ta);
-				m_transferInfo.Add(ta);
-			}
-			catch(Exception ex)
+			int idxTransport = m_tvTransports.Nodes.IndexOf(transport);
+			ta.Transport = (Transport)m_transports[idxTransport];
+			ta.Units = transportees;
+			ta.UnitType = ut;
+			ta.Load = true;
+			ta.MaxTransfer = 1;
+
+			if(!CheckAndAddAction(ta))
 			{
-				MessageBox.Show(ex.Message);
 				return;
 			}
-
-			//containerCollection.RemoveAllUnits(transportees);
 
 			transport.Nodes.Add(nodeText);
 
@@ -435,6 +428,25 @@ namespace BuckRogers.Interface
 				numUnits--;
 				lvi.SubItems[1].Text = numUnits.ToString();
 			}
+		}
+
+		private bool CheckAndAddAction(TransportAction ta)
+		{
+			bool actionSucceeded = false;
+			if (m_controller.ValidateAction(ta))
+			{
+				m_controller.AddAction(ta);
+				m_transferInfo.Push(ta);
+
+				actionSucceeded = true;
+			}
+			else
+			{
+				MessageBox.Show(m_controller.ValidationMessage, "Transport Error", 
+					MessageBoxButtons.OK, MessageBoxIcon.Warning);
+			}
+
+			return actionSucceeded;
 		}
 
 		private void m_btnLoadMax_Click(object sender, System.EventArgs e)
@@ -497,9 +509,10 @@ namespace BuckRogers.Interface
 						ta.Load = true;
 						ta.MaxTransfer = numToTransfer;
 
-						m_controller.AddAction(ta);
-						
-						m_transferInfo.Add(ta);
+						if (!CheckAndAddAction(ta))
+						{
+							return;
+						}
 					}
 					catch(Exception ex)
 					{
@@ -527,11 +540,14 @@ namespace BuckRogers.Interface
 				}
 				case "Factory":
 				{
+					/*
 					if(numTransportees > 0)
 					{
 						MessageBox.Show("Can't load a factory into a transport that is already carrying units");
 						return;
 					}
+					*/
+
 
 					// TODO Check if factory is producing, and if so, ask user for confirmation
 					nodeText = "Factory";
@@ -551,9 +567,10 @@ namespace BuckRogers.Interface
 						ta.Load = true;
 						ta.MaxTransfer = 1;
 
-						m_controller.AddAction(ta);
-						
-						m_transferInfo.Add(ta);
+						if (!CheckAndAddAction(ta))
+						{
+							return;
+						}
 					}
 					catch(Exception ex)
 					{
@@ -610,9 +627,10 @@ namespace BuckRogers.Interface
 				ta.MaxTransfer = 1;
 				ta.Moves = moves;
 
-				m_controller.AddAction(ta);
-						
-				m_transferInfo.Add(ta);
+				if (!CheckAndAddAction(ta))
+				{
+					return;
+				}
 			}
 			catch(Exception ex)
 			{
@@ -711,9 +729,10 @@ namespace BuckRogers.Interface
 				ta.Moves = moves;
 				ta.MatchMoves = false;
 
-				m_controller.AddAction(ta);
-						
-				m_transferInfo.Add(ta);
+				if (!CheckAndAddAction(ta))
+				{
+					return;
+				}
 			}
 			catch(Exception ex)
 			{
@@ -736,6 +755,13 @@ namespace BuckRogers.Interface
 
 		private void m_btnCancel_Click(object sender, System.EventArgs e)
 		{
+			while(m_transferInfo.Count > 0)
+			{
+				TransportAction ta = (TransportAction)m_transferInfo.Pop();
+
+				m_controller.UndoAction();
+			}
+
 			this.DialogResult = DialogResult.Cancel;
 		}
 
@@ -744,7 +770,7 @@ namespace BuckRogers.Interface
 			this.DialogResult = DialogResult.OK;
 		}
 
-		public System.Collections.ArrayList TransferInfo
+		public System.Collections.Stack TransferInfo
 		{
 			get { return this.m_transferInfo; }
 			set { this.m_transferInfo = value; }

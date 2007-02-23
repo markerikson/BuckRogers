@@ -11,6 +11,7 @@ namespace BuckRogers
 		private Player m_owner;
 		private UnitCollection m_units;
 		private Territory m_startingTerritory;
+		private bool m_validated;
 
 		public Action()
 		{
@@ -34,6 +35,19 @@ namespace BuckRogers
 		{
 			get { return this.m_startingTerritory; }
 			set { this.m_startingTerritory = value; }
+		}
+
+		public bool Validated
+		{
+			get
+			{
+				return m_validated;
+			}
+
+			internal set
+			{
+				m_validated = value;
+			}
 		}
 	}
 }

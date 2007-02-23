@@ -53,6 +53,7 @@ namespace BuckRogers.Interface
 		private PlayerListBox m_lbPlayerOrder;
 		private System.Windows.Forms.Label label2;
 		private MapControl m_map;
+		private MoveUnitsForm m_muf;
 
 
 		public MapControl Map
@@ -75,6 +76,7 @@ namespace BuckRogers.Interface
 
 			m_mlbMoves = new MoveListBox();
 			m_mlbTransports = new MoveListBox();
+			m_muf = new MoveUnitsForm();
 
 			int listboxY = m_lbCurrentMoves.Bottom + 8;
 			int listboxHeight = ClientSize.Height - listboxY;
@@ -380,7 +382,7 @@ namespace BuckRogers.Interface
 				return;
 			}
 
-			ArrayList transferInfo = tlf.TransferInfo;
+			//ArrayList transferInfo = tlf.TransferInfo;
 
 			m_mlbMoves.Refresh();
 			m_mlbTransports.Refresh();
@@ -392,6 +394,9 @@ namespace BuckRogers.Interface
 		{
 			m_unitTotalsWereChanged = false;
 			m_stupidCodeGuardFlag = false;
+
+			// If no move has been started, make sure the player picked
+			// a territory where he has units.  
 			if (m_currentMoveTerritories.Count == 0)
 			{
 				if (t.Owner != m_controller.CurrentPlayer)
@@ -399,29 +404,30 @@ namespace BuckRogers.Interface
 					string message = String.Empty;
 					UnitCollection uc = t.Units.GetUnits(m_controller.CurrentPlayer);
 
+					// If there's no units, bail out
 					if (uc.Count == 0)
 					{
-						message = "You don't have any units in that territory";
-					}
-
-					if (message != String.Empty)
-					{
-						MessageBox.Show(message, "Movement",
+						MessageBox.Show("You don't have any units in that territory", "Movement",
 							MessageBoxButtons.OK, MessageBoxIcon.Warning);
 						return;
 					}
 				}
 
+				// Either the player owns the territory, or he at least has units there.  
+				// Make sure we're ready to start counting units.
 				m_unitsToMoveCounts.Clear();
 			}
 
 			PInputEventArgs e = (PInputEventArgs)tcea.Tag;
 
+			// If this is the first click of the move, or if only the starting territory
+			// has been clicked, then we can try to add units
 			if (m_currentMoveTerritories.Count == 0
-				|| (m_currentMoveTerritories.Count == 1 && t == (m_currentMoveTerritories[0])))
+				|| (m_currentMoveTerritories.Count == 1 && t == m_currentMoveTerritories[0]) )
 			{
 				PNode picked = e.PickedNode;
 
+				// check to see if the player clicked a unit icon
 				PNodeList matchingNodes = new PNodeList();
 				PointF point = e.Position;
 				RectangleF pointRect = new RectangleF(point.X, point.Y, 1, 1);
@@ -429,12 +435,14 @@ namespace BuckRogers.Interface
 				IconInfo clickedInfo = null;
 				IconInfo movementInfo = null;
 
+				// something beneath the mouse
 				if (matchingNodes.Count > 0)
 				{
 					PNode topNode = matchingNodes[0];
 
 					if (topNode.Tag is IconInfo)
 					{
+						// Must have clicked a unit icon
 						clickedInfo = (IconInfo)topNode.Tag;
 
 						if (clickedInfo.Player != m_controller.CurrentPlayer)
@@ -442,6 +450,8 @@ namespace BuckRogers.Interface
 							return;
 						}
 
+						// Find if there's a matching floating movement icon.
+						// This comes into play later.
 						foreach (IconInfo existingInfo in m_map.MovementIcons)
 						{
 							if (existingInfo.Player == clickedInfo.Player
@@ -458,9 +468,8 @@ namespace BuckRogers.Interface
 				{
 					Hashtable newUnitCounts = null;
 
-					// territory was clicked, but no unit
-					if (clickedInfo == null && m_unitsToMoveCounts.Count == 0)
-					{
+					// If the user SHIFT-clicked, then grab the counts of all 
+						// units in the territory
 						if ((e.Modifiers & Keys.Shift) == Keys.Shift)
 						{
 							UnitCollection uc = t.Units.GetUnits(UnitType.None, m_controller.CurrentPlayer, t);
@@ -471,29 +480,30 @@ namespace BuckRogers.Interface
 								newUnitCounts = unitsWithMoves.GetUnitTypeCount();
 							}
 						}
-						else
+
+					// territory itself was clicked, and no units have been
+					// added so far
+					if (clickedInfo == null && m_unitsToMoveCounts.Count == 0 && newUnitCounts == null)
+					{
+						// Show MoveUnitForm, get hashtable of results
+						MoveUnitsForm muf = new MoveUnitsForm();
+						muf.SetupUnits(t, m_controller.CurrentPlayer);
+						muf.ShowDialog();
+
+						if (muf.DialogResult != DialogResult.OK)
 						{
-							// Show MoveUnitForm, get hashtable of results
-							MoveUnitsForm muf = new MoveUnitsForm();
-
-							muf.SetupUnits(t, m_controller.CurrentPlayer);
-
-							muf.ShowDialog();
-
-							if (muf.DialogResult != DialogResult.OK)
-							{
-								return;
-							}
-
-							m_handSelectedUnits.AddAllUnits(muf.SelectedUnits);
-							newUnitCounts = muf.SelectedUnits.GetUnitTypeCount();
-
-							m_userChangedOriginalSelection = false;
-							m_stupidCodeGuardFlag = true;
+							return;
 						}
+
+						m_handSelectedUnits.AddAllUnits(muf.SelectedUnits);
+						newUnitCounts = muf.SelectedUnits.GetUnitTypeCount();
+
+						m_userChangedOriginalSelection = false;
+						m_stupidCodeGuardFlag = true;
+
 					}
-					// unit was clicked, and none are currently shown
-					else if (clickedInfo != null && movementInfo == null)
+					// unit icon was clicked, and none of that type have been added yet
+					else if (clickedInfo != null && movementInfo == null && newUnitCounts == null)
 					{
 						// Set newUnitCounts[unitType] to 1;
 						UnitType ut = clickedInfo.Type;
@@ -503,16 +513,20 @@ namespace BuckRogers.Interface
 
 						if (unitsWithMoves.Count > 0)
 						{
+							/*
+							// Grab all the units in the territory (DUPLICATE CODE!)
 							if ((e.Modifiers & Keys.Shift) == Keys.Shift)
 							{
 								newUnitCounts = unitsWithMoves.GetUnitTypeCount();
 							}
+							// Just add the one unit type to the hashtable
 							else
 							{
-								int numUnitsToAdd = NumUnitsToAdd(e, unitsWithMoves.Count, 0);
-								newUnitCounts = new Hashtable();
-								newUnitCounts[ut] = numUnitsToAdd;//1;
-							}
+							*/
+							int numUnitsToAdd = NumUnitsToAdd(e, unitsWithMoves.Count, 0);
+							newUnitCounts = new Hashtable();
+							newUnitCounts[ut] = numUnitsToAdd;
+							//}
 						}
 						// no units with moves left
 						else
@@ -520,12 +534,18 @@ namespace BuckRogers.Interface
 							return;
 						}
 					}
-					else if (clickedInfo == null && m_unitsToMoveCounts.Count > 0)
+					// The user directly clicked this territory, but has previously
+					// selected units to move.  We're going to ignore this click.
+					else if (clickedInfo == null && m_unitsToMoveCounts.Count > 0 && newUnitCounts == null)
 					{
 						// not trying to do anything here
 						return;
 					}
 
+
+					// If newUnitCounts is not null, then the player has selected units
+					// by either using the MoveUnitsForm or by shift-clicking.  
+					// We need to add all those units.
 					if (newUnitCounts != null)
 					{
 						foreach (DictionaryEntry de in newUnitCounts)
@@ -534,9 +554,23 @@ namespace BuckRogers.Interface
 							UnitType ut = (UnitType)de.Key;
 							int numUnits = (int)de.Value;
 
-							// it's possible that we already had something displayed,
-							// then the user shift-clicked
-							if (!m_unitsToMoveCounts.ContainsKey(ut))
+							// it's possible that we already had this type displayed,
+							// then the user shift-clicked.  Find it so we can update it.						
+							if (m_unitsToMoveCounts.ContainsKey(ut))
+							{
+								// should be guaranteed to find something
+								foreach (IconInfo info in m_map.MovementIcons)
+								{
+									if (info.Player == p && info.Type == ut)
+									{
+										movementInfo = info;
+										break;
+									}
+								}								
+							}
+							// If this type was not displayed previously, we need to add
+							// a floating movement icon for it.
+							else
 							{
 								movementInfo = new IconInfo();
 								movementInfo.Player = p;
@@ -572,24 +606,17 @@ namespace BuckRogers.Interface
 								m_unitsToMoveCounts[movementInfo.Type] = numUnits;
 								m_unitTotalsWereChanged = true;
 							}
-							else
-							{
-								// should be guaranteed to find something
-								foreach (IconInfo info in m_map.MovementIcons)
-								{
-									if (info.Player == p && info.Type == ut)
-									{
-										movementInfo = info;
-										break;
-									}
-								}
-							}
 
+							// Since the number of units in the territory isn't changed 
+							// until the user finishes the move, this is guaranteed to never
+							// be more than the number available in the territory.
 							movementInfo.Label.Text = numUnits.ToString();
 						}
 
 						m_map.UpdateMovementIcons(e);
 					}
+					// otherwise, the player has clicked on a unit icon.  We need to figure
+					// out how many units to add based on that icon's text.
 					else
 					{
 						int numCurrent = int.Parse(movementInfo.Label.Text);
@@ -614,27 +641,31 @@ namespace BuckRogers.Interface
 				// right mouse button
 				else
 				{
+					// If there's no icons displayed, don't do anything.
 					if (m_map.MovementIcons.Count == 0)
 					{
 						return;
 					}
 
+					// If the user SHIFT-right-clicked, then remove all the units.
 					if ((e.Modifiers & Keys.Shift) == Keys.Shift)
 					{
-						//ClearMovementIcons();
-						//m_unitsToMoveCounts.Clear();
 						ResetMovementInfo();
 						m_unitTotalsWereChanged = true;
 
 						return;
 					}
 
+					// If the player right-clicked the territory, but didn't click on an icon, 
+					// then we're going to decrement the last icon displayed
 					if (movementInfo == null)
 					{
 						movementInfo = (IconInfo)m_map.MovementIcons[m_map.MovementIcons.Count - 1];
 					}
 
 					bool removeMovementIcon = false;
+
+					// If the user CTRL-clicked, just remove it
 					if ((e.Modifiers & Keys.Control) == Keys.Control)
 					{
 						removeMovementIcon = true;
@@ -644,10 +675,13 @@ namespace BuckRogers.Interface
 						int numToRemove = 1;
 						int numUnits = int.Parse(movementInfo.Label.Text);
 
+						// If the user ALT-clicked, remove a max of 10
+						// TODO Maybe remove 1/10th of the units (and correspondingly add 1/10th elsewhere?)
 						if ((e.Modifiers & Keys.Alt) == Keys.Alt)
 						{
-							int oneTenthDisplayed = numUnits / 10;
-							numToRemove = Math.Max(1, oneTenthDisplayed);
+							//int oneTenthDisplayed = numUnits / 10;
+							//numToRemove = Math.Max(1, oneTenthDisplayed);
+							numToRemove = Math.Min(numUnits, 10);
 						}
 
 						numUnits -= numToRemove;
@@ -674,9 +708,6 @@ namespace BuckRogers.Interface
 						m_unitTotalsWereChanged = true;
 					}
 				}
-
-				int i = 42;
-				int q = i;
 			}
 
 			bool addTerritory = true;
@@ -694,10 +725,64 @@ namespace BuckRogers.Interface
 
 			if (addTerritory)
 			{
-				m_currentMoveTerritories.Add(t);
-				m_lbCurrentMoves.Items.Add(t.Name);
+				bool territoryAdded = false;
+
+				if(m_currentMoveTerritories.Count == 0)	
+				{
+					m_currentMoveTerritories.Add(t);
+					territoryAdded = true;
+				}
+				else
+				{
+					MoveAction ma = new MoveAction();
+					ma.Owner = m_controller.CurrentPlayer;
+					ma.StartingTerritory = (Territory)m_currentMoveTerritories[0];
+
+					for (int i = 1; i < m_currentMoveTerritories.Count; i++)
+					{
+						ma.Territories.Add(m_currentMoveTerritories[i]);
+					}
+
+					ma.Territories.Add(t);
+
+					if(m_handSelectedUnits.Count == 0 || m_userChangedOriginalSelection)
+					{
+						m_muf.SetupUnits(ma.StartingTerritory, m_controller.CurrentPlayer);
+						m_muf.PreSelectUnits(ma.StartingTerritory, m_controller.CurrentPlayer, m_unitsToMoveCounts);
+
+						ma.Units.AddAllUnits(m_muf.SelectedUnits);
+					}
+					else
+					{
+						ma.Units.AddAllUnits(m_handSelectedUnits);
+					}
+					
+
+					if(m_controller.ValidateAction(ma))
+					{
+						m_currentMoveTerritories.Add(t);
+						territoryAdded = true;
+					}
+					else
+					{
+						MessageBox.Show(m_controller.ValidationMessage, "Illegal Move",
+										   MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+					}
+				}
+				
+				if(territoryAdded)
+				{
+					m_lbCurrentMoves.Items.Add(t.Name);
+				}
+				
 			}
 
+			// Perhaps the user used the MoveUnitsForm to select his units, then
+			// clicked on a unit icon or SHIFT-clicked.  In that case, we're going to
+			// pop up another MoveUnitsForm when he finishes.  This lets us know
+			// that needs to happen.  "stupidCodeGuardFlag" keeps this from happening
+			// unless the MoveUnitsForm was used in the first place.
 			if(m_unitTotalsWereChanged && !m_stupidCodeGuardFlag)
 			{
 				m_userChangedOriginalSelection = true;
@@ -892,19 +977,7 @@ namespace BuckRogers.Interface
 		{
 			Action a = m_controller.UndoAction();
 
-			if(a is MoveAction)
-			{
-				m_mlbMoves.Items.Remove(0);
-				m_mlbMoves.Refresh();
-			}
-			else if(a is TransportAction)
-			{
-				m_mlbTransports.Items.Remove(0);
-				m_mlbTransports.Refresh();
-			}
 
-			m_btnUndoMove.Enabled = m_controller.CanUndo;
-			m_btnRedoMove.Enabled = m_controller.CanRedo;
 		}
 
 		private void m_btnRedoMove_Click(object sender, System.EventArgs e)
@@ -912,6 +985,23 @@ namespace BuckRogers.Interface
 			Action a = m_controller.RedoAction();
 
 			//AddActionToList(a);
+
+			m_btnUndoMove.Enabled = m_controller.CanUndo;
+			m_btnRedoMove.Enabled = m_controller.CanRedo;
+		}
+
+		public void RemoveActionFromList(Action a)
+		{
+			if (a is MoveAction)
+			{
+				m_mlbMoves.Items.Remove(0);
+				m_mlbMoves.Refresh();
+			}
+			else if (a is TransportAction)
+			{
+				m_mlbTransports.Items.Remove(0);
+				m_mlbTransports.Refresh();
+			}
 
 			m_btnUndoMove.Enabled = m_controller.CanUndo;
 			m_btnRedoMove.Enabled = m_controller.CanRedo;
@@ -1151,7 +1241,8 @@ namespace BuckRogers.Interface
 				int index = m_lbCurrentMoves.Items.Count - 1;
 
 				m_lbCurrentMoves.Items.RemoveAt(index);
-				m_currentMoveTerritories.Remove(m_currentMoveTerritories[m_currentMoveTerritories.Count - 1]);
+				//m_currentMoveTerritories.Remove(m_currentMoveTerritories[m_currentMoveTerritories.Count - 1]);
+				m_currentMoveTerritories.RemoveAt(index);
 			}
 
 			if(m_lbCurrentMoves.Items.Count == 0)

@@ -61,6 +61,9 @@ namespace BuckRogers.Interface
 
 			this.Icon = InterfaceUtility.GetApplicationIcon();
 
+			this.StartPosition = FormStartPosition.CenterScreen;
+
+
 			m_nudNodeValue = new RangeLimitedUpDown();
 			m_optionNodes = new Hashtable();
 

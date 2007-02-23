@@ -152,6 +152,9 @@ namespace BuckRogers.Interface
 
 		public void SetupUnits(Territory t, Player p)
 		{
+			m_lvAvailableUnits.Items.Clear();
+			m_lvSelectedUnits.Items.Clear();
+
 			UnitCollection uc = t.Units.GetUnits(p);
 			m_player = p;
 			m_territory = t;

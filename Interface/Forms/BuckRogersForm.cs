@@ -91,6 +91,8 @@ namespace BuckRogers.Interface
 
 			
 
+			
+
 			ControllerTest ct = new ControllerTest();
 			ct.Reinitialize = false;
 			m_controller = ct.GameController;
@@ -118,6 +120,12 @@ namespace BuckRogers.Interface
 			//
 			InitializeComponent();
 			this.Icon = InterfaceUtility.GetApplicationIcon();
+
+			this.StartPosition = FormStartPosition.CenterScreen;
+			Rectangle desktop = Screen.PrimaryScreen.WorkingArea;
+			//this.Bounds = new Rectangle(desktop.X + 20, desktop.Y + 20, desktop.Width - 40, desktop.Height - 40);
+			this.Size = new Size(desktop.Width - 80, desktop.Height - 80);
+			
 
 			Initialize(go, loadFileName);
 			
@@ -281,6 +289,7 @@ namespace BuckRogers.Interface
 			m_battleController.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
 
 			m_controller.ActionAdded += new DisplayActionHandler(m_movePanel.AddActionToList);
+			m_controller.ActionUndone += new DisplayActionHandler(m_movePanel.RemoveActionFromList);
 			m_controller.TerritoryUnitsChanged += new TerritoryUnitsChangedHandler(m_informationPanel.UpdateUnitInfo);
 			m_controller.TerritoryUnitsChanged += new TerritoryUnitsChangedHandler(m_map.UpdateUnitInfo);
 
@@ -643,24 +652,24 @@ namespace BuckRogers.Interface
 				return;
 			}
 
-			
+			bool isLeftButton = (tcea.Button == MouseButtons.Left);
 
-			switch(m_clickMode)
+			switch (m_clickMode)
 			{
 				case MapClickMode.Normal:
 				case MapClickMode.GameOver:
 				{
-					if (tcea.Button == MouseButtons.Right)
+					m_territoryPanel.DisplayUnits(t, tcea);
+
+					if(!isLeftButton)
 					{
 						tabControl1.SelectedTab = m_tpTerritory;
-						m_territoryPanel.DisplayUnits(t, tcea);
 					}
-					//m_territoryPanel.DisplayUnits(t, tcea);
 					break;
 				}
 				case MapClickMode.Move:
 				{
-					m_movePanel.TerritoryClicked(t, tcea);
+					m_movePanel.TerritoryClicked(t, tcea);					
 					break;
 				}
 				case MapClickMode.PlaceUnits:
@@ -668,12 +677,8 @@ namespace BuckRogers.Interface
 					m_placementPanel.TerritoryClicked(t, tcea);
 					break;
 				}
-
-
-				//MessageBox.Show("Territory: " + name + ", owner: " + t.Owner.Name);
 			}
-
-			//MessageBox.Show("Territory clicked: " + name);
+			
 		}
 
 		private void m_btnZoomIn_Click(object sender, System.EventArgs e)
