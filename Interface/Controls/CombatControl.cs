@@ -658,12 +658,14 @@ namespace BuckRogers.Interface
 						}
 					}
 
+					// Nothing should be selected
 					if (clickedUID == m_selectedUID)
 					{
 						m_selectedUID = null;	
 					}
 					else
 					{
+						// De-select the selected icon and save the clicked icon for later
 						if (m_selectedUID != null)
 						{
 							m_selectedUID.Selected = !m_selectedUID.Selected;
@@ -818,6 +820,11 @@ namespace BuckRogers.Interface
 
 						if (ci == null)
 						{
+							if(defendingUID.NumAlive == 0)
+							{
+								MessageBox.Show("All units of this type are dead!", "I See Dead Units",
+												MessageBoxButtons.OK, MessageBoxIcon.Information);
+							}
 							return;
 						}
 
