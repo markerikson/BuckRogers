@@ -1038,7 +1038,7 @@ namespace BuckRogers
 			}
 			*/
 
-			if(move.Units.Count == 0)
+			if (move.Units.Count == 0)
 			{
 				exceptionString = "Can't create a move without any units!";
 				goto MoveError;

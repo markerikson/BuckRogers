@@ -233,9 +233,17 @@ namespace BuckRogers.Interface
 			PText lbl2 = new PText();
 			PText lbl3 = new PText();
 
-			lbl1.Text = "Battle Location: ";
+			lbl1.Text = "Battle Location ";
 			lbl2.Text = "Battle Type:";
 			lbl3.Text = "Battles Left:";
+
+			Font f = lbl1.Font;
+
+			f = new Font(f, FontStyle.Bold);
+
+			lbl1.Font = f;
+			lbl2.Font = f;
+			lbl3.Font = f;
 
 			lbl1.X = 10;
 			lbl1.Y = 10;
@@ -249,6 +257,9 @@ namespace BuckRogers.Interface
 
 			m_lblBattleLocation.X = 10;
 			m_lblBattleLocation.Y = 25;
+
+			//m_lblBattleSystem.X = 10;
+			//m_lblBattleSystem.Y = 10;
 
 			m_lblBattleType.X = 660;
 			m_lblBattleType.Y = 10;
@@ -337,10 +348,25 @@ namespace BuckRogers.Interface
 					m_currentPUD = (PlayerUnitDisplay)m_displays[0];
 					m_currentPUD.Selected = true;
 					
+					Territory t = m_battleController.CurrentBattle.Territory;
+					string systemName = string.Empty;
 
-					m_lblBattleLocation.Text = m_battleController.CurrentBattle.Territory.Name;
+					if(t.System == OrbitalSystem.NONE)
+					{
+						systemName = t.Orbit.Name;
+					}
+					else
+					{
+						systemName = t.System.Name;
+					}
+					
+					string battleLocation = string.Format("System: {0}\nTerritory: {1}",
+														systemName, t.Name);
+
+					m_lblBattleLocation.Text = battleLocation;
 					m_lblBattlesLeft.Text = m_battleController.Battles.Count.ToString();
 					m_lblBattleType.Text = m_battleController.CurrentBattle.Type.ToString();
+
 
 					
 

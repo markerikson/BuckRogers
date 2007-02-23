@@ -93,7 +93,7 @@ namespace BuckRogers.Interface
 			m_iconCover.Pen = new Pen(fade);
 			m_iconCover.Brush = new SolidBrush(fade);
 
-			m_iconCover.MouseUp += new PInputEventHandler(m_iconCover_MouseUp);
+			//m_iconCover.MouseUp += new PInputEventHandler(m_iconCover_MouseUp);
 		}
 
 		void m_iconCover_MouseUp(object sender, PInputEventArgs e)
