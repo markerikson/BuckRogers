@@ -159,6 +159,7 @@ namespace BuckRogers.Interface
 			this.m_lvFactories.Name = "m_lvFactories";
 			this.m_lvFactories.Size = new System.Drawing.Size(474, 188);
 			this.m_lvFactories.TabIndex = 13;
+			this.m_lvFactories.UseCompatibleStateImageBehavior = false;
 			this.m_lvFactories.View = System.Windows.Forms.View.Details;
 			this.m_lvFactories.SelectedIndexChanged += new System.EventHandler(this.m_lvFactories_SelectedIndexChanged);
 			this.m_lvFactories.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.m_lvFactories_ColumnClick);
@@ -228,7 +229,7 @@ namespace BuckRogers.Interface
 			this.m_cbUnitTypes.Name = "m_cbUnitTypes";
 			this.m_cbUnitTypes.Size = new System.Drawing.Size(153, 21);
 			this.m_cbUnitTypes.TabIndex = 14;
-			this.m_cbUnitTypes.SelectedIndexChanged += new EventHandler(m_cbUnitTypes_SelectedIndexChanged);
+			this.m_cbUnitTypes.SelectedIndexChanged += new System.EventHandler(this.m_cbUnitTypes_SelectedIndexChanged);
 			// 
 			// m_btnDismantleFactory
 			// 
@@ -299,8 +300,8 @@ namespace BuckRogers.Interface
 		{
 			if(m_lvFactories.SelectedIndices.Count > 0)
 			{
-				int idxUnused = m_lvFactories.SelectedIndices[0];
-				ListViewItem lvi = m_lvFactories.Items[idxUnused];
+				int idxSelectedFactory = m_lvFactories.SelectedIndices[0];
+				ListViewItem lvi = m_lvFactories.Items[idxSelectedFactory];
 
 				string territoryName = lvi.Text;
 				string typeName = (string)m_cbUnitTypes.SelectedItem;
@@ -322,20 +323,50 @@ namespace BuckRogers.Interface
 				pi.Type = ut;
 				pi.DestinationTerritory = destination;
 
+				bool setProduction = false;
+
+			ValidateProduction:
 				try
 				{
-					if(m_controller.CheckProduction(pi))
+					setProduction = m_controller.CheckProduction(pi);
+					
+				}
+				catch(Exception ex)
+				{
+					if(pi.Factory.UnitHalfProduced)
+					{
+						DialogResult dr = MessageBox.Show("Really cancel the current production?", "Change Production?",
+														MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+						if(dr == DialogResult.Yes)
+						{
+							pi.Factory.ClearProduction();
+							goto ValidateProduction;
+						}
+					}
+					else
+					{
+						MessageBox.Show(ex.Message, "Production Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+					}
+					
+				}
+				finally
+				{
+					if(setProduction)
 					{
 						f.StartProduction(ut, destination);
 
 						lvi.SubItems[2].Text = typeName;
 						lvi.SubItems[3].Text = f.AmountProduced.ToString();
 						lvi.SubItems[4].Text = destinationName;
+
+						m_lvFactories.SelectedIndices.Remove(idxSelectedFactory);
+
+						if(idxSelectedFactory < m_lvFactories.Items.Count - 1)
+						{
+							m_lvFactories.SelectedIndices.Add(idxSelectedFactory + 1);
+						}
 					}
-				}
-				catch(Exception ex)
-				{
-					MessageBox.Show(ex.Message, "Production Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 				}
 			}
 		}

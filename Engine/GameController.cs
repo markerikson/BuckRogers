@@ -1838,15 +1838,17 @@ namespace BuckRogers
 		{
 			bool validProduction = true;
 
+			if (pi.Factory.UnitHalfProduced)
+			{
+				throw new Exception("Can't change production while a unit is half-produced");
+			}
+
 			if(!pi.Factory.CanProduce)
 			{
 				throw new Exception("Factory is currently not able to produce");
 			}
 
-			if(pi.Factory.UnitHalfProduced)
-			{
-				throw new Exception("Can't change production while a unit is half-produced");
-			}
+			
 
 			//if(pi.DestinationTerritory != null)
 			//{
