@@ -60,6 +60,8 @@ namespace BuckRogers.Interface
 			m_cbUnitTypes.SelectedIndex = 0;
 			m_btnFinishProduction.Enabled = false;
 
+			m_factories = new UnitCollection();
+
 			
 		}
 
@@ -292,7 +294,7 @@ namespace BuckRogers.Interface
 
 		private void m_btnNextProduction_Click(object sender, System.EventArgs e)
 		{
-			m_lvFactories.Items.Clear();
+			
 			NextProduction();
 		}
 
@@ -567,6 +569,32 @@ namespace BuckRogers.Interface
 		}
 		private void NextProduction()
 		{
+			bool anyNonProducingFactories = false;
+
+			for (int i = 0; i < m_factories.Count; i++)
+			{
+				Factory f = (Factory)m_factories[i];
+
+				if(f.ProductionType == UnitType.None)
+				{
+					anyNonProducingFactories = true;
+					break;
+				}
+			}
+
+			if(anyNonProducingFactories)
+			{
+				string message = "Some of your factories aren't producing anything.  Are you sure you want to ignore them?";
+				DialogResult dr = MessageBox.Show(message, "Unused Factories", 
+												MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+				if(dr == DialogResult.No)
+				{
+					return;
+				}
+			}
+
+			m_lvFactories.Items.Clear();
 			m_productionIndex++;
 
 			if(m_productionIndex < m_lbProductionOrder.Items.Count)
