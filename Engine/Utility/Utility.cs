@@ -79,6 +79,7 @@ namespace BuckRogers
 			set { m_twister2 = value; }
 		}
 
+		/*
         public static string GetEnumValueDescription(object value)
         {
             string result= string.Empty;
@@ -121,6 +122,8 @@ namespace BuckRogers
             // Return the description.
             return result;
         }
+		*/
+
 
         public static string GetDescriptionOf(Enum enumType) 
         {
@@ -192,6 +195,11 @@ namespace BuckRogers
 			dt = dt.AddHours(TimeZone.CurrentTimeZone.GetUtcOffset(dt).Hours);
 			return dt;
 		}
+
+		public static int MakeLong(int LoWord, int HiWord)
+		{
+			return (HiWord << 16) | (LoWord & 0xffff);
+		} 
     }
 }
 

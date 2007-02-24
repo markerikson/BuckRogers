@@ -352,11 +352,11 @@ namespace BuckRogers.Interface
 			this.label9.TabIndex = 23;
 			this.label9.Text = "Number of territories to win:";
 			// 
-			// treeView1
+			// m_tvOptions
 			// 
 			this.m_tvOptions.CheckBoxes = true;
 			this.m_tvOptions.Location = new System.Drawing.Point(221, 40);
-			this.m_tvOptions.Name = "treeView1";
+			this.m_tvOptions.Name = "m_tvOptions";
 			this.m_tvOptions.ShowPlusMinus = false;
 			this.m_tvOptions.ShowRootLines = false;
 			this.m_tvOptions.Size = new System.Drawing.Size(384, 246);
@@ -388,6 +388,7 @@ namespace BuckRogers.Interface
 			// 
 			// GameSetupForm
 			// 
+			this.AcceptButton = this.m_btnOK;
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(617, 318);
 			this.Controls.Add(this.label10);

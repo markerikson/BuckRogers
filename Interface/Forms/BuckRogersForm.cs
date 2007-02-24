@@ -35,7 +35,7 @@ namespace BuckRogers.Interface
 	/// <summary>
 	/// Summary description for BuckRogersForm.
 	/// </summary>
-	public class BuckRogersForm : System.Windows.Forms.Form
+	public class BuckRogersForm : System.Windows.Forms.Form, IMessageFilter
 	{
 		private static string m_versionString = "0.8 (Beta)";
 
@@ -356,6 +356,7 @@ namespace BuckRogers.Interface
 			this.statusBar1 = new System.Windows.Forms.StatusBar();
 			this.statusBarPanel1 = new System.Windows.Forms.StatusBarPanel();
 			this.statusBarPanel2 = new System.Windows.Forms.StatusBarPanel();
+			this.statusBarPanel3 = new System.Windows.Forms.StatusBarPanel();
 			this.mainMenu1 = new System.Windows.Forms.MainMenu(this.components);
 			this.menuItem1 = new System.Windows.Forms.MenuItem();
 			this.m_menuFileSave = new System.Windows.Forms.MenuItem();
@@ -364,7 +365,6 @@ namespace BuckRogers.Interface
 			this.menuItem2 = new System.Windows.Forms.MenuItem();
 			this.m_menuHelpHow = new System.Windows.Forms.MenuItem();
 			this.m_menuHelpAbout = new System.Windows.Forms.MenuItem();
-			this.statusBarPanel3 = new System.Windows.Forms.StatusBarPanel();
 			this.tabControl1.SuspendLayout();
 			this.m_tpPlacement.SuspendLayout();
 			this.m_tpAction.SuspendLayout();
@@ -468,6 +468,7 @@ namespace BuckRogers.Interface
 			// 
 			this.m_placementPanel.Controller = null;
 			this.m_placementPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.m_placementPanel.IconManager = null;
 			this.m_placementPanel.Location = new System.Drawing.Point(0, 0);
 			this.m_placementPanel.Name = "m_placementPanel";
 			this.m_placementPanel.Size = new System.Drawing.Size(232, 634);
@@ -553,6 +554,12 @@ namespace BuckRogers.Interface
 			this.statusBarPanel2.Text = "statusBarPanel2";
 			this.statusBarPanel2.Width = 120;
 			// 
+			// statusBarPanel3
+			// 
+			this.statusBarPanel3.Name = "statusBarPanel3";
+			this.statusBarPanel3.Text = "Victory Condition:";
+			this.statusBarPanel3.Width = 300;
+			// 
 			// mainMenu1
 			// 
 			this.mainMenu1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
@@ -606,12 +613,6 @@ namespace BuckRogers.Interface
 			this.m_menuHelpAbout.Text = "About";
 			this.m_menuHelpAbout.Click += new System.EventHandler(this.m_menuHelpAbout_Click);
 			// 
-			// statusBarPanel3
-			// 
-			this.statusBarPanel3.Name = "statusBarPanel3";
-			this.statusBarPanel3.Text = "Victory Condition:";
-			this.statusBarPanel3.Width = 300;
-			// 
 			// BuckRogersForm
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
@@ -628,6 +629,7 @@ namespace BuckRogers.Interface
 			this.Name = "BuckRogersForm";
 			this.Text = "Buck Rogers: Battle for the 25th Century";
 			this.Closing += new System.ComponentModel.CancelEventHandler(this.BuckRogersForm_Closing);
+			this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.BuckRogersForm_KeyPress);
 			this.Load += new System.EventHandler(this.BuckRogersForm_Load);
 			this.tabControl1.ResumeLayout(false);
 			this.m_tpPlacement.ResumeLayout(false);
@@ -993,5 +995,41 @@ namespace BuckRogers.Interface
 			
 			m_howToPlay.Show();
 		}
+
+		private void BuckRogersForm_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			string message = "Key pressed: " + e.KeyChar;
+			MessageBox.Show(message);
+		}
+
+		protected override void OnLoad(EventArgs e)
+		{
+			base.OnLoad(e);
+
+			Application.AddMessageFilter(this);
+		}
+		#region IMessageFilter Members
+
+		public bool PreFilterMessage(ref Message m)
+		{
+			if(m_controller.CurrentPhase != GamePhase.Setup)
+			{
+				return false;
+			}
+
+			const int WM_KEYDOWN = 0x100;
+			const int WM_KEYUP = 0x101; 
+
+			Keys keyCode = (Keys)(int)m.WParam & Keys.KeyCode;
+
+			if (m.Msg == WM_KEYUP && Array.IndexOf(m_placementPanel.UnitKeys, keyCode) != -1)
+			{
+				m_placementPanel.KeyPressed(keyCode);
+				return true;
+			}
+			return false; 
+		}
+
+		#endregion
 	}
 }
