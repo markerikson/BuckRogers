@@ -630,7 +630,6 @@ namespace BuckRogers.Interface
 			this.Text = "Buck Rogers: Battle for the 25th Century";
 			this.Closing += new System.ComponentModel.CancelEventHandler(this.BuckRogersForm_Closing);
 			this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.BuckRogersForm_KeyPress);
-			this.Load += new System.EventHandler(this.BuckRogersForm_Load);
 			this.tabControl1.ResumeLayout(false);
 			this.m_tpPlacement.ResumeLayout(false);
 			this.m_tpAction.ResumeLayout(false);
@@ -665,17 +664,22 @@ namespace BuckRogers.Interface
 
 			bool isLeftButton = (tcea.Button == MouseButtons.Left);
 
+			// If the user double-right-clicked, we're ALWAYS going to show the 
+			// territory information panel
+			if(!isLeftButton && tcea.DoubleClick)
+			{
+				m_territoryPanel.DisplayUnits(t, tcea);
+				tabControl1.SelectedTab = m_tpTerritory;
+				return;
+			}
+
+			// Otherwise, let the appropriate panel figure out how to deal with it.
 			switch (m_clickMode)
 			{
 				case MapClickMode.Normal:
 				case MapClickMode.GameOver:
 				{
 					m_territoryPanel.DisplayUnits(t, tcea);
-
-					if(!isLeftButton)
-					{
-						tabControl1.SelectedTab = m_tpTerritory;
-					}
 					break;
 				}
 				case MapClickMode.Move:
@@ -684,7 +688,7 @@ namespace BuckRogers.Interface
 					break;
 				}
 				case MapClickMode.PlaceUnits:
-				{
+				{					
 					m_placementPanel.TerritoryClicked(t, tcea);
 					break;
 				}
@@ -736,11 +740,6 @@ namespace BuckRogers.Interface
 					break;
 				}
 			}
-		}
-
-		private void BuckRogersForm_Load(object sender, System.EventArgs e)
-		{
-		
 		}
 
 		private bool OnStatusUpdate(object sender, StatusUpdateEventArgs suea)
@@ -1012,17 +1011,18 @@ namespace BuckRogers.Interface
 
 		public bool PreFilterMessage(ref Message m)
 		{
-			if(m_controller.CurrentPhase != GamePhase.Setup)
+			const int WM_KEYUP = 0x101;
+			if (m.Msg != WM_KEYUP || m_controller.CurrentPhase != GamePhase.Setup)
 			{
 				return false;
 			}
 
 			//const int WM_KEYDOWN = 0x100;
-			const int WM_KEYUP = 0x101; 
+			 
 
 			Keys keyCode = (Keys)(int)m.WParam & Keys.KeyCode;
 
-			if (m.Msg == WM_KEYUP && Array.IndexOf(m_placementPanel.UnitKeys, keyCode) != -1)
+			if(Array.IndexOf(m_placementPanel.UnitKeys, keyCode) != -1)
 			{
 				m_placementPanel.KeyPressed(keyCode);
 				return true;

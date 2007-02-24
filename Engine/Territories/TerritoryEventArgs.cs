@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace BuckRogers
 {
@@ -13,9 +14,20 @@ namespace BuckRogers
 		private System.Windows.Forms.MouseButtons m_button;
 		private PointF m_point;
 		private object m_tag;
+		private bool m_doubleClick;
+		private Keys m_modifiers;
 
-		
+		public Keys Modifiers
+		{
+			get { return m_modifiers; }
+			set { m_modifiers = value; }
+		}
 
+		public bool DoubleClick
+		{
+			get { return m_doubleClick; }
+			set { m_doubleClick = value; }
+		}
 		
 
 		public TerritoryEventArgs()

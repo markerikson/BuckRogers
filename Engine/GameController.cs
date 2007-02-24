@@ -574,6 +574,24 @@ namespace BuckRogers
 			}
 		}
 
+		public void RemoveUnits(UnitCollection uc, Territory t)
+		{
+			foreach (Unit u in uc)
+			{
+				u.CurrentTerritory = Territory.NONE;
+			}
+
+			if (TerritoryUnitsChanged != null)
+			{
+				TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
+				tuea.Units = uc;
+				tuea.Territory = t;
+				tuea.Added = false;
+
+				TerritoryUnitsChanged(this, tuea);
+			}
+		}
+
 		#endregion
 
 		#region Initiative functions

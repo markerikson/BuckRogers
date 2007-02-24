@@ -212,7 +212,7 @@ namespace BuckRogers.Interface
 			DrawSolarOrbit(m_meo, "MeO: ", "Mercury", 2, /*100*/ 5 * orbitRadiusUnit, Color.Yellow, false, true, false);
 			
 			PPath center = PPath.CreateEllipse(0, 0, 10f, 10f);
-			center.MouseUp +=new PInputEventHandler(center_MouseUp);
+			//center.MouseUp +=new PInputEventHandler(center_MouseUp);
 			center.Brush = Brushes.White;
 			RectangleF centerBounds = center.Bounds;
 
@@ -426,7 +426,7 @@ namespace BuckRogers.Interface
 
 				DrawLabelAndOwner2(path, name, x, y);
 
-				composite.MouseUp += new PInputEventHandler(text_Click);
+				composite.MouseUp += new PInputEventHandler(OnTerritoryMouseUp);
 			}
 
 			PPath elevator = (PPath)m_territories["Space Elevator"];
@@ -436,7 +436,7 @@ namespace BuckRogers.Interface
 			elevatorParent.Tag = "Space Elevator";
 			Canvas.Layer.AddChild(elevatorParent);
 
-			elevatorParent.MouseUp += new PInputEventHandler(text_Click);
+			elevatorParent.MouseUp += new PInputEventHandler(OnTerritoryMouseUp);
 
 			DrawLabelAndOwner2(elevator, "Space Elevator", 2200, -1000);
 			PNode elevatorLabel = (PNode)elevator[0];
@@ -502,14 +502,13 @@ namespace BuckRogers.Interface
 				compTerritory.AddChild(text);
 				compTerritory.AddChild(center);
 
-				compTerritory.MouseUp += new PInputEventHandler(text_Click);
+				compTerritory.MouseUp += new PInputEventHandler(OnTerritoryMouseUp);
 				Canvas.Layer.AddChild(compTerritory);
 			}
 		}
 
 		void OnTerritoryMouseUp(object sender, PInputEventArgs e)
 		{
-
 			if(m_dragOccurredDuringClick)
 			{
 				m_isFirstClick = true;
@@ -559,6 +558,7 @@ namespace BuckRogers.Interface
 
 		private void UserClickedMouse(bool doubleClicked, PInputEventArgs e)
 		{
+			/*
 			if(doubleClicked)
 			{
 				m_doubleClicks++;
@@ -568,7 +568,35 @@ namespace BuckRogers.Interface
 				m_singleClicks++;
 			}
 
-			UpdateToolTip(e);			
+			UpdateToolTip(e);	
+			*/
+
+			// make sure we only handle actual clicks
+			if (Canvas.PanEventHandler.Dragging
+				|| Canvas.ZoomEventHandler.Dragging)
+			{
+				return;
+			}
+
+			PNode picked = (PNode)e.PickedNode;
+
+			string territoryName = (string)picked.Tag;
+
+			if (territoryName == null)
+			{
+				return;
+			}
+
+			if (TerritoryClicked != null)
+			{
+				TerritoryEventArgs tcea = new TerritoryEventArgs(territoryName);
+				tcea.Button = e.Button;
+				tcea.Tag = e;
+				tcea.DoubleClick = doubleClicked;
+				tcea.Modifiers = e.Modifiers;
+
+				TerritoryClicked(this, tcea);
+			}			
 		}
 
 		void OnDragAction(object sender, PInputEventArgs e)
@@ -617,8 +645,8 @@ namespace BuckRogers.Interface
 			orbit.Brush = Brushes.Black;
 			orbit.Pen = Pens.White;
 
-			orbitParent.MouseUp += new PInputEventHandler(text_Click);
-			asteroidParent.MouseUp += new PInputEventHandler(text_Click);
+			orbitParent.MouseUp += new PInputEventHandler(OnTerritoryMouseUp);
+			asteroidParent.MouseUp += new PInputEventHandler(OnTerritoryMouseUp);
 
 		}
 		
@@ -640,7 +668,7 @@ namespace BuckRogers.Interface
 
 			m_orbitOffsets[name] = new PointF(shiftX, shiftY);
 
-			parent.MouseUp += new PInputEventHandler(text_Click);
+			parent.MouseUp += new PInputEventHandler(OnTerritoryMouseUp);
 		}
 
 		private void DrawLabelAndOwner2(PPath parent, string name, int shiftX, int shiftY)
@@ -725,7 +753,7 @@ namespace BuckRogers.Interface
 
 				nodes[i] = circle;
 
-				composite.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
+				composite.MouseUp += new UMD.HCIL.Piccolo.PInputEventHandler(OnTerritoryMouseUp);
 
 				float numDegrees = i * deg - 90;
 
@@ -1051,13 +1079,15 @@ namespace BuckRogers.Interface
 			}			
 		}
 
+		/*
 		private void center_MouseUp(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
 		{
-
 			PNode picked = (PNode)e.PickedNode;
 			PPath path = (PPath)picked;
 			MessageBox.Show("x: " + path.Bounds.X + ", y: " + path.Bounds.Y);
 		}
+		*/
+
 
 		private void composite_MouseEnter(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
 		{

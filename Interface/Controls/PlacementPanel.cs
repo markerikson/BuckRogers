@@ -1,3 +1,5 @@
+#define DEBUGUNITSELECTION
+
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -27,8 +29,6 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.ColumnHeader columnHeader1;
 		private System.Windows.Forms.ColumnHeader columnHeader2;
 		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.Button m_btnPlaceUnits;
-		private System.Windows.Forms.Button m_btnCancelPlacement;
 		private System.Windows.Forms.ListView m_lvAvailableUnits;
 		private bool m_playersSelectUnits;
 		private int m_numPlayersFinishedChoosing;
@@ -38,6 +38,8 @@ namespace BuckRogers.Interface
 		private Label label4;
 		private Label m_lblPlacementTerritory;
 		private bool m_clickOnEmptySpace;
+		private Territory m_activeTerritory;
+		private int m_idxSelectedUnit;
 
 		private Keys[] m_unitKeys = { Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6 };
 
@@ -66,14 +68,12 @@ namespace BuckRogers.Interface
 			// This call is required by the Windows.Forms Form Designer.
 			InitializeComponent();
 
-			m_btnCancelPlacement.Enabled = false;
 			m_selectedUnitCounts = new Hashtable();
 
+			int LVM_SETICONSPACING = 4149;
 			int width = 70;
 			int height = 80;
-			int iconSpacing = Utility.MakeLong(width, height);
-
-			int LVM_SETICONSPACING = 4149;
+			int iconSpacing = Utility.MakeLong(width, height);			
 
 			SendMessage(m_lvAvailableUnits.Handle, LVM_SETICONSPACING, 0, iconSpacing);
 			SendMessage(m_lvUnitsPlaced.Handle, LVM_SETICONSPACING, 0, iconSpacing);
@@ -103,12 +103,10 @@ namespace BuckRogers.Interface
 		private void InitializeComponent()
 		{
 			this.label2 = new System.Windows.Forms.Label();
-			this.m_btnPlaceUnits = new System.Windows.Forms.Button();
 			this.m_lvAvailableUnits = new System.Windows.Forms.ListView();
 			this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
 			this.label1 = new System.Windows.Forms.Label();
-			this.m_btnCancelPlacement = new System.Windows.Forms.Button();
 			this.m_btnChooseUnits = new System.Windows.Forms.Button();
 			this.m_lvUnitsPlaced = new System.Windows.Forms.ListView();
 			this.label3 = new System.Windows.Forms.Label();
@@ -125,15 +123,6 @@ namespace BuckRogers.Interface
 			this.label2.TabIndex = 16;
 			this.label2.Text = "Player order:";
 			// 
-			// m_btnPlaceUnits
-			// 
-			this.m_btnPlaceUnits.Location = new System.Drawing.Point(0, 23);
-			this.m_btnPlaceUnits.Name = "m_btnPlaceUnits";
-			this.m_btnPlaceUnits.Size = new System.Drawing.Size(75, 23);
-			this.m_btnPlaceUnits.TabIndex = 17;
-			this.m_btnPlaceUnits.Text = "Place Units";
-			this.m_btnPlaceUnits.Click += new System.EventHandler(this.m_btnPlaceUnits_Click);
-			// 
 			// m_lvAvailableUnits
 			// 
 			this.m_lvAvailableUnits.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -146,6 +135,7 @@ namespace BuckRogers.Interface
 			this.m_lvAvailableUnits.Size = new System.Drawing.Size(221, 180);
 			this.m_lvAvailableUnits.TabIndex = 18;
 			this.m_lvAvailableUnits.UseCompatibleStateImageBehavior = false;
+			this.m_lvAvailableUnits.KeyDown += new System.Windows.Forms.KeyEventHandler(this.m_lvAvailableUnits_KeyDown);
 			this.m_lvAvailableUnits.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.m_lvAvailableUnits_ItemSelectionChanged);
 			this.m_lvAvailableUnits.MouseDown += new System.Windows.Forms.MouseEventHandler(this.m_lvAvailableUnits_MouseDown);
 			// 
@@ -166,18 +156,9 @@ namespace BuckRogers.Interface
 			this.label1.TabIndex = 19;
 			this.label1.Text = "Units left:";
 			// 
-			// m_btnCancelPlacement
-			// 
-			this.m_btnCancelPlacement.Location = new System.Drawing.Point(0, 52);
-			this.m_btnCancelPlacement.Name = "m_btnCancelPlacement";
-			this.m_btnCancelPlacement.Size = new System.Drawing.Size(75, 23);
-			this.m_btnCancelPlacement.TabIndex = 20;
-			this.m_btnCancelPlacement.Text = "Cancel";
-			this.m_btnCancelPlacement.Click += new System.EventHandler(this.m_btnCancelPlacement_Click);
-			// 
 			// m_btnChooseUnits
 			// 
-			this.m_btnChooseUnits.Location = new System.Drawing.Point(0, 81);
+			this.m_btnChooseUnits.Location = new System.Drawing.Point(3, 44);
 			this.m_btnChooseUnits.Name = "m_btnChooseUnits";
 			this.m_btnChooseUnits.RightToLeft = System.Windows.Forms.RightToLeft.No;
 			this.m_btnChooseUnits.Size = new System.Drawing.Size(75, 23);
@@ -220,9 +201,9 @@ namespace BuckRogers.Interface
 			this.m_lblPlacementTerritory.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.m_lblPlacementTerritory.Location = new System.Drawing.Point(4, 345);
 			this.m_lblPlacementTerritory.Name = "m_lblPlacementTerritory";
-			this.m_lblPlacementTerritory.Size = new System.Drawing.Size(196, 16);
+			this.m_lblPlacementTerritory.Size = new System.Drawing.Size(41, 16);
 			this.m_lblPlacementTerritory.TabIndex = 25;
-			this.m_lblPlacementTerritory.Text = "Australian Development Facility";
+			this.m_lblPlacementTerritory.Text = "None";
 			// 
 			// m_lbPlayerOrder
 			// 
@@ -239,10 +220,8 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.m_lvUnitsPlaced);
 			this.Controls.Add(this.m_btnChooseUnits);
-			this.Controls.Add(this.m_btnCancelPlacement);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.m_lvAvailableUnits);
-			this.Controls.Add(this.m_btnPlaceUnits);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.m_lbPlayerOrder);
 			this.Name = "PlacementPanel";
@@ -253,116 +232,186 @@ namespace BuckRogers.Interface
 		}
 		#endregion
 
-		private void m_btnPlaceUnits_Click(object sender, System.EventArgs e)
-		{
-			m_btnPlaceUnits.Enabled = false;
-			m_btnCancelPlacement.Enabled = true;
-
-			if(MoveModeChanged != null)
-			{
-				MoveModeEventArgs mmea = new MoveModeEventArgs();
-				mmea.MoveMode = MoveMode.StartPlacement;
-
-				MoveModeChanged(this, mmea);
-			}
-
-		}
-
 		public void TerritoryClicked(Territory t, TerritoryEventArgs tcea)
 		{
+			string errorMessage = string.Empty;
 			if(t.Owner != m_controller.CurrentPlayer)
 			{
-				MessageBox.Show("Can't place units in a territory you don't own", "Placement", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				errorMessage = "Can't place units in a territory you don't own";
+			}
+
+			if(t.Units.Count >= 6 && !m_playersSelectUnits && errorMessage == string.Empty)
+			{
+				errorMessage = "Can only place 6 units in a single territory";
+			}
+
+			if(m_lvAvailableUnits.SelectedIndices.Count == 0 && errorMessage == string.Empty)
+			{
+				errorMessage = "Must have a unit type selected in order to place units";
+			}
+
+			if(m_activeTerritory != null && t != m_activeTerritory && errorMessage == string.Empty)
+			{
+				errorMessage = "Can't place units in multiple territories in one turn";
+			}			
+
+			if(errorMessage != string.Empty)
+			{
+				MessageBox.Show(errorMessage, "Placement Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 				return;
 			}
 
-			if(t.Units.Count >= 6 && !m_playersSelectUnits)
+			if(tcea.Button == MouseButtons.Left)
 			{
-				MessageBox.Show("Can only place 6 units in a single territory", "Placement",
-								MessageBoxButtons.OK, MessageBoxIcon.Warning);
-				return;
-			}
+				// User previously placed units, then decided he wasn't finished
+				if (m_lvUnitsPlaced.Items.Count == 3)
+				{
+					goto PlacementCompleted;
+				}
 
-			PlacementForm pf = new PlacementForm();
-			pf.SetupUnits(m_controller.CurrentPlayer, t);
+				ListViewItem selectedItem = m_lvAvailableUnits.SelectedItems[0];
+				UnitType ut = (UnitType)selectedItem.Tag;
 
-			pf.ShowDialog();
+				int totalUnitsPlaced = m_lvUnitsPlaced.Items.Count;
+				int numThisTypePlaced = 0;
 
-			if(pf.DialogResult == DialogResult.OK)
-			{
-				UnitCollection uc = pf.SelectedUnits;
+				if (m_selectedUnitCounts.ContainsKey(ut))
+				{
+					numThisTypePlaced = (int)m_selectedUnitCounts[ut];
+				}
+
+				// 1 by default - consider double-clicking a special case
+				int numToAdd = 1;
+
+				// TODO Maybe let players place more than 3 units at a time?
+				if(tcea.DoubleClick)
+				{
+					numToAdd = 3 - totalUnitsPlaced;
+				}
+
+				Player p = m_controller.CurrentPlayer;
+				UnitCollection uc = p.Units.GetUnits(ut, p, Territory.NONE, numToAdd);
 
 				m_controller.PlaceUnits(uc, t);
-
-				m_lvUnitsPlaced.Items.Clear();
-				ImageList il = (ImageList)m_playerImages[m_controller.CurrentPlayer];
-				m_lvUnitsPlaced.LargeImageList = il;
-				
 
 				foreach(Unit u in uc)
 				{
 					ListViewItem lvi = new ListViewItem();
-					lvi.Text = u.Type.ToString();
-					lvi.ImageKey = u.Type.ToString();
+
+					lvi.Text = ut.ToString();
+					lvi.ImageKey = ut.ToString();
+					lvi.Tag = ut;
 
 					m_lvUnitsPlaced.Items.Add(lvi);
+					numThisTypePlaced++;
 				}
 
-				if(m_controller.NextPlayer())
+				m_selectedUnitCounts[ut] = numThisTypePlaced;
+
+				m_activeTerritory = t;
+				m_lblPlacementTerritory.Text = t.Name;
+
+				UnitCollection remainingUnits = p.Units.GetUnits(ut, p, Territory.NONE, p.Units.Count);
+				selectedItem.Text = string.Format("{0}: {1}", ut, remainingUnits.Count);				
+			}
+			else if(tcea.Button == MouseButtons.Right)
+			{
+				// Should never be a double-right-click here, since that's
+				// handled by BuckRogersForm.  So, we're removing units.
+				// Only question is, how many?
+
+				UnitCollection unitsToRemove = new UnitCollection();
+
+				// remove everything
+				if( (tcea.Modifiers & Keys.Shift) == Keys.Shift)
 				{
-					m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
-					RefreshAvailableUnits();					
+					foreach(DictionaryEntry de in m_selectedUnitCounts)
+					{
+						UnitType ut = (UnitType)de.Key;
+						int numUnits = (int)de.Value;
+
+						UnitCollection uc = m_activeTerritory.Units.GetUnits(ut, m_controller.CurrentPlayer, 
+																			m_activeTerritory, numUnits);
+
+						unitsToRemove.AddAllUnits(uc);
+					}
+
+					m_lvUnitsPlaced.Items.Clear();
+
 				}
+				// just remove the most recent
 				else
 				{
-					RefreshPlayerOrder();
+					int index = m_lvUnitsPlaced.Items.Count;
+					ListViewItem lvi = m_lvUnitsPlaced.Items[index - 1];
+
+					UnitType ut = (UnitType)lvi.Tag;
+
+					UnitCollection uc = m_activeTerritory.Units.GetUnits(ut, m_controller.CurrentPlayer,
+																		m_activeTerritory, 1);
+
+					unitsToRemove.AddAllUnits(uc);
+
+					m_lvUnitsPlaced.Items.Remove(lvi);
 				}
-				
-				if(m_playersSelectUnits)
+
+				m_controller.RemoveUnits(unitsToRemove, m_activeTerritory);
+
+				if(m_lvUnitsPlaced.Items.Count == 0)
 				{
-					if(m_numPlayersFinishedChoosing < m_controller.Players.Length)
+					m_activeTerritory = null;
+					m_lblPlacementTerritory.Text = "None";
+				}
+			}
+			else
+			{
+				// ignore middle-clicks
+				return;
+			}
+
+
+		PlacementCompleted:
+			// User has finished placing stuff
+
+			UnitCollection totalRemainingUnits = Territory.NONE.Units.GetUnits(m_controller.CurrentPlayer);
+
+			if (m_lvUnitsPlaced.Items.Count == 3 || totalRemainingUnits.Count == 0)
+			{
+				DialogResult dr = MessageBox.Show("Placement completed?", "Placement", 
+													MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+				if(dr == DialogResult.Yes)
+				{
+					m_lvUnitsPlaced.Items.Clear();
+					m_activeTerritory = null;
+					m_lblPlacementTerritory.Text = "None";
+
+					if (m_controller.NextPlayer())
 					{
-						m_btnPlaceUnits.Enabled = false;
-						m_btnCancelPlacement.Enabled = false;
-						m_btnChooseUnits.Enabled = true;
-						m_btnChooseUnits.Visible = true;
+						m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
+						RefreshAvailableUnits();
 					}
 					else
 					{
-						m_btnPlaceUnits.Enabled = true;
-						m_btnCancelPlacement.Enabled = false;
-						m_btnChooseUnits.Visible = false;
+						RefreshPlayerOrder();
+					}
+
+					if (m_playersSelectUnits)
+					{
+						if (m_numPlayersFinishedChoosing < m_controller.Players.Length)
+						{
+							m_btnChooseUnits.Enabled = true;
+							m_btnChooseUnits.Visible = true;
+						}
+						else
+						{
+							m_btnChooseUnits.Visible = false;
+						}
 					}
 				}
-				else
-				{
-					m_btnPlaceUnits.Enabled = true;
-					m_btnCancelPlacement.Enabled = false;
-				}
-
-				if(MoveModeChanged != null)
-				{
-					MoveModeEventArgs mmea = new MoveModeEventArgs();
-					mmea.MoveMode = MoveMode.Finished;
-
-					MoveModeChanged(this, mmea);
-				}
 			}
 		}
 
-		private void m_btnCancelPlacement_Click(object sender, System.EventArgs e)
-		{
-			m_btnCancelPlacement.Enabled = false;
-			m_btnPlaceUnits.Enabled = true;
-
-			if(MoveModeChanged != null)
-			{
-				MoveModeEventArgs mmea = new MoveModeEventArgs();
-				mmea.MoveMode = MoveMode.Finished;
-
-				MoveModeChanged(this, mmea);
-			}
-		}
 
 		public void RefreshPlayerOrder()
 		{
@@ -381,6 +430,7 @@ namespace BuckRogers.Interface
 			Player p = m_controller.CurrentPlayer;
 			ImageList il = (ImageList)m_playerImages[p];
 			m_lvAvailableUnits.LargeImageList = il;
+			m_lvUnitsPlaced.LargeImageList = il;
 
 			UnitCollection uc = p.Units.GetUnits(Territory.NONE);
 			Hashtable ht = uc.GetUnitTypeCount();
@@ -398,12 +448,15 @@ namespace BuckRogers.Interface
 				lvi.Text = text;
 				lvi.ImageKey = ut.ToString();
 				lvi.SubItems.Add(numUnits.ToString());
+				lvi.Tag = ut;
 
 				m_lvAvailableUnits.Items.Add(lvi);				
 			}
 
 			m_lvAvailableUnits.Focus();
-			m_lvAvailableUnits.Items[0].Selected = true;	
+
+			m_idxSelectedUnit = 0;
+			m_lvAvailableUnits.SelectedIndices.Add(m_idxSelectedUnit);
 		}
 
 		public BuckRogers.GameController Controller
@@ -419,12 +472,10 @@ namespace BuckRogers.Interface
 			if(m_playersSelectUnits)
 			{
 				m_btnChooseUnits.Visible = true;
-				m_btnPlaceUnits.Enabled = false;
 			}
 			else
 			{
 				m_btnChooseUnits.Visible = false;
-				m_btnPlaceUnits.Enabled = true;
 			}
 
 			m_playerImages = new Hashtable();
@@ -451,6 +502,17 @@ namespace BuckRogers.Interface
 
 			RefreshPlayerOrder();
 			RefreshAvailableUnits();
+
+			if(!m_playersSelectUnits)
+			{
+				if (MoveModeChanged != null)
+				{
+					MoveModeEventArgs mmea = new MoveModeEventArgs();
+					mmea.MoveMode = MoveMode.StartPlacement;
+
+					MoveModeChanged(this, mmea);
+				}
+			}			
 		}
 
 		private void m_btnChooseUnits_Click(object sender, EventArgs e)
@@ -470,7 +532,9 @@ namespace BuckRogers.Interface
 				}
 			}
 
-			//numUnits = 5;
+#if DEBUGUNITSELECTION
+			numUnits = 5;
+#endif
 
 			UnitSelectionForm usf = new UnitSelectionForm(numUnits);
 			DialogResult dr = usf.ShowDialog();
@@ -492,9 +556,14 @@ namespace BuckRogers.Interface
 			RefreshAvailableUnits();
 
 			m_btnChooseUnits.Enabled = false;
-			m_btnPlaceUnits.Enabled = true;
-			int i = 42;
-			int q = i;
+
+			if (MoveModeChanged != null)
+			{
+				MoveModeEventArgs mmea = new MoveModeEventArgs();
+				mmea.MoveMode = MoveMode.StartPlacement;
+
+				MoveModeChanged(this, mmea);
+			}
 		}
 
 		internal void KeyPressed(Keys keyCode)
@@ -505,16 +574,19 @@ namespace BuckRogers.Interface
 
 			if(m_lvAvailableUnits.Items.Count > index)
 			{
+				m_idxSelectedUnit = index;
 				m_lvAvailableUnits.SelectedIndices.Clear();
-				m_lvAvailableUnits.SelectedIndices.Add(index);
+				m_lvAvailableUnits.SelectedIndices.Add(m_idxSelectedUnit);
+				
 			}
 		}
 
 		private void m_lvAvailableUnits_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
 		{
-			if(!e.IsSelected && m_clickOnEmptySpace)
+			if(!e.IsSelected && m_clickOnEmptySpace && !m_lvAvailableUnits.SelectedIndices.Contains(m_idxSelectedUnit))
 			{
-				e.Item.Selected = true;
+				m_lvAvailableUnits.SelectedIndices.Clear();
+				m_lvAvailableUnits.SelectedIndices.Add(m_idxSelectedUnit);
 			}
 		}
 
@@ -523,6 +595,17 @@ namespace BuckRogers.Interface
 			ListViewItem item = m_lvAvailableUnits.GetItemAt(e.X, e.Y);
 
 			m_clickOnEmptySpace = (item == null);
+		}
+
+		private void m_lvAvailableUnits_KeyDown(object sender, KeyEventArgs e)
+		{
+			e.Handled = true;
+			e.SuppressKeyPress = true;
+
+			if (Array.IndexOf(this.UnitKeys, e.KeyCode) != -1)
+			{
+				KeyPressed(e.KeyCode);
+			}
 		}
 	}
 }
