@@ -17,6 +17,8 @@ namespace BuckRogers.Interface
 		public event MoveModeChangedHandler MoveModeChanged;
 
 		private GameController m_controller;
+		private IconManager m_iconManager;
+		private Hashtable m_playerImages;
 
 		private System.Windows.Forms.Label label2;
 		private PlayerListBox m_lbPlayerOrder;
@@ -29,6 +31,13 @@ namespace BuckRogers.Interface
 		private bool m_playersSelectUnits;
 		private int m_numPlayersFinishedChoosing;
 		private Button m_btnChooseUnits;
+
+		public IconManager IconManager
+		{
+			get { return m_iconManager; }
+			set { m_iconManager = value; }
+		}
+
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -107,12 +116,11 @@ namespace BuckRogers.Interface
 			this.m_lvAvailableUnits.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2});
-			this.m_lvAvailableUnits.Location = new System.Drawing.Point(92, 184);
+			this.m_lvAvailableUnits.Location = new System.Drawing.Point(7, 216);
 			this.m_lvAvailableUnits.Name = "m_lvAvailableUnits";
-			this.m_lvAvailableUnits.Size = new System.Drawing.Size(136, 168);
+			this.m_lvAvailableUnits.Size = new System.Drawing.Size(221, 274);
 			this.m_lvAvailableUnits.TabIndex = 18;
 			this.m_lvAvailableUnits.UseCompatibleStateImageBehavior = false;
-			this.m_lvAvailableUnits.View = System.Windows.Forms.View.Details;
 			// 
 			// columnHeader1
 			// 
@@ -288,6 +296,8 @@ namespace BuckRogers.Interface
 		public void RefreshAvailableUnits()
 		{
 			Player p = m_controller.CurrentPlayer;
+			ImageList il = (ImageList)m_playerImages[p];
+			m_lvAvailableUnits.LargeImageList = il;
 
 			UnitCollection uc = p.Units.GetUnits(Territory.NONE);
 			Hashtable ht = uc.GetUnitTypeCount();
@@ -300,7 +310,10 @@ namespace BuckRogers.Interface
 				int numUnits = (int)de.Value;
 
 				ListViewItem lvi = new ListViewItem();
-				lvi.Text = ut.ToString();
+
+				string text = string.Format("{0}: {1}", ut, numUnits); 
+				lvi.Text = text;
+				lvi.ImageKey = ut.ToString();
 				/*
 				if(ut == UnitType.Factory)
 				{
@@ -345,6 +358,29 @@ namespace BuckRogers.Interface
 				m_btnChooseUnits.Visible = false;
 				m_btnPlaceUnits.Enabled = true;
 			}
+
+			m_playerImages = new Hashtable();
+
+			foreach(Player p in m_controller.Players)
+			{
+				Hashtable ht = m_iconManager.GetPlayerIcons(p);
+
+				ImageList il = new ImageList();
+				il.ImageSize = new Size(48, 48);
+
+				foreach (UnitType ut in Enum.GetValues(typeof(UnitType)))
+				{
+					if (ht.ContainsKey(ut))
+					{
+						Bitmap b = (Bitmap)ht[ut];
+
+						il.Images.Add(ut.ToString(), b);
+					}
+				}
+
+				m_playerImages[p] = il;
+			}
+			
 
 			RefreshPlayerOrder();
 			RefreshAvailableUnits();

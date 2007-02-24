@@ -205,6 +205,7 @@ namespace BuckRogers.Interface
 			
 					//m_placementPanel.RefreshPlayerOrder();
 					//m_placementPanel.RefreshAvailableUnits();
+					m_placementPanel.IconManager = m_map.IconManager;
 					m_placementPanel.Initialize();
 
 					statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
