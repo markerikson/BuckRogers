@@ -77,6 +77,8 @@ namespace BuckRogers.Interface
 		private PText m_lblNextPlayers;
 		private PText m_lblPrevPlayers;
 
+		private PText m_tooltip;
+
 		//private PlayerUnitDisplay[] m_displays;
 		private Hashlist m_displays;
 		private Hashlist m_availableDisplays;
@@ -132,6 +134,18 @@ namespace BuckRogers.Interface
 			this.ResumeLayout(false);
 
 			m_canvas.Camera = c;
+
+			PBasicInputEventHandler tipEventHandler = new PBasicInputEventHandler();
+			tipEventHandler.MouseMove = new MouseMoveDelegate(MouseMoveHandler);
+			c.AddInputEventListener(tipEventHandler);
+
+			m_tooltip = new PText();
+			m_tooltip.TextBrush = Brushes.Black;
+			m_tooltip.Brush = Brushes.Aquamarine;
+			m_tooltip.Pickable = false;
+			Font font = m_tooltip.Font;
+			m_tooltip.Font = new Font(font.Name, font.SizeInPoints - 2, FontStyle.Bold);
+			c.AddChild(m_tooltip);
 
 			m_controller = gc;
 			m_battleController = bc;
@@ -688,63 +702,25 @@ namespace BuckRogers.Interface
 						if(e.Button == MouseButtons.Left)
 						{
 							m_numAttacks++;
-							//MessageBox.Show("Attacking once");
-
-							/*
-							string message = string.Format(//"Attacking one of {0}'s {1}s with one of {2}'s {3}s",
-															"{2}'s {3} attacks one of {0}'s {1}s ({4})",
-															clickedUID.Player.Name, clickedUID.Type.ToString(),
-															m_selectedUID.Player.Name, m_selectedUID.Type.ToString(), 
-															m_numAttacks);
-							MessageBox.Show(message);
-
-							messages.Add(message);
-							*/
 
 							numAttacks = 1;
 						}
 						else if(e.Button == MouseButtons.Right)
 						{
-							//MessageBox.Show("Attacking with a full stack");
-
 							for(int i = 0; i < 5; i++)
 							{
 								m_numAttacks++;
-								/*
-								string message = string.Format(//"Attacking {0}'s {1}s with all of {2}'s {3}s",
-															"{2}'s {3}s all attack {0}'s {1}s ({4})",
-															clickedUID.Player.Name, clickedUID.Type.ToString(),
-															m_selectedUID.Player.Name, m_selectedUID.Type.ToString(),
-															m_numAttacks);
-								messages.Add(message);
-								*/
-							}
-							
-							//MessageBox.Show(message);
+							}							
 
 							numAttacks = 5;
 						}
 
-						//AddAttackMessages(messages);
-
-						/*
-						Random r = new Random();
-
-						for(int i = 0; i < numAttacks; i++)
-						{
-							int roll = r.Next(1, 11);
-							bool hit = (roll > 6);
-							AddAttackMessage(m_selectedUID.Player, clickedUID.Player, m_selectedUID.Type,
-											clickedUID.Type, roll, hit);
-						}
-						*/
-
 						DoAttack(clickedUID, numAttacks);
+
+						UpdateToolTip(e);
 					}
 					else
 					{
-						//CombatMessage cm2 = (CombatMessage)m_combatMessages[1];
-						//cm2.AnimateMessageTo(new PointF(268, 220));
 					}
 				}		
 			}
@@ -1312,6 +1288,94 @@ namespace BuckRogers.Interface
 			}
 
 			return result;
+		}
+
+		public void MouseMoveHandler(object sender, PInputEventArgs e)
+		{
+			UpdateToolTip(e);
+		}
+
+		public void UpdateToolTip(PInputEventArgs e)
+		{
+			PNode n = (PNode)e.InputManager.MouseOver.PickedNode;
+
+			String tooltipString = null;
+			UnitInfoDisplay info = null;
+
+			if (n.Tag is IconInfo)
+			{
+				//n = e.InputManager.MouseOver.NextPickedNode;//tooltipString = "testing";
+				info = (UnitInfoDisplay)n.Tag ;
+
+				tooltipString = string.Format("Type: {0}\nAlive: {1}\nDead: {2}\nCan shoot: {3}\nTotal: {4}",
+											info.Type, info.NumAlive, info.NumDead, info.NumCanShoot, info.NumTotal);
+			}
+			/*
+			else if (n.Tag is string)
+			{
+				tooltipString = (string)n.Tag;
+			}
+			*/
+			/*
+			if (tooltipString != null)
+			{
+				int idx = tooltipString.IndexOf(':');
+				if (idx != -1)
+				{
+					string[] split = tooltipString.Split(new char[] { ':' });
+					split[1].Trim();
+
+					int orbitIndex = Int32.Parse(split[1]);
+
+					tooltipString = m_controller.Map.GetPlanetTag(split[0], orbitIndex);
+				}
+			}
+			*/
+
+			if (tooltipString == null || info.NumTotal == 0)
+			{
+				m_tooltip.Visible = false;
+				return;
+			}
+			else
+			{
+				PointF p = e.CanvasPosition;
+
+				p = e.Path.CanvasToLocal(p, m_canvas.Camera);
+
+				if (m_tooltip.Text != tooltipString)
+				{
+					m_tooltip.Text = tooltipString;
+
+					if (m_tooltip.Bounds.Width > 350)
+					{
+						RectangleF bounds = m_tooltip.Bounds;
+						bounds.Width = 300;
+						m_tooltip.ConstrainWidthToTextWidth = false;
+						m_tooltip.TextAlignment = StringAlignment.Center;
+						m_tooltip.Bounds = bounds;
+					}
+					else
+					{
+						m_tooltip.ConstrainWidthToTextWidth = true;
+						m_tooltip.TextAlignment = StringAlignment.Near;
+					}
+				}
+
+				/*
+				float x = p.X - (m_tooltip.Width / 2);
+				float y = p.Y - m_tooltip.Height - 8;
+				*/
+
+				float x = info.Icon.X + 60;
+				float y = info.Icon.Y;
+
+				m_tooltip.SetOffset((int)x, (int)y);
+				m_tooltip.Visible = true;
+
+				RectangleF tipBounds = m_tooltip.Bounds;
+				m_tooltip.RepaintFrom(tipBounds, m_tooltip);
+			}
 		}
 	}
 

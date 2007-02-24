@@ -278,18 +278,19 @@ namespace BuckRogers.Interface
 				FindValidProductionTerritories();
 			}
 		}
-
-
-		// TODO Black Market production
 		
 		private void m_btnFinishProduction_Click(object sender, System.EventArgs e)
 		{
-			AddProduction();
-			m_controller.ExecuteProduction();
+			if(CheckPlayerProductionCompleted())
+			{
+				AddProduction();
+				m_controller.ExecuteProduction();
+
+				//this.DialogResult = DialogResult.OK;
+				this.Hide();
+				m_controller.CheckNextPhase();
+			}
 			
-			//this.DialogResult = DialogResult.OK;
-			this.Hide();
-			m_controller.CheckNextPhase();
 		}
 
 		private void m_btnNextProduction_Click(object sender, System.EventArgs e)
@@ -504,7 +505,8 @@ namespace BuckRogers.Interface
 				m_btnProduce.Enabled = false;
 				m_btnNextProduction.Enabled = true;
 
-				NextProduction();
+				//NextProduction();
+				ShowNextPlayerProduction();
 			}
 			else
 			{
@@ -567,7 +569,17 @@ namespace BuckRogers.Interface
 				m_cbNeighbors.Items.Clear();
 			}
 		}
+
 		private void NextProduction()
+		{
+			if(CheckPlayerProductionCompleted())
+			{
+				ShowNextPlayerProduction();
+			}
+			
+		}
+
+		private bool CheckPlayerProductionCompleted()
 		{
 			bool anyNonProducingFactories = false;
 
@@ -575,35 +587,40 @@ namespace BuckRogers.Interface
 			{
 				Factory f = (Factory)m_factories[i];
 
-				if(f.ProductionType == UnitType.None)
+				if (f.ProductionType == UnitType.None)
 				{
 					anyNonProducingFactories = true;
 					break;
 				}
 			}
 
-			if(anyNonProducingFactories)
+			if (anyNonProducingFactories)
 			{
 				string message = "Some of your factories aren't producing anything.  Are you sure you want to ignore them?";
-				DialogResult dr = MessageBox.Show(message, "Unused Factories", 
+				DialogResult dr = MessageBox.Show(message, "Unused Factories",
 												MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-				if(dr == DialogResult.No)
+				if (dr == DialogResult.No)
 				{
-					return;
+					return false;
 				}
 			}
 
+			return true;
+		}
+
+		private void ShowNextPlayerProduction()
+		{
 			m_lvFactories.Items.Clear();
 			m_productionIndex++;
 
-			if(m_productionIndex < m_lbProductionOrder.Items.Count)
+			if (m_productionIndex < m_lbProductionOrder.Items.Count)
 			{
 				m_lbProductionOrder.SelectedIndex = m_productionIndex;
 				AddProduction();
 			}
-			
-			if(m_productionIndex == (m_lbProductionOrder.Items.Count - 1))
+
+			if (m_productionIndex == (m_lbProductionOrder.Items.Count - 1))
 			{
 				m_btnNextProduction.Enabled = false;
 				//m_btnProduce.Enabled = true;
@@ -613,7 +630,6 @@ namespace BuckRogers.Interface
 			m_sorter.SortColumn = 1;
 			m_sorter.Order = SortOrder.Ascending;
 			m_lvFactories.Sort();
-			
 		}
 
 		private void m_btnDismantleFactory_Click(object sender, System.EventArgs e)
