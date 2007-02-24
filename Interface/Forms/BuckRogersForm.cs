@@ -77,6 +77,7 @@ namespace BuckRogers.Interface
 		private MenuItem menuItem2;
 		private MenuItem m_menuHelpAbout;
 		private MenuItem m_menuHelpHow;
+		private StatusBarPanel statusBarPanel3;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
 
 		public static string VersionString
@@ -84,14 +85,10 @@ namespace BuckRogers.Interface
 			get { return BuckRogersForm.m_versionString; }
 		}
 		
-
+		/*
 		public BuckRogersForm()
 		{
 			InitializeComponent();
-
-			
-
-			
 
 			ControllerTest ct = new ControllerTest();
 			ct.Reinitialize = false;
@@ -110,25 +107,19 @@ namespace BuckRogers.Interface
 
 			m_clickMode = MapClickMode.Normal;
 			StartGame();
-
 		}
+		*/
 
 		public BuckRogersForm(GameOptions go, string loadFileName)
 		{
-			//
-			// Required for Windows Form Designer support
-			//
 			InitializeComponent();
 			this.Icon = InterfaceUtility.GetApplicationIcon();
 
 			this.StartPosition = FormStartPosition.CenterScreen;
 			Rectangle desktop = Screen.PrimaryScreen.WorkingArea;
-			//this.Bounds = new Rectangle(desktop.X + 20, desktop.Y + 20, desktop.Width - 40, desktop.Height - 40);
-			this.Size = new Size(desktop.Width - 80, desktop.Height - 80);
-			
+			this.Size = new Size(desktop.Width - 80, desktop.Height - 80);			
 
-			Initialize(go, loadFileName);
-			
+			Initialize(go, loadFileName);			
 		}
 
 		private void Initialize(GameOptions go, string loadFileName)
@@ -217,6 +208,10 @@ namespace BuckRogers.Interface
 					m_placementPanel.Initialize();
 
 					statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+					statusBar1.Panels[1].Text = "Placement";
+
+					string victoryDescription = Utility.GetDescriptionOf(GameController.Options.WinningConditions);
+					statusBar1.Panels[2].Text = "Victory Condition: " + victoryDescription;
 
 					m_menuFileSave.Enabled = false;
 				}
@@ -311,6 +306,9 @@ namespace BuckRogers.Interface
 
 			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
 			statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
+
+			string victoryDescription = Utility.GetDescriptionOf(GameController.Options.WinningConditions);
+			statusBar1.Panels[2].Text = "Victory Condition: " + victoryDescription;
 			
 			m_movePanel.RefreshPlayerOrder();			
 			m_informationPanel.RefreshAllInfo();
@@ -363,8 +361,9 @@ namespace BuckRogers.Interface
 			this.m_menuFileLoad = new System.Windows.Forms.MenuItem();
 			this.m_menuFileExit = new System.Windows.Forms.MenuItem();
 			this.menuItem2 = new System.Windows.Forms.MenuItem();
-			this.m_menuHelpAbout = new System.Windows.Forms.MenuItem();
 			this.m_menuHelpHow = new System.Windows.Forms.MenuItem();
+			this.m_menuHelpAbout = new System.Windows.Forms.MenuItem();
+			this.statusBarPanel3 = new System.Windows.Forms.StatusBarPanel();
 			this.tabControl1.SuspendLayout();
 			this.m_tpPlacement.SuspendLayout();
 			this.m_tpAction.SuspendLayout();
@@ -372,6 +371,7 @@ namespace BuckRogers.Interface
 			this.m_tpInformation.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel2)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel3)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// m_btnZoomIn
@@ -533,7 +533,8 @@ namespace BuckRogers.Interface
 			this.statusBar1.Name = "statusBar1";
 			this.statusBar1.Panels.AddRange(new System.Windows.Forms.StatusBarPanel[] {
             this.statusBarPanel1,
-            this.statusBarPanel2});
+            this.statusBarPanel2,
+            this.statusBarPanel3});
 			this.statusBar1.ShowPanels = true;
 			this.statusBar1.Size = new System.Drawing.Size(1016, 22);
 			this.statusBar1.TabIndex = 8;
@@ -592,17 +593,23 @@ namespace BuckRogers.Interface
             this.m_menuHelpAbout});
 			this.menuItem2.Text = "Help";
 			// 
+			// m_menuHelpHow
+			// 
+			this.m_menuHelpHow.Index = 0;
+			this.m_menuHelpHow.Text = "How To Play";
+			this.m_menuHelpHow.Click += new System.EventHandler(this.m_menuHelpHow_Click);
+			// 
 			// m_menuHelpAbout
 			// 
 			this.m_menuHelpAbout.Index = 1;
 			this.m_menuHelpAbout.Text = "About";
 			this.m_menuHelpAbout.Click += new System.EventHandler(this.m_menuHelpAbout_Click);
 			// 
-			// m_menuHelpHow
+			// statusBarPanel3
 			// 
-			this.m_menuHelpHow.Index = 0;
-			this.m_menuHelpHow.Text = "How To Play";
-			this.m_menuHelpHow.Click += new System.EventHandler(this.m_menuHelpHow_Click);
+			this.statusBarPanel3.Name = "statusBarPanel3";
+			this.statusBarPanel3.Text = "Victory Condition:";
+			this.statusBarPanel3.Width = 300;
 			// 
 			// BuckRogersForm
 			// 
@@ -628,6 +635,7 @@ namespace BuckRogers.Interface
 			this.m_tpInformation.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel1)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel2)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel3)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -936,8 +944,18 @@ namespace BuckRogers.Interface
 
 			m_clickMode = MapClickMode.Normal;
 
+			tabControl1.TabPages.Clear();
+			tabControl1.TabPages.Add(m_tpAction);
+			tabControl1.TabPages.Add(m_tpTerritory);
+			tabControl1.TabPages.Add(m_tpInformation);
+
+			m_menuFileSave.Enabled = true;
+
 			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
 			statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
+
+			string victoryDescription = Utility.GetDescriptionOf(GameController.Options.WinningConditions);
+			statusBar1.Panels[2].Text = "Victory Condition: " + victoryDescription;
 			
 			m_movePanel.RefreshPlayerOrder();			
 			m_informationPanel.RefreshAllInfo();
