@@ -1017,7 +1017,7 @@ namespace BuckRogers.Interface
 				return false;
 			}
 
-			const int WM_KEYDOWN = 0x100;
+			//const int WM_KEYDOWN = 0x100;
 			const int WM_KEYUP = 0x101; 
 
 			Keys keyCode = (Keys)(int)m.WParam & Keys.KeyCode;

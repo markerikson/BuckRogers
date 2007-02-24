@@ -94,6 +94,16 @@ namespace BuckRogers.Interface
 
 		private ArrayList m_movementIcons;
 
+		private Timer m_timer;
+		private bool m_dragOccurredDuringClick;
+		private RectangleF m_doubleClickRectangle;
+		private bool m_isFirstClick;
+		private PInputEventArgs m_clickInfo;
+		private int m_clickMilliseconds;
+		private int m_singleClicks;
+		private int m_doubleClicks;
+
+
 		public ArrayList MovementIcons
 		{
 			get { return m_movementIcons; }
@@ -111,6 +121,11 @@ namespace BuckRogers.Interface
 			m_territories = new Hashtable();
 			m_orbitOffsets = new Hashtable();
 			m_movementIcons = new ArrayList();
+			m_timer = new Timer();
+			m_timer.Tick += new EventHandler(OnClickTimerTick);
+			m_timer.Interval = 50;
+
+			m_isFirstClick = true;
 
 			m_zoomFactors = new float[]{0.1f, 0.175f, 0.25f, 0.5f, 0.75f, 1.0f, 1.5f, 2.0f, 3.0f, 4.0f, 5.0f};
 
@@ -128,6 +143,9 @@ namespace BuckRogers.Interface
 			Canvas.Camera = c;
 			Canvas.PanEventHandler = new PPanEventHandler();
 			Canvas.ZoomEventHandler = new PZoomEventHandler();
+
+			Canvas.PanEventHandler.Drag += new DragDelegate(OnDragAction);
+			Canvas.ZoomEventHandler.Drag += new DragDelegate(OnDragAction);
 
 			Canvas.PanEventHandler.MinDragStartDistance = 0.5f;
 			Canvas.ZoomEventHandler.MinDragStartDistance = 0.5f;
@@ -489,6 +507,91 @@ namespace BuckRogers.Interface
 			}
 		}
 
+		void OnTerritoryMouseUp(object sender, PInputEventArgs e)
+		{
+
+			if(m_dragOccurredDuringClick)
+			{
+				m_isFirstClick = true;
+				m_dragOccurredDuringClick = false;
+				return;
+			}
+
+			if (m_isFirstClick)
+			{
+				m_isFirstClick = false;
+
+				// Determine the location and size of the double click 
+				// rectangle area to draw around the cursor point.
+				m_doubleClickRectangle = new RectangleF(
+					e.Position.X - (SystemInformation.DoubleClickSize.Width / 2),
+					e.Position.Y - (SystemInformation.DoubleClickSize.Height / 2),
+					SystemInformation.DoubleClickSize.Width,
+					SystemInformation.DoubleClickSize.Height);
+				//Invalidate();
+
+				m_clickInfo = e;
+
+				// Start the double click timer.
+				m_timer.Start();
+			}
+
+			// This is the second mouse click.
+			else
+			{
+				// Verify that the mouse click is within the double click
+				// rectangle and is within the system-defined double 
+				// click period.
+				
+				if (m_doubleClickRectangle.Contains(e.Position) &&
+					m_clickMilliseconds < 350)//SystemInformation.DoubleClickTime)
+				{
+					m_timer.Stop();
+
+					//m_isDoubleClick = true;
+					m_isFirstClick = true;
+					m_clickMilliseconds = 0;
+
+					UserClickedMouse(true, e);	
+				}
+			}
+		}
+
+		private void UserClickedMouse(bool doubleClicked, PInputEventArgs e)
+		{
+			if(doubleClicked)
+			{
+				m_doubleClicks++;
+			}
+			else
+			{
+				m_singleClicks++;
+			}
+
+			UpdateToolTip(e);			
+		}
+
+		void OnDragAction(object sender, PInputEventArgs e)
+		{
+			m_dragOccurredDuringClick = true;
+		}
+
+		void OnClickTimerTick(object sender, EventArgs e)
+		{
+			m_clickMilliseconds += m_timer.Interval;
+
+            // The timer has reached the double click time limit.
+			if (m_clickMilliseconds >= SystemInformation.DoubleClickTime)
+			{
+				m_timer.Stop();
+
+				m_isFirstClick = true;
+				m_clickMilliseconds = 0;
+
+				UserClickedMouse(false, m_clickInfo);
+			}
+		}
+
 		private void DrawAsteroid2(float scaleFactor, string name, Color color, int shiftX, int shiftY)
 		{
 			PPath asteroid = (PPath)m_territories[name];
@@ -847,7 +950,7 @@ namespace BuckRogers.Interface
 			
 			if(n.Tag is IconInfo)
 			{
-				n = e.InputManager.MouseOver.NextPickedNode;//tooltipString = "testing";
+				n = e.InputManager.MouseOver.NextPickedNode;
 			}
 			else if(n.Tag is string)
 			{
@@ -866,6 +969,8 @@ namespace BuckRogers.Interface
 					int orbitIndex = Int32.Parse(split[1]);
 
 					tooltipString = m_controller.Map.GetPlanetTag(split[0], orbitIndex);
+
+					
 				}
 			}
 
@@ -880,6 +985,9 @@ namespace BuckRogers.Interface
 				PointF p = e.CanvasPosition;
 
 				p = e.Path.CanvasToLocal(p, Canvas.Camera);
+
+				//tooltipString = string.Format("{0}\nsingle clicks: {1}\ndouble clicks: {2}",
+				//									tooltipString, m_singleClicks, m_doubleClicks);
 				
 				if(m_tooltip.Text != tooltipString)
 				{
