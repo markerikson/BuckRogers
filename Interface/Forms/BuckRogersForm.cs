@@ -80,6 +80,8 @@ namespace BuckRogers.Interface
 		private MenuItem m_menuHelpHow;
 		private StatusBarPanel statusBarPanel3;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
+		private MenuItem m_menuHelpIconLegend;
+		private MenuItem menuItem4;
 		private YesNoForm m_yesno;
 
 		public static string VersionString
@@ -380,6 +382,8 @@ namespace BuckRogers.Interface
 			this.menuItem2 = new System.Windows.Forms.MenuItem();
 			this.m_menuHelpHow = new System.Windows.Forms.MenuItem();
 			this.m_menuHelpAbout = new System.Windows.Forms.MenuItem();
+			this.m_menuHelpIconLegend = new System.Windows.Forms.MenuItem();
+			this.menuItem4 = new System.Windows.Forms.MenuItem();
 			this.tabControl1.SuspendLayout();
 			this.m_tpPlacement.SuspendLayout();
 			this.m_tpAction.SuspendLayout();
@@ -488,6 +492,13 @@ namespace BuckRogers.Interface
 			this.m_placementPanel.Name = "m_placementPanel";
 			this.m_placementPanel.Size = new System.Drawing.Size(232, 634);
 			this.m_placementPanel.TabIndex = 0;
+			this.m_placementPanel.UnitKeys = new System.Windows.Forms.Keys[] {
+        System.Windows.Forms.Keys.D1,
+        System.Windows.Forms.Keys.D2,
+        System.Windows.Forms.Keys.D3,
+        System.Windows.Forms.Keys.D4,
+        System.Windows.Forms.Keys.D5,
+        System.Windows.Forms.Keys.D6};
 			// 
 			// m_tpAction
 			// 
@@ -613,6 +624,8 @@ namespace BuckRogers.Interface
 			this.menuItem2.Index = 1;
 			this.menuItem2.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.m_menuHelpHow,
+            this.m_menuHelpIconLegend,
+            this.menuItem4,
             this.m_menuHelpAbout});
 			this.menuItem2.Text = "Help";
 			// 
@@ -624,9 +637,20 @@ namespace BuckRogers.Interface
 			// 
 			// m_menuHelpAbout
 			// 
-			this.m_menuHelpAbout.Index = 1;
+			this.m_menuHelpAbout.Index = 3;
 			this.m_menuHelpAbout.Text = "About";
 			this.m_menuHelpAbout.Click += new System.EventHandler(this.m_menuHelpAbout_Click);
+			// 
+			// m_menuHelpIconLegend
+			// 
+			this.m_menuHelpIconLegend.Index = 1;
+			this.m_menuHelpIconLegend.Text = "Unit Icon Legend";
+			this.m_menuHelpIconLegend.Click += new System.EventHandler(this.m_menuHelpIconLegend_Click);
+			// 
+			// menuItem4
+			// 
+			this.menuItem4.Index = 2;
+			this.menuItem4.Text = "-";
 			// 
 			// BuckRogersForm
 			// 
@@ -1064,5 +1088,14 @@ namespace BuckRogers.Interface
 		}
 
 		#endregion
+
+		private void m_menuHelpIconLegend_Click(object sender, EventArgs e)
+		{
+			UnitIconLegendForm uilf = new UnitIconLegendForm(m_controller, m_map.IconManager);
+
+			uilf.Initialize();
+			uilf.AddItems();
+			uilf.ShowDialog();
+		}
 	}
 }
