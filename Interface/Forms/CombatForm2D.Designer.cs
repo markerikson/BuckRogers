@@ -41,6 +41,7 @@ namespace BuckRogers.Interface
 			this.Name = "CombatForm2D";
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Combat Display";
 			this.ResumeLayout(false);
 

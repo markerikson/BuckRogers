@@ -11,18 +11,31 @@ To start a new game, select the number of players and enter their names into the
 
 Select a victory condition and any additional options from this screen.  Some of the rules only affect the initial setup.  Others may change various aspects of how the game is played.  For more information, check the rule descriptions for the board game.  Once the conditions are set the way you want, click "OK".  
 
-The game setup screen will disappear and be replaced by the main game window.  Each player takes turns placing their units in a territory, three units at a time.  After all the units have been placed, the game begins.
+The game setup screen will disappear and be replaced by the main game window.  Before the game can actually begin, each player needs to place his units on the board.
+
+
+Unit Placement
+
+Each player takes turns placing their units in a territory, three units at a time.  After all the units have been placed, the game begins.  
+
+To place units on the board, select the unit type you want to place.  You can either click on the unit icons on the left side of the screen, or press the number key that corresponds to that unit.  The top three icons are keys 1, 2, and 3, and the bottom three icons are 4, 5, and 6.
+
+Once a unit type is selected, single-clicking a territory will place one unit, and double-clicking will place the maximum you have left (up to 3).  One icon for each unit placed will appear in the "Units placed" section on the left side.  After you have placed at least one unit, right-clicking will remove the most recently placed unit.  When your third unit is placed, you will be asked to confirm that you are finished.
+
+Right-double-clicking a territory will highlight the "Territory Information" tab, which shows a list of all the units in that territory.  This is true at all times, whether you're placing units, moving units, or transporting units.
 
 
 Moving Units
 
-To create a new move, click the "Add Move" button.  Then, select the units you want to move.  This can be done in two ways.  If you click on a territory that has units you own, the "Move Units" window will appear.  Here you can see a list of all of your units in that territory.  Use the "Add" and "Remove" buttons to select which units to move.  Besides the "Move Units" window, you can also click directly on the unit icons to select units of that type.  A single click on a unit icon selects 1 unit of that type.  ALT-clicking adds 10 units of that type, CTRL-clicking selects all units of that type, and SHIFT-clicking will select all units in the territory that are able to move.  
+Creating a new move starts by selecting the units you want to move.  If you click on a territory that has units you own, the "Move Units" window will appear.  Here you can see a list of all of your units in that territory.  Use the "Add" and "Remove" buttons to select which units to move.  Besides the "Move Units" window, you can also click directly on the unit icons to select units of that type.  A single click on a unit icon selects 1 unit of that type.  ALT-clicking adds 10 units of that type, CTRL-clicking selects all units of that type, and SHIFT-clicking will select all units in the territory that are able to move.  
 
-Once the units are selected, click on the territories you want the units to move through.  Each territory will be listed in the Movement Panel on the left side of the screen.  If you make a mistake, double-click the territory list to remove the last territory added.
+Once the units are selected, you need to select where to move the units.  If you want to choose the exact movement path for the units, click on each territory in turn.  As you click, each territory will be listed in the Movement Panel on the left side of the screen.  If you make a mistake, double-click the territory list or click the "Remove Territories" button to remove the last territory added to the move.  Once all the territories are chosen, click the "Accept" button.  The units are moved, and a summary of the move's information is listed at the bottom of the Movement Panel.  Or, click the "Cancel" button to cancel the move.
 
-Once all the territories are chosen, click the "Accept" button.  The units are moved, and a summary of the move's information is listed at the bottom of the Movement Panel.  Or, click the "Cancel" button to cancel the move.
+Notice that once you've selected some units, the game displays a series of red arrows as you move the mouse around the board.  As the mouse moves, the game tries to find the shortest path from where you started to the territory where the mouse is.  If the path looks okay, just double-click on the territory where you want the units to finish.  The move will be checked, and automatically added to the list.
 
-You can also load and unload units with Transports.  Click the "Transport" button, then click on a territory containing a Transport.  A window will pop up that shows any Transports there and their contents, as well as any units available to be loaded.  Transport actions are listed in the "Transports" tab at the bottom of the Movement Panel.  When you're finished loading transports, click "Done".
+You can also change the units you have selected, but only if no other territories have been added to the move.  Right-clicking the starting territory will remove one unit from the last type shown near the mouse cursor.  SHIFT-clicking the starting territory removes all the units and cancels the move.  ALT-clicking a unit icon removes 10 units of that type, and CTRL-clicking a unit icon removes all units of that type.
+
+You can also load and unload units with Transports.  Click the "Load / Unload Transports" button, then click on a territory containing a Transport.  A window will pop up that shows any Transports there and their contents, as well as any units available to be loaded.  Transport actions are listed in the "Transports" tab at the bottom of the Movement Panel.  When you're finished loading transports, click "Load / Unload Transports" again.
 
 If you decide you want to take back a move or a transport action, you can click the "Undo" button to undo the most recent move.  If you want, you can "undo" all the way back to the start of your turn.  Or, after undoing a move, you can "Redo" it.
 
@@ -38,6 +51,8 @@ You can't expect to take over the Solar System without fighting a few battles fi
 * "D": How many units of this type were killed this round
 * "T": How many units of this type existed at the start
 
+Moving the mouse over a unit icon will pop up a display showing this information in more detail.
+
 During a player's turn, all of his units can shoot at enemy units.  When his last unit has fired, or the last enemy unit is killed, that player's turn is over.  The next player then takes his turn to shoot, including any units that were just killed.  Any unit alive at the start of a combat round will have a chance to shoot before the round is over.
 
 The active player's name is highlighted in red.  To fight, click on one of your unit icons that can shoot (ie, not your Leader or a Factory).  That unit icon will also be highlighted.  Then, click on the icon of the unit you want to attack.  The attack's results will be displayed in the middle of the Combat Screen.  Right-clicking on an opposing unit will attack with up to 10 of your units at once (or, if you have less than 10 of that type left to shoot with, however many you have left).
@@ -51,7 +66,7 @@ Production
 
 The last phase of a turn is production.  Each player can produce units at his factories.  Players take turns producing units in the same order that they moved.  
 
-Each of the current player's factories are listed in the middle of the Production Screen.  Click on a factory, then select which unit type to produce for this turn.  For some unit types, you can also select which territory it should be placed in.  Click "Produce" to set this factory's production.  When finished, click "Next Player" or "Finish" as appropriate.
+Each of the current player's factories are listed in the middle of the Production Screen.  Click on a factory, then select which unit type to produce for this turn.  For some unit types, you can also select which territory it should be placed in.  Click "Produce" to set this factory's production.  The next factory in the list will be automatically selected.  When finished, click "Next Player" or "Finish" as appropriate.
 
 If you want, you can dismantle one of your factories.  Select a factory, then click the "Dismantle" button.  Most of the time, you probably don't want to do this :)
 

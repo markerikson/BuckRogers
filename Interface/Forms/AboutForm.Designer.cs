@@ -87,6 +87,7 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.pictureBox2);
 			this.Controls.Add(this.pictureBox1);
 			this.Name = "AboutForm";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "About Buck Rogers";
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();

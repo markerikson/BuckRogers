@@ -38,7 +38,7 @@ namespace BuckRogers.Interface
 	/// </summary>
 	public class BuckRogersForm : System.Windows.Forms.Form, IMessageFilter
 	{
-		private static string m_versionString = "0.8 (Beta)";
+		private static string m_versionString = "0.8.1 (Beta)";
 
 		
 		private IContainer components;
@@ -1035,6 +1035,7 @@ namespace BuckRogers.Interface
 		private void m_menuHelpAbout_Click(object sender, EventArgs e)
 		{
 			AboutForm af = new AboutForm();
+			af.Owner = this;
 
 			af.ShowDialog();
 		}
@@ -1044,9 +1045,17 @@ namespace BuckRogers.Interface
 			if(m_howToPlay == null)
 			{
 				m_howToPlay = new HowToPlayForm();
+				m_howToPlay.StartPosition = FormStartPosition.Manual;
+
+				int x = this.Bounds.X + (this.Width / 2) - (m_howToPlay.Width / 2);
+				int y = this.Bounds.Y + (this.Height / 2) - (m_howToPlay.Height / 2);
+
+				m_howToPlay.Location = new Point(x, y);
 			}
-			
+
 			m_howToPlay.Show();
+
+			
 		}
 
 		private void BuckRogersForm_KeyPress(object sender, KeyPressEventArgs e)

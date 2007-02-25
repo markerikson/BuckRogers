@@ -61,6 +61,8 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.m_btnOK);
 			this.Controls.Add(this.textBox1);
 			this.Name = "HowToPlayForm";
+			this.ShowInTaskbar = false;
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Buck Rogers: How To Play";
 			this.ResumeLayout(false);
 			this.PerformLayout();

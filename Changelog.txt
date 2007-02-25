@@ -1,3 +1,32 @@
+Version 0.8.1:
+
+- ADD:	Completely revamped the movement system.  Moves are now created simply by
+		clicking on the map, each step is checked to make sure it's valid, and
+		arrows are drawn to show the projected path from A to B.  In addition,
+		the movement control buttons have been simplified.
+- ADD:	Completely revamped the pre-game placement system as well.  Units are 
+		placed by just clicking on the map, and icons are shown for both the 			
+		remaining units and units that have been placed.  Players can select the
+		type they want to place by pressing 1-6.
+- ADD:	Combat window now shows the name of the territory's planet or orbit.
+- ADD:	Setting a factory's production now auto-selects the next factory.
+- ADD:	Can now cancel a half-produced unit.
+- ADD:	Combat screen now displays a popup window with expanded information when
+		the mouse is over a unit icon.
+- ADD:	Status bar now shows what the game's victory condition is.
+- ADD:	Added a "Unit Icon Legend" window to the Help menu.
+
+- CHG:	Tweaked the major forms to appear centered on the screen.
+- CHG:	Combat screen now gives a warning when attacking a stack of dead units.
+- CHG:	Production screen now checks if the player has any unused factories and
+		asks the user to confirm skipping them.
+- CHG:	Click/double-click events are now generated internally		
+
+- FIX:	Fixed a bug that let troopers and factories be loaded onto the same 			
+		transport (which led to other nastiness).
+- FIX:	Removed debug code from the combat screen.
+
+
 Version 0.8.0:
 
 - ADD: 	Replaced the old spreadsheet-like Combat Screen with a graphical 

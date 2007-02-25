@@ -178,7 +178,7 @@ namespace BuckRogers.Interface
 			// 
 			// m_btnRedoMove
 			// 
-			this.m_btnRedoMove.Location = new System.Drawing.Point(78, 164);
+			this.m_btnRedoMove.Location = new System.Drawing.Point(76, 163);
 			this.m_btnRedoMove.Name = "m_btnRedoMove";
 			this.m_btnRedoMove.Size = new System.Drawing.Size(72, 23);
 			this.m_btnRedoMove.TabIndex = 3;

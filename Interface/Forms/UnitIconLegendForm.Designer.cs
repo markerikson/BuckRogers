@@ -63,7 +63,10 @@ namespace BuckRogers.Interface
 			this.ClientSize = new System.Drawing.Size(316, 220);
 			this.Controls.Add(this.OK);
 			this.Controls.Add(this.listView1);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Name = "UnitIconLegendForm";
+			this.ShowInTaskbar = false;
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "UnitIconLegend";
 			this.ResumeLayout(false);
 

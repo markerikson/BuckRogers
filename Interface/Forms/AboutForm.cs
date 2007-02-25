@@ -36,7 +36,7 @@ namespace BuckRogers.Interface
 
 			DateTime buildTime = Utility.RetrieveLinkerTimestamp();
 
-			string buildDateString = buildTime.ToString("yyyy-mm-dd");
+			string buildDateString = buildTime.ToString("yyyy-MM-dd");
 			string buildTimeString = buildTime.ToString("h:mm tt");
 
 			string versionLabelText = string.Format("Version {0}\nBuild {1}\nBuilt on {2} at {3}",
