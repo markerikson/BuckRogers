@@ -85,7 +85,7 @@ namespace BuckRogers.Interface
 		private Hashtable m_territoryCenters;
 
 		private ArrayList m_pathArrows;
-		private ArrayList m_pathNames;
+		private ArrayList m_currentPathTerritories;
 		
 		//private int m_idxPlanets;
 		private PClip[] m_planets;
@@ -146,7 +146,7 @@ namespace BuckRogers.Interface
 
 			m_movementIcons = new ArrayList();
 			m_pathArrows = new ArrayList();
-			m_pathNames = new ArrayList();
+			m_currentPathTerritories = new ArrayList();
 
 			m_timer = new Timer();
 			m_timer.Tick += new EventHandler(OnClickTimerTick);
@@ -259,7 +259,7 @@ namespace BuckRogers.Interface
 
 			string[] orbitNames = {"Near Mercury Orbit", "Far Mercury Orbit", "Near Venus Orbit", 
 									"Far Venus Orbit","Near Moon Orbit","Near Earth Orbit", 
-									"Far Earth Orbit", "Near Mars Orbit", "Far Mars Orbit"};
+									"Far Earth/Moon Orbit", "Near Mars Orbit", "Far Mars Orbit"};
 			PointF[] orbitCenters = new PointF[]{		new PointF(-1750, 120 ), 
 														new PointF(-2070, 475 ), 
 														new PointF(-1545, 1140 ), 
@@ -1034,36 +1034,27 @@ namespace BuckRogers.Interface
 				return;
 			}			
 
-			ArrayList moveTerritoryNames = new ArrayList();
-			
-			foreach(Territory t in currentMoveTerritories)
-			{
-				moveTerritoryNames.Add(t.Name);
-			}
+			ArrayList newPathTerritories = new ArrayList();
+
+			newPathTerritories.AddRange(currentMoveTerritories);
 
 			Territory lastTerritoryAdded = (Territory)currentMoveTerritories[currentMoveTerritories.Count - 1];
 			Territory hoveredTerritory = m_controller.Map[territoryName];
 
 			ArrayList shortestPathTerritories = m_controller.Map.Graph.ShortestPath(lastTerritoryAdded, hoveredTerritory);
-			ArrayList shortestPathNames = new ArrayList();
 
-			foreach(Territory t in shortestPathTerritories)
-			{
-				shortestPathNames.Add(t.Name);
-			}
-
-			moveTerritoryNames.AddRange(shortestPathNames);
-
+			newPathTerritories.AddRange(shortestPathTerritories);
+			
 			bool identicalPath = true;
 
-			if(moveTerritoryNames.Count == m_pathNames.Count)
+			if(newPathTerritories.Count == m_currentPathTerritories.Count)
 			{
-				for(int i = 0; i < moveTerritoryNames.Count; i++)
+				for(int i = 0; i < newPathTerritories.Count; i++)
 				{
-					string name1 = (string)moveTerritoryNames[i];
-					string name2 = (string)m_pathNames[i];
+					Territory t1 = (Territory)newPathTerritories[i];
+					Territory t2 = (Territory)m_currentPathTerritories[i];
 
-					if(name1 != name2)
+					if(t1 != t2)
 					{
 						identicalPath = false;
 						break;
@@ -1083,10 +1074,10 @@ namespace BuckRogers.Interface
 			else
 			{
 				ClearPathArrows();
-				ShowPathArrows(moveTerritoryNames);
+				ShowPathArrows(newPathTerritories);
 
-				m_pathNames.Clear();
-				m_pathNames.AddRange(moveTerritoryNames);
+				m_currentPathTerritories.Clear();
+				m_currentPathTerritories.AddRange(newPathTerritories);
 			}
 
 		}
@@ -1689,11 +1680,20 @@ namespace BuckRogers.Interface
 				line.Pen.CustomEndCap = new AdjustableArrowCap(3, 4, true);
 				line.Pen.Width = 10;
 
-				string startingTerritory = (string)al[i];
-				string endingTerritory = (string)al[i + 1];
 
-				PointF startingPoint = (PointF)m_territoryCenters[startingTerritory];
-				PointF endingPoint = (PointF)m_territoryCenters[endingTerritory];
+				Territory startingTerritory = (Territory)al[i];
+				Territory endingTerritory = (Territory)al[i + 1];
+
+				if( (startingTerritory.IsSolarTerritory && !endingTerritory.IsSolarTerritory)
+					|| (!startingTerritory.IsSolarTerritory && endingTerritory.IsSolarTerritory))
+				{
+					line.Pen.DashStyle = DashStyle.Dash;
+					line.Pen.DashOffset = 75;
+					line.Pen.Width = 7.5f;
+				}
+
+				PointF startingPoint = (PointF)m_territoryCenters[startingTerritory.Name];
+				PointF endingPoint = (PointF)m_territoryCenters[endingTerritory.Name];
 
 				line.AddLine(startingPoint.X, startingPoint.Y, endingPoint.X, endingPoint.Y);
 
