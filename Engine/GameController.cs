@@ -1064,7 +1064,7 @@ namespace BuckRogers
 
 			if(move.Territories.Count == 0)
 			{
-				exceptionString = "Can't create a move with no territories!";
+				exceptionString = "Can't create a move that doesn't go anywhere!";
 				goto MoveError;
 			}
 

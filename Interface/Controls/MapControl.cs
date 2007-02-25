@@ -100,8 +100,6 @@ namespace BuckRogers.Interface
 		private bool m_isFirstClick;
 		private PInputEventArgs m_clickInfo;
 		private int m_clickMilliseconds;
-		private int m_singleClicks;
-		private int m_doubleClicks;
 
 
 		public ArrayList MovementIcons

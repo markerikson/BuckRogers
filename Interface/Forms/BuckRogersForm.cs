@@ -7,6 +7,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Text;
+using System.Threading;
 
 using UMD.HCIL.Piccolo;
 using UMD.HCIL.Piccolo.Nodes;
@@ -79,6 +80,7 @@ namespace BuckRogers.Interface
 		private MenuItem m_menuHelpHow;
 		private StatusBarPanel statusBarPanel3;
 		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
+		private YesNoForm m_yesno;
 
 		public static string VersionString
 		{
@@ -272,7 +274,20 @@ namespace BuckRogers.Interface
 			m_placementPanel.Controller = m_controller;
 			m_informationPanel.Controller = m_controller;
 
+			m_yesno = new YesNoForm();
+			m_yesno.VisibleChanged += new EventHandler(m_yesno_VisibleChanged);
+
 			m_map.PlacePlanetIcons();
+		}
+
+		void m_yesno_VisibleChanged(object sender, EventArgs e)
+		{
+			if(!m_yesno.Visible)
+			{
+				DialogResult dr = m_yesno.DialogResult;
+
+				MessageBox.Show("Result: " + dr);
+			}
 		}
 
 
@@ -710,6 +725,12 @@ namespace BuckRogers.Interface
 		private void m_btnDefaultZoom_Click(object sender, System.EventArgs e)
 		{
 			m_map.DefaultZoom();
+
+			/*
+			m_yesno.TopMost = false;
+			m_yesno.Owner = this;
+			m_yesno.Show();
+			*/
 		}
 
 		private void m_btnCenterCamera_Click(object sender, System.EventArgs e)
@@ -1012,21 +1033,33 @@ namespace BuckRogers.Interface
 		public bool PreFilterMessage(ref Message m)
 		{
 			const int WM_KEYUP = 0x101;
-			if (m.Msg != WM_KEYUP || m_controller.CurrentPhase != GamePhase.Setup)
+			if (m.Msg != WM_KEYUP)
 			{
 				return false;
 			}
 
 			//const int WM_KEYDOWN = 0x100;
-			 
 
 			Keys keyCode = (Keys)(int)m.WParam & Keys.KeyCode;
 
-			if(Array.IndexOf(m_placementPanel.UnitKeys, keyCode) != -1)
+			if(m_controller.CurrentPhase == GamePhase.Setup)
 			{
-				m_placementPanel.KeyPressed(keyCode);
-				return true;
+				if (Array.IndexOf(m_placementPanel.UnitKeys, keyCode) != -1)
+				{
+					m_placementPanel.KeyPressed(keyCode);
+					return true;
+				}
 			}
+			else if(m_controller.CurrentPhase == GamePhase.Movement)
+			{
+				if (keyCode == Keys.Enter)
+				{
+					m_movePanel.KeyPressed(keyCode);
+					return true;
+				}
+			}
+
+			
 			return false; 
 		}
 

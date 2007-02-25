@@ -119,6 +119,12 @@
     <Compile Include="Forms\UnitSelectionForm.Designer.cs">
       <DependentUpon>UnitSelectionForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\YesNoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\YesNoForm.Designer.cs">
+      <DependentUpon>YesNoForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ListBox\ItemInfo.cs" />
     <Compile Include="ListBox\ListBoxList.cs" />
     <Compile Include="ListBox\MoveListBox.cs">
@@ -204,6 +210,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Other\App.ico" />
+    <EmbeddedResource Include="Forms\YesNoForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>YesNoForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Other\Graphics\bucklogo.ico" />
     <EmbeddedResource Include="Other\Resources\HowToPlay.txt" />
     <EmbeddedResource Include="Forms\HowToPlayForm.resx">
