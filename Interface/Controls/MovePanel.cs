@@ -37,6 +37,7 @@ namespace BuckRogers.Interface
 		private MoveListBox m_mlbTransports;
 		private GameController m_controller;
 		private MoveMode m_moveMode;
+		
 		private System.Windows.Forms.Button m_btnCancelMove;
 		private System.Windows.Forms.Button m_btnEndMoves;
 		private System.Windows.Forms.Label label1;
@@ -61,13 +62,28 @@ namespace BuckRogers.Interface
 		public MapControl Map
 		{
 			get { return m_map; }
-			set { m_map = value; }
+			set 
+			{ 
+				m_map = value;
+			}
 		}
 
 		public BuckRogers.GameController Controller
 		{
 			get { return this.m_controller; }
 			set { this.m_controller = value; }
+		}
+
+		public ArrayList CurrentMoveTerritories
+		{
+			get { return m_currentMoveTerritories; }
+			set { m_currentMoveTerritories = value; }
+		}
+
+		public MoveMode MoveMode
+		{
+			get { return m_moveMode; }
+			set { m_moveMode = value; }
 		}
 		#endregion
 
@@ -474,32 +490,57 @@ namespace BuckRogers.Interface
 				// We only care about a single-right-click if it's on the starting territory
 				// so we can subtract units, and we don't care about the middle button.
 				// So, if it's not a left-click, we can bail out.
+
+				/*
 				if(e.Button != MouseButtons.Left)
 				{
 					return;
 				}
+				*/
 
-				ArrayList territoriesToAdd = new ArrayList();
-				// Find the shortest path from our starting position to here and add the move
-				if(tcea.DoubleClick)
+				if(e.Button == MouseButtons.Left)
 				{
-					Territory lastListedTerritory = (Territory)m_currentMoveTerritories[m_currentMoveTerritories.Count - 1];
-					ArrayList al = m_controller.Map.Graph.ShortestPath(lastListedTerritory, t);
+					ArrayList territoriesToAdd = new ArrayList();
+					// Find the shortest path from our starting position to here and add the move
+					if (tcea.DoubleClick)
+					{
+						Territory lastListedTerritory = (Territory)m_currentMoveTerritories[m_currentMoveTerritories.Count - 1];
+						ArrayList al = m_controller.Map.Graph.ShortestPath(lastListedTerritory, t);
 
-					territoriesToAdd.AddRange(al);
+						territoriesToAdd.AddRange(al);
+					}
+					// add this one territory to the move
+					else
+					{
+						territoriesToAdd.Add(t);
+					}
+
+					MoveAction ma = CreateAndValidateMove(territoriesToAdd, tcea.DoubleClick);
+
+					if (ma.Validated)
+					{
+						FinalizeOrUpdateMove(tcea.DoubleClick, territoriesToAdd, ma);
+					}
 				}
-				// add this one territory to the move
-				else
+				else if(e.Button == MouseButtons.Middle)
 				{
-					territoriesToAdd.Add(t);					
-				}
+					if(!m_map.PathArrowsDisplayed)
+					{
+						ArrayList al = new ArrayList();
+						Territory startingTerritory = (Territory)m_currentMoveTerritories[0];
 
-				MoveAction ma = CreateAndValidateMove(territoriesToAdd, tcea.DoubleClick);
+						foreach(Territory terr in m_currentMoveTerritories)
+						{
+							al.Add(terr.Name);
+						}
 
-				if(ma.Validated)
-				{
-					FinalizeOrUpdateMove(tcea.DoubleClick, territoriesToAdd, ma);
-				}
+						m_map.ShowPathArrows(al);
+					}
+					else
+					{
+						m_map.ClearPathArrows();
+					}					
+				}				
 			}
 
 			// Perhaps the user used the MoveUnitsForm to select his units, then

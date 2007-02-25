@@ -164,6 +164,8 @@ namespace BuckRogers.Interface
 #endif
 
 			InitControls();
+
+			m_map.MovePanel = m_movePanel;
 			m_map.IconManager.Controller = m_controller;
 			m_map.IconManager.LoadUnitIconLocations(false, true);
 			InitEvents();

@@ -82,6 +82,10 @@ namespace BuckRogers.Interface
 		private Hashtable m_territoryMarkers;
 		private Hashtable m_territories;
 		private Hashtable m_orbitOffsets;
+		private Hashtable m_territoryCenters;
+
+		private ArrayList m_pathArrows;
+		private ArrayList m_pathNames;
 		
 		//private int m_idxPlanets;
 		private PClip[] m_planets;
@@ -101,12 +105,32 @@ namespace BuckRogers.Interface
 		private PInputEventArgs m_clickInfo;
 		private int m_clickMilliseconds;
 
+		private MovePanel m_movePanel;
+
 
 		public ArrayList MovementIcons
 		{
 			get { return m_movementIcons; }
 			set { m_movementIcons = value; }
 		}
+
+		public bool PathArrowsDisplayed
+		{
+			get
+			{
+				return m_pathArrows.Count > 0;
+			}
+		}
+
+		public MovePanel MovePanel
+		{
+			set
+			{
+				m_movePanel = value;
+			}
+		}
+
+
 
 		public MapControl()
 		{
@@ -118,7 +142,12 @@ namespace BuckRogers.Interface
 			m_territoryMarkers = new Hashtable();
 			m_territories = new Hashtable();
 			m_orbitOffsets = new Hashtable();
+			m_territoryCenters = new Hashtable();
+
 			m_movementIcons = new ArrayList();
+			m_pathArrows = new ArrayList();
+			m_pathNames = new ArrayList();
+
 			m_timer = new Timer();
 			m_timer.Tick += new EventHandler(OnClickTimerTick);
 			m_timer.Interval = 50;
@@ -227,6 +256,25 @@ namespace BuckRogers.Interface
 
 			Canvas.AnimatingRenderQuality = RenderQuality.HighQuality;
 			Canvas.InteractingRenderQuality = RenderQuality.HighQuality;
+
+			string[] orbitNames = {"Near Mercury Orbit", "Far Mercury Orbit", "Near Venus Orbit", 
+									"Far Venus Orbit","Near Moon Orbit","Near Earth Orbit", 
+									"Far Earth Orbit", "Near Mars Orbit", "Far Mars Orbit"};
+			PointF[] orbitCenters = new PointF[]{		new PointF(-1750, 120 ), 
+														new PointF(-2070, 475 ), 
+														new PointF(-1545, 1140 ), 
+														new PointF(-1225, 1200 ), 
+														new PointF( 1330, 1160 ), 										
+														new PointF( 1865, 1155), 
+														new PointF( 1910, 705), 
+														new PointF( 1610, 60), 
+														new PointF( 1910, -845) 
+													};
+
+			for(int i = 0; i < orbitNames.Length; i++)
+			{
+				m_territoryCenters[orbitNames[i]] = orbitCenters[i];
+			}
 
 		}
 
@@ -475,6 +523,8 @@ namespace BuckRogers.Interface
 				center.X = unshiftedCenter.X + shiftX;
 				center.Y = unshiftedCenter.Y + shiftY;
 
+				m_territoryCenters[territoryNames[i]] = new PointF(center.X, center.Y);
+
 				string label = territoryNames[i];
 				
 				PText text = new PText(label);
@@ -570,6 +620,9 @@ namespace BuckRogers.Interface
 			*/
 
 			// make sure we only handle actual clicks
+
+
+
 			if (Canvas.PanEventHandler.Dragging
 				|| Canvas.ZoomEventHandler.Dragging)
 			{
@@ -579,6 +632,9 @@ namespace BuckRogers.Interface
 			PNode picked = (PNode)e.PickedNode;
 
 			string territoryName = (string)picked.Tag;
+
+			Territory t = m_controller.Map[territoryName];
+			PPath territoryPath = (PPath)m_territories[territoryName];
 
 			if (territoryName == null)
 			{
@@ -625,6 +681,8 @@ namespace BuckRogers.Interface
 			PPath asteroid = (PPath)m_territories[name];
 			string orbitName = name + " Orbit";
 			PPath orbit = (PPath)m_territories[orbitName];
+
+			m_territoryCenters[orbitName] = PUtil.CenterOfRectangle(orbit.FullBounds);
 
 			PComposite asteroidParent = new PComposite();
 			asteroidParent.Tag = name;
@@ -688,6 +746,8 @@ namespace BuckRogers.Interface
 
 			center.X = unshiftedCenter.X + shiftX;
 			center.Y = unshiftedCenter.Y + shiftY;
+
+			m_territoryCenters[name] = new PointF(center.X, center.Y);
 
 			PText text = new PText(name);//names[i]);
 
@@ -784,6 +844,9 @@ namespace BuckRogers.Interface
 				circle.Bounds = circleBounds;
 
 				string tag = orbitName + " Orbit: " + i.ToString();
+
+				m_territoryCenters[tag] = PUtil.CenterOfRectangle(circleBounds);
+
 				text.Tag = tag;
 				circle.Tag = tag;
 				composite.Tag = tag;
@@ -936,7 +999,96 @@ namespace BuckRogers.Interface
 		{
 			UpdateMovementIcons(e);
 			UpdateToolTip(e);
+
+			if(m_movePanel.MoveMode == MoveMode.StartMove
+				&& m_movePanel.CurrentMoveTerritories.Count > 0)
+			{
+				UpdateMovementArrows(e);
+			}
 			//Canvas.Refresh();
+		}
+
+		private void UpdateMovementArrows(PInputEventArgs e)
+		{
+			PNode n = (PNode)e.InputManager.MouseOver.PickedNode;
+
+			if (!(n.Tag is string))
+			{
+				ClearPathArrows();
+				return;
+			}
+
+			ArrayList currentMoveTerritories = m_movePanel.CurrentMoveTerritories;
+			Territory startingTerritory = (Territory)currentMoveTerritories[0];
+
+			string territoryName = n.Tag as string;
+
+			// if this is somehow a territory we don't have info on, or if
+			// we're just starting the move and we're over the starting territory, don't
+			// bother drawing any path arrows
+			if(!m_territoryCenters.ContainsKey(territoryName)
+				|| (currentMoveTerritories.Count == 1 
+					&& territoryName == startingTerritory.Name) )
+			{
+				ClearPathArrows();
+				return;
+			}			
+
+			ArrayList moveTerritoryNames = new ArrayList();
+			
+			foreach(Territory t in currentMoveTerritories)
+			{
+				moveTerritoryNames.Add(t.Name);
+			}
+
+			Territory lastTerritoryAdded = (Territory)currentMoveTerritories[currentMoveTerritories.Count - 1];
+			Territory hoveredTerritory = m_controller.Map[territoryName];
+
+			ArrayList shortestPathTerritories = m_controller.Map.Graph.ShortestPath(lastTerritoryAdded, hoveredTerritory);
+			ArrayList shortestPathNames = new ArrayList();
+
+			foreach(Territory t in shortestPathTerritories)
+			{
+				shortestPathNames.Add(t.Name);
+			}
+
+			moveTerritoryNames.AddRange(shortestPathNames);
+
+			bool identicalPath = true;
+
+			if(moveTerritoryNames.Count == m_pathNames.Count)
+			{
+				for(int i = 0; i < moveTerritoryNames.Count; i++)
+				{
+					string name1 = (string)moveTerritoryNames[i];
+					string name2 = (string)m_pathNames[i];
+
+					if(name1 != name2)
+					{
+						identicalPath = false;
+						break;
+					}
+				}
+			}
+			else
+			{
+				identicalPath = false;
+			}
+			
+			if(identicalPath)
+			{
+				// We should already be showing this path.  Don't do anything
+				return;
+			}
+			else
+			{
+				ClearPathArrows();
+				ShowPathArrows(moveTerritoryNames);
+
+				m_pathNames.Clear();
+				m_pathNames.AddRange(moveTerritoryNames);
+			}
+
 		}
 
 		public void UpdateMovementIcons(PInputEventArgs e)
@@ -1517,6 +1669,51 @@ namespace BuckRogers.Interface
 			set { this.m_territories = value; }
 		}
 
+
+		public void ShowPathArrows(ArrayList al)
+		{
+			if(al.Count == 1)
+			{
+				return;
+			}
+
+			for(int i = 0; i < al.Count - 1; i++)
+			{
+				PPath line = new PPath();
+				Pen newPen = (Pen)line.Pen.Clone();
+				line.Pen = newPen;
+
+				line.Pen.Color = Color.Red;
+				line.Pen.StartCap = LineCap.RoundAnchor;
+				line.Pen.EndCap = LineCap.Custom;
+				line.Pen.CustomEndCap = new AdjustableArrowCap(3, 4, true);
+				line.Pen.Width = 10;
+
+				string startingTerritory = (string)al[i];
+				string endingTerritory = (string)al[i + 1];
+
+				PointF startingPoint = (PointF)m_territoryCenters[startingTerritory];
+				PointF endingPoint = (PointF)m_territoryCenters[endingTerritory];
+
+				line.AddLine(startingPoint.X, startingPoint.Y, endingPoint.X, endingPoint.Y);
+
+				line.Pickable = false;
+
+				Canvas.Layer.AddChild(line);
+
+				m_pathArrows.Add(line);
+			}
+		}
+
+		public void ClearPathArrows()
+		{
+			foreach(PPath line in m_pathArrows)
+			{
+				line.RemoveFromParent();
+			}
+
+			m_pathArrows.Clear();
+		}
 	}
 
 	class BlackLayer : PLayer 
