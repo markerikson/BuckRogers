@@ -607,7 +607,9 @@ namespace BuckRogers.Interface
 			m_clickMilliseconds += m_timer.Interval;
 
             // The timer has reached the double click time limit.
-			if (m_clickMilliseconds >= SystemInformation.DoubleClickTime)
+
+			int timeout = 350;//SystemInformation.DoubleClickTime;
+			if (m_clickMilliseconds >= timeout)
 			{
 				m_timer.Stop();
 

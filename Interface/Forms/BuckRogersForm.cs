@@ -809,6 +809,8 @@ namespace BuckRogers.Interface
 							tabControl1.TabPages.Add(m_tpTerritory);
 							tabControl1.TabPages.Add(m_tpInformation);
 
+							m_movePanel.BeginMovement();
+
 							m_menuFileSave.Enabled = true;
 
 							StartGame();
@@ -885,6 +887,8 @@ namespace BuckRogers.Interface
 							statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
 							m_movePanel.RefreshPlayerOrder();
 							m_informationPanel.RefreshAllInfo();
+
+							m_movePanel.BeginMovement();
 
 							m_menuFileSave.Enabled = true;
 							//m_menuFileLoad.Enabled = true;
@@ -996,6 +1000,8 @@ namespace BuckRogers.Interface
 			tabControl1.TabPages.Add(m_tpTerritory);
 			tabControl1.TabPages.Add(m_tpInformation);
 
+
+
 			m_menuFileSave.Enabled = true;
 
 			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
@@ -1004,7 +1010,8 @@ namespace BuckRogers.Interface
 			string victoryDescription = Utility.GetDescriptionOf(GameController.Options.WinningConditions);
 			statusBar1.Panels[2].Text = "Victory Condition: " + victoryDescription;
 			
-			m_movePanel.RefreshPlayerOrder();			
+			m_movePanel.RefreshPlayerOrder();
+			m_movePanel.BeginMovement();
 			m_informationPanel.RefreshAllInfo();
 			m_map.AdvancePlanets();
 
@@ -1076,7 +1083,7 @@ namespace BuckRogers.Interface
 			}
 			else if(m_controller.CurrentPhase == GamePhase.Movement)
 			{
-				if (keyCode == Keys.Enter)
+				if (keyCode == Keys.Enter || keyCode == Keys.T)
 				{
 					m_movePanel.KeyPressed(keyCode);
 					return true;

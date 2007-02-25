@@ -30,8 +30,6 @@ namespace BuckRogers.Interface
 		private bool m_userChangedOriginalSelection;
 		private bool m_unitTotalsWereChanged;
 		private bool m_stupidCodeGuardFlag;
-
-		private System.Windows.Forms.Button m_btnAddMove;
 		private System.Windows.Forms.Button m_btnUndoMove;
 		private System.Windows.Forms.Button m_btnRedoMove;
 
@@ -43,9 +41,7 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.Button m_btnEndMoves;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.ListBox m_lbCurrentMoves;
-		private System.Windows.Forms.Button m_btnTransports;
 		private System.Windows.Forms.Button m_btnAcceptMoves;
-		private System.Windows.Forms.Button m_btnDoneTransports;
 		private System.Windows.Forms.TabControl tabControl1;
 		private System.Windows.Forms.TabPage tabPage1;
 		private System.Windows.Forms.TabPage tabPage2;
@@ -53,17 +49,29 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.Label label2;
 		private MapControl m_map;
 		private MoveUnitsForm m_muf;
+		private CheckBox m_chkLoadTransports;
+		private Button m_btnRemoveTerritory;
+		private bool m_showingTransportDialog;
 
 		private System.ComponentModel.Container components = null;
 
 		#endregion
 
+		#region properties
 		public MapControl Map
 		{
 			get { return m_map; }
 			set { m_map = value; }
 		}
 
+		public BuckRogers.GameController Controller
+		{
+			get { return this.m_controller; }
+			set { this.m_controller = value; }
+		}
+		#endregion
+
+		#region Constructor and initialization
 		public MovePanel()
 		{
 			// This call is required by the Windows.Forms Form Designer.
@@ -99,11 +107,12 @@ namespace BuckRogers.Interface
 			m_btnAcceptMoves.Enabled = false;
 			m_btnUndoMove.Enabled = false;
 			m_btnRedoMove.Enabled = false;
-			m_btnDoneTransports.Enabled = false;
 
 			m_userChangedOriginalSelection = false;
 
 		}
+
+		#endregion
 
 		#region generated stuff
 		protected override void Dispose( bool disposing )
@@ -125,7 +134,6 @@ namespace BuckRogers.Interface
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.m_btnAddMove = new System.Windows.Forms.Button();
 			this.m_btnUndoMove = new System.Windows.Forms.Button();
 			this.m_btnRedoMove = new System.Windows.Forms.Button();
 			this.m_btnEndMoves = new System.Windows.Forms.Button();
@@ -133,46 +141,37 @@ namespace BuckRogers.Interface
 			this.m_btnAcceptMoves = new System.Windows.Forms.Button();
 			this.label1 = new System.Windows.Forms.Label();
 			this.m_lbCurrentMoves = new System.Windows.Forms.ListBox();
-			this.m_btnTransports = new System.Windows.Forms.Button();
-			this.m_btnDoneTransports = new System.Windows.Forms.Button();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
-			this.m_lbPlayerOrder = new BuckRogers.Interface.PlayerListBox();
 			this.label2 = new System.Windows.Forms.Label();
+			this.m_chkLoadTransports = new System.Windows.Forms.CheckBox();
+			this.m_btnRemoveTerritory = new System.Windows.Forms.Button();
+			this.m_lbPlayerOrder = new BuckRogers.Interface.PlayerListBox();
 			this.tabControl1.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// m_btnAddMove
-			// 
-			this.m_btnAddMove.Location = new System.Drawing.Point(0, 104);
-			this.m_btnAddMove.Name = "m_btnAddMove";
-			this.m_btnAddMove.Size = new System.Drawing.Size(72, 23);
-			this.m_btnAddMove.TabIndex = 0;
-			this.m_btnAddMove.Text = "Add Move";
-			this.m_btnAddMove.Click += new System.EventHandler(this.m_btnAddMove_Click);
-			// 
 			// m_btnUndoMove
 			// 
-			this.m_btnUndoMove.Location = new System.Drawing.Point(0, 160);
+			this.m_btnUndoMove.Location = new System.Drawing.Point(0, 163);
 			this.m_btnUndoMove.Name = "m_btnUndoMove";
 			this.m_btnUndoMove.Size = new System.Drawing.Size(72, 23);
 			this.m_btnUndoMove.TabIndex = 2;
-			this.m_btnUndoMove.Text = "Undo";
+			this.m_btnUndoMove.Text = "Undo Move";
 			this.m_btnUndoMove.Click += new System.EventHandler(this.m_btnUndoMove_Click);
 			// 
 			// m_btnRedoMove
 			// 
-			this.m_btnRedoMove.Location = new System.Drawing.Point(76, 160);
+			this.m_btnRedoMove.Location = new System.Drawing.Point(78, 164);
 			this.m_btnRedoMove.Name = "m_btnRedoMove";
 			this.m_btnRedoMove.Size = new System.Drawing.Size(72, 23);
 			this.m_btnRedoMove.TabIndex = 3;
-			this.m_btnRedoMove.Text = "Redo";
+			this.m_btnRedoMove.Text = "Redo Move";
 			this.m_btnRedoMove.Click += new System.EventHandler(this.m_btnRedoMove_Click);
 			// 
 			// m_btnEndMoves
 			// 
-			this.m_btnEndMoves.Location = new System.Drawing.Point(152, 160);
+			this.m_btnEndMoves.Location = new System.Drawing.Point(152, 163);
 			this.m_btnEndMoves.Name = "m_btnEndMoves";
 			this.m_btnEndMoves.Size = new System.Drawing.Size(72, 23);
 			this.m_btnEndMoves.TabIndex = 4;
@@ -181,27 +180,27 @@ namespace BuckRogers.Interface
 			// 
 			// m_btnCancelMove
 			// 
-			this.m_btnCancelMove.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-			this.m_btnCancelMove.Location = new System.Drawing.Point(76, 104);
+			this.m_btnCancelMove.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.m_btnCancelMove.Location = new System.Drawing.Point(0, 105);
 			this.m_btnCancelMove.Name = "m_btnCancelMove";
-			this.m_btnCancelMove.Size = new System.Drawing.Size(72, 23);
+			this.m_btnCancelMove.Size = new System.Drawing.Size(105, 23);
 			this.m_btnCancelMove.TabIndex = 6;
-			this.m_btnCancelMove.Text = "Cancel";
+			this.m_btnCancelMove.Text = "Cancel Move";
 			this.m_btnCancelMove.Click += new System.EventHandler(this.m_btnCancelMove_Click);
 			// 
 			// m_btnAcceptMoves
 			// 
-			this.m_btnAcceptMoves.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-			this.m_btnAcceptMoves.Location = new System.Drawing.Point(152, 104);
+			this.m_btnAcceptMoves.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.m_btnAcceptMoves.Location = new System.Drawing.Point(119, 105);
 			this.m_btnAcceptMoves.Name = "m_btnAcceptMoves";
-			this.m_btnAcceptMoves.Size = new System.Drawing.Size(72, 23);
+			this.m_btnAcceptMoves.Size = new System.Drawing.Size(105, 23);
 			this.m_btnAcceptMoves.TabIndex = 7;
-			this.m_btnAcceptMoves.Text = "Accept";
+			this.m_btnAcceptMoves.Text = "Accept Move";
 			this.m_btnAcceptMoves.Click += new System.EventHandler(this.m_btnFinishMove_Click);
 			// 
 			// label1
 			// 
-			this.label1.Location = new System.Drawing.Point(0, 192);
+			this.label1.Location = new System.Drawing.Point(0, 193);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(80, 16);
 			this.label1.TabIndex = 8;
@@ -210,36 +209,17 @@ namespace BuckRogers.Interface
 			// m_lbCurrentMoves
 			// 
 			this.m_lbCurrentMoves.Items.AddRange(new object[] {
-																  "One",
-																  "Two",
-																  "Three",
-																  "Four",
-																  "Five",
-																  "Six"});
-			this.m_lbCurrentMoves.Location = new System.Drawing.Point(84, 192);
+            "One",
+            "Two",
+            "Three",
+            "Four",
+            "Five",
+            "Six"});
+			this.m_lbCurrentMoves.Location = new System.Drawing.Point(105, 193);
 			this.m_lbCurrentMoves.Name = "m_lbCurrentMoves";
-			this.m_lbCurrentMoves.Size = new System.Drawing.Size(140, 82);
+			this.m_lbCurrentMoves.Size = new System.Drawing.Size(120, 82);
 			this.m_lbCurrentMoves.TabIndex = 9;
 			this.m_lbCurrentMoves.DoubleClick += new System.EventHandler(this.m_lbCurrentMoves_DoubleClick);
-			// 
-			// m_btnTransports
-			// 
-			this.m_btnTransports.Location = new System.Drawing.Point(0, 132);
-			this.m_btnTransports.Name = "m_btnTransports";
-			this.m_btnTransports.Size = new System.Drawing.Size(148, 23);
-			this.m_btnTransports.TabIndex = 10;
-			this.m_btnTransports.Text = "Load / Unload Transports";
-			this.m_btnTransports.Click += new System.EventHandler(this.m_btnTransports_Click);
-			// 
-			// m_btnDoneTransports
-			// 
-			this.m_btnDoneTransports.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-			this.m_btnDoneTransports.Location = new System.Drawing.Point(152, 132);
-			this.m_btnDoneTransports.Name = "m_btnDoneTransports";
-			this.m_btnDoneTransports.Size = new System.Drawing.Size(72, 23);
-			this.m_btnDoneTransports.TabIndex = 11;
-			this.m_btnDoneTransports.Text = "Done";
-			this.m_btnDoneTransports.Click += new System.EventHandler(this.m_btnDoneTransports_Click);
 			// 
 			// tabControl1
 			// 
@@ -267,14 +247,6 @@ namespace BuckRogers.Interface
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "Transports";
 			// 
-			// m_lbPlayerOrder
-			// 
-			this.m_lbPlayerOrder.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-			this.m_lbPlayerOrder.Location = new System.Drawing.Point(88, 4);
-			this.m_lbPlayerOrder.Name = "m_lbPlayerOrder";
-			this.m_lbPlayerOrder.Size = new System.Drawing.Size(136, 95);
-			this.m_lbPlayerOrder.TabIndex = 13;
-			// 
 			// label2
 			// 
 			this.label2.Location = new System.Drawing.Point(0, 4);
@@ -283,13 +255,43 @@ namespace BuckRogers.Interface
 			this.label2.TabIndex = 14;
 			this.label2.Text = "Player order:";
 			// 
+			// m_chkLoadTransports
+			// 
+			this.m_chkLoadTransports.Appearance = System.Windows.Forms.Appearance.Button;
+			this.m_chkLoadTransports.Location = new System.Drawing.Point(0, 134);
+			this.m_chkLoadTransports.Name = "m_chkLoadTransports";
+			this.m_chkLoadTransports.Size = new System.Drawing.Size(224, 24);
+			this.m_chkLoadTransports.TabIndex = 16;
+			this.m_chkLoadTransports.Text = "Load / Unload Transports";
+			this.m_chkLoadTransports.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+			this.m_chkLoadTransports.UseVisualStyleBackColor = true;
+			this.m_chkLoadTransports.CheckedChanged += new System.EventHandler(this.m_chkLoadTransports_CheckedChanged);
+			// 
+			// m_btnRemoveTerritory
+			// 
+			this.m_btnRemoveTerritory.Location = new System.Drawing.Point(0, 212);
+			this.m_btnRemoveTerritory.Name = "m_btnRemoveTerritory";
+			this.m_btnRemoveTerritory.Size = new System.Drawing.Size(80, 36);
+			this.m_btnRemoveTerritory.TabIndex = 18;
+			this.m_btnRemoveTerritory.Text = "Remove Territory";
+			this.m_btnRemoveTerritory.UseVisualStyleBackColor = true;
+			this.m_btnRemoveTerritory.Click += new System.EventHandler(this.m_btnRemoveTerritory_Click);
+			// 
+			// m_lbPlayerOrder
+			// 
+			this.m_lbPlayerOrder.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+			this.m_lbPlayerOrder.Location = new System.Drawing.Point(88, 4);
+			this.m_lbPlayerOrder.Name = "m_lbPlayerOrder";
+			this.m_lbPlayerOrder.Size = new System.Drawing.Size(136, 95);
+			this.m_lbPlayerOrder.TabIndex = 13;
+			// 
 			// MovePanel
 			// 
+			this.Controls.Add(this.m_chkLoadTransports);
+			this.Controls.Add(this.m_btnRemoveTerritory);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.m_lbPlayerOrder);
 			this.Controls.Add(this.tabControl1);
-			this.Controls.Add(this.m_btnDoneTransports);
-			this.Controls.Add(this.m_btnTransports);
 			this.Controls.Add(this.m_lbCurrentMoves);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.m_btnAcceptMoves);
@@ -297,7 +299,6 @@ namespace BuckRogers.Interface
 			this.Controls.Add(this.m_btnEndMoves);
 			this.Controls.Add(this.m_btnRedoMove);
 			this.Controls.Add(this.m_btnUndoMove);
-			this.Controls.Add(this.m_btnAddMove);
 			this.Name = "MovePanel";
 			this.Size = new System.Drawing.Size(240, 600);
 			this.tabControl1.ResumeLayout(false);
@@ -313,11 +314,9 @@ namespace BuckRogers.Interface
 			m_btnCancelMove.Enabled = true;
 			m_btnAcceptMoves.Enabled = true;
 
-			m_btnAddMove.Enabled = false;
 			m_btnUndoMove.Enabled = false;
 			m_btnRedoMove.Enabled = false;
 			m_btnEndMoves.Enabled = false;
-			m_btnTransports.Enabled = false;
 
 			m_currentMoveTerritories.Clear();
 
@@ -351,17 +350,18 @@ namespace BuckRogers.Interface
 
 		private void OnTransportLoadClick(Territory t)
 		{
+			m_showingTransportDialog = true;
 			TransportLoadForm tlf = new TransportLoadForm(m_controller);
 
 			tlf.SetupUnits(t, m_controller.CurrentPlayer);
 			tlf.ShowDialog();
 
+			m_showingTransportDialog = false;
+
 			if (tlf.DialogResult != DialogResult.OK)
 			{
 				return;
 			}
-
-			//ArrayList transferInfo = tlf.TransferInfo;
 
 			m_mlbMoves.Refresh();
 			m_mlbTransports.Refresh();
@@ -398,7 +398,6 @@ namespace BuckRogers.Interface
 			}
 
 			PInputEventArgs e = (PInputEventArgs)tcea.Tag;
-			bool territoryAdded = false;
 
 			// If this is the first click of the move, or if only the starting territory
 			// has been clicked, then we can try to add units
@@ -451,8 +450,10 @@ namespace BuckRogers.Interface
 					if (m_currentMoveTerritories.Count == 0)
 					{
 						m_currentMoveTerritories.Add(t);
-						//territoryAdded = true;
 						m_lbCurrentMoves.Items.Add(t.Name);
+
+						m_chkLoadTransports.Enabled = false;
+						m_btnEndMoves.Enabled = false;
 					}
 				}
 				// right mouse button
@@ -486,29 +487,6 @@ namespace BuckRogers.Interface
 					ArrayList al = m_controller.Map.Graph.ShortestPath(lastListedTerritory, t);
 
 					territoriesToAdd.AddRange(al);
-					/*
-					StringBuilder sb = new StringBuilder();
-
-					sb.Append("Territories:");
-
-					foreach (Territory terr in m_currentMoveTerritories)
-					{
-						sb.Append("\n");
-						sb.Append(terr.Name);
-					}
-
-					foreach(Territory terr in al)
-					{
-						sb.Append("\n");
-						sb.Append(terr.Name);
-					}
-
-					MessageBox.Show(sb.ToString(), "Movement Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-					return;
-					*/
-
-
 				}
 				// add this one territory to the move
 				else
@@ -516,128 +494,13 @@ namespace BuckRogers.Interface
 					territoriesToAdd.Add(t);					
 				}
 
-				MoveAction ma = CreateAndValidateMove(t, territoriesToAdd, tcea.DoubleClick);
+				MoveAction ma = CreateAndValidateMove(territoriesToAdd, tcea.DoubleClick);
 
 				if(ma.Validated)
 				{
-					if(tcea.DoubleClick)
-					{
-						m_controller.AddAction(ma);
-
-						m_btnUndoMove.Enabled = m_controller.CanUndo;
-						m_btnRedoMove.Enabled = m_controller.CanRedo;
-
-						// doesn't matter if the move completed or if there was an exception - either
-						// way, the move is over.
-						if (MoveModeChanged != null)
-						{
-							MoveModeEventArgs mmea = new MoveModeEventArgs();
-							mmea.MoveMode = MoveMode.Finished;
-
-							MoveModeChanged(this, mmea);
-						}
-
-						m_handSelectedUnits.Clear();
-
-						m_lbCurrentMoves.Items.Clear();
-						m_currentMoveTerritories.Clear();
-
-						m_btnCancelMove.Enabled = false;
-						m_btnAcceptMoves.Enabled = false;
-
-						m_btnAddMove.Enabled = true;
-						m_btnTransports.Enabled = true;
-						m_btnEndMoves.Enabled = true;
-
-						m_unitsToMoveCounts.Clear();
-
-						ClearMovementIcons();
-					}
-					else
-					{
-						foreach(Territory terr in territoriesToAdd)
-						{
-							m_currentMoveTerritories.Add(terr);
-							m_lbCurrentMoves.Items.Add(terr.Name);
-						}
-					}
+					FinalizeOrUpdateMove(tcea.DoubleClick, territoriesToAdd, ma);
 				}
 			}
-
-			/*
-			bool addTerritory = true;
-
-			if (e.Button == MouseButtons.Right)
-			{
-				addTerritory = false;
-			}
-
-			if ((m_currentMoveTerritories.Count > 0)
-				&& (t == (Territory)m_currentMoveTerritories[m_currentMoveTerritories.Count - 1]))
-			{
-				addTerritory = false;
-			}
-
-			if (addTerritory)
-			{
-				
-
-				if(m_currentMoveTerritories.Count == 0)	
-				{
-					m_currentMoveTerritories.Add(t);
-					territoryAdded = true;
-				}
-				else
-				{
-					MoveAction ma = new MoveAction();
-					ma.Owner = m_controller.CurrentPlayer;
-					ma.StartingTerritory = (Territory)m_currentMoveTerritories[0];
-
-					for (int i = 1; i < m_currentMoveTerritories.Count; i++)
-					{
-						ma.Territories.Add(m_currentMoveTerritories[i]);
-					}
-
-					ma.Territories.Add(t);
-
-					if(m_handSelectedUnits.Count == 0 || m_userChangedOriginalSelection)
-					{
-						m_muf.SetupUnits(ma.StartingTerritory, m_controller.CurrentPlayer);
-						m_muf.PreSelectUnits(ma.StartingTerritory, m_controller.CurrentPlayer, m_unitsToMoveCounts);
-
-						ma.Units.AddAllUnits(m_muf.SelectedUnits);
-					}
-					else
-					{
-						ma.Units.AddAllUnits(m_handSelectedUnits);
-					}
-					
-
-					if(m_controller.ValidateAction(ma))
-					{
-						m_currentMoveTerritories.Add(t);
-						territoryAdded = true;
-					}
-					else
-					{
-						MessageBox.Show(m_controller.ValidationMessage, "Illegal Move",
-										   MessageBoxButtons.OK, MessageBoxIcon.Warning);
-
-					}
-				}
-				
-				
-				
-			}
-
-			*/
-
-			/*
-			if (territoryAdded)
-			{
-				m_lbCurrentMoves.Items.Add(t.Name);
-			}
-			*/
 
 			// Perhaps the user used the MoveUnitsForm to select his units, then
 			// clicked on a unit icon or SHIFT-clicked.  In that case, we're going to
@@ -652,7 +515,49 @@ namespace BuckRogers.Interface
 			return;
 		}
 
-		private MoveAction CreateAndValidateMove(Territory t, ArrayList territoriesToAdd, bool finalizingMove)
+		private void FinalizeOrUpdateMove(bool finalizeMove, ArrayList territoriesToAdd, MoveAction ma)
+		{
+			if (ma.Validated)
+			{
+				if (finalizeMove)
+				{
+					m_controller.AddAction(ma);
+
+					m_btnUndoMove.Enabled = m_controller.CanUndo;
+					m_btnRedoMove.Enabled = m_controller.CanRedo;
+
+					m_handSelectedUnits.Clear();
+					m_currentMoveTerritories.Clear();
+					m_lbCurrentMoves.Items.Clear();
+					
+
+					m_btnCancelMove.Enabled = false;
+					m_btnAcceptMoves.Enabled = false;
+					
+					m_btnEndMoves.Enabled = true;
+					m_chkLoadTransports.Enabled = true;
+
+					m_unitsToMoveCounts.Clear();
+
+					ClearMovementIcons();
+				}
+				else
+				{
+					foreach (Territory terr in territoriesToAdd)
+					{
+						m_currentMoveTerritories.Add(terr);
+						m_lbCurrentMoves.Items.Add(terr.Name);
+					}
+
+					m_btnCancelMove.Enabled = true;
+					m_btnAcceptMoves.Enabled = true;
+
+					m_btnAcceptMoves.Focus();
+				}
+			}
+		}
+
+		private MoveAction CreateAndValidateMove(ArrayList territoriesToAdd, bool finalizingMove)
 		{
 			MoveAction ma = new MoveAction();
 			ma.Owner = m_controller.CurrentPlayer;
@@ -687,24 +592,10 @@ namespace BuckRogers.Interface
 				ma.Units.AddAllUnits(m_handSelectedUnits);
 			}
 
-
 			if (!m_controller.ValidateAction(ma))
 			{
 				MessageBox.Show(m_controller.ValidationMessage, "Illegal Move",
 								   MessageBoxButtons.OK, MessageBoxIcon.Warning);
-				//m_currentMoveTerritories.Add(t);
-				//territoryAdded = true;
-
-				/*
-				if(tcea.DoubleClick)
-				{
-					m_controller.AddAction(ma);
-				}
-				*/
-			}
-			else
-			{
-				
 			}
 
 			return ma;
@@ -721,8 +612,9 @@ namespace BuckRogers.Interface
 			// If the user SHIFT-right-clicked, then remove all the units.
 			if ((e.Modifiers & Keys.Shift) == Keys.Shift)
 			{
-				ResetMovementInfo();
-				m_unitTotalsWereChanged = true;
+				//ResetMovementInfo();
+				//m_unitTotalsWereChanged = true;
+				CancelMove();
 
 				return;
 			}
@@ -776,7 +668,15 @@ namespace BuckRogers.Interface
 				m_map.UpdateMovementIcons(e);
 
 				m_unitsToMoveCounts.Remove(movementInfo.Type);
-				m_unitTotalsWereChanged = true;
+
+				if(m_map.MovementIcons.Count == 0)
+				{
+					CancelMove();
+				}
+				else
+				{
+					m_unitTotalsWereChanged = true;
+				}				
 			}
 
 			return;
@@ -831,20 +731,10 @@ namespace BuckRogers.Interface
 
 				if (unitsWithMoves.Count > 0)
 				{
-					/*
-					// Grab all the units in the territory (DUPLICATE CODE!)
-					if ((e.Modifiers & Keys.Shift) == Keys.Shift)
-					{
-						newUnitCounts = unitsWithMoves.GetUnitTypeCount();
-					}
-					// Just add the one unit type to the hashtable
-					else
-					{
-					*/
+
 					int numUnitsToAdd = NumUnitsToAdd(e, unitsWithMoves.Count, 0);
 					newUnitCounts = new Hashtable();
 					newUnitCounts[ut] = numUnitsToAdd;
-					//}
 				}
 				// no units with moves left
 				else
@@ -971,14 +861,7 @@ namespace BuckRogers.Interface
 			{
 				numToAdd = 10;
 			}
-			/*
-			else if ((e.Modifiers & Keys.Shift) == Keys.Shift)
-			{
-				// add EVERYTHING here
-				MessageBox.Show("adding everything");
-				return;
-			}
-			*/
+
 			numCurrent += numToAdd;
 
 			if (numCurrent > numTotal)
@@ -1006,153 +889,44 @@ namespace BuckRogers.Interface
 			m_map.MovementIcons.Clear();
 		}
 
-
-
 		private void m_btnCancelMove_Click(object sender, System.EventArgs e)
+		{
+			CancelMove();
+		}
+
+		public void CancelMove()
 		{
 			m_lbCurrentMoves.Items.Clear();
 			m_currentMoveTerritories.Clear();
 
 			m_btnCancelMove.Enabled = false;
 			m_btnAcceptMoves.Enabled = false;
-
-			m_btnAddMove.Enabled = true;
 			m_btnEndMoves.Enabled = true;
-			m_btnTransports.Enabled = true;
+
+			m_chkLoadTransports.Enabled = true;
 
 			m_btnUndoMove.Enabled = m_controller.CanUndo;
 			m_btnRedoMove.Enabled = m_controller.CanRedo;
 
-			if(MoveModeChanged != null)
-			{
-				MoveModeEventArgs mmea = new MoveModeEventArgs();
-				mmea.MoveMode = MoveMode.Finished;
-
-				MoveModeChanged(this, mmea);
-			}
-
-			m_handSelectedUnits.Clear();
-			m_unitsToMoveCounts.Clear();
-			ClearMovementIcons();
-
+			ResetMovementInfo();
 		}
 
 		private void m_btnFinishMove_Click(object sender, System.EventArgs e)
 		{
-			
-
-			if(m_currentMoveTerritories.Count < 2)
-			{
-				m_lbCurrentMoves.Items.Clear();
-				m_currentMoveTerritories.Clear();
-
-				if(m_currentMoveTerritories.Count == 0)
-				{
-					MessageBox.Show("No territories were selected, so no move was added");
-				}
-				else if(m_currentMoveTerritories.Count == 1)
-				{
-					MessageBox.Show("Only a starting territory was selected, so no move was added");
-				}
-				
-				return;
-			}
-
-			try
-			{
-				if(m_handSelectedUnits.Count == 0 || m_userChangedOriginalSelection)
-				{
-					MoveUnitsForm muf = new MoveUnitsForm();
-
-					Territory startingTerritory = (Territory)m_currentMoveTerritories[0];
-					muf.SetupUnits(startingTerritory, m_controller.CurrentPlayer);
-
-					bool userShouldConfirm = muf.PreSelectUnits(startingTerritory, m_controller.CurrentPlayer, m_unitsToMoveCounts);
-
-					if (userShouldConfirm)
-					{
-						muf.ShowDialog();
-
-						if (muf.DialogResult != DialogResult.OK)
-						{
-							return;
-						}
-					}
-
-					m_handSelectedUnits.AddAllUnits(muf.SelectedUnits);
-				}
-				
-
-				m_unitsToMove.Clear();
-				m_unitsToMove.AddAllUnits(m_handSelectedUnits);
-				m_handSelectedUnits.Clear();
-				//newUnitCounts = muf.SelectedUnits.GetUnitTypeCount();
-
-				MoveAction ma = new MoveAction();
-				ma.Owner = m_controller.CurrentPlayer;
-				ma.StartingTerritory = (Territory)m_currentMoveTerritories[0];
-
-				m_currentMoveTerritories.Remove(ma.StartingTerritory);
-
-				foreach(Territory t in m_currentMoveTerritories)
-				{
-					ma.Territories.Add(t);
-				}
-
-				ma.Units.AddAllUnits(m_unitsToMove);
-
-				m_controller.AddAction(ma);
-
-				//AddActionToList(ma);
-
-				
-			}
-			catch(ActionException aex)
-			{
-				MessageBox.Show(aex.Message);
-			}
-
-			m_btnUndoMove.Enabled = m_controller.CanUndo;
-			m_btnRedoMove.Enabled = m_controller.CanRedo;
-
-			m_lbCurrentMoves.Items.Clear();
-			m_currentMoveTerritories.Clear();
-
-			// doesn't matter if the move completed or if there was an exception - either
-			// way, the move is over.
-			if(MoveModeChanged != null)
-			{
-				MoveModeEventArgs mmea = new MoveModeEventArgs();
-				mmea.MoveMode = MoveMode.Finished;
-
-				MoveModeChanged(this, mmea);
-			}
-
-			m_btnCancelMove.Enabled = false;
-			m_btnAcceptMoves.Enabled = false;
-
-			m_btnAddMove.Enabled = true;
-			m_btnTransports.Enabled = true;
-			m_btnEndMoves.Enabled = true;
-
-			m_unitsToMoveCounts.Clear();
-
-			ClearMovementIcons();
-		
+			FinalizeCurrentMove();
 		}
 
 		private void m_btnUndoMove_Click(object sender, System.EventArgs e)
 		{
 			Action a = m_controller.UndoAction();
 
-
+			m_btnUndoMove.Enabled = m_controller.CanUndo;
+			m_btnRedoMove.Enabled = m_controller.CanRedo;
 		}
 
 		private void m_btnRedoMove_Click(object sender, System.EventArgs e)
 		{
 			Action a = m_controller.RedoAction();
-
-			//AddActionToList(a);
 
 			m_btnUndoMove.Enabled = m_controller.CanUndo;
 			m_btnRedoMove.Enabled = m_controller.CanRedo;
@@ -1262,6 +1036,16 @@ namespace BuckRogers.Interface
                 return;
             }
 
+			m_currentMoveTerritories.Clear();
+
+			if (MoveModeChanged != null)
+			{
+				MoveModeEventArgs mmea = new MoveModeEventArgs();
+				mmea.MoveMode = MoveMode.Finished;
+				m_moveMode = MoveMode.Finished;
+
+				MoveModeChanged(this, mmea);
+			}
 
 			m_controller.EndMovePhase();
 			if(m_controller.NextPlayer())
@@ -1304,12 +1088,9 @@ namespace BuckRogers.Interface
 			m_mlbTransports.Items.Clear();
 
 			m_btnAcceptMoves.Enabled = false;
-			m_btnAddMove.Enabled = false;
 			m_btnCancelMove.Enabled = false;
-			m_btnDoneTransports.Enabled = false;
 			m_btnEndMoves.Enabled = false;
 			m_btnRedoMove.Enabled = false;
-			m_btnTransports.Enabled = false;
 			m_btnUndoMove.Enabled = false;
 		}
 
@@ -1318,70 +1099,10 @@ namespace BuckRogers.Interface
 			// Assume that we're in the middle of a normal turn.  Currently, the active
 			// player's MoveActions from this turn are not saved, just the current position
 			// of his units.  So, we don't need to worry about Undo/Redo.
-			m_btnAddMove.Enabled = true;
 			m_btnEndMoves.Enabled = true;
-			m_btnTransports.Enabled = true;
-		}
-
-		private void m_btnTransports_Click(object sender, System.EventArgs e)
-		{
-			//m_btnCancelMove.Enabled = true;
-			//m_btnAcceptMoves.Enabled = true;
-			
-			m_btnDoneTransports.Enabled = true;
-
-			m_btnTransports.Enabled = false;
-			m_btnAddMove.Enabled = false;
-			m_btnAcceptMoves.Enabled = false;
-			m_btnUndoMove.Enabled = m_controller.CanUndo;
-			m_btnRedoMove.Enabled = m_controller.CanRedo;
-			m_btnEndMoves.Enabled = false;
-
-			m_currentMoveTerritories.Clear();
-
-			if(MoveModeChanged != null)
-			{
-				MoveModeEventArgs mmea = new MoveModeEventArgs();
-				mmea.MoveMode = MoveMode.StartTransport;
-				m_moveMode = MoveMode.StartTransport;
-
-				MoveModeChanged(this, mmea);
-			}
-		}
-
-		private void m_btnDoneTransports_Click(object sender, System.EventArgs e)
-		{
-			m_btnAddMove.Enabled = true;
-			m_btnTransports.Enabled = true;
-			m_btnEndMoves.Enabled = true;
-
-			m_btnDoneTransports.Enabled = false;
-
-			if(MoveModeChanged != null)
-			{
-				MoveModeEventArgs mmea = new MoveModeEventArgs();
-				mmea.MoveMode = MoveMode.Finished;
-				m_moveMode = MoveMode.Finished;
-
-				MoveModeChanged(this, mmea);
-			}
-
-		}
-
-		public BuckRogers.GameController Controller
-		{
-			get { return this.m_controller; }
-			set { this.m_controller = value; }
 		}
 
 		/*
-		public GameController Controller
-		{
-			get { return this.m_controller; }
-			set { this.m_controller = value; }
-		}
-		*/
-
 		private void tlf_TransportInfo(object sender, TransportInfoEventArgs tiea)
 		{
 			char[] delimiters = {'%'};
@@ -1391,42 +1112,99 @@ namespace BuckRogers.Interface
 			m_mlbTransports.Items.Add(eventInfo[0], eventInfo[1]);
 			m_mlbTransports.Refresh();
 		}
+		*/
 
 		private void m_lbCurrentMoves_DoubleClick(object sender, System.EventArgs e)
 		{
-			/*
-			int index = m_lbCurrentMoves.SelectedIndex;
-			if( index == m_lbCurrentMoves.Items.Count - 1
-				&& index != 0)
-			{
-				m_lbCurrentMoves.Items.Remove(m_lbCurrentMoves.Items[index]);
-				m_currentMoveTerritories.Remove(m_currentMoveTerritories[m_currentMoveTerritories.Count - 1]);
-			}
-			*/
+			RemoveTerritoryFromMove();
+		}
 
-			if(m_lbCurrentMoves.Items.Count > 0)
+		private void RemoveTerritoryFromMove()
+		{
+			if (m_lbCurrentMoves.Items.Count > 0)
 			{
 				int index = m_lbCurrentMoves.Items.Count - 1;
 
 				m_lbCurrentMoves.Items.RemoveAt(index);
-				//m_currentMoveTerritories.Remove(m_currentMoveTerritories[m_currentMoveTerritories.Count - 1]);
 				m_currentMoveTerritories.RemoveAt(index);
 			}
 
-			if(m_lbCurrentMoves.Items.Count == 0)
+			if (m_lbCurrentMoves.Items.Count == 0)
 			{
-				//m_handSelectedUnits.Clear();
-				//m_unitsToMoveCounts.Clear();
-				//ClearMovementIcons();
-				ResetMovementInfo();
+				CancelMove();
 			}
-
 		}
 
 		internal void KeyPressed(Keys keyCode)
 		{
-			//throw new Exception("The method or operation is not implemented.");
+			if(keyCode == Keys.Enter)
+			{
+				FinalizeCurrentMove();
+			}
+			else if (keyCode == Keys.T)
+			{
+				// Switch the transport state, if we're currently able to
+				if(m_chkLoadTransports.Enabled && !m_showingTransportDialog)
+				{
+					m_chkLoadTransports.Checked = !m_chkLoadTransports.Checked;
+				}
+			}
+			
 		}
+
+		private void FinalizeCurrentMove()
+		{
+			if (m_currentMoveTerritories.Count > 1)
+			{
+				ArrayList dummy = new ArrayList();
+				MoveAction ma = CreateAndValidateMove(dummy, true);
+
+				FinalizeOrUpdateMove(true, dummy, ma);
+			}
+		}
+
+		public void BeginMovement()
+		{
+			m_currentMoveTerritories.Clear();
+
+			if (MoveModeChanged != null)
+			{
+				MoveModeEventArgs mmea = new MoveModeEventArgs();
+				mmea.MoveMode = MoveMode.StartMove;
+				m_moveMode = MoveMode.StartMove;
+
+				MoveModeChanged(this, mmea);
+			}
+
+			m_chkLoadTransports.Location = new Point(0, 134);
+			
+		}
+
+		private void m_btnRemoveTerritory_Click(object sender, EventArgs e)
+		{
+			RemoveTerritoryFromMove();
+		}
+
+		private void m_chkLoadTransports_CheckedChanged(object sender, EventArgs e)
+		{
+			if (MoveModeChanged != null)
+			{
+				MoveModeEventArgs mmea = new MoveModeEventArgs();
+
+				if (m_chkLoadTransports.Checked)
+				{
+					mmea.MoveMode = MoveMode.StartTransport;
+					m_moveMode = MoveMode.StartTransport;
+				}
+				else
+				{
+					mmea.MoveMode = MoveMode.StartMove;
+					m_moveMode = MoveMode.StartMove;
+				}				
+
+				MoveModeChanged(this, mmea);
+			}
+		}		
 	}
 	
 }

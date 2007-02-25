@@ -73,7 +73,7 @@ namespace BuckRogers.Interface
 			int LVM_SETICONSPACING = 4149;
 			int width = 70;
 			int height = 80;
-			int iconSpacing = Utility.MakeLong(width, height);			
+			int iconSpacing = Utility.MakeLong(width, height);
 
 			SendMessage(m_lvAvailableUnits.Handle, LVM_SETICONSPACING, 0, iconSpacing);
 			SendMessage(m_lvUnitsPlaced.Handle, LVM_SETICONSPACING, 0, iconSpacing);
