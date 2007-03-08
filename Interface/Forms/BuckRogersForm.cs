@@ -38,7 +38,7 @@ namespace BuckRogers.Interface
 	/// </summary>
 	public class BuckRogersForm : System.Windows.Forms.Form, IMessageFilter
 	{
-		private static string m_versionString = "0.8.1 (Beta)";
+		private static string m_versionString = "0.8.1a (Beta)";
 
 		
 		private IContainer components;
@@ -184,7 +184,8 @@ namespace BuckRogers.Interface
 					tabControl1.TabPages.Add(m_tpTerritory);
 					tabControl1.TabPages.Add(m_tpInformation);
 
-					m_clickMode = MapClickMode.Normal;
+					m_clickMode = MapClickMode.Move;
+					m_movePanel.MoveMode = MoveMode.StartMove;
 
 					GameController.Options.OptionalRules = go.OptionalRules;
 					m_map.IconManager.CreateIcons();
@@ -995,7 +996,8 @@ namespace BuckRogers.Interface
 
 			m_battleController.InitGameLog();
 
-			m_clickMode = MapClickMode.Normal;
+			m_clickMode = MapClickMode.Move;
+			m_movePanel.MoveMode = MoveMode.StartMove;
 
 			tabControl1.TabPages.Clear();
 			tabControl1.TabPages.Add(m_tpAction);
