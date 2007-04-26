@@ -4,12 +4,15 @@ using System.Xml;
 
 namespace BuckRogers
 {
+	#region delegates
 
 	public delegate void DisplayUnitsHandler(object sender, DisplayUnitsEventArgs e);
 	public delegate void TerritoryUpdateHandler(Territory t);
 	public delegate void BattleStatusUpdateHandler(BattleStatus status);
-	
 
+	#endregion
+
+	#region BattleStatus enum
 	public enum BattleStatus
 	{
 		None,
@@ -19,21 +22,24 @@ namespace BuckRogers
 		BattleComplete,
 		BattleReady,
 	}
-	
 
+	#endregion
 
-	/// <summary>
-	/// Summary description for BattleController.
-	/// </summary>
 	public class BattleController
 	{
+		#region events
+
 		public event DisplayUnitsHandler UnitsToDisplay;
 		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
 		public StatusUpdateHandler StatusUpdate;
 		public TerritoryUpdateHandler UpdateTerritory;
 		public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
 		public event BattleStatusUpdateHandler BattleStatusUpdated;
-		
+
+		#endregion
+
+		#region private members
+
 		private int[,] m_combatTable = new int[,]	{	{6, 8, 7, NOTPOSSIBLE, 6, NOTPOSSIBLE, 3}, // Trooper
 														{5, 6, 6, NOTPOSSIBLE, 5, NOTPOSSIBLE, 2}, // Gennie
 														{7, 7, 6, 8, 3, 7, 3}, // Fighter
@@ -63,11 +69,85 @@ namespace BuckRogers
 		private int m_numRolls;
 		private bool m_attacksAlwaysHit;
 
+		#endregion
+
+		#region properties
+
 		public bool AttacksAlwaysHit
 		{
 			get { return m_attacksAlwaysHit; }
 			set { m_attacksAlwaysHit = value; }
 		}
+
+		public BuckRogers.Hashlist Battles
+		{
+			get { return this.m_battles; }
+			set { this.m_battles = value; }
+		}
+
+		public BuckRogers.BattleInfo CurrentBattle
+		{
+			get { return this.m_currentBattle; }
+			set { this.m_currentBattle = value; }
+		}
+
+		public System.Collections.ArrayList BattleOrder
+		{
+			get { return this.m_playerOrder; }
+			set { this.m_playerOrder = value; }
+		}
+
+		public UnitCollection SurvivingUnits
+		{
+			get { return this.m_survivingUnits; }
+			set { this.m_survivingUnits = value; }
+		}
+
+		public BuckRogers.Player CurrentPlayer
+		{
+			get { return this.m_currentPlayer; }
+			set { this.m_currentPlayer = value; }
+		}
+
+		public BuckRogers.UnitCollection CurrentUnused
+		{
+			get { return this.m_currentUnused; }
+			set { this.m_currentUnused = value; }
+		}
+
+		public BuckRogers.CombatResult LastResult
+		{
+			get { return this.m_lastResult; }
+			set { this.m_lastResult = value; }
+		}
+
+		public BuckRogers.CombatResult TurnResult
+		{
+			get { return this.m_turnResult; }
+			set { this.m_turnResult = value; }
+		}
+
+		public BuckRogers.CombatResult BattleResult
+		{
+			get { return this.m_cumulativeResult; }
+			set { this.m_cumulativeResult = value; }
+		}
+
+		public BuckRogers.BattleStatus Status
+		{
+			get { return this.m_status; }
+			set { this.m_status = value; }
+		}
+
+		public System.Xml.XmlDocument Gamelog
+		{
+			get { return this.m_gamelog; }
+			set { this.m_gamelog = value; }
+		}
+
+		#endregion
+
+		#region constructor
 
 		public BattleController(GameController gc)
 		{
@@ -77,6 +157,10 @@ namespace BuckRogers
 			m_currentBattle = null;
 			m_battles = null;
 		}
+
+		#endregion
+
+		#region gamelog
 
 		public void InitGameLog()
 		{
@@ -94,6 +178,9 @@ namespace BuckRogers
 			m_xeCurrentTurn.AppendChild(m_xeBattles);
 		}
 
+		#endregion
+
+		#region CheckPlayerOrder
 		private void CheckPlayerOrder()
 		{
 			m_playerOrder = new ArrayList();
@@ -167,6 +254,9 @@ namespace BuckRogers
 			*/
 		}
 
+		#endregion
+
+		#region NextBattle
 		public bool NextBattle()
 		{
 			if(m_cumulativeResult.Casualties.Count > 0)
@@ -528,6 +618,10 @@ namespace BuckRogers
 			return false;
 		}
 
+		#endregion
+
+		#region round functions
+
 		public void ProcessAttackResults()
 		{
 			TurnResult.Casualties.AddAllUnits(LastResult.Casualties);
@@ -629,6 +723,10 @@ namespace BuckRogers
 		{
 			m_status = BattleStatus.Setup;
 		}
+
+		#endregion
+
+		#region display functions
 
 		public void DisplayUnits()
 		{
@@ -736,6 +834,10 @@ namespace BuckRogers
 			m_currentUnused.AddAllUnits(casualties);
 		}
 
+		#endregion
+
+		#region end of turn functions
+
 		public void ProcessTurnResults()
 		{
 			foreach(Unit u in m_turnResult.Casualties)
@@ -831,6 +933,7 @@ namespace BuckRogers
 			m_currentBattle = null;
 		}
 
+		#endregion
 
 		#region Combat functions
 
@@ -1044,70 +1147,5 @@ namespace BuckRogers
 		#endregion
 
 
-		public BuckRogers.Hashlist Battles
-		{
-			get { return this.m_battles; }
-			set { this.m_battles = value; }
-		}
-
-		public BuckRogers.BattleInfo CurrentBattle
-		{
-			get { return this.m_currentBattle; }
-			set { this.m_currentBattle = value; }
-		}
-
-		public System.Collections.ArrayList BattleOrder
-		{
-			get { return this.m_playerOrder; }
-			set { this.m_playerOrder = value; }
-		}
-
-		public UnitCollection SurvivingUnits
-		{
-			get { return this.m_survivingUnits; }
-			set { this.m_survivingUnits = value; }
-		}
-
-		public BuckRogers.Player CurrentPlayer
-		{
-			get { return this.m_currentPlayer; }
-			set { this.m_currentPlayer = value; }
-		}
-
-		public BuckRogers.UnitCollection CurrentUnused
-		{
-			get { return this.m_currentUnused; }
-			set { this.m_currentUnused = value; }
-		}
-
-		public BuckRogers.CombatResult LastResult
-		{
-			get { return this.m_lastResult; }
-			set { this.m_lastResult = value; }
-		}
-
-		public BuckRogers.CombatResult TurnResult
-		{
-			get { return this.m_turnResult; }
-			set { this.m_turnResult = value; }
-		}
-
-		public BuckRogers.CombatResult BattleResult
-		{
-			get { return this.m_cumulativeResult; }
-			set { this.m_cumulativeResult = value; }
-		}
-
-		public BuckRogers.BattleStatus Status
-		{
-			get { return this.m_status; }
-			set { this.m_status = value; }
-		}
-
-		public System.Xml.XmlDocument Gamelog
-		{
-			get { return this.m_gamelog; }
-			set { this.m_gamelog = value; }
-		}
 	}
 }

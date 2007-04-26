@@ -1,5 +1,4 @@
-//#define DEBUGCOMBAT
-
+#region using directives
 using System;
 using System.Drawing;
 using System.Drawing.Design;
@@ -19,8 +18,7 @@ using UMD.HCIL.PiccoloX.Components;
 using BuckRogers;
 using BuckRogers.Interface;
 using BuckRogers.Networking;
-
-
+#endregion
 
 namespace BuckRogers.Interface
 {
@@ -32,16 +30,14 @@ namespace BuckRogers.Interface
 		PlaceUnits,
 		SelectTerritories,
 		GameOver,
+		Observation,
 	}
 
-	/// <summary>
-	/// Summary description for BuckRogersForm.
-	/// </summary>
 	public class BuckRogersForm : System.Windows.Forms.Form, IMessageFilter
 	{
 		private static string m_versionString = "0.8.1a (Beta)";
 
-		
+		#region private members
 		private IContainer components;
 		private System.Windows.Forms.Button m_btnZoomIn;
 		private System.Windows.Forms.Button m_btnZoomOut;
@@ -49,6 +45,7 @@ namespace BuckRogers.Interface
 
 		private GameController m_controller;
 		private BattleController m_battleController;
+		private BuckRogersClient m_gameClient;
 
 		//private CombatForm m_combatForm;
 		private ProductionForm m_productionForm;
@@ -85,40 +82,36 @@ namespace BuckRogers.Interface
 		private MenuItem menuItem4;
 		private YesNoForm m_yesno;
 
+		#endregion
+
+		#region properties
+
 		public static string VersionString
 		{
 			get { return BuckRogersForm.m_versionString; }
 		}
-		
-		/*
-		public BuckRogersForm()
+
+		public BuckRogers.GameController GameController
 		{
-			InitializeComponent();
-
-			ControllerTest ct = new ControllerTest();
-			ct.Reinitialize = false;
-			m_controller = ct.GameController;
-			m_battleController = ct.BattleController;
-
-			InitControls();
-			InitEvents();
-
-			ct.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
-			ct.Init();
-
-			tabControl1.TabPages.Clear();
-			tabControl1.TabPages.Add(m_tpAction);
-			tabControl1.TabPages.Add(m_tpTerritory);
-
-			m_clickMode = MapClickMode.Normal;
-			StartGame();
+			get { return this.m_controller; }
+			set { this.m_controller = value; }
 		}
-		*/
 
-		public BuckRogersForm(GameOptions go, string loadFileName)
+		public BuckRogers.BattleController BattleController
+		{
+			get { return this.m_battleController; }
+			set { this.m_battleController = value; }
+		}
+
+		#endregion
+
+		#region constructors
+
+		public BuckRogersForm(GameOptions go, string loadFileName, BuckRogersClient client)
 		{
 			InitializeComponent();
 			this.Icon = InterfaceUtility.GetApplicationIcon();
+			m_gameClient = client;
 
 			this.StartPosition = FormStartPosition.CenterScreen;
 			Rectangle desktop = Screen.PrimaryScreen.WorkingArea;
@@ -127,37 +120,29 @@ namespace BuckRogers.Interface
 			Initialize(go, loadFileName);			
 		}
 
-		public BuckRogersForm(BuckRogersClient client, GameOptions options)
-		{
+		#endregion
 
-		}
+		#region initialization
 
 		private void Initialize(GameOptions go, string loadFileName)
 		{
 			bool useTesting = go.OptionalRules["UseTestingSetup"];
+			bool loadSaveGame = (loadFileName != string.Empty);
 			ControllerTest ct = null;
 
-			if(loadFileName == String.Empty)
+			if(!loadSaveGame && useTesting)
 			{
-				if(useTesting)
-				{
-					ct = new ControllerTest();
-					ct.Reinitialize = false;
-					m_controller = ct.GameController;
-					m_battleController = ct.BattleController;
+				ct = new ControllerTest();
+				ct.Reinitialize = false;
+				m_controller = ct.GameController;
+				m_battleController = ct.BattleController;
 
-					GameController.Options.OptionalRules = go.OptionalRules;
-					//GameController.Options.SetupOptions = go.SetupOptions;
-					GameController.Options.IncreasedProductionTurn = go.IncreasedProductionTurn;
-					GameController.Options.NumTerritoriesNeeded = go.NumTerritoriesNeeded;
-					GameController.Options.ProductionMultiplier = go.ProductionMultiplier;
-					GameController.Options.WinningConditions = go.WinningConditions;
-				}
-				else
-				{
-					m_controller = new GameController(go);
-					m_battleController = new BattleController(m_controller);
-				}
+				GameController.Options.OptionalRules = go.OptionalRules;
+				//GameController.Options.SetupOptions = go.SetupOptions;
+				GameController.Options.IncreasedProductionTurn = go.IncreasedProductionTurn;
+				GameController.Options.NumTerritoriesNeeded = go.NumTerritoriesNeeded;
+				GameController.Options.ProductionMultiplier = go.ProductionMultiplier;
+				GameController.Options.WinningConditions = go.WinningConditions;
 			}			
 			else
 			{
@@ -176,7 +161,7 @@ namespace BuckRogers.Interface
 			m_map.IconManager.LoadUnitIconLocations(false, true);
 			InitEvents();
 
-			if(loadFileName == String.Empty)
+			if(!loadSaveGame)
 			{
 				if(useTesting)
 				{
@@ -286,21 +271,10 @@ namespace BuckRogers.Interface
 			m_informationPanel.Controller = m_controller;
 
 			m_yesno = new YesNoForm();
-			m_yesno.VisibleChanged += new EventHandler(m_yesno_VisibleChanged);
+			m_yesno.VisibleChanged += new EventHandler(OnYesNoFormVisibleChanged);
 
 			m_map.PlacePlanetIcons();
 		}
-
-		void m_yesno_VisibleChanged(object sender, EventArgs e)
-		{
-			if(!m_yesno.Visible)
-			{
-				DialogResult dr = m_yesno.DialogResult;
-
-				MessageBox.Show("Result: " + dr);
-			}
-		}
-
 
 		private void InitEvents()
 		{
@@ -323,27 +297,10 @@ namespace BuckRogers.Interface
 
 		}
 
-		private void StartGame()
-		{
-			//m_controller.InitGamelog();
-			m_controller.NextTurn();
-			//m_battleController.Gamelog = m_controller.Gamelog;
-			m_battleController.InitGameLog();
-			//m_controller.LogInitialPlacements();
+		#endregion
 
-			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
-			statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
+		#region plumbing
 
-			string victoryDescription = Utility.GetDescriptionOf(GameController.Options.WinningConditions);
-			statusBar1.Panels[2].Text = "Victory Condition: " + victoryDescription;
-			
-			m_movePanel.RefreshPlayerOrder();			
-			m_informationPanel.RefreshAllInfo();
-		}
-
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
 		protected override void Dispose( bool disposing )
 		{
 			if( disposing )
@@ -677,7 +634,6 @@ namespace BuckRogers.Interface
 			this.Name = "BuckRogersForm";
 			this.Text = "Buck Rogers: Battle for the 25th Century";
 			this.Closing += new System.ComponentModel.CancelEventHandler(this.BuckRogersForm_Closing);
-			this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.BuckRogersForm_KeyPress);
 			this.tabControl1.ResumeLayout(false);
 			this.m_tpPlacement.ResumeLayout(false);
 			this.m_tpAction.ResumeLayout(false);
@@ -691,13 +647,9 @@ namespace BuckRogers.Interface
 		}
 		#endregion
 
-		/*
-		[STAThread]
-		public static void Main(string[] args)
-		{
-			Application.Run(new BuckRogersForm());
-		}
-		*/
+		#endregion
+
+		#region message handlers
 
 		public void OnTerritoryClicked(object sender, TerritoryEventArgs tcea)
 		{
@@ -741,8 +693,178 @@ namespace BuckRogers.Interface
 					break;
 				}
 			}
-			
+
 		}
+
+		public void OnMoveModeChanged(object sender, MoveModeEventArgs mmea)
+		{
+			switch (mmea.MoveMode)
+			{
+				case MoveMode.StartMove:
+				case MoveMode.StartTransport:
+				{
+					m_clickMode = MapClickMode.Move;
+					break;
+				}
+				case MoveMode.Finished:
+				{
+					m_clickMode = MapClickMode.Normal;
+					break;
+				}
+				case MoveMode.StartPlacement:
+				{
+					m_clickMode = MapClickMode.PlaceUnits;
+					break;
+				}
+			}
+		}
+
+		private bool OnStatusUpdate(object sender, StatusUpdateEventArgs suea)
+		{
+			bool result = true;
+			switch (suea.StatusInfo)
+			{
+				case StatusInfo.NextPlayer:
+				{
+					statusBar1.Panels[0].Text = "Current player: " + suea.Player.Name;
+					break;
+				}
+				case StatusInfo.NextPhase:
+				{
+					switch (m_controller.CurrentPhase)
+					{
+						case GamePhase.Movement:
+						{
+							//tabControl1.TabPages.Remove(m_tpPlacement);
+							tabControl1.TabPages.Clear();
+							tabControl1.TabPages.Add(m_tpAction);
+							tabControl1.TabPages.Add(m_tpTerritory);
+							tabControl1.TabPages.Add(m_tpInformation);
+
+							m_movePanel.BeginMovement();
+
+							m_menuFileSave.Enabled = true;
+
+							StartGame();
+							break;
+						}
+						case GamePhase.Combat:
+						{
+							m_menuFileSave.Enabled = false;
+							//m_menuFileLoad.Enabled = false;
+							statusBar1.Panels[0].Text = "Combat phase";
+							//MessageBox.Show("Movement over, time for combat");
+
+							/*
+							if(m_combatForm == null)
+							{
+								m_combatForm = new CombatForm(m_controller, m_battleController);
+							}
+							*/
+
+							if (m_combatForm2 == null)
+							{
+								m_combatForm2 = new CombatForm2D(m_controller, m_battleController, m_map.IconManager);
+							}
+
+							m_controller.FindBattles();
+
+							if (m_controller.Battles.Count == 0)
+							{
+								//MessageBox.Show("No battles this turn - moving to production");
+								m_controller.CheckNextPhase();
+
+							}
+							else
+							{
+								//m_combatForm.BeginCombat();
+								//m_combatForm.ShowDialog();
+
+
+								//m_combatForm2.CombatDisplay.BeginCombat();
+								m_combatForm2.ShowDialog();
+
+								m_controller.CheckNextPhase();
+							}
+
+							//break;
+							goto case GamePhase.Production;
+						}
+						case GamePhase.Production:
+						{
+							if (m_productionForm == null)
+							{
+								m_productionForm = new ProductionForm(m_controller);
+								m_productionForm.Owner = this;
+							}
+
+							m_productionForm.SetupProduction();
+							m_productionForm.Show();
+
+							bool visible = m_productionForm.Visible;
+
+							tabControl1.TabPages.Remove(m_tpAction);
+
+							break;
+						}
+						case GamePhase.EndTurn:
+						{
+							tabControl1.TabPages.Clear();
+
+							tabControl1.TabPages.Add(m_tpAction);
+							tabControl1.TabPages.Add(m_tpTerritory);
+							m_controller.NextTurn();
+							m_map.AdvancePlanets();
+							statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+							statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
+							m_movePanel.RefreshPlayerOrder();
+							m_informationPanel.RefreshAllInfo();
+
+							m_movePanel.BeginMovement();
+
+							m_menuFileSave.Enabled = true;
+							//m_menuFileLoad.Enabled = true;
+							break;
+						}
+					}
+
+
+
+					break;
+				}
+				case StatusInfo.GameOver:
+				{
+					MessageBox.Show("The winner is " + suea.Player.Name, "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+					m_movePanel.DisableMovePanel();
+					m_clickMode = MapClickMode.GameOver;
+					break;
+				}
+				case StatusInfo.TransportLanded:
+				{
+					string message = "You have loaded transports in " + suea.Territory.Name + ".  Unload them?";
+					DialogResult dr = MessageBox.Show(message, "Unload Transports?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+					return dr == DialogResult.Yes;
+				}
+			}
+
+			return result;
+		}
+
+		private void OnYesNoFormVisibleChanged(object sender, EventArgs e)
+		{
+			if (!m_yesno.Visible)
+			{
+				DialogResult dr = m_yesno.DialogResult;
+
+				MessageBox.Show("Result: " + dr);
+			}
+		}
+
+		#endregion
+
+		#region form event handlers
 
 		private void m_btnZoomIn_Click(object sender, System.EventArgs e)
 		{
@@ -773,161 +895,9 @@ namespace BuckRogers.Interface
 			m_map.CenterMapOn(target);
 		}
 
-		public void OnMoveModeChanged(object sender, MoveModeEventArgs mmea)
-		{
-			switch(mmea.MoveMode)
-			{
-				case MoveMode.StartMove:
-				case MoveMode.StartTransport:
-				{
-					m_clickMode = MapClickMode.Move;
-					break;
-				}
-				case MoveMode.Finished:
-				{
-					m_clickMode = MapClickMode.Normal;
-					break;
-				}
-				case MoveMode.StartPlacement:
-				{
-					m_clickMode = MapClickMode.PlaceUnits;
-					break;
-				}
-			}
-		}
+		
 
-		private bool OnStatusUpdate(object sender, StatusUpdateEventArgs suea)
-		{
-			bool result = true;
-			switch(suea.StatusInfo)
-			{
-				case StatusInfo.NextPlayer:
-				{
-					statusBar1.Panels[0].Text = "Current player: " + suea.Player.Name;
-					break;
-				}
-				case StatusInfo.NextPhase:
-				{
-					switch(m_controller.CurrentPhase)
-					{
-						case GamePhase.Movement:
-						{
-							//tabControl1.TabPages.Remove(m_tpPlacement);
-							tabControl1.TabPages.Clear();
-							tabControl1.TabPages.Add(m_tpAction);
-							tabControl1.TabPages.Add(m_tpTerritory);
-							tabControl1.TabPages.Add(m_tpInformation);
-
-							m_movePanel.BeginMovement();
-
-							m_menuFileSave.Enabled = true;
-
-							StartGame();
-							break;
-						}
-						case GamePhase.Combat:
-						{
-							m_menuFileSave.Enabled = false;
-							//m_menuFileLoad.Enabled = false;
-							statusBar1.Panels[0].Text = "Combat phase";
-							//MessageBox.Show("Movement over, time for combat");
-							
-							/*
-							if(m_combatForm == null)
-							{
-								m_combatForm = new CombatForm(m_controller, m_battleController);
-							}
-							*/
-
-							if(m_combatForm2 == null)
-							{
-								m_combatForm2 = new CombatForm2D(m_controller, m_battleController, m_map.IconManager);
-							}
-
-							m_controller.FindBattles();
-
-							if(m_controller.Battles.Count == 0)
-							{
-								//MessageBox.Show("No battles this turn - moving to production");
-								m_controller.CheckNextPhase();
-								
-							}
-							else
-							{
-								//m_combatForm.BeginCombat();
-								//m_combatForm.ShowDialog();
-								
-
-								//m_combatForm2.CombatDisplay.BeginCombat();
-								m_combatForm2.ShowDialog();
-
-								m_controller.CheckNextPhase();
-							}
-
-							//break;
-							goto case GamePhase.Production;
-						}
-						case GamePhase.Production:
-						{
-							if(m_productionForm == null)
-							{
-								m_productionForm = new ProductionForm(m_controller);
-								m_productionForm.Owner = this;
-							}
-
-							m_productionForm.SetupProduction();
-							m_productionForm.Show();
-
-							bool visible = m_productionForm.Visible;
-
-							tabControl1.TabPages.Remove(m_tpAction);
-							
-							break;
-						}
-						case GamePhase.EndTurn:
-						{
-							tabControl1.TabPages.Clear();
-
-							tabControl1.TabPages.Add(m_tpAction);
-							tabControl1.TabPages.Add(m_tpTerritory);
-							m_controller.NextTurn();
-							m_map.AdvancePlanets();
-							statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
-							statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
-							m_movePanel.RefreshPlayerOrder();
-							m_informationPanel.RefreshAllInfo();
-
-							m_movePanel.BeginMovement();
-
-							m_menuFileSave.Enabled = true;
-							//m_menuFileLoad.Enabled = true;
-							break;
-						}
-					}
-					
-					
-
-					break;
-				}
-				case StatusInfo.GameOver:
-				{
-					MessageBox.Show("The winner is " + suea.Player.Name, "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-					m_movePanel.DisableMovePanel();
-					m_clickMode = MapClickMode.GameOver;
-					break;
-				}
-				case StatusInfo.TransportLanded:
-				{
-					string message = "You have loaded transports in " + suea.Territory.Name + ".  Unload them?";
-					DialogResult dr = MessageBox.Show(message, "Unload Transports?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-					return dr == DialogResult.Yes;
-				}				
-			}		
-	
-			return result;
-		}
+		
 
 		private void button1_Click_1(object sender, System.EventArgs e)
 		{
@@ -994,6 +964,45 @@ namespace BuckRogers.Interface
 			}
 		}
 
+		private void m_menuHelpAbout_Click(object sender, EventArgs e)
+		{
+			AboutForm af = new AboutForm();
+			af.Owner = this;
+
+			af.ShowDialog();
+		}
+
+		private void m_menuHelpHow_Click(object sender, EventArgs e)
+		{
+			if (m_howToPlay == null)
+			{
+				m_howToPlay = new HowToPlayForm();
+				m_howToPlay.StartPosition = FormStartPosition.Manual;
+
+				int x = this.Bounds.X + (this.Width / 2) - (m_howToPlay.Width / 2);
+				int y = this.Bounds.Y + (this.Height / 2) - (m_howToPlay.Height / 2);
+
+				m_howToPlay.Location = new Point(x, y);
+			}
+
+			m_howToPlay.Show();
+
+
+		}
+
+		private void m_menuHelpIconLegend_Click(object sender, EventArgs e)
+		{
+			UnitIconLegendForm uilf = new UnitIconLegendForm(m_controller, m_map.IconManager);
+
+			uilf.Initialize();
+			uilf.AddItems();
+			uilf.ShowDialog();
+		}
+
+		#endregion
+
+		#region game load / start
+
 		public void LoadGame(string filename)
 		{
 			m_movePanel.ResetMovementInfo();
@@ -1009,8 +1018,6 @@ namespace BuckRogers.Interface
 			tabControl1.TabPages.Add(m_tpAction);
 			tabControl1.TabPages.Add(m_tpTerritory);
 			tabControl1.TabPages.Add(m_tpInformation);
-
-
 
 			m_menuFileSave.Enabled = true;
 
@@ -1028,49 +1035,27 @@ namespace BuckRogers.Interface
 			m_movePanel.EnableMovePanel();
 		}
 
-		public BuckRogers.GameController GameController
+		private void StartGame()
 		{
-			get { return this.m_controller; }
-			set { this.m_controller = value; }
+			//m_controller.InitGamelog();
+			m_controller.NextTurn();
+			//m_battleController.Gamelog = m_controller.Gamelog;
+			m_battleController.InitGameLog();
+			//m_controller.LogInitialPlacements();
+
+			statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+			statusBar1.Panels[1].Text = "Turn: " + m_controller.TurnNumber.ToString();
+
+			string victoryDescription = Utility.GetDescriptionOf(GameController.Options.WinningConditions);
+			statusBar1.Panels[2].Text = "Victory Condition: " + victoryDescription;
+
+			m_movePanel.RefreshPlayerOrder();
+			m_informationPanel.RefreshAllInfo();
 		}
 
-		public BuckRogers.BattleController BattleController
-		{
-			get { return this.m_battleController; }
-			set { this.m_battleController = value; }
-		}
+		#endregion
 
-		private void m_menuHelpAbout_Click(object sender, EventArgs e)
-		{
-			AboutForm af = new AboutForm();
-			af.Owner = this;
-
-			af.ShowDialog();
-		}
-
-		private void m_menuHelpHow_Click(object sender, EventArgs e)
-		{
-			if(m_howToPlay == null)
-			{
-				m_howToPlay = new HowToPlayForm();
-				m_howToPlay.StartPosition = FormStartPosition.Manual;
-
-				int x = this.Bounds.X + (this.Width / 2) - (m_howToPlay.Width / 2);
-				int y = this.Bounds.Y + (this.Height / 2) - (m_howToPlay.Height / 2);
-
-				m_howToPlay.Location = new Point(x, y);
-			}
-
-			m_howToPlay.Show();
-
-			
-		}
-
-		private void BuckRogersForm_KeyPress(object sender, KeyPressEventArgs e)
-		{
-			string message = "Key pressed: " + e.KeyChar;
-			MessageBox.Show(message);
-		}
+		#region keypress handling
 
 		protected override void OnLoad(EventArgs e)
 		{
@@ -1115,13 +1100,6 @@ namespace BuckRogers.Interface
 
 		#endregion
 
-		private void m_menuHelpIconLegend_Click(object sender, EventArgs e)
-		{
-			UnitIconLegendForm uilf = new UnitIconLegendForm(m_controller, m_map.IconManager);
-
-			uilf.Initialize();
-			uilf.AddItems();
-			uilf.ShowDialog();
-		}
+		#endregion
 	}
 }

@@ -1,3 +1,4 @@
+#region using directives
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -43,6 +44,8 @@ using PComposite = UMD.HCIL.PiccoloDirect3D.Util.P3Composite;
 
 using GpcWrapper;
 
+#endregion
+
 namespace BuckRogers.Interface
 {
 
@@ -53,9 +56,7 @@ namespace BuckRogers.Interface
 	/// </summary>
 	public class MapControl : System.Windows.Forms.Control
 	{
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
+		#region private members
 		private System.ComponentModel.Container components = null;
 
 		public event TerritoryClickedHandler TerritoryClicked;
@@ -107,6 +108,9 @@ namespace BuckRogers.Interface
 
 		private MovePanel m_movePanel;
 
+		#endregion
+
+		#region properties
 
 		public ArrayList MovementIcons
 		{
@@ -130,7 +134,39 @@ namespace BuckRogers.Interface
 			}
 		}
 
+		public UMD.HCIL.Piccolo.PCanvas Canvas
+		{
+			get { return this.m_canvas; }
+			set { this.m_canvas = (PCanvas)value; }
+		}
 
+		public RefreshingScrollableControl ScrollControl
+		{
+			get { return this.m_scroller; }
+			set { this.m_scroller = value; }
+		}
+
+		public BuckRogers.GameController GameController
+		{
+			get { return this.m_controller; }
+			set { this.m_controller = value; }
+		}
+
+		public BuckRogers.Interface.IconManager IconManager
+		{
+			get { return this.m_iconManager; }
+			set { this.m_iconManager = value; }
+		}
+
+		public System.Collections.Hashtable Territories
+		{
+			get { return this.m_territories; }
+			set { this.m_territories = value; }
+		}
+
+		#endregion
+
+		#region constructor
 
 		public MapControl()
 		{
@@ -278,35 +314,22 @@ namespace BuckRogers.Interface
 
 		}
 
-		void m_scroller_MouseWheel(object sender, MouseEventArgs e)
-		{
-			//throw new Exception("The method or operation is not implemented.");
-			float scaleFactor = 1.0f;
+		#endregion
 
-			if(e.Delta > 0)
-			{
-				scaleFactor = 1.5f;
-			}
-			else
-			{
-				scaleFactor = 0.67f;
-			}
+		#region plumbing
 
-			CenterZoomedMap(true, scaleFactor, e.X, e.Y);
-			
-		}
 
 		/// <summary>
 		/// Clean up any resources being used.
 		/// </summary>
-		protected override void Dispose( bool disposing )
+		protected override void Dispose(bool disposing)
 		{
-			if( disposing )
+			if (disposing)
 			{
-				if( components != null )
+				if (components != null)
 					components.Dispose();
 			}
-			base.Dispose( disposing );
+			base.Dispose(disposing);
 		}
 
 		#region Component Designer generated code
@@ -320,6 +343,12 @@ namespace BuckRogers.Interface
 		}
 		#endregion
 
+		#endregion
+
+		#region map creation
+
+		#region LoadTerritoryPolygons
+
 		private void LoadTerritoryPolygons()
 		{
 			Assembly a = Assembly.GetExecutingAssembly();
@@ -330,9 +359,9 @@ namespace BuckRogers.Interface
 			string line = sr.ReadLine();
 			int numTerritories = Int32.Parse(line);
 
-			char[] pointSeparators = new char[]{','};
+			char[] pointSeparators = new char[] { ',' };
 
-			for(int i = 0; i < numTerritories; i++)
+			for (int i = 0; i < numTerritories; i++)
 			{
 				string territoryName = sr.ReadLine();
 				string sNumContours = sr.ReadLine();
@@ -340,11 +369,11 @@ namespace BuckRogers.Interface
 
 				Polygon poly = new Polygon();
 
-				for(int j = 0; j < numContours; j++)
+				for (int j = 0; j < numContours; j++)
 				{
 					line = sr.ReadLine();
 
-					string[] contourInfo = line.Split(new char[]{':'});
+					string[] contourInfo = line.Split(new char[] { ':' });
 
 					int numPoints = Int32.Parse(contourInfo[1]);
 					bool isHole = Boolean.Parse(contourInfo[2]);
@@ -352,7 +381,7 @@ namespace BuckRogers.Interface
 					VertexList points = new VertexList();
 					points.Vertex = new Vertex[numPoints];
 					points.NofVertices = numPoints;
-					for(int k = 0; k < numPoints; k++)
+					for (int k = 0; k < numPoints; k++)
 					{
 						line = sr.ReadLine();
 
@@ -365,11 +394,14 @@ namespace BuckRogers.Interface
 				}
 
 				PPath path = new PPath(poly.ToGraphicsPath());
-				m_territories[territoryName] = path;				
+				m_territories[territoryName] = path;
 			}
 			sr.Close();
 		}
-		
+
+		#endregion
+
+		#region AddPlanets2
 
 		private void AddPlanets2()
 		{
@@ -379,21 +411,21 @@ namespace BuckRogers.Interface
 			#region Territory centers
 
 			PointF[] mercuryCenters = new PointF[] {new PointF(27.41f, 67.41f), new PointF(64.1f, 25.74f),
-													   new PointF(105f, 67f), new PointF(75f, 110f)}; 
+													   new PointF(105f, 67f), new PointF(75f, 110f)};
 
 			PointF[] venusCenters = new PointF[] {new PointF(50f, 38f), new PointF(85f, 28f),
 													 new PointF(114f, 65f), new PointF(130f, 110f),
-													 new PointF(83f, 120f), new PointF(47f, 110f), new PointF(35f, 79f)}; 
+													 new PointF(83f, 120f), new PointF(47f, 110f), new PointF(35f, 79f)};
 
 			PointF[] moonCenters = new PointF[] {new PointF(53f, 20f), new PointF(75f, 55f),
-													new PointF(53f, 90f), new PointF(30f, 55f)}; 
+													new PointF(53f, 90f), new PointF(30f, 55f)};
 
 			PointF[] earthCenters = new PointF[] {new PointF(79f, 14f), new PointF(105f, 50f),
 													 new PointF(105f, 90f), new PointF(95f, 125f),
-													 new PointF(48f, 125f), new PointF(50f, 75f), new PointF(45f, 45f)}; 
+													 new PointF(48f, 125f), new PointF(50f, 75f), new PointF(45f, 45f)};
 
 
-			
+
 			PointF[] marsCenters = new PointF[] {new PointF(75f, 19f), new PointF(129f, 74f),
 													new PointF(91.5f, 94f), new PointF(56.5f, 94f),
 													new PointF(19f, 74f)};
@@ -401,7 +433,7 @@ namespace BuckRogers.Interface
 
 			#region Territory Names
 
-			string[] mercuryNames = {"Bach", "The Warrens", "Tolstoi", "Sobkou Plains"};
+			string[] mercuryNames = { "Bach", "The Warrens", "Tolstoi", "Sobkou Plains" };
 
 			string[] venusNames = {"Aerostates", "Mt. Maxwell", "Elysium", 
 									  "Wreckers", "Aphrodite",
@@ -411,7 +443,7 @@ namespace BuckRogers.Interface
 									  "Antarctic Testing Zone",  "Australian Development Facility", 
 									  "Urban Reservations",	"American Regency"};
 
-			string[] moonNames = {"Moscoviense", "Farside", "Tycho", "Tranquility" };
+			string[] moonNames = { "Moscoviense", "Farside", "Tycho", "Tranquility" };
 
 			string[] marsNames = { "Boreal Sea", "Pavonis", "Arcadia", 
 									 "Ram HQ", "Coprates Chasm"};
@@ -430,8 +462,8 @@ namespace BuckRogers.Interface
 
 			DrawPlanetaryOrbit2("Near Mars Orbit", Color.Red, scaleFactor, 1000, -1300, true);
 			DrawPlanetaryOrbit2("Far Mars Orbit", Color.Red, scaleFactor, 1000, -1300, true);
-			
-			
+
+
 			DrawAsteroid2(scaleFactor, "Ceres", Color.Gray, -200, 1150);
 			DrawAsteroid2(scaleFactor, "Pallas", Color.Gray, 450, 1000);
 			DrawAsteroid2(scaleFactor, "Psyche", Color.LightSteelBlue, 500, 1350);
@@ -441,7 +473,7 @@ namespace BuckRogers.Interface
 			DrawAsteroid2(scaleFactor, "Juno", Color.LightSteelBlue, -1000, 1650);
 			DrawAsteroid2(scaleFactor, "Hygeia", Color.Gold, -800, 1300);
 			DrawAsteroid2(scaleFactor, "Aurora", Color.LightGray, -800, 1000);
-			
+
 			AddPlanet2(mercuryNames, mercuryCenters, Brushes.Goldenrod, scaleFactor, -2600, -800);
 			AddPlanet2(venusNames, venusCenters, Brushes.LightGreen, scaleFactor, -2600, 1000);
 			AddPlanet2(earthNames, earthCenters, Brushes.LightBlue, scaleFactor, 1900, 1100);
@@ -455,7 +487,7 @@ namespace BuckRogers.Interface
 														 new object[]{"L-5 Colony", Color.CornflowerBlue, 2100, 650},
 			};
 
-			for(int i = 0; i < satelliteInfo.Length; i++)
+			for (int i = 0; i < satelliteInfo.Length; i++)
 			{
 				object[] info = satelliteInfo[i];
 				string name = (string)info[0];
@@ -492,12 +524,12 @@ namespace BuckRogers.Interface
 			elevatorMarker.X = 2449;
 			elevatorMarker.Y = -805;
 		}
-	
 
-		private void AddPlanet2(string[] territoryNames, PointF[] territoryCenters, Brush color, 
+
+		private void AddPlanet2(string[] territoryNames, PointF[] territoryCenters, Brush color,
 			float scaleFactor, int shiftX, int shiftY)
 		{
-			for(int i = 0; i < territoryNames.Length; i++)
+			for (int i = 0; i < territoryNames.Length; i++)
 			{
 				PPath territory = (PPath)m_territories[territoryNames[i]];
 
@@ -526,12 +558,12 @@ namespace BuckRogers.Interface
 				m_territoryCenters[territoryNames[i]] = new PointF(center.X, center.Y);
 
 				string label = territoryNames[i];
-				
+
 				PText text = new PText(label);
 				Font f = text.Font;
 				text.Font = new Font(f.Name, f.SizeInPoints + 6, FontStyle.Bold);
 
-				if(text.Bounds.Width > 280)
+				if (text.Bounds.Width > 280)
 				{
 					RectangleF bounds = text.Bounds;
 					bounds.Width = 280;
@@ -553,6 +585,408 @@ namespace BuckRogers.Interface
 				compTerritory.MouseUp += new PInputEventHandler(OnTerritoryMouseUp);
 				Canvas.Layer.AddChild(compTerritory);
 			}
+		}
+
+		#endregion
+
+		#region DrawAsteroid2
+		private void DrawAsteroid2(float scaleFactor, string name, Color color, int shiftX, int shiftY)
+		{
+			PPath asteroid = (PPath)m_territories[name];
+			string orbitName = name + " Orbit";
+			PPath orbit = (PPath)m_territories[orbitName];
+
+			m_territoryCenters[orbitName] = PUtil.CenterOfRectangle(orbit.FullBounds);
+
+			PComposite asteroidParent = new PComposite();
+			asteroidParent.Tag = name;
+			asteroidParent.AddChild(asteroid);
+			Canvas.Layer.AddChild(asteroidParent);
+
+			PComposite orbitParent = new PComposite();
+			orbitParent.Tag = orbitName;
+			orbitParent.AddChild(orbit);
+			Canvas.Layer.AddChild(orbitParent);
+
+
+			DrawLabelAndOwner2(asteroid, name, shiftX, shiftY);
+
+			asteroid.Brush = new SolidBrush(color);
+			asteroid.Pen = Pens.White;
+
+			orbit.Brush = Brushes.Black;
+			orbit.Pen = Pens.White;
+
+			orbitParent.MouseUp += new PInputEventHandler(OnTerritoryMouseUp);
+			asteroidParent.MouseUp += new PInputEventHandler(OnTerritoryMouseUp);
+
+		}
+
+		#endregion
+
+		#region DrawPlanetaryOrbit2
+
+		private void DrawPlanetaryOrbit2(string name, Color color, float scaleFactor, int shiftX, int shiftY, bool closeOrbit)
+		{
+			PPath orbit = (PPath)m_territories[name];
+
+			PComposite parent = new PComposite();
+			parent.Tag = name;
+			parent.AddChild(orbit);
+			Canvas.Layer.AddChild(parent);
+
+			orbit.Pen = new Pen(color);
+			orbit.Brush = Brushes.Black;
+
+			orbit.OffsetX += shiftX;
+			orbit.OffsetY += shiftY;
+
+			m_orbitOffsets[name] = new PointF(shiftX, shiftY);
+
+			parent.MouseUp += new PInputEventHandler(OnTerritoryMouseUp);
+		}
+
+		#endregion
+
+		#region DrawLabelAndOwner2
+
+		private void DrawLabelAndOwner2(PPath parent, string name, int shiftX, int shiftY)
+		{
+			PPath center = PPath.CreateEllipse(0, 0, 40, 40);
+			center.Brush = Brushes.White;
+			Pen p = new Pen(Color.Black, 3.0f);
+			center.Pen = p;
+			center.Tag = name;
+
+			float centerX = parent.Width / 2;
+			float centerY = parent.Height / 2;
+
+			PointF unshiftedCenter = new PointF();
+			unshiftedCenter.X = centerX - (center.Width / 2);
+			unshiftedCenter.Y = centerY;
+
+			center.X = unshiftedCenter.X + shiftX;
+			center.Y = unshiftedCenter.Y + shiftY;
+
+			m_territoryCenters[name] = new PointF(center.X, center.Y);
+
+			PText text = new PText(name);//names[i]);
+
+			text.TextBrush = Brushes.Black;
+			Font f = text.Font;
+			text.Font = new Font(f.Name, f.SizeInPoints + 6, FontStyle.Bold);
+			text.X = centerX - (text.Width / 2) + shiftX;
+			text.Y = centerY - (text.Height) + shiftY;
+			text.Tag = name;
+
+			m_territoryMarkers[name] = center;
+
+			parent.AddChild(text);
+			parent.AddChild(center);
+		}
+
+		#endregion
+
+		#region DrawSolarOrbit
+
+		private void DrawSolarOrbit(PNode[] nodes, string prefix, string orbitName, int numNodes, int radius,
+			Color color, bool drawConnector, bool isTransOrbit)
+		{
+			DrawSolarOrbit(nodes, prefix, orbitName, numNodes, radius, color, false, drawConnector, isTransOrbit);
+		}
+
+		private void DrawSolarOrbit(PNode[] nodes, string prefix, string orbitName, int numNodes, int radius,
+			Color color, bool rotate45, bool drawConnector, bool isTransOrbit)
+		{
+			PPath circle;
+			PText text;
+			PComposite composite;
+			float deg = (360 / (float)numNodes);
+
+			int centerX = this.Bounds.Width / 2;
+			int centerY = this.Bounds.Height / 2;
+
+			PPath orbit = PPath.CreateEllipse(0f, 0f, 2 * radius, 2 * radius);
+			RectangleF orbitBounds = orbit.Bounds;
+
+			orbit.Brush = Brushes.Transparent;
+
+			orbitBounds.X = centerX - radius;
+			orbitBounds.Y = centerY - radius;
+			orbit.Bounds = orbitBounds;
+
+			if (!isTransOrbit)
+			{
+				orbit.Pen = new Pen(color);
+			}
+
+			Canvas.Layer.AddChild(orbit);
+
+
+			for (int i = 0; i < numNodes; i++)
+			{
+				composite = new PComposite();
+
+				text = new PText(prefix + " " + i.ToString());
+				text.TextBrush = Brushes.White;
+				circle = PPath.CreateEllipse(0f, 0f, 10f, 10f);
+				circle.Brush = new SolidBrush(color);//Brushes.Black;
+				circle.Pen = Pens.Black;
+
+				circle.Tag = orbitName + " Orbit: " + i.ToString();
+
+				nodes[i] = circle;
+
+				composite.MouseUp += new UMD.HCIL.Piccolo.PInputEventHandler(OnTerritoryMouseUp);
+
+				float numDegrees = i * deg - 90;
+
+				if (rotate45)
+				{
+					numDegrees += 45;
+				}
+
+				float x = -Utility.GetCos(numDegrees) * radius;
+				float y = Utility.GetSin(numDegrees) * radius;
+
+				RectangleF compositeBounds = composite.Bounds;
+				compositeBounds.X = centerX + x;
+				compositeBounds.Y = centerY + y;
+				composite.Bounds = compositeBounds;
+
+				circle.AddChild(text);
+				composite.AddChild(circle);
+
+				RectangleF textBounds = text.Bounds;
+				textBounds.X = x + centerX - (textBounds.Width / 2);
+				textBounds.Y = y - 20 + centerY;
+				text.Bounds = textBounds;
+
+				RectangleF circleBounds = circle.Bounds;
+				circleBounds.X = x - 5 + centerX;
+				circleBounds.Y = y - 5 + centerY;
+				circle.Bounds = circleBounds;
+
+				string tag = orbitName + " Orbit: " + i.ToString();
+
+				m_territoryCenters[tag] = PUtil.CenterOfRectangle(circleBounds);
+
+				text.Tag = tag;
+				circle.Tag = tag;
+				composite.Tag = tag;
+
+				m_territories[tag] = circle;
+
+				Canvas.Layer.AddChild(composite);
+			}
+		}
+
+
+
+		private void DrawConnectors()
+		{
+			for (int i = 1; i < m_orbits.Length; i++)
+			{
+				PNode[] orbit = m_orbits[i];
+				PNode[] previousOrbit = m_orbits[i - 1];
+
+				bool sameLength = (orbit.Length == previousOrbit.Length);
+
+				if (!sameLength)
+				{
+					bool isMercury = (orbit.Length == 2);
+					bool isVenus = (orbit.Length == 4);
+					for (int j = 0; j < orbit.Length; j++)
+					{
+						int d1idx = 0;
+						int d2idx = 0;
+
+						if (isMercury)
+						{
+							if (j == 0)
+							{
+								d1idx = 0;
+								d2idx = 3;
+							}
+							else
+							{
+								d1idx = 1;
+								d2idx = 2;
+							}
+						}
+						else if (isVenus)
+						{
+							d1idx = (j * 2) + 1;
+							d2idx = (d1idx + 1) % 8;
+						}
+						else
+						{
+							d1idx = 2 * j;
+							d2idx = d1idx + 1;
+						}
+
+
+						PPath origin = (PPath)orbit[j];
+						PPath destination1 = (PPath)previousOrbit[d1idx];
+						PPath destination2 = (PPath)previousOrbit[d2idx];
+
+						float startX = origin.X + 5;
+						float startY = origin.Y + 5;
+
+						float destination1X = destination1.X + 5;
+						float destination1Y = destination1.Y + 5;
+
+						float destination2X = destination2.X + 5;
+						float destination2Y = destination2.Y + 5;
+
+						PPath line1 = PPath.CreateLine(startX, startY, destination1X, destination1Y);
+						PPath line2 = PPath.CreateLine(startX, startY, destination2X, destination2Y);
+
+						line1.Pen = Pens.White;
+						line2.Pen = Pens.White;
+
+						Canvas.Layer.AddChild(line1);
+						Canvas.Layer.AddChild(line2);
+
+						origin.Parent.MoveToFront();
+						destination1.Parent.MoveToFront();
+						destination2.Parent.MoveToFront();
+					}
+				}
+				else
+				{
+					for (int j = 0; j < orbit.Length; j++)
+					{
+						PPath origin = (PPath)orbit[j];
+						PPath destination1 = (PPath)previousOrbit[j];
+
+						float startX = origin.X + 5;
+						float startY = origin.Y + 5;
+
+						float destination1X = destination1.X + 5;
+						float destination1Y = destination1.Y + 5;
+
+						PPath line1 = PPath.CreateLine(startX, startY, destination1X, destination1Y);
+
+						line1.Pen = Pens.White;
+
+						Canvas.Layer.AddChild(line1);
+						origin.Parent.MoveToFront();
+						destination1.Parent.MoveToFront();
+					}
+				}
+			}
+		}
+
+		#endregion
+
+		#region PlacePlanetIcons
+
+		public void PlacePlanetIcons()
+		{
+			int iconRadius = 50;
+			m_iconMercury = new PComposite();
+			PPath mercCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
+
+			mercCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Yellow);
+			mercCircle.Pen = Pens.White;
+			PText mercName = new PText("Mercury");
+			mercName.TextBrush = new SolidBrush(Color.White);
+			mercName.X = iconRadius - (mercName.Width / 2);
+			mercName.Y = iconRadius + mercName.Height + 4;
+			m_iconMercury.AddChild(mercCircle);
+			m_iconMercury.AddChild(mercName);
+			m_iconMercury.Tag = "Mercury";
+
+			m_iconVenus = new PComposite();
+			PPath venusCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
+			venusCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Green);
+			venusCircle.Pen = Pens.White;
+			PText venusName = new PText("Venus");
+			venusName.TextBrush = new SolidBrush(Color.White);
+			venusName.X = iconRadius - (venusName.Width / 2);
+			venusName.Y = iconRadius + venusName.Height + 4;
+			m_iconVenus.AddChild(venusCircle);
+			m_iconVenus.AddChild(venusName);
+			m_iconVenus.Tag = "Venus";
+
+
+			m_iconEarth = new PComposite();
+			PPath earthCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
+			earthCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Blue);
+			earthCircle.Pen = Pens.White;
+			PText earthName = new PText("Earth");
+			earthName.TextBrush = new SolidBrush(Color.White);
+			earthName.X = iconRadius - (earthName.Width / 2);
+			earthName.Y = iconRadius + earthName.Height + 4;
+			m_iconEarth.AddChild(earthCircle);
+			m_iconEarth.AddChild(earthName);
+			m_iconEarth.Tag = "Earth";
+
+			m_iconMars = new PComposite();
+			PPath marsCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
+			marsCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Red);
+			marsCircle.Pen = Pens.White;
+			PText marsName = new PText("Mars");
+			marsName.TextBrush = new SolidBrush(Color.White);
+			marsName.X = iconRadius - (marsName.Width / 2);
+			marsName.Y = iconRadius + marsName.Height + 4;
+			m_iconMars.AddChild(marsCircle);
+			m_iconMars.AddChild(marsName);
+			m_iconMars.Tag = "Mars";
+
+
+			Canvas.Layer.AddChild(m_iconMercury);
+			Canvas.Layer.AddChild(m_iconVenus);
+			Canvas.Layer.AddChild(m_iconEarth);
+			Canvas.Layer.AddChild(m_iconMars);
+
+			m_iconAsteroids = new PComposite[9];
+			string[] asteroidNames = { "Ceres", "Pallas", "Psyche", "Thule", "Fortuna", "Vesta", "Juno", "Hygeia", "Aurora" };
+			for (int i = 0; i < 9; i++)
+			{
+				m_iconAsteroids[i] = new PComposite();
+				PPath asteroidCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
+				asteroidCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Gray);
+				asteroidCircle.Pen = Pens.White;
+				m_iconAsteroids[i].AddChild(asteroidCircle);
+				PText asteroidName = new PText(asteroidNames[i]);
+				asteroidName.TextBrush = new SolidBrush(Color.White);
+				asteroidName.X = iconRadius - (asteroidName.Width / 2);
+				asteroidName.Y = iconRadius + asteroidName.Height + 4;
+
+				m_iconAsteroids[i].AddChild(asteroidCircle);
+				m_iconAsteroids[i].AddChild(asteroidName);
+				m_iconAsteroids[i].Tag = asteroidNames[i];
+				Canvas.Layer.AddChild(m_iconAsteroids[i]);
+
+			}
+
+			AdvancePlanets();
+		}
+
+		#endregion
+
+		#endregion
+
+		#region mouse handling (clicks, etc)
+
+		void m_scroller_MouseWheel(object sender, MouseEventArgs e)
+		{
+			//throw new Exception("The method or operation is not implemented.");
+			float scaleFactor = 1.0f;
+
+			if (e.Delta > 0)
+			{
+				scaleFactor = 1.5f;
+			}
+			else
+			{
+				scaleFactor = 0.67f;
+			}
+
+			CenterZoomedMap(true, scaleFactor, e.X, e.Y);
+
 		}
 
 		void OnTerritoryMouseUp(object sender, PInputEventArgs e)
@@ -676,337 +1110,23 @@ namespace BuckRogers.Interface
 			}
 		}
 
-		private void DrawAsteroid2(float scaleFactor, string name, Color color, int shiftX, int shiftY)
-		{
-			PPath asteroid = (PPath)m_territories[name];
-			string orbitName = name + " Orbit";
-			PPath orbit = (PPath)m_territories[orbitName];
 
-			m_territoryCenters[orbitName] = PUtil.CenterOfRectangle(orbit.FullBounds);
-
-			PComposite asteroidParent = new PComposite();
-			asteroidParent.Tag = name;
-			asteroidParent.AddChild(asteroid);
-			Canvas.Layer.AddChild(asteroidParent);
-
-			PComposite orbitParent = new PComposite();
-			orbitParent.Tag = orbitName;
-			orbitParent.AddChild(orbit);
-			Canvas.Layer.AddChild(orbitParent);
-
-
-			DrawLabelAndOwner2(asteroid, name, shiftX, shiftY);
-
-			asteroid.Brush = new SolidBrush(color);
-			asteroid.Pen = Pens.White;
-
-			orbit.Brush = Brushes.Black;
-			orbit.Pen = Pens.White;
-
-			orbitParent.MouseUp += new PInputEventHandler(OnTerritoryMouseUp);
-			asteroidParent.MouseUp += new PInputEventHandler(OnTerritoryMouseUp);
-
-		}
-		
-		
-		private void DrawPlanetaryOrbit2(string name, Color color, float scaleFactor, int shiftX, int shiftY, bool closeOrbit)
-		{
-			PPath orbit = (PPath)m_territories[name];
-
-			PComposite parent = new PComposite();
-			parent.Tag = name;
-			parent.AddChild(orbit);
-			Canvas.Layer.AddChild(parent);
-
-			orbit.Pen = new Pen(color);
-			orbit.Brush = Brushes.Black;
-
-			orbit.OffsetX += shiftX;
-			orbit.OffsetY += shiftY;
-
-			m_orbitOffsets[name] = new PointF(shiftX, shiftY);
-
-			parent.MouseUp += new PInputEventHandler(OnTerritoryMouseUp);
-		}
-
-		private void DrawLabelAndOwner2(PPath parent, string name, int shiftX, int shiftY)
-		{
-			PPath center = PPath.CreateEllipse(0, 0, 40, 40);
-			center.Brush = Brushes.White;
-			Pen p = new Pen(Color.Black, 3.0f);
-			center.Pen = p;
-			center.Tag = name;
-
-			float centerX = parent.Width / 2;
-			float centerY = parent.Height / 2;
-
-			PointF unshiftedCenter = new PointF();
-			unshiftedCenter.X = centerX - (center.Width / 2);
-			unshiftedCenter.Y = centerY;
-
-			center.X = unshiftedCenter.X + shiftX;
-			center.Y = unshiftedCenter.Y + shiftY;
-
-			m_territoryCenters[name] = new PointF(center.X, center.Y);
-
-			PText text = new PText(name);//names[i]);
-
-			text.TextBrush = Brushes.Black;
-			Font f = text.Font;
-			text.Font = new Font(f.Name, f.SizeInPoints + 6, FontStyle.Bold);
-			text.X = centerX - (text.Width / 2) + shiftX;
-			text.Y = centerY - (text.Height) + shiftY;
-			text.Tag = name;
-
-			m_territoryMarkers[name] = center;
-
-			parent.AddChild(text);
-			parent.AddChild(center);
-		}
-		
-
-		private void DrawSolarOrbit(PNode[] nodes, string prefix, string orbitName, int numNodes, int radius, 
-			Color color, bool drawConnector, bool isTransOrbit)
-		{
-			DrawSolarOrbit(nodes, prefix, orbitName, numNodes, radius, color, false, drawConnector, isTransOrbit);
-		}
-
-		private void DrawSolarOrbit(PNode[] nodes, string prefix, string orbitName, int numNodes, int radius, 
-			Color color, bool rotate45, bool drawConnector, bool isTransOrbit)
-		{
-			PPath circle;
-			PText text;
-			PComposite composite;
-			float deg = (360 / (float)numNodes);
-
-			int centerX = this.Bounds.Width / 2;
-			int centerY = this.Bounds.Height / 2;
-
-			PPath orbit = PPath.CreateEllipse(0f, 0f, 2 * radius, 2 * radius);
-			RectangleF orbitBounds = orbit.Bounds;
-
-			orbit.Brush = Brushes.Transparent;
-			
-			orbitBounds.X = centerX - radius;
-			orbitBounds.Y = centerY - radius;
-			orbit.Bounds = orbitBounds;
-
-			if(!isTransOrbit)
-			{
-				orbit.Pen = new Pen(color);
-			}
-			
-			Canvas.Layer.AddChild(orbit);
-
-
-			for(int i = 0; i < numNodes; i++)
-			{
-				composite = new PComposite();
-				
-				text = new PText(prefix + " " + i.ToString());
-				text.TextBrush = Brushes.White;
-				circle = PPath.CreateEllipse(0f, 0f, 10f, 10f);
-				circle.Brush = new SolidBrush(color);//Brushes.Black;
-				circle.Pen = Pens.Black;
-
-				circle.Tag = orbitName + " Orbit: " + i.ToString();
-
-				nodes[i] = circle;
-
-				composite.MouseUp += new UMD.HCIL.Piccolo.PInputEventHandler(OnTerritoryMouseUp);
-
-				float numDegrees = i * deg - 90;
-
-				if(rotate45)
-				{
-					numDegrees += 45;
-				}
-
-				float x = -Utility.GetCos(numDegrees) * radius;
-				float y = Utility.GetSin(numDegrees) * radius;
-
-				RectangleF compositeBounds = composite.Bounds;
-				compositeBounds.X = centerX + x;
-				compositeBounds.Y = centerY + y;
-				composite.Bounds = compositeBounds;
-
-				circle.AddChild(text);
-				composite.AddChild(circle);
-				
-				RectangleF textBounds = text.Bounds;
-				textBounds.X = x + centerX - (textBounds.Width / 2);
-				textBounds.Y = y - 20 + centerY;
-				text.Bounds = textBounds;
-
-				RectangleF circleBounds = circle.Bounds;				
-				circleBounds.X = x - 5 + centerX;
-				circleBounds.Y = y - 5 + centerY;				
-				circle.Bounds = circleBounds;
-
-				string tag = orbitName + " Orbit: " + i.ToString();
-
-				m_territoryCenters[tag] = PUtil.CenterOfRectangle(circleBounds);
-
-				text.Tag = tag;
-				circle.Tag = tag;
-				composite.Tag = tag;
-
-				m_territories[tag] = circle;
-				
-				Canvas.Layer.AddChild(composite);
-			}
-		}
-
-
-		/*
-		private void DrawPlanetaryOrbit(PointF[][] polygons, string name, Color color, float scaleFactor, int shiftX, int shiftY, bool closeOrbit)
-		{
-			PPath orbit = new PPath();
-
-			orbit.Pen = new Pen(color);
-			orbit.Brush = Brushes.Black;
-
-			for(int i = 0; i < polygons.Length; i++)
-			{
-				PointF[] shape = polygons[i];
-
-				if(scaleFactor != 1.0f)
-				{
-					for(int j = 0; j < shape.Length; j++)
-					{
-						shape[j].X *= scaleFactor;
-						shape[j].Y *= scaleFactor;
-					}
-				}
-				
-				orbit.AddBezier(shape[0].X, shape[0].Y, shape[1].X, shape[1].Y, shape[2].X, shape[2].Y, shape[3].X, shape[3].Y);
-			}
-
-			if(closeOrbit)
-			{
-				orbit.CloseFigure();
-			}
-
-			orbit.OffsetX = shiftY;
-			orbit.OffsetY = shiftY;
-
-			orbit.Tag = name;
-
-			orbit.MouseUp +=new UMD.HCIL.Piccolo.PInputEventHandler(text_Click);
-
-			Canvas.Layer.AddChild(orbit);
-
-			
-		}
-		*/
-		private void DrawConnectors()
-		{
-			for(int i = 1; i < m_orbits.Length; i++)
-			{
-				PNode[] orbit = m_orbits[i];
-				PNode[] previousOrbit = m_orbits[i - 1];
-
-				bool sameLength = (orbit.Length == previousOrbit.Length);
-
-				if(!sameLength)
-				{
-					bool isMercury = (orbit.Length == 2);
-					bool isVenus = (orbit.Length == 4);
-					for(int j = 0; j < orbit.Length; j++)
-					{
-						int d1idx = 0;
-						int d2idx = 0;
-						
-						if(isMercury)
-						{
-							if(j == 0)
-							{
-								d1idx = 0;
-								d2idx = 3;
-							}
-							else
-							{
-								d1idx = 1;
-								d2idx = 2;
-							}
-						}
-						else if(isVenus)
-						{
-							d1idx = (j * 2) + 1;
-							d2idx = (d1idx + 1) % 8;
-						}
-						else
-						{
-							d1idx = 2 * j;
-							d2idx = d1idx + 1;
-						}
-
-
-						PPath origin = (PPath)orbit[j];
-						PPath destination1 = (PPath)previousOrbit[d1idx];
-						PPath destination2 = (PPath)previousOrbit[d2idx];
-
-						float startX = origin.X + 5;
-						float startY = origin.Y + 5;
-
-						float destination1X = destination1.X + 5;
-						float destination1Y = destination1.Y + 5;
-
-						float destination2X = destination2.X + 5;
-						float destination2Y = destination2.Y + 5;
-
-						PPath line1 = PPath.CreateLine(startX, startY, destination1X, destination1Y);
-						PPath line2 = PPath.CreateLine(startX, startY, destination2X, destination2Y);
-
-						line1.Pen = Pens.White;
-						line2.Pen = Pens.White;
-
-						Canvas.Layer.AddChild(line1);
-						Canvas.Layer.AddChild(line2);
-
-						origin.Parent.MoveToFront();
-						destination1.Parent.MoveToFront();
-						destination2.Parent.MoveToFront();
-					}
-				}
-				else
-				{
-					for(int j = 0; j < orbit.Length; j++)
-					{
-						PPath origin = (PPath)orbit[j];
-						PPath destination1 = (PPath)previousOrbit[j];
-
-						float startX = origin.X + 5;
-						float startY = origin.Y + 5;
-
-						float destination1X = destination1.X + 5;
-						float destination1Y = destination1.Y + 5;
-
-						PPath line1 = PPath.CreateLine(startX, startY, destination1X, destination1Y);
-
-						line1.Pen = Pens.White;
-
-						Canvas.Layer.AddChild(line1);
-						origin.Parent.MoveToFront();
-						destination1.Parent.MoveToFront();
-					}
-				}
-			}
-		}
-
-
-		public void MouseMoveHandler(object sender, PInputEventArgs e) 
+		public void MouseMoveHandler(object sender, PInputEventArgs e)
 		{
 			UpdateMovementIcons(e);
 			UpdateToolTip(e);
 
-			if(m_movePanel.MoveMode == MoveMode.StartMove
+			if (m_movePanel.MoveMode == MoveMode.StartMove
 				&& m_movePanel.CurrentMoveTerritories.Count > 0)
 			{
 				UpdateMovementArrows(e);
 			}
 			//Canvas.Refresh();
 		}
+
+		#endregion
+
+		#region movement arrows / tooltips
 
 		private void UpdateMovementArrows(PInputEventArgs e)
 		{
@@ -1187,9 +1307,66 @@ namespace BuckRogers.Interface
 				
 				RectangleF tipBounds = m_tooltip.Bounds;
 				m_tooltip.RepaintFrom(tipBounds, m_tooltip);
-			}			
+			}
 		}
 
+		public void ShowPathArrows(ArrayList al)
+		{
+			if (al.Count == 1)
+			{
+				return;
+			}
+
+			for (int i = 0; i < al.Count - 1; i++)
+			{
+				PPath line = new PPath();
+				Pen newPen = (Pen)line.Pen.Clone();
+				line.Pen = newPen;
+
+				line.Pen.Color = Color.Red;
+				line.Pen.StartCap = LineCap.RoundAnchor;
+				line.Pen.EndCap = LineCap.Custom;
+				line.Pen.CustomEndCap = new AdjustableArrowCap(3, 4, true);
+				line.Pen.Width = 10;
+
+
+				Territory startingTerritory = (Territory)al[i];
+				Territory endingTerritory = (Territory)al[i + 1];
+
+				if ((startingTerritory.IsSolarTerritory && !endingTerritory.IsSolarTerritory)
+					|| (!startingTerritory.IsSolarTerritory && endingTerritory.IsSolarTerritory))
+				{
+					line.Pen.DashStyle = DashStyle.Dash;
+					line.Pen.DashOffset = 75;
+					line.Pen.Width = 7.5f;
+				}
+
+				PointF startingPoint = (PointF)m_territoryCenters[startingTerritory.Name];
+				PointF endingPoint = (PointF)m_territoryCenters[endingTerritory.Name];
+
+				line.AddLine(startingPoint.X, startingPoint.Y, endingPoint.X, endingPoint.Y);
+
+				line.Pickable = false;
+
+				Canvas.Layer.AddChild(line);
+
+				m_pathArrows.Add(line);
+			}
+		}
+
+		public void ClearPathArrows()
+		{
+			foreach (PPath line in m_pathArrows)
+			{
+				line.RemoveFromParent();
+			}
+
+			m_pathArrows.Clear();
+		}
+
+		#endregion
+
+		#region handlers that might be unused
 		private void text_Click(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
 		{
 			// make sure we only handle actual clicks
@@ -1221,16 +1398,6 @@ namespace BuckRogers.Interface
 				TerritoryClicked(this, tcea);
 			}			
 		}
-
-		/*
-		private void center_MouseUp(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
-		{
-			PNode picked = (PNode)e.PickedNode;
-			PPath path = (PPath)picked;
-			MessageBox.Show("x: " + path.Bounds.X + ", y: " + path.Bounds.Y);
-		}
-		*/
-
 
 		private void composite_MouseEnter(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
 		{
@@ -1288,6 +1455,10 @@ namespace BuckRogers.Interface
 
 			MessageBox.Show(sb.ToString());
 		}
+
+		#endregion
+
+		#region zooming
 
 		public void ZoomIn()
 		{
@@ -1463,6 +1634,10 @@ namespace BuckRogers.Interface
 			Canvas.Refresh();
 		}
 
+		#endregion
+
+		#region display updates
+
 		public void SetTerritoryOwner(object sender, TerritoryEventArgs tea)
 		{
 			PPath marker = (PPath)m_territoryMarkers[tea.Name];
@@ -1473,88 +1648,6 @@ namespace BuckRogers.Interface
 			}
 		}
 
-		public void PlacePlanetIcons()
-		{
-			int iconRadius = 50;
-			m_iconMercury = new PComposite();
-			PPath mercCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
-			
-			mercCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Yellow);
-			mercCircle.Pen = Pens.White;
-			PText mercName = new PText("Mercury");
-			mercName.TextBrush = new SolidBrush(Color.White);
-			mercName.X = iconRadius - (mercName.Width / 2);
-			mercName.Y = iconRadius + mercName.Height + 4;
-			m_iconMercury.AddChild(mercCircle);
-			m_iconMercury.AddChild(mercName);
-			m_iconMercury.Tag = "Mercury";
-
-			m_iconVenus = new PComposite();
-			PPath venusCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
-			venusCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Green);
-			venusCircle.Pen = Pens.White;
-			PText venusName = new PText("Venus");
-			venusName.TextBrush = new SolidBrush(Color.White);
-			venusName.X = iconRadius - (venusName.Width / 2);
-			venusName.Y = iconRadius + venusName.Height + 4;
-			m_iconVenus.AddChild(venusCircle);
-			m_iconVenus.AddChild(venusName);
-			m_iconVenus.Tag = "Venus";
-			
-
-			m_iconEarth = new PComposite();
-			PPath earthCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
-			earthCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Blue);
-			earthCircle.Pen = Pens.White;
-			PText earthName = new PText("Earth");
-			earthName.TextBrush = new SolidBrush(Color.White);
-			earthName.X = iconRadius - (earthName.Width / 2);
-			earthName.Y = iconRadius + earthName.Height + 4;
-			m_iconEarth.AddChild(earthCircle);
-			m_iconEarth.AddChild(earthName);
-			m_iconEarth.Tag = "Earth";
-
-			m_iconMars = new PComposite();
-			PPath marsCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
-			marsCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Red);
-			marsCircle.Pen = Pens.White;
-			PText marsName = new PText("Mars");
-			marsName.TextBrush = new SolidBrush(Color.White);
-			marsName.X = iconRadius - (marsName.Width / 2);
-			marsName.Y = iconRadius + marsName.Height + 4;
-			m_iconMars.AddChild(marsCircle);
-			m_iconMars.AddChild(marsName);
-			m_iconMars.Tag = "Mars";
-			
-
-			Canvas.Layer.AddChild(m_iconMercury);
-			Canvas.Layer.AddChild(m_iconVenus);
-			Canvas.Layer.AddChild(m_iconEarth);
-			Canvas.Layer.AddChild(m_iconMars);
-
-			m_iconAsteroids = new PComposite[9];
-			string[] asteroidNames = {"Ceres", "Pallas", "Psyche", "Thule", "Fortuna", "Vesta", "Juno", "Hygeia", "Aurora"};
-			for(int i = 0; i < 9; i++)
-			{
-				m_iconAsteroids[i] = new PComposite();
-				PPath asteroidCircle = PPath.CreateEllipse(0, 0, iconRadius, iconRadius);
-				asteroidCircle.Brush = new HatchBrush(HatchStyle.DiagonalCross, Color.Black, Color.Gray);
-				asteroidCircle.Pen = Pens.White;
-				m_iconAsteroids[i].AddChild(asteroidCircle);
-				PText asteroidName = new PText(asteroidNames[i]);
-				asteroidName.TextBrush = new SolidBrush(Color.White);
-				asteroidName.X = iconRadius - (asteroidName.Width / 2);
-				asteroidName.Y = iconRadius + asteroidName.Height + 4;
-
-				m_iconAsteroids[i].AddChild(asteroidCircle);
-				m_iconAsteroids[i].AddChild(asteroidName);
-				m_iconAsteroids[i].Tag = asteroidNames[i];
-				Canvas.Layer.AddChild(m_iconAsteroids[i]);
-
-			}
-
-			AdvancePlanets();
-		}
 
 		public void AdvancePlanets()
 		{
@@ -1617,6 +1710,10 @@ namespace BuckRogers.Interface
 			Canvas.Refresh();
 		}
 
+		#endregion
+
+		#region miscellaneous
+
 		public void DrawScreenshot()
 		{
 			float oldScale = m_canvas.Camera.ViewScale;
@@ -1630,91 +1727,11 @@ namespace BuckRogers.Interface
 			b.Save("c:\\temp\\brmap.png", ImageFormat.Png);
 		}
 
-		public UMD.HCIL.Piccolo.PCanvas Canvas
-		{
-			get { return this.m_canvas; }
-			set { this.m_canvas = (PCanvas)value; }
-		}
+		#endregion
 
-		public RefreshingScrollableControl ScrollControl
-		{
-			get { return this.m_scroller; }
-			set { this.m_scroller = value; }
-		}
-
-		public BuckRogers.GameController GameController
-		{
-			get { return this.m_controller; }
-			set { this.m_controller = value; }
-		}
-
-		public BuckRogers.Interface.IconManager IconManager
-		{
-			get { return this.m_iconManager; }
-			set { this.m_iconManager = value; }
-		}
-
-		public System.Collections.Hashtable Territories
-		{
-			get { return this.m_territories; }
-			set { this.m_territories = value; }
-		}
-
-
-		public void ShowPathArrows(ArrayList al)
-		{
-			if(al.Count == 1)
-			{
-				return;
-			}
-
-			for(int i = 0; i < al.Count - 1; i++)
-			{
-				PPath line = new PPath();
-				Pen newPen = (Pen)line.Pen.Clone();
-				line.Pen = newPen;
-
-				line.Pen.Color = Color.Red;
-				line.Pen.StartCap = LineCap.RoundAnchor;
-				line.Pen.EndCap = LineCap.Custom;
-				line.Pen.CustomEndCap = new AdjustableArrowCap(3, 4, true);
-				line.Pen.Width = 10;
-
-
-				Territory startingTerritory = (Territory)al[i];
-				Territory endingTerritory = (Territory)al[i + 1];
-
-				if( (startingTerritory.IsSolarTerritory && !endingTerritory.IsSolarTerritory)
-					|| (!startingTerritory.IsSolarTerritory && endingTerritory.IsSolarTerritory))
-				{
-					line.Pen.DashStyle = DashStyle.Dash;
-					line.Pen.DashOffset = 75;
-					line.Pen.Width = 7.5f;
-				}
-
-				PointF startingPoint = (PointF)m_territoryCenters[startingTerritory.Name];
-				PointF endingPoint = (PointF)m_territoryCenters[endingTerritory.Name];
-
-				line.AddLine(startingPoint.X, startingPoint.Y, endingPoint.X, endingPoint.Y);
-
-				line.Pickable = false;
-
-				Canvas.Layer.AddChild(line);
-
-				m_pathArrows.Add(line);
-			}
-		}
-
-		public void ClearPathArrows()
-		{
-			foreach(PPath line in m_pathArrows)
-			{
-				line.RemoveFromParent();
-			}
-
-			m_pathArrows.Clear();
-		}
 	}
+
+	#region BlackLayer / ScreenshotRoot
 
 	class BlackLayer : PLayer 
 	{
@@ -1744,4 +1761,6 @@ namespace BuckRogers.Interface
 			return b;
 		}
 	}
+
+	#endregion
 }

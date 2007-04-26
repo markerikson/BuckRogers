@@ -1,3 +1,4 @@
+#region using directives
 using System;
 using System.Drawing;
 using System.Collections;
@@ -6,12 +7,10 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using BuckRogers;
 using BuckRogers.Networking;
+#endregion
 
 namespace BuckRogers.Interface
 {
-	/// <summary>
-	/// Summary description for GameSetupForm.
-	/// </summary>
 	public class GameSetupForm : System.Windows.Forms.Form
 	{
 		#region private members
@@ -33,7 +32,7 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.ComboBox m_cbNumPlayers;
 		private TextBox[] m_tbPlayerNames;
 		private string[] m_playerNames;
-		private string m_loadFileName;
+		private string m_loadFileName = string.Empty;
 		private GameOptions m_options;
 		private System.Windows.Forms.Label label8;
 		private System.Windows.Forms.ComboBox m_cbVictoryConditions;
@@ -54,6 +53,31 @@ namespace BuckRogers.Interface
 
 		#endregion
 
+		#region properties
+
+		public string[] PlayerNames
+		{
+			get
+			{
+				return m_playerNames;
+			}
+		}
+
+		public BuckRogers.GameOptions Options
+		{
+			get { return this.m_options; }
+			set { this.m_options = value; }
+		}
+
+		public string LoadFileName
+		{
+			get { return this.m_loadFileName; }
+			set { this.m_loadFileName = value; }
+		}
+
+		#endregion
+
+		#region constructor
 		public GameSetupForm()
 		{
 			//
@@ -123,6 +147,10 @@ namespace BuckRogers.Interface
 			// HACK Dunno why, but the first node needs this done a second time
 			TreeNode_SetStateImageIndex(m_tvOptions.Nodes[0], 0);
 		}
+
+		#endregion
+
+		#region plumbing
 
 		/// <summary>
 		/// Clean up any resources being used.
@@ -440,6 +468,10 @@ namespace BuckRogers.Interface
 		}
 		#endregion
 
+		#endregion
+
+		#region Main()
+
 		[STAThread]
 		public static void Main(string[] args)
 		{
@@ -461,7 +493,7 @@ namespace BuckRogers.Interface
 					{
 						BuckRogersForm brf = null;
 
-						brf = new BuckRogersForm(client, go);
+						brf = new BuckRogersForm(go, gsf.LoadFileName, client);
 
 						Application.Run(brf);
 					}
@@ -470,13 +502,17 @@ namespace BuckRogers.Interface
 				{
 					BuckRogersForm brf = null;
 
-					brf = new BuckRogersForm(go, gsf.LoadFileName);
+					brf = new BuckRogersForm(go, gsf.LoadFileName, null);
 
 					Application.Run(brf);
 				}
 				
 			}
 		}
+
+		#endregion
+
+		#region event handlers
 
 		private void button1_Click(object sender, System.EventArgs e)
 		{
@@ -606,17 +642,6 @@ namespace BuckRogers.Interface
 			}
 
 		}
-		
-		/*
-		private void m_chklbOptions_ItemCheck(object sender, System.Windows.Forms.ItemCheckEventArgs e)
-		{
-			GameOption option = (GameOption)m_options.OptionalRules[e.Index];
-
-			option.Value = (e.NewValue == CheckState.Checked);
-
-			bool increasedProduction = m_options.OptionalRules["IncreasedProduction"];
-		}
-		*/
 
 		private void m_btnLoadGame_Click(object sender, System.EventArgs e)
 		{
@@ -631,27 +656,16 @@ namespace BuckRogers.Interface
 			}
 		}
 
-
-		public string[] PlayerNames
+		private void m_btnNetworkClient_Click(object sender, EventArgs e)
 		{
-			get
-			{
-				return m_playerNames;
-			}
+			m_options = new GameOptions();
+			m_options.IsNetworkGame = true;
+
+			this.DialogResult = DialogResult.OK;
+			this.Close();
 		}
 
-		public BuckRogers.GameOptions Options
-		{
-			get { return this.m_options; }
-			set { this.m_options = value; }
-		}
-
-		public string LoadFileName
-		{
-			get { return this.m_loadFileName; }
-			set { this.m_loadFileName = value; }
-		}
-
+		/*
 		private void button3_Click(object sender, EventArgs e)
 		{
 			NumberEntryForm nef = new NumberEntryForm();
@@ -660,6 +674,11 @@ namespace BuckRogers.Interface
 
 			nef.ShowDialog();
 		}
+		*/
+
+		#endregion
+
+		#region P/Invokes
 
 		[DllImport("User32.dll", CharSet = CharSet.Auto, SetLastError = true)]
 		public static extern int SendMessage(IntPtr hwnd, int msg, IntPtr wParam, ref TVITEM lParam);
@@ -692,6 +711,10 @@ namespace BuckRogers.Interface
 			public int cChildren;
 			public IntPtr lParam;
 		}
+
+		#endregion
+
+		#region treeview functions
 
 		private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
 		{
@@ -829,13 +852,8 @@ namespace BuckRogers.Interface
 			}
 		}
 
-		private void m_btnNetworkClient_Click(object sender, EventArgs e)
-		{
-			m_options = new GameOptions();
-			m_options.IsNetworkGame = true;
+		#endregion
 
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
+		
 	}
 }

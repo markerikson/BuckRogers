@@ -27,6 +27,8 @@ namespace BuckRogers
 	/// </summary>
 	public class GameController
 	{
+		#region events
+
 		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
 		public event StatusUpdateHandler StatusUpdate;
 		public event DisplayActionHandler ActionAdded;
@@ -34,7 +36,9 @@ namespace BuckRogers
 		public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
 		public TerritoryUpdateHandler UpdateTerritory;
 		public event PlayersCreatedHandler PlayersCreated;
-		
+
+		#endregion
+
 		#region Properties
 		public BuckRogers.GameMap Map
 		{
