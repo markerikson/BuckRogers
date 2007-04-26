@@ -30,11 +30,13 @@ namespace BuckRogers.Networking
 
 
 		GameMessagesFirst,
-		PlayerPlacementStarted = GameMessagesFirst,
+		InitialSetupInformation = GameMessagesFirst,
+		PlayerPlacementStarted,
 		PlayerPlacementEnded,
+		CreateUnits,
 		PlayerTurnStarted,
 		PlayerTurnEnded,
-		
+
 
 		GameMessagesLast,
 

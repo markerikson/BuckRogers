@@ -15,6 +15,14 @@ namespace BuckRogers.Interface
 		private const int RECTTEXT_MARGIN = 10;
 		private const int RECTTEXT_LEFT = RECTCOLOR_LEFT + RECTCOLOR_WIDTH + RECTTEXT_MARGIN;
 
+		private bool m_showPlayerLocation;
+
+		public bool ShowPlayerLocation
+		{
+			get { return m_showPlayerLocation; }
+			set { m_showPlayerLocation = value; }
+		}
+
 		public PlayerListBox()
 		{
 			this.DrawMode = DrawMode.OwnerDrawFixed;
@@ -55,7 +63,26 @@ namespace BuckRogers.Interface
 			{
 				Player p = (Player)this.Items[e.Index];
 				blockColor = p.Color;
-				text = p.Name;
+
+				if (m_showPlayerLocation)
+				{
+					string extraText;
+
+					if (p.Location == PlayerLocation.Local)
+					{
+						extraText = " (L)";
+					}
+					else
+					{
+						extraText = " (R)";
+					}
+
+					text = p.Name + extraText;
+				}
+				else
+				{
+					text = p.Name;
+				}
 			}
 
 			g.FillRectangle(new SolidBrush(blockColor),left, e.Bounds.Top+RECTCOLOR_TOP,RECTCOLOR_WIDTH,

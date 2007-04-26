@@ -149,6 +149,7 @@
       <DependentUpon>YesNoForm.cs</DependentUpon>
     </Compile>
     <Compile Include="GameClient\BuckRogersClient.cs" />
+    <Compile Include="GameClient\ClientSideGameManager.cs" />
     <Compile Include="GameClient\ClientUpdateEventArgs.cs" />
     <Compile Include="ListBox\ItemInfo.cs" />
     <Compile Include="ListBox\ListBoxList.cs" />

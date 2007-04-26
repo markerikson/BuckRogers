@@ -81,6 +81,7 @@ namespace BuckRogers.Networking
 			m_players = new Hashlist();
 
 			m_options = new GameOptions();
+			m_options.IsNetworkGame = true;
 
 			m_rePrivateMessage = new Regex(@"Private Message\r\nSender: (?<sender>.+)\r\nRecipient: (?<recipient>.+)\r\n(?<messageText>.+)");
 		}

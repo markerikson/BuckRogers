@@ -46,6 +46,7 @@ namespace BuckRogers.Interface
 		private GameController m_controller;
 		private BattleController m_battleController;
 		private BuckRogersClient m_gameClient;
+		private ClientSideGameManager m_csgm;
 
 		//private CombatForm m_combatForm;
 		private ProductionForm m_productionForm;
@@ -148,6 +149,21 @@ namespace BuckRogers.Interface
 			{
 				m_controller = new GameController(go);
 				m_battleController = new BattleController(m_controller);
+
+				if(go.IsNetworkGame)
+				{
+					Player[] players = new Player[m_gameClient.Players.Count];
+					for (int i = 0; i < m_gameClient.Players.Count; i++)
+					{
+						players[i] = (Player)m_gameClient.Players[i];
+					}
+
+					m_controller.SetPlayers(players);
+
+					m_csgm = new ClientSideGameManager(m_gameClient, m_controller, m_battleController);
+					m_csgm.ClientUpdateMessage += new EventHandler<ClientUpdateEventArgs>(OnClientUpdateMessage);
+				}
+				
 			}
 
 #if DEBUGCOMBAT
@@ -190,23 +206,36 @@ namespace BuckRogers.Interface
 					tabControl1.TabPages.Add(m_tpPlacement);
 					tabControl1.TabPages.Add(m_tpTerritory);
 
-					m_controller.AssignTerritories();
-					m_controller.CreateInitialUnits();
-					m_controller.RollForInitiative(false);
-
 					m_map.IconManager.CreateIcons();
 					m_map.IconManager.LoadUnitIconLocations(false, true);
+					m_placementPanel.IconManager = m_map.IconManager;
 
-					m_controller.InitGamelog();
+
 
 					m_clickMode = MapClickMode.Normal;
-			
-					//m_placementPanel.RefreshPlayerOrder();
-					//m_placementPanel.RefreshAvailableUnits();
-					m_placementPanel.IconManager = m_map.IconManager;
-					m_placementPanel.Initialize();
 
-					statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+					
+
+					if(!go.IsNetworkGame)
+					{
+						m_controller.AssignTerritories();
+						m_controller.CreateInitialUnits();
+						m_controller.RollForInitiative(false);
+
+						//m_placementPanel.RefreshPlayerOrder();
+						//m_placementPanel.RefreshAvailableUnits();
+						m_controller.InitGamelog();
+
+						m_placementPanel.Initialize();
+
+						statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
+					}
+					else
+					{
+						statusBar1.Panels[0].Text = "Current player: N/A";
+					}
+
+					
 					statusBar1.Panels[1].Text = "Placement";
 
 					string victoryDescription = Utility.GetDescriptionOf(GameController.Options.WinningConditions);
@@ -229,6 +258,8 @@ namespace BuckRogers.Interface
 
 			
 		}
+
+		
 
 		private void InitControls()
 		{
@@ -651,6 +682,20 @@ namespace BuckRogers.Interface
 
 		#region message handlers
 
+		private void OnClientUpdateMessage(object sender, ClientUpdateEventArgs e)
+		{
+			switch(e.MessageType)
+			{
+				case NetworkMessages.InitialSetupInformation:
+				{
+					m_controller.InitGamelog();
+
+					m_placementPanel.Initialize();
+					break;
+				}
+			}
+		}
+
 		public void OnTerritoryClicked(object sender, TerritoryEventArgs tcea)
 		{
 			string name = tcea.Name;
@@ -1062,6 +1107,11 @@ namespace BuckRogers.Interface
 			base.OnLoad(e);
 
 			Application.AddMessageFilter(this);
+
+			if (GameController.Options.IsNetworkGame)
+			{
+				m_gameClient.SendMessageToServer(NetworkMessages.ClientReady, string.Empty);
+			}
 		}
 		#region IMessageFilter Members
 

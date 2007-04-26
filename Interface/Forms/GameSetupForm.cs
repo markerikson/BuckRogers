@@ -493,7 +493,7 @@ namespace BuckRogers.Interface
 					{
 						BuckRogersForm brf = null;
 
-						brf = new BuckRogersForm(go, gsf.LoadFileName, client);
+						brf = new BuckRogersForm(client.GameOptions, gsf.LoadFileName, client);
 
 						Application.Run(brf);
 					}

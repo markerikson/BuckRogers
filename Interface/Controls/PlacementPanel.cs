@@ -500,6 +500,11 @@ namespace BuckRogers.Interface
 				m_playerImages[p] = il;
 			}			
 
+			if(GameController.Options.IsNetworkGame)
+			{
+				m_lbPlayerOrder.ShowPlayerLocation = true;
+			}
+
 			RefreshPlayerOrder();
 			RefreshAvailableUnits();
 

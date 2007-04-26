@@ -126,6 +126,11 @@ namespace BuckRogers.Interface
 
 			m_userChangedOriginalSelection = false;
 
+			if(GameController.Options.IsNetworkGame)
+			{
+				m_lbPlayerOrder.ShowPlayerLocation = true;
+			}
+
 		}
 
 		#endregion
