@@ -38,12 +38,23 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\ClientLobbyPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ClientLobbyPanel.designer.cs">
+      <DependentUpon>ClientLobbyPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ColorCollection.cs" />
+    <Compile Include="Controls\ColorPicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\CombatControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Controls\CombatControl.Designer.cs">
       <DependentUpon>CombatControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\CustomColorCollection.cs" />
     <Compile Include="Controls\InformationPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -85,6 +96,12 @@
     </Compile>
     <Compile Include="Forms\CombatForm2D.Designer.cs">
       <DependentUpon>CombatForm2D.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\GameLobbyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\GameLobbyForm.Designer.cs">
+      <DependentUpon>GameLobbyForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\GameSetupForm.cs">
       <SubType>Form</SubType>
@@ -131,6 +148,8 @@
     <Compile Include="Forms\YesNoForm.Designer.cs">
       <DependentUpon>YesNoForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="GameClient\BuckRogersClient.cs" />
+    <Compile Include="GameClient\ClientUpdateEventArgs.cs" />
     <Compile Include="ListBox\ItemInfo.cs" />
     <Compile Include="ListBox\ListBoxList.cs" />
     <Compile Include="ListBox\MoveListBox.cs">
@@ -216,6 +235,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Other\App.ico" />
+    <EmbeddedResource Include="Controls\ClientLobbyPanel.resx">
+      <DependentUpon>ClientLobbyPanel.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\UnitIconLegendForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>UnitIconLegendForm.cs</DependentUpon>
@@ -271,6 +294,10 @@
     <ProjectReference Include="..\Engine\BuckRogers.Engine.csproj">
       <Project>{119BEE7C-25A5-4F32-B15F-7F81C48EEB62}</Project>
       <Name>BuckRogers.Engine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Networking\BuckRogers.Networking.csproj">
+      <Project>{061E238C-15EF-4BD0-9CD2-B0599944DACB}</Project>
+      <Name>BuckRogers.Networking</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

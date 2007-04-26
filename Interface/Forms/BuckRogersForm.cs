@@ -18,6 +18,7 @@ using UMD.HCIL.PiccoloX.Components;
 
 using BuckRogers;
 using BuckRogers.Interface;
+using BuckRogers.Networking;
 
 
 
@@ -124,6 +125,11 @@ namespace BuckRogers.Interface
 			this.Size = new Size(desktop.Width - 80, desktop.Height - 80);			
 
 			Initialize(go, loadFileName);			
+		}
+
+		public BuckRogersForm(BuckRogersClient client, GameOptions options)
+		{
+
 		}
 
 		private void Initialize(GameOptions go, string loadFileName)

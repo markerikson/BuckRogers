@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using BuckRogers;
+using BuckRogers.Networking;
 
 namespace BuckRogers.Interface
 {
