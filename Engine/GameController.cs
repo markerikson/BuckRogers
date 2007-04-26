@@ -222,25 +222,31 @@ namespace BuckRogers
 
 		public void SetPlayers(string[] playerNames, Color[] colors)
 		{
-			m_players = new Player[playerNames.Length];
+			Player[] players = new Player[playerNames.Length];
 
 			for(int i = 0; i < playerNames.Length; i++)
 			{
-				m_players[i] = new Player(playerNames[i]);
+				players[i] = new Player(playerNames[i]);
 				if(colors == null)
 				{
-					m_players[i].Color = m_playerColors[i];
+					players[i].Color = m_playerColors[i];
 				}
 				else
 				{
-					m_players[i].Color = colors[i];
-				}
-				
+					players[i].Color = colors[i];
+				}				
 			}
+
+			SetPlayers(players);			
+		}
+
+		public void SetPlayers(Player[] players)
+		{
+			m_players = players;
 
 			m_phase = GamePhase.Setup;
 
-			if(PlayersCreated != null)
+			if (PlayersCreated != null)
 			{
 				PlayersCreated();
 			}
@@ -1580,7 +1586,7 @@ namespace BuckRogers
 		}
 
 		// Ends the current player's move phase
-		public void EndMovePhase()
+		public void FinalizeCurrentPlayerMoves()
 		{
 			foreach(Action a in m_checkedActions)
 			{

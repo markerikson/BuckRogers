@@ -58,19 +58,37 @@ namespace BuckRogers
 		private OptionsHashlist m_optionalRules;
 		private Hashlist m_categories;
 
+
+
+		private VictoryConditions m_victoryConditions;
+		//private StartingScenarios m_startingScenarios;
+
+		private int m_numPlayers;
+		
+		private int m_productionMultiplier;
+		private int m_increasedProductionTurn;
+		private int m_numTerritoriesNeeded;
+		private string[] m_playerNames;
+
+		private bool m_isNetworkGame;
+
+		public bool IsNetworkGame
+		{
+			get { return m_isNetworkGame; }
+			set { m_isNetworkGame = value; }
+		}
+
 		public Hashlist Categories
 		{
 			get { return m_categories; }
 			set { m_categories = value; }
 		}
 
-		private VictoryConditions m_victoryConditions;
-		//private StartingScenarios m_startingScenarios;
-
-		private int m_productionMultiplier;
-		private int m_increasedProductionTurn;
-		private int m_numTerritoriesNeeded;
-		private string[] m_playerNames;
+		public int NumPlayers
+		{
+			get { return m_numPlayers; }
+			set { m_numPlayers = value; }
+		}
 
 		public GameOptions()
 		{

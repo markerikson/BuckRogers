@@ -45,6 +45,7 @@ namespace BuckRogers.Interface
 		private TreeNode m_selectedNode;
 		private Hashtable m_optionNodes;
 		private Label label10;
+		private Button m_btnNetworkClient;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -167,6 +168,7 @@ namespace BuckRogers.Interface
 			this.m_tvOptions = new System.Windows.Forms.TreeView();
 			this.m_btnLoadGame = new System.Windows.Forms.Button();
 			this.label10 = new System.Windows.Forms.Label();
+			this.m_btnNetworkClient = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.m_nudNumTerritories)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -386,11 +388,23 @@ namespace BuckRogers.Interface
 			this.label10.TabIndex = 33;
 			this.label10.Text = "Game options:";
 			// 
+			// m_btnNetworkClient
+			// 
+			this.m_btnNetworkClient.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.m_btnNetworkClient.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.m_btnNetworkClient.Location = new System.Drawing.Point(412, 292);
+			this.m_btnNetworkClient.Name = "m_btnNetworkClient";
+			this.m_btnNetworkClient.Size = new System.Drawing.Size(144, 23);
+			this.m_btnNetworkClient.TabIndex = 34;
+			this.m_btnNetworkClient.Text = "Connect to Network Game";
+			this.m_btnNetworkClient.Click += new System.EventHandler(this.m_btnNetworkClient_Click);
+			// 
 			// GameSetupForm
 			// 
 			this.AcceptButton = this.m_btnOK;
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
 			this.ClientSize = new System.Drawing.Size(617, 318);
+			this.Controls.Add(this.m_btnNetworkClient);
 			this.Controls.Add(this.label10);
 			this.Controls.Add(this.m_tvOptions);
 			this.Controls.Add(this.m_btnLoadGame);
@@ -435,11 +449,31 @@ namespace BuckRogers.Interface
 			GameOptions go = gsf.Options;
 			if(gsf.DialogResult == DialogResult.OK)
 			{
-				BuckRogersForm brf = null;
+				if(go.IsNetworkGame)
+				{
+					GameLobbyForm glf = new GameLobbyForm();
 
-				brf = new BuckRogersForm(go, gsf.LoadFileName);
+					Application.Run(glf);
 
-				Application.Run(brf);
+					BuckRogersClient client = glf.GameClient;
+					if (client.GameStarted)
+					{
+						BuckRogersForm brf = null;
+
+						brf = new BuckRogersForm(client, go);
+
+						Application.Run(brf);
+					}
+				}
+				else
+				{
+					BuckRogersForm brf = null;
+
+					brf = new BuckRogersForm(go, gsf.LoadFileName);
+
+					Application.Run(brf);
+				}
+				
 			}
 		}
 
@@ -792,6 +826,15 @@ namespace BuckRogers.Interface
 				m_selectedNode = null;
 				m_upDownDisplayed = false;
 			}
+		}
+
+		private void m_btnNetworkClient_Click(object sender, EventArgs e)
+		{
+			m_options = new GameOptions();
+			m_options.IsNetworkGame = true;
+
+			this.DialogResult = DialogResult.OK;
+			this.Close();
 		}
 	}
 }

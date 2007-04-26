@@ -5,10 +5,19 @@ using System.Diagnostics;
 
 namespace BuckRogers
 {
-	/// <summary>
-	/// Summary description for Player.
-	/// </summary>
-	/// 
+	public enum PlayerType
+	{
+		Human,
+		AI,
+	}
+
+	public enum PlayerLocation
+	{
+		Local,
+		Remote,
+	}
+
+
 
 	[DebuggerDisplay("Player: {m_name}")]
 	public class Player
@@ -21,11 +30,34 @@ namespace BuckRogers
 		private bool m_disabled;
 		private Color m_color;
 		private int m_turnDisabled;
+		private PlayerType m_type;
+		private int m_id;
+		private PlayerLocation m_location;
+
+		
+		public int ID
+		{
+			get { return m_id; }
+			set { m_id = value; }
+		}
+
+		public PlayerType Type
+		{
+			get { return m_type; }
+			set { m_type = value; }
+		}
+
+		public PlayerLocation Location
+		{
+			get { return m_location; }
+			set { m_location = value; }
+		}
 
 		public Player(string name, Color color)
 		{
 			Init(name, color);
 		}
+
 		public Player(string name)
 		{
 			Init(name, Color.White);
@@ -38,6 +70,8 @@ namespace BuckRogers
 			m_territories = new Hashtable();
 			m_disabled = false;
 			m_color = color;
+			m_type = PlayerType.Human;
+			m_location = PlayerLocation.Local;
 		}
 
 		public bool Disabled

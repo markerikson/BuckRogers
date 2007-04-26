@@ -689,7 +689,7 @@ namespace BuckRogers
 				Assert.AreEqual(tmo20, u.CurrentTerritory);
 			}
 
-			m_controller.EndMovePhase();
+			m_controller.FinalizeCurrentPlayerMoves();
 			m_controller.Map.AdvancePlanets();
 
 			move = new MoveAction();

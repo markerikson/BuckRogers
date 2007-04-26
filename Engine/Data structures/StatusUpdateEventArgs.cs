@@ -22,6 +22,7 @@ namespace BuckRogers
 		private Territory m_territory;
 		private StatusInfo m_statusInfo;
 		private bool m_result;
+		private bool m_isLocal;		
 
 		public StatusUpdateEventArgs()
 		{
@@ -50,6 +51,12 @@ namespace BuckRogers
 		{
 			get { return this.m_result; }
 			set { this.m_result = value; }
+		}
+
+		public bool IsLocal
+		{
+			get { return m_isLocal; }
+			set { m_isLocal = value; }
 		}
 	}
 }

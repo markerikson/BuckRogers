@@ -581,6 +581,7 @@ namespace BuckRogers.Interface
 					m_unitsToMoveCounts.Clear();
 
 					ClearMovementIcons();
+					m_map.ClearPathArrows();
 				}
 				else
 				{
@@ -1079,6 +1080,7 @@ namespace BuckRogers.Interface
 
 			m_currentMoveTerritories.Clear();
 
+			/*
 			if (MoveModeChanged != null)
 			{
 				MoveModeEventArgs mmea = new MoveModeEventArgs();
@@ -1087,8 +1089,9 @@ namespace BuckRogers.Interface
 
 				MoveModeChanged(this, mmea);
 			}
+			*/
 
-			m_controller.EndMovePhase();
+			m_controller.FinalizeCurrentPlayerMoves();
 			if(m_controller.NextPlayer())
 			{
 				m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
