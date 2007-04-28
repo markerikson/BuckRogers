@@ -9,6 +9,7 @@ namespace BuckRogers.Interface
 		StartTransport,
 		StartPlacement,
 		Finished,
+		None,
 	}
 	/// <summary>
 	/// Summary description for MoveModeEventArgs.

@@ -1,7 +1,7 @@
-#define DEBUGUNITSELECTION
-
+#region using directives
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Data;
@@ -9,20 +9,28 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
 using BuckRogers.Interface;
+using BuckRogers.Networking;
+using CommandManagement;
+
+#endregion
 
 namespace BuckRogers.Interface
 {
-	/// <summary>
-	/// Summary description for PlacementPanel.
-	/// </summary>
 	public class PlacementPanel : System.Windows.Forms.UserControl
 	{
+		#region private members
 		public event MoveModeChangedHandler MoveModeChanged;
+
+		private System.ComponentModel.Container components = null;
 
 		private GameController m_controller;
 		private IconManager m_iconManager;
+		private ClientSideGameManager m_csgm;
+
 		private Hashtable m_playerImages;
 		private Hashtable m_selectedUnitCounts;
+
+		private List<Player> m_playersFinishedChoosing;
 
 		private System.Windows.Forms.Label label2;
 		private PlayerListBox m_lbPlayerOrder;
@@ -31,7 +39,6 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.ListView m_lvAvailableUnits;
 		private bool m_playersSelectUnits;
-		private int m_numPlayersFinishedChoosing;
 		private Button m_btnChooseUnits;
 		private ListView m_lvUnitsPlaced;
 		private Label label3;
@@ -43,6 +50,9 @@ namespace BuckRogers.Interface
 
 		private Keys[] m_unitKeys = { Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6 };
 
+		#endregion
+
+		#region properties
 		public Keys[] UnitKeys
 		{
 			get { return m_unitKeys; }
@@ -55,13 +65,39 @@ namespace BuckRogers.Interface
 			set { m_iconManager = value; }
 		}
 
-		/// <summary> 
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+		public BuckRogers.GameController GameController
+		{
+			get { return this.m_controller; }
+			set { this.m_controller = value; }
+		}
+
+		internal ClientSideGameManager GameManager
+		{
+			get { return m_csgm; }
+			set 
+			{ 
+				m_csgm = value;
+
+				m_csgm.ClientUpdateMessage += new EventHandler<ClientUpdateEventArgs>(OnClientUpdateMessage);
+			}
+		}
+
+		public List<Player> PlayersFinishedChoosing
+		{
+			get { return m_playersFinishedChoosing; }
+			set { m_playersFinishedChoosing = value; }
+		}
+
+		#endregion
+
+		#region P/Invokes
 
 		[DllImport("User32.dll", CharSet = CharSet.Auto, SetLastError = true)]
 		private static extern int SendMessage(IntPtr hwnd, int msg, int wParam, int lParam);
+
+		#endregion
+
+		#region constructor
 
 		public PlacementPanel()
 		{
@@ -69,6 +105,7 @@ namespace BuckRogers.Interface
 			InitializeComponent();
 
 			m_selectedUnitCounts = new Hashtable();
+			m_playersFinishedChoosing = new List<Player>();
 
 			int LVM_SETICONSPACING = 4149;
 			int width = 70;
@@ -77,8 +114,29 @@ namespace BuckRogers.Interface
 
 			SendMessage(m_lvAvailableUnits.Handle, LVM_SETICONSPACING, 0, iconSpacing);
 			SendMessage(m_lvUnitsPlaced.Handle, LVM_SETICONSPACING, 0, iconSpacing);
-			
+
+			ClientSideGameManager.CommandManager.RegisterCommandExecutor("System.Windows.Forms.Control", new ControlCommandExecutor());
+			ClientSideGameManager.CommandManager.RegisterCommandExecutor("System.Windows.Forms.ListView", new ListViewCommandExecutor());
+
+			Command selectUnitsCommand = new Command("PlacementSelectUnits", null,
+							new Command.UpdateHandler(UpdateSelectUnitsCommand));
+			ClientSideGameManager.CommandManager.Commands.Add(selectUnitsCommand);
+
+			selectUnitsCommand.CommandInstances.Add(m_btnChooseUnits);
+			selectUnitsCommand.CommandInstances.Add(m_lvAvailableUnits);
+
 		}
+
+		private void UpdateSelectUnitsCommand(Command command)
+		{
+			bool isLocalOrActive = (!GameController.Options.IsNetworkGame || ClientSideGameManager.IsActiveClient);
+			command.Enabled = isLocalOrActive;
+		}
+
+
+		#endregion
+
+		#region plumbing
 
 		/// <summary> 
 		/// Clean up any resources being used.
@@ -210,6 +268,7 @@ namespace BuckRogers.Interface
 			this.m_lbPlayerOrder.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
 			this.m_lbPlayerOrder.Location = new System.Drawing.Point(92, 4);
 			this.m_lbPlayerOrder.Name = "m_lbPlayerOrder";
+			this.m_lbPlayerOrder.ShowPlayerLocation = false;
 			this.m_lbPlayerOrder.Size = new System.Drawing.Size(136, 95);
 			this.m_lbPlayerOrder.TabIndex = 15;
 			// 
@@ -231,6 +290,10 @@ namespace BuckRogers.Interface
 
 		}
 		#endregion
+
+		#endregion
+
+		#region TerritoryClicked
 
 		public void TerritoryClicked(Territory t, TerritoryEventArgs tcea)
 		{
@@ -386,6 +449,8 @@ namespace BuckRogers.Interface
 					m_activeTerritory = null;
 					m_lblPlacementTerritory.Text = "None";
 
+					//m_csgm.PlayerPlacedUnits(m_controller.CurrentPlayer, )
+
 					if (m_controller.NextPlayer())
 					{
 						m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
@@ -398,7 +463,7 @@ namespace BuckRogers.Interface
 
 					if (m_playersSelectUnits)
 					{
-						if (m_numPlayersFinishedChoosing < m_controller.Players.Length)
+						if (m_playersFinishedChoosing.Count < m_controller.Players.Length)
 						{
 							m_btnChooseUnits.Enabled = true;
 							m_btnChooseUnits.Visible = true;
@@ -412,6 +477,9 @@ namespace BuckRogers.Interface
 			}
 		}
 
+		#endregion
+
+		#region Updates
 
 		public void RefreshPlayerOrder()
 		{
@@ -459,24 +527,15 @@ namespace BuckRogers.Interface
 			m_lvAvailableUnits.SelectedIndices.Add(m_idxSelectedUnit);
 		}
 
-		public BuckRogers.GameController Controller
-		{
-			get { return this.m_controller; }
-			set { this.m_controller = value; }
-		}
+		#endregion
+
+		#region initialization
 
 		public void Initialize()
 		{
 			m_playersSelectUnits = GameController.Options.OptionalRules["PickStartingUnits"];
 
-			if(m_playersSelectUnits)
-			{
-				m_btnChooseUnits.Visible = true;
-			}
-			else
-			{
-				m_btnChooseUnits.Visible = false;
-			}
+			m_btnChooseUnits.Visible = m_playersSelectUnits;
 
 			m_playerImages = new Hashtable();
 
@@ -508,7 +567,10 @@ namespace BuckRogers.Interface
 			RefreshPlayerOrder();
 			RefreshAvailableUnits();
 
-			if(!m_playersSelectUnits)
+			m_csgm.ReadyToStartPlacement();
+
+			/*
+			if(!m_playersSelectUnits && !GameController.Options.IsNetworkGame)
 			{
 				if (MoveModeChanged != null)
 				{
@@ -517,8 +579,14 @@ namespace BuckRogers.Interface
 
 					MoveModeChanged(this, mmea);
 				}
-			}			
+			}
+			*/
+		
 		}
+
+		#endregion
+
+		#region event handlers
 
 		private void m_btnChooseUnits_Click(object sender, EventArgs e)
 		{
@@ -549,14 +617,8 @@ namespace BuckRogers.Interface
 				return;
 			}
 
-			Player p = m_controller.CurrentPlayer;
-
-			m_controller.CreateUnits(p, UnitType.Fighter, usf.TotalFighters);
-			m_controller.CreateUnits(p, UnitType.Transport, usf.TotalTransports);
-			m_controller.CreateUnits(p, UnitType.Trooper, usf.TotalTroopers);
-			m_controller.CreateUnits(p, UnitType.Gennie, usf.TotalGennies);
-
-			m_numPlayersFinishedChoosing++;
+			m_csgm.PlayerChoseUnits(m_controller.CurrentPlayer, usf.TotalTroopers, usf.TotalFighters, 
+									usf.TotalGennies, usf.TotalTransports);
 
 			RefreshAvailableUnits();
 
@@ -612,5 +674,48 @@ namespace BuckRogers.Interface
 				KeyPressed(e.KeyCode);
 			}
 		}
+
+		void OnClientUpdateMessage(object sender, ClientUpdateEventArgs e)
+		{
+			switch(e.MessageType)
+			{
+				case NetworkMessages.NextPlayer:
+				{
+					if(m_playersFinishedChoosing.Contains(m_controller.CurrentPlayer))
+					{
+						m_btnChooseUnits.Visible = false;
+					}
+
+					goto case NetworkMessages.PlayerPlacementStarted;
+				}
+				case NetworkMessages.PlayerPlacementStarted:				
+				{
+					if (MoveModeChanged != null)
+					{
+						MoveModeEventArgs mmea = new MoveModeEventArgs();
+
+						if(m_controller.CurrentPlayer.Location == PlayerLocation.Local)
+						{
+							mmea.MoveMode = MoveMode.StartPlacement;
+						}
+						else
+						{
+							mmea.MoveMode = MoveMode.None;
+						}
+						
+						MoveModeChanged(this, mmea);
+					}
+
+					break;
+				}
+				case NetworkMessages.PlayerChoseUnits:
+				{
+					m_playersFinishedChoosing.Add(e.Players[0]);
+					break;
+				}
+			}
+		}
+
+		#endregion
 	}
 }

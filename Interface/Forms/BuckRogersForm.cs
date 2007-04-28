@@ -48,18 +48,23 @@ namespace BuckRogers.Interface
 		private BuckRogersClient m_gameClient;
 		private ClientSideGameManager m_csgm;
 
-		//private CombatForm m_combatForm;
 		private ProductionForm m_productionForm;
 		private CombatForm2D m_combatForm2;
 		private HowToPlayForm m_howToPlay;
+		private YesNoForm m_yesno;
 
 		private MapControl m_map;
 		private MapClickMode m_clickMode;
+
+		private BuckRogers.Interface.MovePanel m_movePanel;
+		private BuckRogers.Interface.PlacementPanel m_placementPanel;
+		private BuckRogers.Interface.InformationPanel m_informationPanel;
+		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
+
 		private System.Windows.Forms.Button m_btnCenterCamera;
 		private System.Windows.Forms.ComboBox m_cbCenterLocations;
 		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.TabControl tabControl1;
-		private BuckRogers.Interface.MovePanel m_movePanel;
+		private System.Windows.Forms.TabControl tabControl1;		
 		private System.Windows.Forms.StatusBar statusBar1;
 		private System.Windows.Forms.MainMenu mainMenu1;
 		private System.Windows.Forms.MenuItem menuItem1;
@@ -67,21 +72,18 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.StatusBarPanel statusBarPanel2;
 		private System.Windows.Forms.TabPage m_tpAction;
 		private System.Windows.Forms.TabPage m_tpTerritory;
-		private System.Windows.Forms.TabPage m_tpPlacement;
-		private BuckRogers.Interface.PlacementPanel m_placementPanel;
+		private System.Windows.Forms.TabPage m_tpPlacement;		
 		private System.Windows.Forms.MenuItem m_menuFileExit;
-		private System.Windows.Forms.TabPage m_tpInformation;
-		private BuckRogers.Interface.InformationPanel m_informationPanel;
+		private System.Windows.Forms.TabPage m_tpInformation;		
 		private System.Windows.Forms.MenuItem m_menuFileSave;
 		private System.Windows.Forms.MenuItem m_menuFileLoad;
 		private MenuItem menuItem2;
 		private MenuItem m_menuHelpAbout;
 		private MenuItem m_menuHelpHow;
 		private StatusBarPanel statusBarPanel3;
-		private BuckRogers.Interface.TerritoryPanel m_territoryPanel;
 		private MenuItem m_menuHelpIconLegend;
 		private MenuItem menuItem4;
-		private YesNoForm m_yesno;
+		
 
 		#endregion
 
@@ -159,12 +161,13 @@ namespace BuckRogers.Interface
 					}
 
 					m_controller.SetPlayers(players);
-
-					m_csgm = new ClientSideGameManager(m_gameClient, m_controller, m_battleController);
-					m_csgm.ClientUpdateMessage += new EventHandler<ClientUpdateEventArgs>(OnClientUpdateMessage);
 				}
 				
 			}
+
+			m_csgm = new ClientSideGameManager(m_gameClient, m_controller, m_battleController);
+			m_csgm.ClientUpdateMessage += new EventHandler<ClientUpdateEventArgs>(OnClientUpdateMessage);
+
 
 #if DEBUGCOMBAT
 			m_battleController.AttacksAlwaysHit = true;
@@ -210,12 +213,6 @@ namespace BuckRogers.Interface
 					m_map.IconManager.LoadUnitIconLocations(false, true);
 					m_placementPanel.IconManager = m_map.IconManager;
 
-
-
-					m_clickMode = MapClickMode.Normal;
-
-					
-
 					if(!go.IsNetworkGame)
 					{
 						m_controller.AssignTerritories();
@@ -228,10 +225,13 @@ namespace BuckRogers.Interface
 
 						m_placementPanel.Initialize();
 
+						m_clickMode = MapClickMode.Normal;
+
 						statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
 					}
 					else
 					{
+						m_clickMode = MapClickMode.Observation;
 						statusBar1.Panels[0].Text = "Current player: N/A";
 					}
 
@@ -295,11 +295,15 @@ namespace BuckRogers.Interface
 			m_movePanel.MoveModeChanged += new MoveModeChangedHandler(OnMoveModeChanged);
 			m_placementPanel.MoveModeChanged += new MoveModeChangedHandler(OnMoveModeChanged);
 
-			m_movePanel.Controller = m_controller;
 			m_movePanel.Map = m_map;
+
+			m_movePanel.Controller = m_controller;			
 			m_map.GameController = m_controller;
-			m_placementPanel.Controller = m_controller;
+			m_placementPanel.GameController = m_controller;
 			m_informationPanel.Controller = m_controller;
+
+			m_placementPanel.GameManager = m_csgm;
+
 
 			m_yesno = new YesNoForm();
 			m_yesno.VisibleChanged += new EventHandler(OnYesNoFormVisibleChanged);
@@ -482,7 +486,7 @@ namespace BuckRogers.Interface
 			// 
 			// m_placementPanel
 			// 
-			this.m_placementPanel.Controller = null;
+			this.m_placementPanel.GameController = null;
 			this.m_placementPanel.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.m_placementPanel.IconManager = null;
 			this.m_placementPanel.Location = new System.Drawing.Point(0, 0);
@@ -737,6 +741,11 @@ namespace BuckRogers.Interface
 					m_placementPanel.TerritoryClicked(t, tcea);
 					break;
 				}
+				case MapClickMode.Observation:
+				{
+					// for the moment, deliberately do nothing
+					break;
+				}
 			}
 
 		}
@@ -759,6 +768,11 @@ namespace BuckRogers.Interface
 				case MoveMode.StartPlacement:
 				{
 					m_clickMode = MapClickMode.PlaceUnits;
+					break;
+				}
+				case MoveMode.None:
+				{
+					m_clickMode = MapClickMode.Observation;
 					break;
 				}
 			}
@@ -1110,7 +1124,7 @@ namespace BuckRogers.Interface
 
 			if (GameController.Options.IsNetworkGame)
 			{
-				m_gameClient.SendMessageToServer(NetworkMessages.ClientReady, string.Empty);
+				m_gameClient.SendMessageToServer(NetworkMessages.ClientLoaded, string.Empty);
 			}
 		}
 		#region IMessageFilter Members
@@ -1127,23 +1141,25 @@ namespace BuckRogers.Interface
 
 			Keys keyCode = (Keys)(int)m.WParam & Keys.KeyCode;
 
-			if(m_controller.CurrentPhase == GamePhase.Setup)
+			if(!GameController.Options.IsNetworkGame || ClientSideGameManager.IsActiveClient)
 			{
-				if (Array.IndexOf(m_placementPanel.UnitKeys, keyCode) != -1)
+				if (m_controller.CurrentPhase == GamePhase.Setup)
 				{
-					m_placementPanel.KeyPressed(keyCode);
-					return true;
+					if (Array.IndexOf(m_placementPanel.UnitKeys, keyCode) != -1)
+					{
+						m_placementPanel.KeyPressed(keyCode);
+						return true;
+					}
+				}
+				else if (m_controller.CurrentPhase == GamePhase.Movement)
+				{
+					if (keyCode == Keys.Enter || keyCode == Keys.T)
+					{
+						m_movePanel.KeyPressed(keyCode);
+						return true;
+					}
 				}
 			}
-			else if(m_controller.CurrentPhase == GamePhase.Movement)
-			{
-				if (keyCode == Keys.Enter || keyCode == Keys.T)
-				{
-					m_movePanel.KeyPressed(keyCode);
-					return true;
-				}
-			}
-
 			
 			return false; 
 		}

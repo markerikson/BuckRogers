@@ -12,6 +12,7 @@ namespace BuckRogers
 	public enum GamePhase
 	{
 		Setup,
+		Placement,
 		Movement,
 		Combat,
 		Production,
@@ -490,6 +491,24 @@ namespace BuckRogers
 					TerritoryOwnerChanged(this, tea);
 				}				
 			}			
+		}
+
+		public void SetTerritoriesOwner(Player p, List<Territory> territories)
+		{
+			TerritoryEventArgs tea = new TerritoryEventArgs();
+
+			foreach(Territory t in territories)
+			{
+				t.Owner = p;
+
+				if (TerritoryOwnerChanged != null)
+				{
+					tea.Name = t.Name;
+					tea.Owner = p;
+
+					TerritoryOwnerChanged(this, tea);
+				}
+			}
 		}
 
 		public void CreateUnits(Player p, UnitType ut, int numUnits)

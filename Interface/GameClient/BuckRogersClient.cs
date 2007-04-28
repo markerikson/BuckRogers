@@ -30,8 +30,10 @@ namespace BuckRogers.Networking
 		private GameOptions m_options;
 
 		private Regex m_rePrivateMessage;
+
 		private bool m_connected;
 		private bool m_gameStarted;
+		
 
 		private Hashtable m_otherClients;
 		private Hashlist m_players;
@@ -58,6 +60,8 @@ namespace BuckRogers.Networking
 			get { return m_gameStarted; }
 			set { m_gameStarted = value; }
 		}
+
+		
 
 		public GameOptions GameOptions
 		{

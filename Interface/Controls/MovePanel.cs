@@ -1,3 +1,4 @@
+#region using directives
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -13,6 +14,8 @@ using UMD.HCIL.Piccolo.Util;
 
 using BuckRogers;
 using BuckRogers.Interface;
+
+#endregion
 
 namespace BuckRogers.Interface
 {
@@ -135,7 +138,7 @@ namespace BuckRogers.Interface
 
 		#endregion
 
-		#region generated stuff
+		#region plumbing
 		protected override void Dispose( bool disposing )
 		{
 			if( disposing )
@@ -330,6 +333,8 @@ namespace BuckRogers.Interface
 
 		#endregion
 
+		#region event handlers
+
 		private void m_btnAddMove_Click(object sender, System.EventArgs e)
 		{
 			m_btnCancelMove.Enabled = true;
@@ -351,6 +356,113 @@ namespace BuckRogers.Interface
 			}
 		}
 
+		private void m_btnCancelMove_Click(object sender, System.EventArgs e)
+		{
+			CancelMove();
+		}
+
+		private void m_btnFinishMove_Click(object sender, System.EventArgs e)
+		{
+			FinalizeCurrentMove();
+		}
+
+		private void m_btnUndoMove_Click(object sender, System.EventArgs e)
+		{
+			Action a = m_controller.UndoAction();
+
+			m_btnUndoMove.Enabled = m_controller.CanUndo;
+			m_btnRedoMove.Enabled = m_controller.CanRedo;
+		}
+
+		private void m_btnRedoMove_Click(object sender, System.EventArgs e)
+		{
+			Action a = m_controller.RedoAction();
+
+			m_btnUndoMove.Enabled = m_controller.CanUndo;
+			m_btnRedoMove.Enabled = m_controller.CanRedo;
+		}
+
+		private void m_btnEndMoves_Click(object sender, System.EventArgs e)
+		{
+			DialogResult dr = MessageBox.Show("Do you want to end your turn?", "End Turn?", MessageBoxButtons.YesNo,
+				MessageBoxIcon.Question);
+
+			if (dr != DialogResult.Yes)
+			{
+				return;
+			}
+
+			m_currentMoveTerritories.Clear();
+
+			/*
+			if (MoveModeChanged != null)
+			{
+				MoveModeEventArgs mmea = new MoveModeEventArgs();
+				mmea.MoveMode = MoveMode.Finished;
+				m_moveMode = MoveMode.Finished;
+
+				MoveModeChanged(this, mmea);
+			}
+			*/
+
+			m_controller.FinalizeCurrentPlayerMoves();
+			if (m_controller.NextPlayer())
+			{
+				m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
+				m_lbPlayerOrder.Refresh();
+
+			}
+			else
+			{
+				RefreshPlayerOrder();
+			}
+
+			m_btnUndoMove.Enabled = m_controller.CanUndo;
+			m_btnRedoMove.Enabled = m_controller.CanRedo;
+
+			m_mlbMoves.Items.Clear();
+			m_mlbMoves.Refresh();
+			m_mlbTransports.Items.Clear();
+			m_mlbTransports.Refresh();
+			m_unitsToMove.Clear();
+		}
+
+		private void m_lbCurrentMoves_DoubleClick(object sender, System.EventArgs e)
+		{
+			RemoveTerritoryFromMove();
+		}
+
+
+		private void m_btnRemoveTerritory_Click(object sender, EventArgs e)
+		{
+			RemoveTerritoryFromMove();
+		}
+
+		private void m_chkLoadTransports_CheckedChanged(object sender, EventArgs e)
+		{
+			if (MoveModeChanged != null)
+			{
+				MoveModeEventArgs mmea = new MoveModeEventArgs();
+
+				if (m_chkLoadTransports.Checked)
+				{
+					mmea.MoveMode = MoveMode.StartTransport;
+					m_moveMode = MoveMode.StartTransport;
+				}
+				else
+				{
+					mmea.MoveMode = MoveMode.StartMove;
+					m_moveMode = MoveMode.StartMove;
+				}
+
+				MoveModeChanged(this, mmea);
+			}
+		}	
+
+
+		#endregion
+
+		#region external event handlers
 
 		public void TerritoryClicked(Territory t, TerritoryEventArgs tcea)
 		{
@@ -368,6 +480,27 @@ namespace BuckRogers.Interface
 				}
 			}
 		}
+
+		internal void KeyPressed(Keys keyCode)
+		{
+			if (keyCode == Keys.Enter)
+			{
+				FinalizeCurrentMove();
+			}
+			else if (keyCode == Keys.T)
+			{
+				// Switch the transport state, if we're currently able to
+				if (m_chkLoadTransports.Enabled && !m_showingTransportDialog)
+				{
+					m_chkLoadTransports.Checked = !m_chkLoadTransports.Checked;
+				}
+			}
+
+		}
+
+		#endregion
+
+		#region primary transport / movement functions
 
 		private void OnTransportLoadClick(Territory t)
 		{
@@ -560,6 +693,10 @@ namespace BuckRogers.Interface
 
 			return;
 		}
+
+		#endregion
+
+		#region secondary movement functions
 
 		private void FinalizeOrUpdateMove(bool finalizeMove, ArrayList territoriesToAdd, MoveAction ma)
 		{
@@ -919,6 +1056,54 @@ namespace BuckRogers.Interface
 			return numCurrent;
 		}
 
+		private void FinalizeCurrentMove()
+		{
+			if (m_currentMoveTerritories.Count > 1)
+			{
+				ArrayList dummy = new ArrayList();
+				MoveAction ma = CreateAndValidateMove(dummy, true);
+
+				FinalizeOrUpdateMove(true, dummy, ma);
+			}
+		}
+
+		#endregion
+
+		#region movement state functions 
+
+		public void BeginMovement()
+		{
+			m_currentMoveTerritories.Clear();
+
+			if (MoveModeChanged != null)
+			{
+				MoveModeEventArgs mmea = new MoveModeEventArgs();
+				mmea.MoveMode = MoveMode.StartMove;
+				m_moveMode = MoveMode.StartMove;
+
+				MoveModeChanged(this, mmea);
+			}
+
+			m_chkLoadTransports.Location = new Point(0, 134);
+
+		}
+
+		private void RemoveTerritoryFromMove()
+		{
+			if (m_lbCurrentMoves.Items.Count > 0)
+			{
+				int index = m_lbCurrentMoves.Items.Count - 1;
+
+				m_lbCurrentMoves.Items.RemoveAt(index);
+				m_currentMoveTerritories.RemoveAt(index);
+			}
+
+			if (m_lbCurrentMoves.Items.Count == 0)
+			{
+				CancelMove();
+			}
+		}
+
 		public void ResetMovementInfo()
 		{
 			m_handSelectedUnits.Clear();
@@ -934,11 +1119,6 @@ namespace BuckRogers.Interface
 			}
 
 			m_map.MovementIcons.Clear();
-		}
-
-		private void m_btnCancelMove_Click(object sender, System.EventArgs e)
-		{
-			CancelMove();
 		}
 
 		public void CancelMove()
@@ -958,26 +1138,9 @@ namespace BuckRogers.Interface
 			ResetMovementInfo();
 		}
 
-		private void m_btnFinishMove_Click(object sender, System.EventArgs e)
-		{
-			FinalizeCurrentMove();
-		}
+		#endregion
 
-		private void m_btnUndoMove_Click(object sender, System.EventArgs e)
-		{
-			Action a = m_controller.UndoAction();
-
-			m_btnUndoMove.Enabled = m_controller.CanUndo;
-			m_btnRedoMove.Enabled = m_controller.CanRedo;
-		}
-
-		private void m_btnRedoMove_Click(object sender, System.EventArgs e)
-		{
-			Action a = m_controller.RedoAction();
-
-			m_btnUndoMove.Enabled = m_controller.CanUndo;
-			m_btnRedoMove.Enabled = m_controller.CanRedo;
-		}
+		#region action list functions
 
 		public void RemoveActionFromList(Action a)
 		{
@@ -1073,50 +1236,9 @@ namespace BuckRogers.Interface
 			}
 		}
 
-		private void m_btnEndMoves_Click(object sender, System.EventArgs e)
-		{
-            DialogResult dr = MessageBox.Show("Do you want to end your turn?", "End Turn?", MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
+		#endregion
 
-            if(dr != DialogResult.Yes)
-            {
-                return;
-            }
-
-			m_currentMoveTerritories.Clear();
-
-			/*
-			if (MoveModeChanged != null)
-			{
-				MoveModeEventArgs mmea = new MoveModeEventArgs();
-				mmea.MoveMode = MoveMode.Finished;
-				m_moveMode = MoveMode.Finished;
-
-				MoveModeChanged(this, mmea);
-			}
-			*/
-
-			m_controller.FinalizeCurrentPlayerMoves();
-			if(m_controller.NextPlayer())
-			{
-				m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
-				m_lbPlayerOrder.Refresh();
-				
-			}
-			else
-			{
-				RefreshPlayerOrder();
-			}
-
-			m_btnUndoMove.Enabled = m_controller.CanUndo;
-			m_btnRedoMove.Enabled = m_controller.CanRedo;
-
-			m_mlbMoves.Items.Clear();
-			m_mlbMoves.Refresh();
-			m_mlbTransports.Items.Clear();
-			m_mlbTransports.Refresh();
-			m_unitsToMove.Clear();	
-		}
+		#region panel state functions
 
 		public void RefreshPlayerOrder()
 		{
@@ -1151,109 +1273,7 @@ namespace BuckRogers.Interface
 			m_btnEndMoves.Enabled = true;
 		}
 
-		/*
-		private void tlf_TransportInfo(object sender, TransportInfoEventArgs tiea)
-		{
-			char[] delimiters = {'%'};
-			string[] eventInfo = tiea.Message.Split(delimiters);
-
-			eventInfo[0] += (m_mlbTransports.Items.Count + 1).ToString();
-			m_mlbTransports.Items.Add(eventInfo[0], eventInfo[1]);
-			m_mlbTransports.Refresh();
-		}
-		*/
-
-		private void m_lbCurrentMoves_DoubleClick(object sender, System.EventArgs e)
-		{
-			RemoveTerritoryFromMove();
-		}
-
-		private void RemoveTerritoryFromMove()
-		{
-			if (m_lbCurrentMoves.Items.Count > 0)
-			{
-				int index = m_lbCurrentMoves.Items.Count - 1;
-
-				m_lbCurrentMoves.Items.RemoveAt(index);
-				m_currentMoveTerritories.RemoveAt(index);
-			}
-
-			if (m_lbCurrentMoves.Items.Count == 0)
-			{
-				CancelMove();
-			}
-		}
-
-		internal void KeyPressed(Keys keyCode)
-		{
-			if(keyCode == Keys.Enter)
-			{
-				FinalizeCurrentMove();
-			}
-			else if (keyCode == Keys.T)
-			{
-				// Switch the transport state, if we're currently able to
-				if(m_chkLoadTransports.Enabled && !m_showingTransportDialog)
-				{
-					m_chkLoadTransports.Checked = !m_chkLoadTransports.Checked;
-				}
-			}
-			
-		}
-
-		private void FinalizeCurrentMove()
-		{
-			if (m_currentMoveTerritories.Count > 1)
-			{
-				ArrayList dummy = new ArrayList();
-				MoveAction ma = CreateAndValidateMove(dummy, true);
-
-				FinalizeOrUpdateMove(true, dummy, ma);
-			}
-		}
-
-		public void BeginMovement()
-		{
-			m_currentMoveTerritories.Clear();
-
-			if (MoveModeChanged != null)
-			{
-				MoveModeEventArgs mmea = new MoveModeEventArgs();
-				mmea.MoveMode = MoveMode.StartMove;
-				m_moveMode = MoveMode.StartMove;
-
-				MoveModeChanged(this, mmea);
-			}
-
-			m_chkLoadTransports.Location = new Point(0, 134);
-			
-		}
-
-		private void m_btnRemoveTerritory_Click(object sender, EventArgs e)
-		{
-			RemoveTerritoryFromMove();
-		}
-
-		private void m_chkLoadTransports_CheckedChanged(object sender, EventArgs e)
-		{
-			if (MoveModeChanged != null)
-			{
-				MoveModeEventArgs mmea = new MoveModeEventArgs();
-
-				if (m_chkLoadTransports.Checked)
-				{
-					mmea.MoveMode = MoveMode.StartTransport;
-					m_moveMode = MoveMode.StartTransport;
-				}
-				else
-				{
-					mmea.MoveMode = MoveMode.StartMove;
-					m_moveMode = MoveMode.StartMove;
-				}				
-
-				MoveModeChanged(this, mmea);
-			}
-		}		
+		#endregion
 	}
 	
 }

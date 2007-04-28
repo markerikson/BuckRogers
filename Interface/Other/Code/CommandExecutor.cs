@@ -148,4 +148,40 @@ public class ToolbarCommandExecutor : CommandExecutor
 		}
 	
 	}
+
+	public class ControlCommandExecutor : CommandExecutor
+	{
+		public override void InstanceAdded(object item, Command cmd)
+		{
+			base.InstanceAdded(item, cmd);
+		}
+		public override void Enable(object item, bool bEnable)
+		{
+			Control c = (Control)item;
+			c.Enabled = bEnable;
+		}
+
+		public override void Check(object item, bool bCheck)
+		{
+			// ignore
+		}
+	}
+
+	public class ListViewCommandExecutor : CommandExecutor
+	{
+		public override void InstanceAdded(object item, Command cmd)
+		{
+			base.InstanceAdded(item, cmd);
+		}
+		public override void Enable(object item, bool bEnable)
+		{
+			ListView lv = (ListView)item;
+			lv.Enabled = bEnable;
+		}
+
+		public override void Check(object item, bool bCheck)
+		{
+			// ignore
+		}
+	}
 }
