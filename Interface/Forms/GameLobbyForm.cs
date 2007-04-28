@@ -148,7 +148,7 @@ namespace BuckRogers.Interface
 			{
 				clp.Client = null;
 
-				m_gameClient.SendMessageToServer(NetworkMessages.PlayerRemoved, clp.Player.Name);
+				m_gameClient.SendMessageToServer(GameMessage.PlayerRemoved, clp.Player.Name);
 			}
 
 			tabControl1.TabPages.RemoveAt(tabControl1.TabPages.Count - 1);
@@ -231,7 +231,7 @@ namespace BuckRogers.Interface
 		{
 			switch (e.MessageType)
 			{
-				case NetworkMessages.ConnectionAcknowledged:
+				case GameMessage.ConnectionAcknowledged:
 					{
 						m_lblConnectionStatus.Invoke((MethodInvoker)delegate
 						{
@@ -250,7 +250,7 @@ namespace BuckRogers.Interface
 						}
 						break;
 					}
-				case NetworkMessages.PublicChatMessage:
+				case GameMessage.PublicChatMessage:
 					{
 						foreach (ClientLobbyPanel clp in m_lobbyPanels)
 						{
@@ -262,7 +262,7 @@ namespace BuckRogers.Interface
 						}
 						break;
 					}
-				case NetworkMessages.PrivateChatMessage:
+				case GameMessage.PrivateChatMessage:
 					{
 						Player p = e.Players[0];
 						ClientLobbyPanel clp = m_playerPanels[p];
@@ -273,7 +273,7 @@ namespace BuckRogers.Interface
 						});
 						break;
 					}
-				case NetworkMessages.OtherClientsList:
+				case GameMessage.OtherClientsList:
 					{
 						foreach (ClientLobbyPanel clp in m_lobbyPanels)
 						{
@@ -285,7 +285,7 @@ namespace BuckRogers.Interface
 						}
 						break;
 					}
-				case NetworkMessages.PlayerAdded:
+				case GameMessage.PlayerAdded:
 					{
 						foreach (ClientLobbyPanel clp in m_lobbyPanels)
 						{
@@ -296,7 +296,7 @@ namespace BuckRogers.Interface
 						}
 						break;
 					}
-				case NetworkMessages.PlayerRemoved:
+				case GameMessage.PlayerRemoved:
 					{
 						string fullMessage = "Player left: " + e.MessageText;
 						foreach (ClientLobbyPanel clp in m_lobbyPanels)
@@ -314,12 +314,12 @@ namespace BuckRogers.Interface
 
 						break;
 					}
-				case NetworkMessages.PlayerDenied:
+				case GameMessage.PlayerDenied:
 					{
 						MessageBox.Show(e.MessageText);
 						break;
 					}
-				case NetworkMessages.PlayerAccepted:
+				case GameMessage.PlayerAccepted:
 					{
 						ClientLobbyPanel acceptedCLP = null;
 						foreach (ClientLobbyPanel clp in m_lobbyPanels)
@@ -344,7 +344,7 @@ namespace BuckRogers.Interface
 						}
 						break;
 					}
-				case NetworkMessages.GameSettings:
+				case GameMessage.GameSettings:
 					{
 						m_txtGameSettings.Invoke((MethodInvoker)delegate
 						{
@@ -352,7 +352,7 @@ namespace BuckRogers.Interface
 						});
 						break;
 					}
-				case NetworkMessages.StatusUpdate:
+				case GameMessage.StatusUpdate:
 					{
 						if (e.MessageText != string.Empty)
 						{
@@ -363,7 +363,7 @@ namespace BuckRogers.Interface
 						}
 						break;
 					}
-				case NetworkMessages.ServerDisconnected:
+				case GameMessage.ServerDisconnected:
 					{
 						m_lbMessages.Invoke((MethodInvoker)delegate
 						{
@@ -391,7 +391,7 @@ namespace BuckRogers.Interface
 						m_players.Clear();
 						break;
 					}
-				case NetworkMessages.GameStarted:
+				case GameMessage.GameStarted:
 					{
 						//MessageBox.Show("Game starting!");
 
@@ -430,7 +430,7 @@ namespace BuckRogers.Interface
 			StreamReader sr = new StreamReader(stream);
 			string xml = sr.ReadToEnd();
 
-			m_gameClient.SendMessageToServer(NetworkMessages.PlayerListing, xml);
+			m_gameClient.SendMessageToServer(GameMessage.PlayerListing, xml);
 		}
 
 		#endregion

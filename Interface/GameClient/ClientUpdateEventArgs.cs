@@ -9,7 +9,7 @@ namespace BuckRogers.Networking
 {
 	public class ClientUpdateEventArgs : EventArgs
 	{
-		private NetworkMessages m_networkMessage;		
+		private GameMessage m_networkMessage;		
 		private string m_messageText;		
 		private List<Player> m_players;
 
@@ -19,7 +19,7 @@ namespace BuckRogers.Networking
 			set { m_players = value; }
 		}
 
-		public NetworkMessages MessageType
+		public GameMessage MessageType
 		{
 			get { return m_networkMessage; }
 			set { m_networkMessage = value; }

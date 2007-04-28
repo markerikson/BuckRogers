@@ -331,7 +331,7 @@ namespace BuckRogers.Interface
 			*/
 
 			m_battleController.UnitsToDisplay += new DisplayUnitsHandler(DisplayUnits);
-			m_battleController.StatusUpdate += new StatusUpdateHandler(OnBattleControllerStatusUpdate);
+			m_battleController.StatusUpdate += new EventHandler<StatusUpdateEventArgs>(OnBattleControllerStatusUpdate);//new StatusUpdateHandler(OnBattleControllerStatusUpdate);
 			m_battleController.BattleStatusUpdated += new BattleStatusUpdateHandler(OnBattleStatusUpdated);
 		}
 
@@ -1242,7 +1242,7 @@ namespace BuckRogers.Interface
 			return pud;
 		}
 
-		private bool OnBattleControllerStatusUpdate(object sender, StatusUpdateEventArgs suea)
+		private void OnBattleControllerStatusUpdate(object sender, StatusUpdateEventArgs suea)
 		{
 			bool result = true;
 
@@ -1254,6 +1254,7 @@ namespace BuckRogers.Interface
 					DialogResult dr = MessageBox.Show(message, "Sabotage Factory?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
 					result = (dr == DialogResult.Yes);
+					suea.Result = result;
 					break;
 				}
 				case StatusInfo.SabotageResult:
@@ -1287,7 +1288,7 @@ namespace BuckRogers.Interface
 				}
 			}
 
-			return result;
+			return;
 		}
 
 		public void MouseMoveHandler(object sender, PInputEventArgs e)

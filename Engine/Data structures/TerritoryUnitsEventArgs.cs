@@ -5,7 +5,7 @@ namespace BuckRogers
 	/// <summary>
 	/// Summary description for TerritoryUnitsEventArgs.
 	/// </summary>
-	public class TerritoryUnitsEventArgs
+	public class TerritoryUnitsEventArgs : EventArgs
 	{
 		private Player m_player;
 		private Territory m_territory;

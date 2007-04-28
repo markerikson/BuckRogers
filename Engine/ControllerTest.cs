@@ -10,7 +10,8 @@ namespace BuckRogers
 	[TestFixture]
 	public class ControllerTest
 	{
-		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
+		//public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
+		public event EventHandler<TerritoryEventArgs> TerritoryOwnerChanged = delegate { };
 
 		private GameController m_controller;
 		private BattleController m_battleController;

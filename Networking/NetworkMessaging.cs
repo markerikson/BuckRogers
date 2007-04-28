@@ -2,10 +2,12 @@ using System;
 
 namespace BuckRogers.Networking
 {
-	public enum NetworkMessages : uint
+	public enum GameMessage : uint
 	{
 		ConnectionAcknowledged = 1,
+		ServerStarted,
 		ServerDisconnected,
+		ServerStatus,
 		PlayerNameRequested,
 		PlayerNameUpdated,
 		PlayerColorRequested,
@@ -30,10 +32,11 @@ namespace BuckRogers.Networking
 		GameStarted,
 
 
-		GameMessagesFirst,
-		InitialSetupInformation = GameMessagesFirst,
+		GameplayMessagesFirst,
+		InitialSetupInformation = GameplayMessagesFirst,
 		PlayerPlacementStarted,
 		PlayerChoseUnits,
+		PlayerPlacedUnits,
 		PlayerPlacementEnded,
 		NextPlayer,
 		CreateUnits,
@@ -41,7 +44,7 @@ namespace BuckRogers.Networking
 		PlayerTurnEnded,
 
 
-		GameMessagesLast,
+		GameplayMessagesLast,
 
 	}
 }

@@ -29,6 +29,7 @@ namespace BuckRogers.Interface
 
 		private Hashtable m_playerImages;
 		private Hashtable m_selectedUnitCounts;
+		private UnitCollection m_ucPlacedUnits;
 
 		private List<Player> m_playersFinishedChoosing;
 
@@ -106,6 +107,7 @@ namespace BuckRogers.Interface
 
 			m_selectedUnitCounts = new Hashtable();
 			m_playersFinishedChoosing = new List<Player>();
+			m_ucPlacedUnits = new UnitCollection();
 
 			int LVM_SETICONSPACING = 4149;
 			int width = 70;
@@ -357,6 +359,8 @@ namespace BuckRogers.Interface
 
 				m_controller.PlaceUnits(uc, t);
 
+				m_ucPlacedUnits.AddAllUnits(uc);
+
 				foreach(Unit u in uc)
 				{
 					ListViewItem lvi = new ListViewItem();
@@ -397,6 +401,8 @@ namespace BuckRogers.Interface
 																			m_activeTerritory, numUnits);
 
 						unitsToRemove.AddAllUnits(uc);
+
+						m_ucPlacedUnits.RemoveAllUnits(uc);
 					}
 
 					m_lvUnitsPlaced.Items.Clear();
@@ -438,7 +444,7 @@ namespace BuckRogers.Interface
 
 			UnitCollection totalRemainingUnits = Territory.NONE.Units.GetUnits(m_controller.CurrentPlayer);
 
-			if (m_lvUnitsPlaced.Items.Count == 3 || totalRemainingUnits.Count == 0)
+			if (m_ucPlacedUnits.Count == 3 || totalRemainingUnits.Count == 0)
 			{
 				DialogResult dr = MessageBox.Show("Placement completed?", "Placement", 
 													MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -446,33 +452,26 @@ namespace BuckRogers.Interface
 				if(dr == DialogResult.Yes)
 				{
 					m_lvUnitsPlaced.Items.Clear();
-					m_activeTerritory = null;
+					
+					
 					m_lblPlacementTerritory.Text = "None";
 
-					//m_csgm.PlayerPlacedUnits(m_controller.CurrentPlayer, )
+					m_csgm.PlayerPlacedUnits(m_controller.CurrentPlayer, m_activeTerritory, m_ucPlacedUnits);
 
+					m_ucPlacedUnits.Clear();
+					m_activeTerritory = null;
+
+					/*
 					if (m_controller.NextPlayer())
 					{
-						m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
-						RefreshAvailableUnits();
+						
 					}
 					else
 					{
 						RefreshPlayerOrder();
 					}
-
-					if (m_playersSelectUnits)
-					{
-						if (m_playersFinishedChoosing.Count < m_controller.Players.Length)
-						{
-							m_btnChooseUnits.Enabled = true;
-							m_btnChooseUnits.Visible = true;
-						}
-						else
-						{
-							m_btnChooseUnits.Visible = false;
-						}
-					}
+					*/
+					
 				}
 			}
 		}
@@ -620,10 +619,11 @@ namespace BuckRogers.Interface
 			m_csgm.PlayerChoseUnits(m_controller.CurrentPlayer, usf.TotalTroopers, usf.TotalFighters, 
 									usf.TotalGennies, usf.TotalTransports);
 
-			RefreshAvailableUnits();
-
 			m_btnChooseUnits.Enabled = false;
 
+			RefreshAvailableUnits();
+
+			/*
 			if (MoveModeChanged != null)
 			{
 				MoveModeEventArgs mmea = new MoveModeEventArgs();
@@ -631,6 +631,7 @@ namespace BuckRogers.Interface
 
 				MoveModeChanged(this, mmea);
 			}
+			*/
 		}
 
 		internal void KeyPressed(Keys keyCode)
@@ -675,20 +676,27 @@ namespace BuckRogers.Interface
 			}
 		}
 
+		#endregion
+
+		#region OnClientUpdateMessage
+
 		void OnClientUpdateMessage(object sender, ClientUpdateEventArgs e)
 		{
 			switch(e.MessageType)
 			{
-				case NetworkMessages.NextPlayer:
+				case GameMessage.NextPlayer:
 				{
 					if(m_playersFinishedChoosing.Contains(m_controller.CurrentPlayer))
 					{
 						m_btnChooseUnits.Visible = false;
 					}
 
-					goto case NetworkMessages.PlayerPlacementStarted;
+					m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
+					RefreshAvailableUnits();
+
+					goto case GameMessage.PlayerPlacementStarted;
 				}
-				case NetworkMessages.PlayerPlacementStarted:				
+				case GameMessage.PlayerPlacementStarted:				
 				{
 					if (MoveModeChanged != null)
 					{
@@ -708,9 +716,22 @@ namespace BuckRogers.Interface
 
 					break;
 				}
-				case NetworkMessages.PlayerChoseUnits:
+				case GameMessage.PlayerChoseUnits:
 				{
 					m_playersFinishedChoosing.Add(e.Players[0]);
+
+					if (m_playersSelectUnits)
+					{
+						if (m_playersFinishedChoosing.Count < m_controller.Players.Length)
+						{
+							m_btnChooseUnits.Enabled = true;
+							m_btnChooseUnits.Visible = true;
+						}
+						else
+						{
+							m_btnChooseUnits.Visible = false;
+						}
+					}
 					break;
 				}
 			}

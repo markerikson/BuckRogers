@@ -93,34 +93,36 @@ namespace BuckRogers.Networking
 		{
 			switch (e.MessageType)
 			{
-				case NetworkMessages.InitialSetupInformation:
+				case GameMessage.InitialSetupInformation:
 				{
 					ParseInitialSetupInformation(e.MessageText);
 
 					ClientUpdateEventArgs cuea = new ClientUpdateEventArgs();
-					cuea.MessageType = NetworkMessages.InitialSetupInformation;
+					cuea.MessageType = GameMessage.InitialSetupInformation;
 
 					// synchronous, to make sure things complete before we report ready
 					EventsHelper.Fire(ClientUpdateMessage, this, cuea);
 
-					m_gameClient.SendMessageToServer(NetworkMessages.ClientReady, string.Empty);
+					m_gameClient.SendMessageToServer(GameMessage.ClientReady, string.Empty);
 					break;
 				}
-				case NetworkMessages.PlayerPlacementStarted:
+				case GameMessage.PlayerPlacementStarted:
 				{
 					CheckIfActiveClient();
-					RaiseSimpleUpdateEvent(string.Empty, NetworkMessages.PlayerPlacementStarted, null);
+					RaiseSimpleUpdateEvent(GameMessage.PlayerPlacementStarted, string.Empty, null);
 					break;
 				}
-				case NetworkMessages.PlayerChoseUnits:
+				case GameMessage.PlayerChoseUnits:
 				{
 					string[] messageParts = e.MessageText.Split('|');
 					Player p = m_controller.GetPlayer(messageParts[0]);
 
+					/*
 					if(p.Location == PlayerLocation.Local)
 					{
 						break;
 					}
+					*/
 
 					int[] numUnits = new int[4];
 					UnitType[] unitTypes = new UnitType[] { UnitType.Trooper, UnitType.Fighter, 
@@ -136,7 +138,42 @@ namespace BuckRogers.Networking
 						m_controller.CreateUnits(p, unitTypes[i], numUnits[i]);
 					}
 
-					RaiseSimpleUpdateEvent(string.Empty, NetworkMessages.PlayerChoseUnits, p);
+					RaiseSimpleUpdateEvent(GameMessage.PlayerChoseUnits, string.Empty, p);
+					break;
+				}
+				case GameMessage.PlayerPlacedUnits:
+				{
+					string[] messageInfo = e.MessageText.Split('|');
+					Player p = m_controller.GetPlayer(messageInfo[0]);
+
+					if(p.Location == PlayerLocation.Local)
+					{
+						break;
+					}
+
+					Territory t = m_controller.Map[messageInfo[1]];
+
+					for (int i = 2; i < messageInfo.Length; i++)
+					{
+						string[] unitCountInfo = messageInfo[i].Split(':');
+						UnitType ut = (UnitType)Enum.Parse( typeof(UnitType), unitCountInfo[0]);
+						int numUnits = int.Parse(unitCountInfo[1]);
+
+						UnitCollection unitsToPlace = p.Units.GetUnits(ut, p, Territory.NONE, numUnits);
+
+						m_controller.PlaceUnits(unitsToPlace, t);
+					}
+
+					break;
+				}
+				case GameMessage.NextPlayer:
+				{
+					if(m_controller.NextPlayer())
+					{
+						CheckIfActiveClient();
+						RaiseSimpleUpdateEvent(GameMessage.NextPlayer, string.Empty, null);
+					}					
+					
 					break;
 				}
 			}
@@ -151,7 +188,21 @@ namespace BuckRogers.Networking
 			m_isActiveClient = (m_controller.CurrentPlayer.Location == PlayerLocation.Local);
 		}
 
-		private void RaiseSimpleUpdateEvent(string text, NetworkMessages message, Player p)
+		private void RaiseSimpleUpdateEvent(GameMessage message, string text, Player p)
+		{
+			ClientUpdateEventArgs cuea = CreateClientUpdateEvent(text, message, p);
+
+			EventsHelper.Fire(ClientUpdateMessage, this, cuea);
+		}
+
+		private void RaiseLocalLoopbackEvent(GameMessage message, string text, Player p)
+		{
+			ClientUpdateEventArgs cuea = CreateClientUpdateEvent(text, message, p);
+
+			OnGameMessageReceived(this, cuea);
+		}
+
+		private ClientUpdateEventArgs CreateClientUpdateEvent(string text, GameMessage message, Player p)
 		{
 			ClientUpdateEventArgs cuea = new ClientUpdateEventArgs();
 			cuea.MessageText = text;
@@ -162,12 +213,12 @@ namespace BuckRogers.Networking
 				cuea.Players.Add(p);
 			}
 
-			EventsHelper.FireAsync(ClientUpdateMessage, this, cuea);
+			return cuea;
 		}
 
 		#endregion
 
-		#region message creation
+		#region message parsing
 
 		private void ParseInitialSetupInformation(string messageText)
 		{
@@ -184,7 +235,6 @@ namespace BuckRogers.Networking
 				string playerName = xePlayer.Attributes["name"].Value;
 
 				Player p = m_controller.GetPlayer(playerName);
-				initialPlayerOrder.Add(p);
 
 				XmlElement xeTerritories = (XmlElement)xePlayer.GetElementsByTagName("Territories")[0];
 				XmlNodeList xnlTerritories = xePlayer.GetElementsByTagName("Territory");
@@ -222,6 +272,16 @@ namespace BuckRogers.Networking
 				}
 			}
 
+			XmlElement xePlayerOrder = (XmlElement)xd.GetElementsByTagName("InitialOrder")[0];
+			string playerOrderString = xePlayerOrder.Attributes["order"].Value;
+			string[] playerOrderNames = playerOrderString.Split('|');
+
+			foreach(string playerOrderName in playerOrderNames)
+			{
+				Player p = m_controller.GetPlayer(playerOrderName);
+				initialPlayerOrder.Add(p);
+			}
+			
 			m_controller.PlayerOrder = initialPlayerOrder;
 		}
 
@@ -231,32 +291,69 @@ namespace BuckRogers.Networking
 
 		public void ReadyToStartPlacement()
 		{
-			if(m_isNetworkGame)
+			// if it's a network game, then the ClientReady message should be sent from
+			// OnGameMessageReceived once this call stack returns
+			if (!m_isNetworkGame)
 			{
-				m_gameClient.SendMessageToServer(NetworkMessages.ClientReady, string.Empty);
-			}
-			else
-			{
-				RaiseSimpleUpdateEvent(string.Empty, NetworkMessages.PlayerPlacementStarted, null);
+				RaiseSimpleUpdateEvent(GameMessage.PlayerPlacementStarted, string.Empty, null);
+				//m_gameClient.SendMessageToServer(NetworkMessages.ClientReady, string.Empty);
 			}
 		}
 
 		public void PlayerChoseUnits(Player p, int numTroopers, int numFighters, int numGennies, int numTransports)
 		{
+			/*
 			m_controller.CreateUnits(p, UnitType.Fighter, numFighters);
 			m_controller.CreateUnits(p, UnitType.Transport, numTransports);
 			m_controller.CreateUnits(p, UnitType.Trooper, numTroopers);
 			m_controller.CreateUnits(p, UnitType.Gennie,numGennies);
+			*/
+
+			string messageText = string.Format("{0}|{1}|{2}|{3}|{4}", p.Name,
+												numTroopers, numFighters, numGennies, numTransports);
 
 			if(m_isNetworkGame)
 			{
-				string message = string.Format("{0}|{1}|{2}|{3}|{4}", p.Name, 
-												numTroopers, numFighters, numGennies, numTransports);
-				m_gameClient.SendMessageToServer(NetworkMessages.PlayerChoseUnits, message);
+				m_gameClient.SendMessageToServer(GameMessage.PlayerChoseUnits, messageText);
+			}
+			else
+			{
+				//RaiseSimpleUpdateEvent(string.Empty, NetworkMessages.PlayerChoseUnits, p);
+				RaiseLocalLoopbackEvent(GameMessage.PlayerChoseUnits, messageText, p);
+			}
+		}
+
+		public void PlayerPlacedUnits(Player player, Territory territory, UnitCollection placedUnits)
+		{
+			if(m_isNetworkGame)
+			{
+				StringBuilder sb = new StringBuilder();
+				sb.Append(player.Name);
+				sb.Append("|");
+				sb.Append(territory.Name);
+
+				Hashtable ht = placedUnits.GetUnitTypeCount();
+
+				foreach(DictionaryEntry de in ht)
+				{
+					UnitType ut = (UnitType)de.Key;
+					int numUnits = (int)de.Value;
+
+					sb.Append("|");
+					sb.AppendFormat("{0}:{1}", ut, numUnits);
+				}
+
+				m_gameClient.SendMessageToServer(GameMessage.PlayerPlacedUnits, sb.ToString());
+			}
+			else
+			{
+				RaiseSimpleUpdateEvent(GameMessage.PlayerPlacedUnits, string.Empty, player);
 			}
 		}
 
 		#endregion
+
+
 
 
 

@@ -184,7 +184,7 @@ namespace BuckRogers.Interface
 			{
 				if(useTesting)
 				{
-					ct.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
+					ct.TerritoryOwnerChanged += new EventHandler<TerritoryEventArgs>(m_map.SetTerritoryOwner); //new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
 					m_map.IconManager.CreateIcons();
 					ct.Init();
 					m_controller.InitGamelog();
@@ -313,20 +313,20 @@ namespace BuckRogers.Interface
 
 		private void InitEvents()
 		{
-			m_controller.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
-			m_battleController.TerritoryOwnerChanged += new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
+			m_controller.TerritoryOwnerChanged += new EventHandler<TerritoryEventArgs>(m_map.SetTerritoryOwner); //new TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
+			m_battleController.TerritoryOwnerChanged += new EventHandler<TerritoryEventArgs>(m_map.SetTerritoryOwner); //TerritoryOwnerChangedHandler(m_map.SetTerritoryOwner);
 
-			m_controller.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
-			m_battleController.StatusUpdate += new StatusUpdateHandler(OnStatusUpdate);
+			m_controller.StatusUpdate += new EventHandler<StatusUpdateEventArgs>(OnStatusUpdate); //StatusUpdateHandler(OnStatusUpdate);
+			m_battleController.StatusUpdate += new EventHandler<StatusUpdateEventArgs>(OnStatusUpdate);
 
 			m_controller.ActionAdded += new DisplayActionHandler(m_movePanel.AddActionToList);
 			m_controller.ActionUndone += new DisplayActionHandler(m_movePanel.RemoveActionFromList);
-			m_controller.TerritoryUnitsChanged += new TerritoryUnitsChangedHandler(m_informationPanel.UpdateUnitInfo);
-			m_controller.TerritoryUnitsChanged += new TerritoryUnitsChangedHandler(m_map.UpdateUnitInfo);
+			m_controller.TerritoryUnitsChanged += new EventHandler<TerritoryUnitsEventArgs>(m_informationPanel.UpdateUnitInfo);//new TerritoryUnitsChangedHandler(m_informationPanel.UpdateUnitInfo);
+			m_controller.TerritoryUnitsChanged += new EventHandler<TerritoryUnitsEventArgs>(m_map.UpdateUnitInfo);//new TerritoryUnitsChangedHandler(m_map.UpdateUnitInfo);
 
 			m_battleController.UpdateTerritory += new TerritoryUpdateHandler(m_map.IconManager.RefreshIcons);
 			m_controller.UpdateTerritory += new TerritoryUpdateHandler(m_map.IconManager.RefreshIcons);
-			m_battleController.TerritoryUnitsChanged += new TerritoryUnitsChangedHandler(m_map.UpdateUnitInfo);
+			m_battleController.TerritoryUnitsChanged += new EventHandler<TerritoryUnitsEventArgs>(m_map.UpdateUnitInfo);//new TerritoryUnitsChangedHandler(m_map.UpdateUnitInfo);
 
 			m_controller.PlayersCreated += new PlayersCreatedHandler(m_map.IconManager.CreateIcons);
 
@@ -690,7 +690,7 @@ namespace BuckRogers.Interface
 		{
 			switch(e.MessageType)
 			{
-				case NetworkMessages.InitialSetupInformation:
+				case GameMessage.InitialSetupInformation:
 				{
 					m_controller.InitGamelog();
 
@@ -778,7 +778,7 @@ namespace BuckRogers.Interface
 			}
 		}
 
-		private bool OnStatusUpdate(object sender, StatusUpdateEventArgs suea)
+		private void OnStatusUpdate(object sender, StatusUpdateEventArgs suea)
 		{
 			bool result = true;
 			switch (suea.StatusInfo)
@@ -904,11 +904,13 @@ namespace BuckRogers.Interface
 					string message = "You have loaded transports in " + suea.Territory.Name + ".  Unload them?";
 					DialogResult dr = MessageBox.Show(message, "Unload Transports?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-					return dr == DialogResult.Yes;
+					result = (dr == DialogResult.Yes);
+					suea.Result = result;
+					break;
 				}
 			}
 
-			return result;
+			return;
 		}
 
 		private void OnYesNoFormVisibleChanged(object sender, EventArgs e)
@@ -1124,7 +1126,7 @@ namespace BuckRogers.Interface
 
 			if (GameController.Options.IsNetworkGame)
 			{
-				m_gameClient.SendMessageToServer(NetworkMessages.ClientLoaded, string.Empty);
+				m_gameClient.SendMessageToServer(GameMessage.ClientLoaded, string.Empty);
 			}
 		}
 		#region IMessageFilter Members

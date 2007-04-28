@@ -119,7 +119,7 @@ namespace BuckRogers.Networking
 			m_connection = null;
 			m_players.Clear();
 
-			RaiseSimpleUpdateEvent(string.Empty, NetworkMessages.ServerDisconnected, null);
+			RaiseSimpleUpdateEvent(string.Empty, GameMessage.ServerDisconnected, null);
 		}
 
 		#endregion
@@ -132,35 +132,35 @@ namespace BuckRogers.Networking
 
 			string message = Encoding.UTF8.GetString(bytes);
 			string logMessage = string.Empty;
-			NetworkMessages netMessage = (NetworkMessages)code;
+			GameMessage netMessage = (GameMessage)code;
 
-			if (code >= (uint)NetworkMessages.GameMessagesFirst)
+			if (code >= (uint)GameMessage.GameplayMessagesFirst)
 			{
 				ClientUpdateEventArgs cuea = new ClientUpdateEventArgs();
 				cuea.MessageType = netMessage;
 				cuea.MessageText = message;
 
-				EventsHelper.FireAsync(GameMessageReceived, this, cuea);
+				EventsHelper.Fire(GameMessageReceived, this, cuea);
 				return;
 			}
 
 			switch (netMessage)
 			{
-				case NetworkMessages.ConnectionAcknowledged:
+				case GameMessage.ConnectionAcknowledged:
 				{
 					logMessage = "Connection acknowledged.";
 
 					OnConnectionAcknowledged();
 					break;
 				}
-				case NetworkMessages.PublicChatMessage:
+				case GameMessage.PublicChatMessage:
 				{
 					logMessage = string.Format("Received public chat message : {0}", message);
 
 					RaiseSimpleUpdateEvent(message, netMessage, null);
 					break;
 				}
-				case NetworkMessages.PrivateChatMessage:
+				case GameMessage.PrivateChatMessage:
 				{
 					string sender = m_rePrivateMessage.Match(message).Groups["sender"].Value;
 					string recipient = m_rePrivateMessage.Match(message).Groups["recipient"].Value;
@@ -174,31 +174,31 @@ namespace BuckRogers.Networking
 					RaiseSimpleUpdateEvent(formattedMessage, netMessage, p);
 					break;
 				}
-				case NetworkMessages.PlayerNameRequested:
+				case GameMessage.PlayerNameRequested:
 				{
 					logMessage = "Received PlayerNameRequested.  Isn't this obsolete now?";
 					//SendPlayerName();
 					break;
 				}
-				case NetworkMessages.OtherClientsList:
+				case GameMessage.OtherClientsList:
 				{
 					logMessage = "Received OtherClientsList";
 
 					RaiseSimpleUpdateEvent(message, netMessage, null);
 					break;
 				}
-				case NetworkMessages.PlayerColorUpdated:
-				case NetworkMessages.PlayerNameUpdated:
-				case NetworkMessages.OtherClientConnected:
-				case NetworkMessages.OtherClientDisconnected:
-				case NetworkMessages.LoginCompleted:
+				case GameMessage.PlayerColorUpdated:
+				case GameMessage.PlayerNameUpdated:
+				case GameMessage.OtherClientConnected:
+				case GameMessage.OtherClientDisconnected:
+				case GameMessage.LoginCompleted:
 				{
-					string messageName = Enum.GetName(typeof(NetworkMessages), code);
+					string messageName = Enum.GetName(typeof(GameMessage), code);
 					logMessage = string.Format("Received message ({0}) causing client list request", messageName);
-					m_connection.SendMessage((uint)NetworkMessages.ClientListRequested, new byte[0]);
+					m_connection.SendMessage((uint)GameMessage.ClientListRequested, new byte[0]);
 					break;
 				}
-				case NetworkMessages.PlayerAdded:
+				case GameMessage.PlayerAdded:
 				{
 					logMessage = string.Format("Server reports Player Added: {0}", message);
 
@@ -209,12 +209,12 @@ namespace BuckRogers.Networking
 
 					if(!m_players.ContainsKey(message))
 					{
-						m_connection.SendMessage((uint)NetworkMessages.ClientListRequested, new byte[0]);
+						m_connection.SendMessage((uint)GameMessage.ClientListRequested, new byte[0]);
 					}
 					
 					break;
 				}
-				case NetworkMessages.PlayerRemoved:
+				case GameMessage.PlayerRemoved:
 				{
 					logMessage = string.Format("Server reports Player Removed: {0}", message);
 					//string fullMessage = "Player left: " + message;
@@ -226,17 +226,17 @@ namespace BuckRogers.Networking
 						m_players.Remove(message);
 					}
 
-					m_connection.SendMessage((uint)NetworkMessages.ClientListRequested, new byte[0]);
+					m_connection.SendMessage((uint)GameMessage.ClientListRequested, new byte[0]);
 					break;
 				}
-				case NetworkMessages.PlayerDenied:
+				case GameMessage.PlayerDenied:
 				{
 					logMessage = string.Format("Player was denied: {0}", message);
 
 					RaiseSimpleUpdateEvent(message, netMessage, null);
 					break;
 				}
-				case NetworkMessages.PlayerAccepted:
+				case GameMessage.PlayerAccepted:
 				{
 					logMessage = string.Format("Player was accepted: {0}", message);
 
@@ -245,10 +245,10 @@ namespace BuckRogers.Networking
 					Player p = new Player(message);
 
 					m_players.Add(message, p);
-					m_connection.SendMessage((uint)NetworkMessages.ClientListRequested, new byte[0]);
+					m_connection.SendMessage((uint)GameMessage.ClientListRequested, new byte[0]);
 					break;
 				}
-				case NetworkMessages.GameSettings:
+				case GameMessage.GameSettings:
 				{
 					logMessage = "Game settings received";
 					ParseGameOptionsMessage(message);
@@ -268,10 +268,10 @@ namespace BuckRogers.Networking
 						}
 					}
 
-					RaiseSimpleUpdateEvent(sb.ToString(), NetworkMessages.GameSettings, null);
+					RaiseSimpleUpdateEvent(sb.ToString(), GameMessage.GameSettings, null);
 					break;
 				}
-				case NetworkMessages.GameStarted:
+				case GameMessage.GameStarted:
 				{
 					m_gameStarted = true;
 
@@ -284,17 +284,17 @@ namespace BuckRogers.Networking
 
 			if(logMessage != string.Empty)
 			{
-				RaiseSimpleUpdateEvent(logMessage, NetworkMessages.StatusUpdate, null);
+				RaiseSimpleUpdateEvent(logMessage, GameMessage.StatusUpdate, null);
 			}
 			
 		}
 
 		private void OnConnectionAcknowledged()
 		{
-			RaiseSimpleUpdateEvent(string.Empty, NetworkMessages.ConnectionAcknowledged, null);
+			RaiseSimpleUpdateEvent(string.Empty, GameMessage.ConnectionAcknowledged, null);
 
-			m_connection.SendMessage((uint)NetworkMessages.ClientListRequested, new byte[0]);
-			m_connection.SendMessage((uint)NetworkMessages.GameSettings, new byte[0]);
+			m_connection.SendMessage((uint)GameMessage.ClientListRequested, new byte[0]);
+			m_connection.SendMessage((uint)GameMessage.GameSettings, new byte[0]);
 		}
 
 		private void ParseGameInformation(string message)
@@ -402,7 +402,7 @@ namespace BuckRogers.Networking
 
 		#region events and message sending
 
-		private void RaiseSimpleUpdateEvent(string text, NetworkMessages message, Player p)
+		private void RaiseSimpleUpdateEvent(string text, GameMessage message, Player p)
 		{
 			ClientUpdateEventArgs cuea = new ClientUpdateEventArgs();
 			cuea.MessageText = text;
@@ -413,10 +413,10 @@ namespace BuckRogers.Networking
 				cuea.Players.Add(p);
 			}
 
-			EventsHelper.FireAsync(ClientStatusUpdate, this, cuea);
+			EventsHelper.Fire(ClientStatusUpdate, this, cuea);
 		}
 
-		public void SendMessageToServer(NetworkMessages messageType, string messageText)
+		public void SendMessageToServer(GameMessage messageType, string messageText)
 		{
 			byte[] messageBytes = Encoding.UTF8.GetBytes(messageText);
 

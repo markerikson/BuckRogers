@@ -1,3 +1,4 @@
+#region using directives
 using System;
 using System.Collections;
 using CenterSpace.Free;
@@ -6,6 +7,11 @@ using System.Drawing;
 using System.Text;
 using System.Xml;
 using System.Collections.Generic;
+
+using BuckRogers.Networking;
+
+#endregion
+
 
 namespace BuckRogers
 {
@@ -19,24 +25,28 @@ namespace BuckRogers
 		EndTurn,
 		GameOver,
 	}
-	public delegate bool StatusUpdateHandler(object sender, StatusUpdateEventArgs suea);
+	//public delegate bool StatusUpdateHandler(object sender, StatusUpdateEventArgs suea);
 	public delegate void DisplayActionHandler(Action a);
 	public delegate void TerritoryUnitsChangedHandler(object sender, TerritoryUnitsEventArgs tuea);
 	public delegate void PlayersCreatedHandler();
-	/// <summary>
-	/// Summary description for GameController.
-	/// </summary>
+	
 	public class GameController
 	{
 		#region events
+		public event EventHandler<StatusUpdateEventArgs> StatusUpdate = delegate { };
+		public event EventHandler<TerritoryEventArgs> TerritoryOwnerChanged = delegate { };
+		public event EventHandler<TerritoryUnitsEventArgs> TerritoryUnitsChanged = delegate { };
 
+		/*
 		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
+		public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
 		public event StatusUpdateHandler StatusUpdate;
+		*/
+
 		public event DisplayActionHandler ActionAdded;
 		public event DisplayActionHandler ActionUndone;
-		public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
-		public TerritoryUpdateHandler UpdateTerritory;
 		public event PlayersCreatedHandler PlayersCreated;
+		public TerritoryUpdateHandler UpdateTerritory;
 
 		#endregion
 
@@ -409,7 +419,11 @@ namespace BuckRogers
 
 		public void SaveLog()
 		{
-			m_gamelog.Save("gamelog.xml");
+			if(m_gamelog != null)
+			{
+				m_gamelog.Save("gamelog.xml");
+			}
+			
 		}
 
 		#endregion
@@ -441,7 +455,7 @@ namespace BuckRogers
 			ArrayList groundTerritories = new ArrayList();
 			foreach(Territory t in m_map.Graph.Nodes)
 			{
-				if(t.Type == TerritoryType.Ground)
+				if(t.Type == TerritoryType.Ground && t.Name != "Black Market")
 				{
 					groundTerritories.Add(t);
 				}
@@ -488,7 +502,8 @@ namespace BuckRogers
 					tea.Name = t.Name;
 					tea.Owner = p;
 
-					TerritoryOwnerChanged(this, tea);
+					EventsHelper.Fire(TerritoryOwnerChanged, this, tea);
+					//TerritoryOwnerChanged(this, tea);
 				}				
 			}			
 		}
@@ -506,7 +521,8 @@ namespace BuckRogers
 					tea.Name = t.Name;
 					tea.Owner = p;
 
-					TerritoryOwnerChanged(this, tea);
+					EventsHelper.Fire(TerritoryOwnerChanged, this, tea);
+					//TerritoryOwnerChanged(this, tea);
 				}
 			}
 		}
@@ -599,7 +615,8 @@ namespace BuckRogers
 				tuea.Territory = t;
 				tuea.Added = true;
 
-				TerritoryUnitsChanged(this, tuea);
+				EventsHelper.Fire(TerritoryUnitsChanged, this, tuea);
+				//TerritoryUnitsChanged(this, tuea);
 			}
 		}
 
@@ -617,7 +634,8 @@ namespace BuckRogers
 				tuea.Territory = t;
 				tuea.Added = false;
 
-				TerritoryUnitsChanged(this, tuea);
+				EventsHelper.Fire(TerritoryUnitsChanged, this, tuea);
+				//TerritoryUnitsChanged(this, tuea);
 			}
 		}
 
@@ -1330,7 +1348,8 @@ namespace BuckRogers
 					tea.Name = conquered.Name;
 					tea.Owner = move.Owner;
 
-					TerritoryOwnerChanged(this, tea);
+					EventsHelper.Fire(TerritoryOwnerChanged, this, tea);
+					//TerritoryOwnerChanged(this, tea);
 				}
 			}
 
@@ -1390,7 +1409,8 @@ namespace BuckRogers
 
 				m_alteredTerritories[move.StartingTerritory] = null;
 
-				TerritoryUnitsChanged(this, tuea);
+				EventsHelper.Fire(TerritoryUnitsChanged, this, tuea);
+				//TerritoryUnitsChanged(this, tuea);
 
 				Territory finalTerritory = (Territory)move.Territories[move.Territories.Count - 1];
 				tuea.Territory = finalTerritory;
@@ -1398,8 +1418,8 @@ namespace BuckRogers
 
 				m_alteredTerritories[finalTerritory] = null;
 
-
-				TerritoryUnitsChanged(this, tuea);
+				EventsHelper.Fire(TerritoryUnitsChanged, this, tuea);
+				//TerritoryUnitsChanged(this, tuea);
 			}
 
 
@@ -1429,7 +1449,11 @@ namespace BuckRogers
 							suea.Territory = destination;//(Player)m_currentPlayerOrder[m_idxCurrentPlayer];
 
 							suea.StatusInfo = StatusInfo.TransportLanded;
-							unloadTransports = StatusUpdate(this, suea);
+
+							EventsHelper.Fire(StatusUpdate, this, suea);
+
+							//unloadTransports = StatusUpdate(this, suea);
+							unloadTransports = suea.Result;
 						}
 					}
 				}
@@ -1481,7 +1505,8 @@ namespace BuckRogers
 					tea.Name = t.Name;
 					tea.Owner = originalOwner;
 
-					TerritoryOwnerChanged(this, tea);
+					EventsHelper.Fire(TerritoryOwnerChanged, this, tea);
+					//TerritoryOwnerChanged(this, tea);
 				}
 			}
 
@@ -1493,12 +1518,14 @@ namespace BuckRogers
 				tuea.Units = ma.Units;
 				tuea.Added = false;
 
-				TerritoryUnitsChanged(this, tuea);
+				EventsHelper.Fire(TerritoryUnitsChanged, this, tuea);
+				//TerritoryUnitsChanged(this, tuea);
 
 				tuea.Territory = ma.StartingTerritory;
 				tuea.Added = true;
 
-				TerritoryUnitsChanged(this, tuea);
+				EventsHelper.Fire(TerritoryUnitsChanged, this, tuea);
+				//TerritoryUnitsChanged(this, tuea);
 			}
 		}
 
@@ -1564,7 +1591,8 @@ namespace BuckRogers
 				tuea.Added = !ta.Load;
 				tuea.Player = ta.Owner;
 
-				TerritoryUnitsChanged(this, tuea);
+				EventsHelper.Fire(TerritoryUnitsChanged, this, tuea);
+				//TerritoryUnitsChanged(this, tuea);
 			}
 		}
 
@@ -1587,7 +1615,8 @@ namespace BuckRogers
 				tuea.Units = ta.Units;
 				tuea.Added = !ta.Load;
 
-				TerritoryUnitsChanged(this, tuea);
+				EventsHelper.Fire(TerritoryUnitsChanged, this, tuea);
+				//TerritoryUnitsChanged(this, tuea);
 			}
 		}
 
@@ -2099,7 +2128,8 @@ namespace BuckRogers
 					suea.Player = m_winner;//(Player)m_currentPlayerOrder[m_idxCurrentPlayer];
 				
 					suea.StatusInfo = StatusInfo.GameOver;
-					StatusUpdate(this, suea);
+					EventsHelper.Fire(StatusUpdate, this, suea);
+					//StatusUpdate(this, suea);
 				}
 			}
 			m_gamelog.Save("gamelog.xml");
@@ -2341,7 +2371,8 @@ namespace BuckRogers
 
 				
 				suea.StatusInfo = morePlayers ? StatusInfo.NextPlayer : StatusInfo.NextPhase;
-				StatusUpdate(this, suea);
+				EventsHelper.Fire(StatusUpdate, this, suea);
+				//StatusUpdate(this, suea);
 			}
 
 			return morePlayers;
@@ -2382,7 +2413,8 @@ namespace BuckRogers
 					{
 						StatusUpdateEventArgs suea = new StatusUpdateEventArgs();				
 						suea.StatusInfo = StatusInfo.NextPhase;
-						StatusUpdate(this, suea);
+						//StatusUpdate(this, suea);
+						EventsHelper.Fire(StatusUpdate, this, suea);
 					}
 					break;
 				}
@@ -2778,7 +2810,8 @@ namespace BuckRogers
 						tea.Name = t.Name;
 						tea.Owner = p;
 
-						TerritoryOwnerChanged(this, tea);
+						EventsHelper.Fire(TerritoryOwnerChanged, this, tea);
+						//TerritoryOwnerChanged(this, tea);
 					}
 
 				}

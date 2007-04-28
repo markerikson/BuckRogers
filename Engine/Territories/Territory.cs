@@ -10,7 +10,7 @@ namespace BuckRogers
 		Ground,
 	}
 
-	public delegate void TerritoryOwnerChangedHandler(object sender, TerritoryEventArgs tea);
+	//public delegate void TerritoryOwnerChangedHandler(object sender, TerritoryEventArgs tea);
 
 	/// <summary>
 	/// Summary description for Territory.

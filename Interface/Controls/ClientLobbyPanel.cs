@@ -246,7 +246,7 @@ namespace BuckRogers.Interface
 			});
 
 			string message = m_player.Name + "|" + colorName;
-			m_client.SendMessageToServer(NetworkMessages.PlayerColorUpdated, message);
+			m_client.SendMessageToServer(GameMessage.PlayerColorUpdated, message);
 
 			/*
 			byte[] messageBytes = Encoding.UTF8.GetBytes(message);
@@ -267,7 +267,7 @@ namespace BuckRogers.Interface
 				m_txtName.Enabled = false;
 				//SendPlayerInfo(m_player);
 				string message = m_player.Name + "|" + m_player.Color.Name;
-				m_client.SendMessageToServer(NetworkMessages.PlayerAdded, message);
+				m_client.SendMessageToServer(GameMessage.PlayerAdded, message);
 				
 			}
 			else
@@ -276,7 +276,7 @@ namespace BuckRogers.Interface
 				{
 					//byte[] bytes = Encoding.UTF8.GetBytes(m_player.Name);
 					//m_connection.SendMessage((uint)NetworkMessages.PlayerRemoved, bytes);
-					m_client.SendMessageToServer(NetworkMessages.PlayerRemoved, m_player.Name);
+					m_client.SendMessageToServer(GameMessage.PlayerRemoved, m_player.Name);
 				}
 				catch (NullReferenceException)
 				{
@@ -309,7 +309,7 @@ namespace BuckRogers.Interface
 			string fullMessage = string.Format("Private Message\r\nSender: {0}\r\nRecipient: {1}\r\n{2}",
 												m_player.Name, clientName, message);
 
-			m_client.SendMessageToServer(NetworkMessages.PrivateChatMessage, fullMessage);
+			m_client.SendMessageToServer(GameMessage.PrivateChatMessage, fullMessage);
 
 			/*
 			byte[] messageBytes = Encoding.UTF8.GetBytes(fullMessage);
@@ -331,7 +331,7 @@ namespace BuckRogers.Interface
 			string message = m_txtMessage.Text;
 			string fullMessage = string.Format("Public Message\r\nSender: {0}\r\n{1}",
 												m_player.Name, message);
-			m_client.SendMessageToServer(NetworkMessages.PublicChatMessage, fullMessage);
+			m_client.SendMessageToServer(GameMessage.PublicChatMessage, fullMessage);
 
 			/*
 			byte[] bytes = System.Text.Encoding.UTF8.GetBytes(fullMessage);

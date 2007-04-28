@@ -28,12 +28,15 @@ namespace BuckRogers
 	public class BattleController
 	{
 		#region events
+		public event EventHandler<StatusUpdateEventArgs> StatusUpdate = delegate { };
+		public event EventHandler<TerritoryEventArgs> TerritoryOwnerChanged = delegate { };
+		public event EventHandler<TerritoryUnitsEventArgs> TerritoryUnitsChanged = delegate { };
 
 		public event DisplayUnitsHandler UnitsToDisplay;
-		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
-		public StatusUpdateHandler StatusUpdate;
+		//public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
+		//public StatusUpdateHandler StatusUpdate;
 		public TerritoryUpdateHandler UpdateTerritory;
-		public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
+		//public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
 		public event BattleStatusUpdateHandler BattleStatusUpdated;
 
 		#endregion
@@ -385,7 +388,9 @@ namespace BuckRogers
 						foreach(Factory f in factories)
 						{
 							suea.StatusInfo = StatusInfo.FactoryConquered;
-							bool destroyFactory = StatusUpdate(this, suea);
+							EventsHelper.Fire(StatusUpdate, this, suea);
+							//bool destroyFactory = StatusUpdate(this, suea);
+							bool destroyFactory = suea.Result;
 
 							// Either the factory will be destroyed or it will be captured.
 							playersLeft.Remove(f.Owner);

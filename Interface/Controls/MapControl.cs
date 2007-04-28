@@ -1707,7 +1707,11 @@ namespace BuckRogers.Interface
 				}
 			}
 
-			Canvas.Refresh();
+			Canvas.Invoke((MethodInvoker)delegate
+			{
+				Canvas.Refresh();
+			});
+			
 		}
 
 		#endregion
