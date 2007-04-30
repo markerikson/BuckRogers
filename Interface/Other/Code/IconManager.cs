@@ -62,6 +62,11 @@ namespace BuckRogers.Interface
 			m_icons = new Hashtable();
 		}
 
+		public void CreateIcons(object sender, StatusUpdateEventArgs suea)
+		{
+			CreateIcons();
+		}
+
 		public void CreateIcons()
 		{
 			string[] typeAbbreviations = {"To", "Ge", "Fi", "Ba", "Tr", "Ks", /*"Ma,*/ "Fa", "Le"};
@@ -490,6 +495,11 @@ namespace BuckRogers.Interface
 				Territory t = m_controller.Map[name];
 				ClearIcons(t);
 			}
+
+			m_map.Canvas.Invoke((MethodInvoker)delegate
+			{
+				m_map.Canvas.Refresh();
+			});
 		}
 
 		public void ClearIcons(Territory t)
@@ -510,27 +520,33 @@ namespace BuckRogers.Interface
 					RemoveIcon(t, info.Player, info.Type);
 				}				
 			}
-
-			m_map.Canvas.Refresh();
 		}
 
-		public void RefreshIcons(Territory t)
+		public void RefreshIcons(object sender, StatusUpdateEventArgs suea)//Territory t)
 		{
-			ClearIcons(t);
-			ArrayList players = t.Units.GetPlayersWithUnits();
+			//Territory t = suea.Territory;
 
-			foreach(Player p in players)
+			foreach(Territory t in suea.Territories)
 			{
-				UnitCollection uc = t.Units.GetUnits(p);
-				Hashtable ht = uc.GetUnitTypeCount();
+				ClearIcons(t);
+				ArrayList players = t.Units.GetPlayersWithUnits();
 
-				foreach(UnitType ut in ht.Keys)
+				foreach (Player p in players)
 				{
-					UpdateIconInfo(t, p, ut);
+					UnitCollection uc = t.Units.GetUnits(p);
+					Hashtable ht = uc.GetUnitTypeCount();
+
+					foreach (UnitType ut in ht.Keys)
+					{
+						UpdateIconInfo(t, p, ut);
+					}
 				}
 			}
 
-			m_map.Canvas.Refresh();
+			m_map.Canvas.Invoke((MethodInvoker)delegate
+			{
+				m_map.Canvas.Refresh();
+			});
 		}
 
 		// By this time, we don't care whether it overlaps or not

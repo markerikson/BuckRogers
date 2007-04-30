@@ -1,12 +1,13 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace BuckRogers
 {
 	#region delegates
 
-	public delegate void DisplayUnitsHandler(object sender, DisplayUnitsEventArgs e);
+	//public delegate void DisplayUnitsHandler(object sender, DisplayUnitsEventArgs e);
 	public delegate void TerritoryUpdateHandler(Territory t);
 	public delegate void BattleStatusUpdateHandler(BattleStatus status);
 
@@ -31,13 +32,17 @@ namespace BuckRogers
 		public event EventHandler<StatusUpdateEventArgs> StatusUpdate = delegate { };
 		public event EventHandler<TerritoryEventArgs> TerritoryOwnerChanged = delegate { };
 		public event EventHandler<TerritoryUnitsEventArgs> TerritoryUnitsChanged = delegate { };
+		public event EventHandler<DisplayUnitsEventArgs> UnitsToDisplay = delegate { };
 
-		public event DisplayUnitsHandler UnitsToDisplay;
+		public event EventHandler<StatusUpdateEventArgs> BattleStatusUpdated = delegate { };
+		public event EventHandler<StatusUpdateEventArgs> UpdateTerritory = delegate { };
+
+		//public event DisplayUnitsHandler UnitsToDisplay;
 		//public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
 		//public StatusUpdateHandler StatusUpdate;
-		public TerritoryUpdateHandler UpdateTerritory;
+		//public TerritoryUpdateHandler UpdateTerritory;
 		//public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
-		public event BattleStatusUpdateHandler BattleStatusUpdated;
+		//public event BattleStatusUpdateHandler BattleStatusUpdated;
 
 		#endregion
 
@@ -378,7 +383,7 @@ namespace BuckRogers
 					if(StatusUpdate != null)
 					{
 						StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
-						suea.Territory = m_currentBattle.Territory;
+						suea.Territories.Add(m_currentBattle.Territory);
 							
 
 						UnitCollection factories = m_currentBattle.Territory.Units.GetUnits(UnitType.Factory);
@@ -462,7 +467,13 @@ namespace BuckRogers
 
 				if(UpdateTerritory != null)
 				{
-					UpdateTerritory(m_currentBattle.Territory);
+					StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+					suea.StatusInfo = StatusInfo.UpdateTerritory;
+					//suea.Territory = m_currentBattle.Territory;
+					suea.Territories.Add(m_currentBattle.Territory);
+
+					EventsHelper.Fire(UpdateTerritory, this, suea);
+					//UpdateTerritory(m_currentBattle.Territory);
 				}
 			}
 
@@ -610,7 +621,12 @@ namespace BuckRogers
 
 					if(BattleStatusUpdated != null)
 					{
-						BattleStatusUpdated(m_status);
+						StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+						suea.StatusInfo = StatusInfo.BattleStatusUpdated;
+						suea.BattleStatus = m_status;
+
+						EventsHelper.Fire(BattleStatusUpdated, this, suea);
+						//BattleStatusUpdated(m_status);
 					}
 
 					
@@ -653,18 +669,30 @@ namespace BuckRogers
 				{
 					ProcessTurnResults();
 					m_status = BattleStatus.BattleComplete;
-					BattleStatusUpdated(m_status);
+					//BattleStatusUpdated(m_status);
 				}
 				else
 				{
 					m_status = BattleStatus.RoundComplete;
-					BattleStatusUpdated(m_status);
+					//BattleStatusUpdated(m_status);
 				}
+
+				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+				suea.StatusInfo = StatusInfo.BattleStatusUpdated;
+				suea.BattleStatus = m_status;
+
+				EventsHelper.Fire(BattleStatusUpdated, this, suea);
 			}
 			else if(CurrentUnused.Count == 0)
 			{
 				m_status = BattleStatus.RoundComplete;
-				BattleStatusUpdated(m_status);
+				//BattleStatusUpdated(m_status);
+
+				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+				suea.StatusInfo = StatusInfo.BattleStatusUpdated;
+				suea.BattleStatus = m_status;
+
+				EventsHelper.Fire(BattleStatusUpdated, this, suea);
 			}
 			else
 			{

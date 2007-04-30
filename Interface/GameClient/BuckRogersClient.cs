@@ -338,7 +338,7 @@ namespace BuckRogers.Networking
 			}
 		}
 
-		private void ParseGameOptionsMessage(string message)
+		public void ParseGameOptionsMessage(string message)
 		{
 			XmlDocument xd = new XmlDocument();
 			xd.LoadXml(message);

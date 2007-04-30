@@ -1,3 +1,4 @@
+#region using directives
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,7 +20,9 @@ using UMD.HCIL.Piccolo.Event;
 
 using BuckRogers;
 
+#endregion
 
+#region algorithm comments
 /*
 Each player's display is a PComposite that looks like:
 
@@ -57,10 +60,14 @@ Note:	It's another edge case, but it would be possible to have a battler around 
   
  */
 
+#endregion
+
 namespace BuckRogers.Interface
 {
 	public partial class CombatControl : UserControl
 	{
+		#region private members
+
 		private GameController m_controller;
 		private BattleController m_battleController;
 		private IconManager m_iconManager;
@@ -101,6 +108,10 @@ namespace BuckRogers.Interface
 		private ArrayList m_combatMessages;
 		private ArrayList m_bombingTargets;
 		private ArrayList m_playerTerritoryNames;
+
+		#endregion
+
+		#region constructor
 
 		public CombatControl(GameController gc, BattleController bc, IconManager im)
 		{
@@ -156,8 +167,6 @@ namespace BuckRogers.Interface
 			m_canvas.AnimatingRenderQuality = RenderQuality.HighQuality;
 			m_canvas.InteractingRenderQuality = RenderQuality.HighQuality;
 
-			//CreatePlayerDisplays();
-
 			CreateInitialDisplays();
 
 			m_playerLocationsNormal = new PointF[]{	new PointF ( 400, 2 ), 
@@ -179,52 +188,7 @@ namespace BuckRogers.Interface
 													new PointF ( 130, 42 ), 
 												};
 
-
-			/*
-			int numDisplaysToShow = 6; // m_displays.Length
-			PointF[] locations = m_playerLocationsNormal; //m_playerLocationsExtended;
-			for(int i = 0; i < numDisplaysToShow; i++)
-			{
-				PlayerUnitDisplay pud = (PlayerUnitDisplay)m_displays[i];
-				pud.Location = locations[i];//new PointF(200, 50);
-				pud.LayoutChildren();
-				pud.Player = m_controller.Players[i % m_controller.Players.Length];
-
-				string message = null;
-				if (i != 0)
-				{
-					//message = i.ToString();
-					message = "Australian Development Facility";
-				}
-
-				pud.UpdatePlayerInfo(message);
-
-				pud.ShowDisplay();
-
-
-				if(pud.Player.Name == "Mark")
-				{
-					m_player = pud.Player;
-				}
-
-				
-				if(pud.Player.Name == "Chris" ||
-					pud.Player.Name == "Jake")
-				{
-					pud.HideDisplay(m_canvas);
-				}
-								
-			}
-			
-
-			for (int i = numDisplaysToShow; i < m_displays.Count; i++)
-			{
-				PlayerUnitDisplay pud = (PlayerUnitDisplay)m_displays[i];
-				pud.HideDisplay();
-			}
-			*/
-
-			m_displayedResults = new ArrayList(); //new PText[10];
+			m_displayedResults = new ArrayList();
 			m_availableResults = new ArrayList();
 
 			m_resultLocations = new PointF[10];
@@ -272,9 +236,6 @@ namespace BuckRogers.Interface
 			m_lblBattleLocation.X = 10;
 			m_lblBattleLocation.Y = 25;
 
-			//m_lblBattleSystem.X = 10;
-			//m_lblBattleSystem.Y = 10;
-
 			m_lblBattleType.X = 660;
 			m_lblBattleType.Y = 10;
 
@@ -303,9 +264,6 @@ namespace BuckRogers.Interface
 			m_lblPrevPlayers.X = 130 + (-1 * (m_lblPrevPlayers.Width / 2));
 			m_lblPrevPlayers.Y = 550;
 
-			//m_canvas.Layer.AddChild(m_lblNextPlayers);
-			//m_canvas.Layer.AddChild(m_lblPrevPlayers);
-
 			m_lblNextPlayers.MouseEnter += new PInputEventHandler(OnLabelMouseEnter);
 			m_lblNextPlayers.MouseLeave += new PInputEventHandler(OnLabelMouseLeave);
 
@@ -315,24 +273,40 @@ namespace BuckRogers.Interface
 			m_lblNextPlayers.MouseUp += new PInputEventHandler(OnPageButtonClicked);
 			m_lblPrevPlayers.MouseUp += new PInputEventHandler(OnPageButtonClicked);
 
-			/*
-			CombatMessage cm = new CombatMessage(m_canvas);
-
-			cm.SetDetails(m_controller.Players[0], m_controller.Players[1], UnitType.Trooper, UnitType.Gennie, 8, true);
-			cm.DisplayMessage(new PointF(268, 200));
-
-			CombatMessage cm2 = new CombatMessage(m_canvas);
-
-			cm2.SetDetails(m_controller.Players[3], m_controller.Players[4], UnitType.Fighter, UnitType.KillerSatellite, 3, false);
-			cm2.DisplayMessage(new PointF(268, 280));
-
-			m_combatMessages.Add(cm);
-			m_combatMessages.Add(cm2);
-			*/
-
-			m_battleController.UnitsToDisplay += new DisplayUnitsHandler(DisplayUnits);
+			//m_battleController.UnitsToDisplay += new DisplayUnitsHandler(DisplayUnits);
+			m_battleController.UnitsToDisplay += new EventHandler<DisplayUnitsEventArgs>(DisplayUnits);
 			m_battleController.StatusUpdate += new EventHandler<StatusUpdateEventArgs>(OnBattleControllerStatusUpdate);//new StatusUpdateHandler(OnBattleControllerStatusUpdate);
-			m_battleController.BattleStatusUpdated += new BattleStatusUpdateHandler(OnBattleStatusUpdated);
+			m_battleController.BattleStatusUpdated += new EventHandler<StatusUpdateEventArgs>(OnBattleStatusUpdated);//new BattleStatusUpdateHandler(OnBattleStatusUpdated);
+		}
+
+		#endregion
+
+		#region event handlers
+
+		private void OnLabelMouseEnter(object sender, PInputEventArgs e)
+		{
+			if (!(sender is PText))
+			{
+				return;
+			}
+
+			PText text = sender as PText;
+
+			Font f = text.Font;
+			text.Font = new Font(f.Name, f.SizeInPoints, FontStyle.Bold);
+		}
+
+		private void OnLabelMouseLeave(object sender, PInputEventArgs e)
+		{
+			if (!(sender is PText))
+			{
+				return;
+			}
+
+			PText text = sender as PText;
+
+			Font f = text.Font;
+			text.Font = new Font(f.Name, f.SizeInPoints, FontStyle.Regular);
 		}
 
 		void OnPageButtonClicked(object sender, PInputEventArgs e)
@@ -349,96 +323,223 @@ namespace BuckRogers.Interface
 			}
 		}
 
-		void OnBattleStatusUpdated(BattleStatus status)
+		public void NodeClicked(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
 		{
-			switch(status)
+			PNode picked = (PNode)e.PickedNode;
+
+			object obj = picked.Tag;
+
+			if (obj is UnitInfoDisplay)
 			{
-				case BattleStatus.BattleReady:
+				UnitInfoDisplay clickedUID = (UnitInfoDisplay)obj;
+				PlayerUnitDisplay pud = clickedUID.PlayerDisplay;
+
+				if (pud.Player == m_player)
 				{
-					UpdatePlayerDisplays();
-					ClearMessages();
+					Hashtable uids = pud.UIDs;
 
-					m_player = m_battleController.CurrentPlayer;
-					m_currentPUD = (PlayerUnitDisplay)m_displays[0];
-					m_currentPUD.Selected = true;
-					
-					Territory t = m_battleController.CurrentBattle.Territory;
-					string systemName = string.Empty;
-
-					if(t.System == OrbitalSystem.NONE)
+					// "Anything selected?"
+					foreach (DictionaryEntry de in uids)
 					{
-						systemName = t.Orbit.Name;
+						UnitInfoDisplay uid = (UnitInfoDisplay)de.Value;
+
+						if (uid.Selected)
+						{
+							m_selectedUID = uid;
+							break;
+						}
+					}
+
+					// Nothing should be selected
+					if (clickedUID == m_selectedUID)
+					{
+						m_selectedUID = null;
 					}
 					else
 					{
-						systemName = t.System.Name;
+						// De-select the selected icon and save the clicked icon for later
+						if (m_selectedUID != null)
+						{
+							m_selectedUID.Selected = !m_selectedUID.Selected;
+						}
+
+						m_selectedUID = clickedUID;
 					}
-					
-					string battleLocation = string.Format("System: {0}\nTerritory: {1}",
-														systemName, t.Name);
 
-					m_lblBattleLocation.Text = battleLocation;
-					m_lblBattlesLeft.Text = m_battleController.Battles.Count.ToString();
-					m_lblBattleType.Text = m_battleController.CurrentBattle.Type.ToString();
+					clickedUID.Selected = !clickedUID.Selected;
 
-
-					
-
-					
-
-					if(m_battleController.CurrentBattle.Type == BattleType.KillerSatellite)
-					{
-						MessageBox.Show("Killer Satellite preparing to fire...");
-						DoAttack(null, 0);
-					}
-					break;
 				}
-				case BattleStatus.RoundComplete:
+				else
 				{
-					m_currentPUD.ClearUnitSelection();
-					m_currentPUD.Selected = false;
-					m_selectedUID = null;
+					ArrayList messages = new ArrayList();
 
-					MessageBox.Show("Combat round complete.  Click OK to continue.", "Round Finished", 
-									MessageBoxButtons.OK);
-					ClearMessages();
-
-					if(m_battleController.NextPlayer())
+					if (m_selectedUID != null)
 					{
-						m_player = m_battleController.CurrentPlayer;
-						string territoryName = m_battleController.CurrentBattle.Territory.Name;
-						//int index = m_battleController.BattleOrder.IndexOf(m_player);
-						//m_currentPUD = (PlayerUnitDisplay)m_displays[index];
+						int numAttacks = 0;
 
-						string pudID = m_player.Name + " - " + territoryName;
-						m_currentPUD = (PlayerUnitDisplay)m_displays[pudID];
-						m_currentPUD.Selected = true;
+						if (e.Button == MouseButtons.Left)
+						{
+							m_numAttacks++;
+
+							numAttacks = 1;
+						}
+						else if (e.Button == MouseButtons.Right)
+						{
+							for (int i = 0; i < 5; i++)
+							{
+								m_numAttacks++;
+							}
+
+							numAttacks = 5;
+						}
+
+						DoAttack(clickedUID, numAttacks);
+
+						UpdateToolTip(e);
 					}
 					else
 					{
-						goto case BattleStatus.BattleComplete;
 					}
-
-					
-					break;
 				}
-				case BattleStatus.BattleComplete:
+			}
+			else if (obj is PlayerUnitDisplay)
+			{
+				PlayerUnitDisplay pud = (PlayerUnitDisplay)obj;
+
+				MessageBox.Show("Clicked player: " + pud.Player.Name);
+			}
+		}
+
+		public void MouseMoveHandler(object sender, PInputEventArgs e)
+		{
+			UpdateToolTip(e);
+		}
+
+		public void UpdateToolTip(PInputEventArgs e)
+		{
+			PNode n = (PNode)e.InputManager.MouseOver.PickedNode;
+
+			String tooltipString = null;
+			UnitInfoDisplay info = null;
+
+			if (n.Tag is IconInfo)
+			{
+				info = (UnitInfoDisplay)n.Tag;
+
+				tooltipString = string.Format("Type: {0}\nAlive: {1}\nDead: {2}\nCan shoot: {3}\nTotal: {4}",
+											info.Type, info.NumAlive, info.NumDead, info.NumCanShoot, info.NumTotal);
+			}
+
+			if (tooltipString == null || info.NumTotal == 0)
+			{
+				m_tooltip.Visible = false;
+				return;
+			}
+			else
+			{
+				PointF p = e.CanvasPosition;
+
+				p = e.Path.CanvasToLocal(p, m_canvas.Camera);
+
+				if (m_tooltip.Text != tooltipString)
 				{
-					MessageBox.Show("Battle finished.  Click OK to continue.", "Battle Finished",
-									MessageBoxButtons.OK);
+					m_tooltip.Text = tooltipString;
 
-					ResetDisplay();
-					
-					if (!m_battleController.NextBattle())
+					if (m_tooltip.Bounds.Width > 350)
 					{
-						ClearMessages();
-						m_battleController.CombatComplete();
-						MessageBox.Show("All battles finished");
-						Form parent = (Form)this.Parent;
-						parent.DialogResult = DialogResult.OK;
+						RectangleF bounds = m_tooltip.Bounds;
+						bounds.Width = 300;
+						m_tooltip.ConstrainWidthToTextWidth = false;
+						m_tooltip.TextAlignment = StringAlignment.Center;
+						m_tooltip.Bounds = bounds;
 					}
-					break;
+					else
+					{
+						m_tooltip.ConstrainWidthToTextWidth = true;
+						m_tooltip.TextAlignment = StringAlignment.Near;
+					}
 				}
+
+				float x = info.Icon.X + 60;
+				float y = info.Icon.Y;
+
+				m_tooltip.SetOffset((int)x, (int)y);
+				m_tooltip.Visible = true;
+
+				RectangleF tipBounds = m_tooltip.Bounds;
+				m_tooltip.RepaintFrom(tipBounds, m_tooltip);
+			}
+		}
+
+		#endregion
+
+		#region player displays
+
+		private void CreateInitialDisplays()
+		{
+			m_availableDisplays = new Hashlist();
+			m_displays = new Hashlist();
+
+			// Start with the initial six displays
+			for (int i = 0; i < 6; i++)
+			{
+				CreateDisplay(i);
+			}
+
+			for (int i = 0; i < m_availableDisplays.Count; i++)
+			{
+				PlayerUnitDisplay pud = (PlayerUnitDisplay)m_availableDisplays[i];
+				pud.HideDisplay();
+			}
+		}
+
+		private void CreateDisplay(int playerIndex)
+		{
+			UnitType[] types = {UnitType.Trooper, UnitType.Gennie, UnitType.Leader, UnitType.Factory, 
+								UnitType.Fighter, UnitType.Battler, UnitType.Transport, UnitType.KillerSatellite};
+
+			Hashtable uids = new Hashtable();
+
+			PlayerUnitDisplay pud = new PlayerUnitDisplay(this, m_canvas);
+			m_availableDisplays.Add(pud.GetHashCode(), pud);
+			pud.Composite.Tag = pud;
+
+			PText name = new PText();
+			pud.Label = name;
+			Font f = name.Font;
+			name.Font = new Font(f.Name, f.SizeInPoints + 3, FontStyle.Bold);
+
+			pud.Composite.AddChild(name);
+		}
+
+
+
+		private void CreatePlayerDisplays()
+		{
+			// Never more than six displays being shown at a time
+			//m_displays = new PlayerUnitDisplay[6];   //m_controller.Players.Length];
+			m_displays = new Hashlist();
+
+			UnitType[] types = {UnitType.Trooper, UnitType.Gennie, UnitType.Leader, UnitType.Factory, 
+								UnitType.Fighter, UnitType.Battler, UnitType.Transport, UnitType.KillerSatellite};
+
+			for (int i = 0; i < 6; i++)
+			{
+				// Make sure all the players' icons get grabbed
+				Player p = m_controller.Players[i];
+
+				Hashtable uids = new Hashtable();
+
+				PlayerUnitDisplay pud = new PlayerUnitDisplay(this, m_canvas);
+				m_displays.Add(i, pud);
+				pud.Composite.Tag = pud;
+
+				PText name = new PText(p.Name);
+				pud.Label = name;
+				Font f = name.Font;
+				name.Font = new Font(f.Name, f.SizeInPoints + 3, FontStyle.Bold);
+
+				pud.Composite.AddChild(name);
 			}
 		}
 
@@ -488,14 +589,8 @@ namespace BuckRogers.Interface
 			int pageIndex = pageNum - 1;
 			int displayIndex = 0;
 
-			//if (pageNum == 1)
-			//{
-				displayIndex = (pageIndex * 5) + 1;
-			//}
-			//else
-			//{
-			//	displayIndex = (pageIndex * 5);
-			//}
+			displayIndex = (pageIndex * 5) + 1;
+
 			int highestIndexForPage = (pageIndex + 1) * 5;
 			int maxDisplayIndex = Math.Min(highestIndexForPage, m_displays.Count - 1);
 
@@ -544,193 +639,102 @@ namespace BuckRogers.Interface
 			}
 		}
 
-		private void OnLabelMouseEnter(object sender,PInputEventArgs e)
+		public void DisplayUnits(object sender, DisplayUnitsEventArgs duea)
 		{
-			if(!(sender is PText))
+			PlayerUnitDisplay pud = GetPlayerUnitDisplay(duea.Player, duea.Territory);
+
+			// Based on the new setup, should only ever display one 
+			// player's info at a time
+
+			Hashtable counts = duea.Units.GetUnitTypeCount();
+
+			bool displayingDeadUnits = (duea.Category == DisplayCategory.DeadUnits);
+			bool nonCombatUnits = (duea.Category == DisplayCategory.NonCombatUnits);
+
+			foreach (DictionaryEntry de in counts)
 			{
-				return;
-			}
+				UnitType ut = (UnitType)de.Key;
+				int count = (int)de.Value;
 
-			PText text = sender as PText;
-
-			Font f = text.Font;
-			text.Font = new Font(f.Name, f.SizeInPoints, FontStyle.Bold);
-		}
-
-		private void OnLabelMouseLeave(object sender, PInputEventArgs e)
-		{
-			if (!(sender is PText))
-			{
-				return;
-			}
-
-			PText text = sender as PText;
-
-			Font f = text.Font;
-			text.Font = new Font(f.Name, f.SizeInPoints, FontStyle.Regular);
-		}
-
-		private void CreateInitialDisplays()
-		{
-			m_availableDisplays = new Hashlist();
-			m_displays = new Hashlist();
-
-			// Start with the initial six displays
-			for(int i = 0; i < 6; i++)
-			{
-				CreateDisplay(i);
-			}
-
-			for(int i = 0; i < m_availableDisplays.Count; i++)
-			{
-				PlayerUnitDisplay pud = (PlayerUnitDisplay)m_availableDisplays[i];
-				pud.HideDisplay();
-			}
-		}
-
-		private void CreateDisplay(int playerIndex)
-		{
-			UnitType[] types = {UnitType.Trooper, UnitType.Gennie, UnitType.Leader, UnitType.Factory, 
-								UnitType.Fighter, UnitType.Battler, UnitType.Transport, UnitType.KillerSatellite};
-
-			//Player p = m_controller.Players[playerIndex];// % m_controller.Players.Length];				
-
-			Hashtable uids = new Hashtable();
-
-			PlayerUnitDisplay pud = new PlayerUnitDisplay(this, m_canvas);
-			//m_displays[i] = pud;
-			m_availableDisplays.Add(pud.GetHashCode(), pud);
-			pud.Composite.Tag = pud;
-
-			PText name = new PText();
-			pud.Label = name;
-			Font f = name.Font;
-			name.Font = new Font(f.Name, f.SizeInPoints + 3, FontStyle.Bold);
-
-			pud.Composite.AddChild(name);
-		}
-
-
-
-		private void CreatePlayerDisplays()
-		{
-			// Never more than six displays being shown at a time
-			//m_displays = new PlayerUnitDisplay[6];   //m_controller.Players.Length];
-			m_displays = new Hashlist();
-
-			UnitType[] types = {UnitType.Trooper, UnitType.Gennie, UnitType.Leader, UnitType.Factory, 
-								UnitType.Fighter, UnitType.Battler, UnitType.Transport, UnitType.KillerSatellite};
-
-			//foreach(Player p in m_game.Players)
-			//for (int i = 0; i < m_controller.Players.Length; i++)
-			for (int i = 0; i < 6; i++)
-			{
-				// Make sure all the players' icons get grabbed
-				Player p = m_controller.Players[i];// % m_controller.Players.Length];				
-
-				Hashtable uids = new Hashtable();
-
-				PlayerUnitDisplay pud = new PlayerUnitDisplay(this, m_canvas);
-				//m_displays[i] = pud;
-				m_displays.Add(i, pud);
-				pud.Composite.Tag = pud;
-
-				PText name = new PText(p.Name);
-				pud.Label = name;
-				Font f = name.Font;
-				name.Font = new Font(f.Name, f.SizeInPoints + 3, FontStyle.Bold);
-
-				pud.Composite.AddChild(name);
-			}
-		}
-
-
-		public void NodeClicked(object sender, UMD.HCIL.Piccolo.Event.PInputEventArgs e)
-		{
-			PNode picked = (PNode)e.PickedNode;
-
-			object obj = picked.Tag;			
-
-			if(obj is UnitInfoDisplay)
-			{
-				UnitInfoDisplay clickedUID = (UnitInfoDisplay)obj;
-				PlayerUnitDisplay pud = clickedUID.PlayerDisplay;
-
-				if(pud.Player == m_player)
+				if (!displayingDeadUnits)
 				{
-					Hashtable uids = pud.UIDs;
-					
-					// "Anything selected?"
-					foreach(DictionaryEntry de in uids)
+					if (!nonCombatUnits)
 					{
-						UnitInfoDisplay uid = (UnitInfoDisplay)de.Value;
-
-						if(uid.Selected)
-						{
-							m_selectedUID = uid;
-							break;
-						}
-					}
-
-					// Nothing should be selected
-					if (clickedUID == m_selectedUID)
-					{
-						m_selectedUID = null;	
+						pud.UpdateUnitCount(ut, count);
 					}
 					else
 					{
-						// De-select the selected icon and save the clicked icon for later
-						if (m_selectedUID != null)
-						{
-							m_selectedUID.Selected = !m_selectedUID.Selected;
-						}
-
-						m_selectedUID = clickedUID;
+						pud.UpdateUnitCount(ut, count, 0, count, 0);
 					}
-
-					clickedUID.Selected = !clickedUID.Selected;
-					
 				}
 				else
 				{
-					ArrayList messages = new ArrayList();
-
-					if(m_selectedUID != null)
-					{
-						int numAttacks = 0;
-
-						if(e.Button == MouseButtons.Left)
-						{
-							m_numAttacks++;
-
-							numAttacks = 1;
-						}
-						else if(e.Button == MouseButtons.Right)
-						{
-							for(int i = 0; i < 5; i++)
-							{
-								m_numAttacks++;
-							}							
-
-							numAttacks = 5;
-						}
-
-						DoAttack(clickedUID, numAttacks);
-
-						UpdateToolTip(e);
-					}
-					else
-					{
-					}
-				}		
+					pud.UpdateDeathCount(ut, count);
+				}
 			}
-			else if(obj is PlayerUnitDisplay)
-			{
-				PlayerUnitDisplay pud = (PlayerUnitDisplay)obj;
 
-				MessageBox.Show("Clicked player: " + pud.Player.Name);
-			}		
+			pud.ShowDisplay();
 		}
+
+		public PlayerUnitDisplay GetPlayerUnitDisplay(Player p, Territory t)
+		{
+			PlayerUnitDisplay pud = null;
+
+			string identifier = p.Name + " - " + t.Name;
+
+			if (m_displays.ContainsKey(identifier))
+			{
+				pud = (PlayerUnitDisplay)m_displays[identifier];
+			}
+			else
+			{
+				if (m_availableDisplays.Count == 0)
+				{
+					// Initialize it with the first player.  Doesn't matter,
+					// cause it'll be replaced soon anyway.
+					CreateDisplay(0);
+				}
+
+				pud = (PlayerUnitDisplay)m_availableDisplays[0];
+				m_availableDisplays.RemoveAt(0);
+
+				pud.Player = p;
+				pud.Territory = t;
+				PointF location;
+
+				if (m_displays.Count >= 6)
+				{
+					int index = (m_displays.Count - 1) % 6;
+					location = m_playerLocationsNormal[index];
+				}
+				else
+				{
+					location = m_playerLocationsNormal[m_displays.Count];
+				}
+
+				pud.Location = location;
+
+				// Only need to display territory names if it's a bombing attack
+				// and this isn't the first player
+				if ((m_battleController.CurrentBattle.Type == BattleType.Bombing)
+					&& m_displays.Count > 0)
+				{
+					pud.UpdatePlayerInfo(t.Name);
+				}
+				else
+				{
+					pud.UpdatePlayerInfo();
+				}
+
+				m_displays.Add(identifier, pud);
+			}
+
+			return pud;
+		}
+
+		#endregion
+
+		#region combat functions
 
 		private void DoAttack(UnitInfoDisplay defendingUID, int numAttacks)
 		{
@@ -777,21 +781,6 @@ namespace BuckRogers.Interface
 					CombatInfo ci = null;
 					try
 					{
-						/*
-						ci = new CombatInfo();
-
-						UnitCollection attackers = GetRequestedUnits(m_selectedUID.Player, attackingUID.Type, m_selectedUID.PlayerDisplay.Territory, true, numAttacks);
-						ci.Attackers.AddAllUnits(attackers);
-
-						UnitCollection defenders = GetRequestedUnits(defendingUID.Player, defendingUID.Type, defendingUID.PlayerDisplay.Territory, false, numAttacks);
-						ci.Defenders.AddAllUnits(defenders);
-
-						if (attackers.Count == 0 || defenders.Count == 0)
-						{
-							return;
-						}
-						*/
-
 						ci = SetUpCombat(attackingUID, defendingUID, numAttacks);
 
 						if (ci == null)
@@ -828,6 +817,7 @@ namespace BuckRogers.Interface
 				
 				bool killerSatellite = (defendingUID == null);
 				ArrayList m_satelliteUIDs = new ArrayList();
+
 				// Show messages here
 				foreach(AttackResult ar in cr.AttackResults)
 				{
@@ -878,17 +868,14 @@ namespace BuckRogers.Interface
 			{
 				allMatchingUnits = m_battleController.CurrentUnused.GetUnits(ut, p, territory, numAttacks);
 				matches = allMatchingUnits.GetUnits(numAttacks);
-				//m_battleController.CurrentUnused.RemoveAllUnits(allMatchingUnits);
 			}
 			else
 			{
-				UnitCollection playerUnits = m_battleController.SurvivingUnits.GetUnits(p);//((UnitCollection)m_battleController.SurvivingUnits[p]);
-
+				UnitCollection playerUnits = m_battleController.SurvivingUnits.GetUnits(p);
 				if (ut == UnitType.Transport)
 				{
 					int numTransports = playerUnits.GetUnits(UnitType.Transport).Count;
 					UnitCollection otherUnits = playerUnits.GetNonMatchingUnits(UnitType.Transport);
-					//UnitCollection otherUnitsAdded = allMatches.GetUnits(p).GetNonMatchingUnits(UnitType.Transport);
 					UnitCollection otherCombatUnits = otherUnits.GetCombatUnits();
 
 					if (otherCombatUnits.Count > 0)
@@ -943,6 +930,10 @@ namespace BuckRogers.Interface
 			return ci;
 		}
 
+		#endregion
+
+		#region combat message functions
+
 		// FIXME Rapid clicking sometimes puts one message at the top, out of order
 		public void AddAttackMessage(Player attacker, Player defender, UnitType attackType, 
 							UnitType defendType, int roll, bool hit)
@@ -954,7 +945,6 @@ namespace BuckRogers.Interface
 			{
 				cm = (CombatMessage)m_displayedResults[0];
 				m_displayedResults.RemoveAt(0);
-				//m_canvas.Layer.RemoveChild(label);
 				cm.HideMessage();
 
 				ScrollMessagesUpward();
@@ -1021,17 +1011,12 @@ namespace BuckRogers.Interface
 			}
 		}
 
-		
-
 		private void ScrollMessagesUpward()
 		{
 			for(int i = 0; i < m_displayedResults.Count; i++)
 			{
-				//PText label = (PText)m_displayedResults[i];
-
 				CombatMessage cm = (CombatMessage)m_displayedResults[i];
 				PointF location = m_resultLocations[i];
-				//label.AnimateToBounds(location.X, location.Y, label.Width, label.Height, 500);
 
 				if(i % 2 == 0)
 				{
@@ -1052,17 +1037,6 @@ namespace BuckRogers.Interface
 
 		public void ClearMessages()
 		{
-			/*
-			for (int i = 0; i < m_displayedResults.Count; i++)
-			{
-				PText label = (PText)m_displayedResults[i];
-				label.RemoveFromParent();
-			}
-
-			m_availableResults.AddRange(m_displayedResults);
-			m_displayedResults.Clear();
-			*/
-
 			for(int i = 0; i < m_displayedResults.Count; i++)
 			{
 				CombatMessage cm = (CombatMessage)m_displayedResults[i];
@@ -1072,6 +1046,10 @@ namespace BuckRogers.Interface
 			m_availableResults.AddRange(m_displayedResults);
 			m_displayedResults.Clear();
 		}
+
+		#endregion
+
+		#region combat turn / update stuff
 
 		public void BeginCombat()
 		{
@@ -1083,8 +1061,6 @@ namespace BuckRogers.Interface
 
 			m_battleController.LogNewTurn();
 			m_battleController.NextBattle();
-
-			//UpdateCombatInformation();
 		}
 
 		public void UpdateCombatInformation()
@@ -1107,10 +1083,7 @@ namespace BuckRogers.Interface
 
 				PlayerUnitDisplay pud = (PlayerUnitDisplay)m_displays[0];
 				pud.Player = p;
-				//pud.UpdateUnitInfo();
 				pud.ShowDisplay();
-
-
 			}
 			else
 			{
@@ -1120,126 +1093,117 @@ namespace BuckRogers.Interface
 
 					PlayerUnitDisplay pud = (PlayerUnitDisplay)m_displays[i];
 					pud.Player = p;
-
-					//pud.UpdateUnitInfo();
-
 					pud.ShowDisplay();
 				}
-			}			
-
+			}
 		}
 
 		public void ResetDisplay()
-		{			
-			foreach(PlayerUnitDisplay pud in m_displays)
+		{
+			foreach (PlayerUnitDisplay pud in m_displays)
 			{
-				m_availableDisplays.Add(pud.GetHashCode(), pud);				
+				m_availableDisplays.Add(pud.GetHashCode(), pud);
 			}
 
 			m_displays.Clear();
 
-			foreach(PlayerUnitDisplay pud in m_availableDisplays)
+			foreach (PlayerUnitDisplay pud in m_availableDisplays)
 			{
 				pud.Selected = false;
 				pud.ResetUnitCounts();
 				pud.HideDisplay();
-				
+
 			}
 		}
 
-		public void DisplayUnits(object sender, DisplayUnitsEventArgs duea)
+		#endregion
+
+		#region battle status updates
+
+		void OnBattleStatusUpdated(object sender, StatusUpdateEventArgs suea)//BattleStatus status)
 		{
-			PlayerUnitDisplay pud = GetPlayerUnitDisplay(duea.Player, duea.Territory);
-
-			// Based on the new setup, should only ever display one 
-			// player's info at a time
-
-			Hashtable counts = duea.Units.GetUnitTypeCount();
-
-			bool displayingDeadUnits = (duea.Category == DisplayCategory.DeadUnits);
-			bool nonCombatUnits = (duea.Category == DisplayCategory.NonCombatUnits);
-
-			foreach(DictionaryEntry de in counts)
+			BattleStatus status = suea.BattleStatus;
+			switch (status)
 			{
-				UnitType ut = (UnitType)de.Key;
-				int count = (int)de.Value;
-
-				if (!displayingDeadUnits)
+				case BattleStatus.BattleReady:
 				{
-					if(!nonCombatUnits)
+					UpdatePlayerDisplays();
+					ClearMessages();
+
+					m_player = m_battleController.CurrentPlayer;
+					m_currentPUD = (PlayerUnitDisplay)m_displays[0];
+					m_currentPUD.Selected = true;
+
+					Territory t = m_battleController.CurrentBattle.Territory;
+					string systemName = string.Empty;
+
+					if (t.System == OrbitalSystem.NONE)
 					{
-						pud.UpdateUnitCount(ut, count);
+						systemName = t.Orbit.Name;
 					}
 					else
 					{
-						pud.UpdateUnitCount(ut, count, 0, count, 0);
+						systemName = t.System.Name;
 					}
-					
+
+					string battleLocation = string.Format("System: {0}\nTerritory: {1}",
+														systemName, t.Name);
+
+					m_lblBattleLocation.Text = battleLocation;
+					m_lblBattlesLeft.Text = m_battleController.Battles.Count.ToString();
+					m_lblBattleType.Text = m_battleController.CurrentBattle.Type.ToString();
+
+					if (m_battleController.CurrentBattle.Type == BattleType.KillerSatellite)
+					{
+						MessageBox.Show("Killer Satellite preparing to fire...");
+						DoAttack(null, 0);
+					}
+					break;
 				}
-				else
+				case BattleStatus.RoundComplete:
 				{
-					pud.UpdateDeathCount(ut, count);
+					m_currentPUD.ClearUnitSelection();
+					m_currentPUD.Selected = false;
+					m_selectedUID = null;
+
+					MessageBox.Show("Combat round complete.  Click OK to continue.", "Round Finished",
+									MessageBoxButtons.OK);
+					ClearMessages();
+
+					if (m_battleController.NextPlayer())
+					{
+						m_player = m_battleController.CurrentPlayer;
+						string territoryName = m_battleController.CurrentBattle.Territory.Name;
+
+						string pudID = m_player.Name + " - " + territoryName;
+						m_currentPUD = (PlayerUnitDisplay)m_displays[pudID];
+						m_currentPUD.Selected = true;
+					}
+					else
+					{
+						goto case BattleStatus.BattleComplete;
+					}
+
+					break;
+				}
+				case BattleStatus.BattleComplete:
+				{
+					MessageBox.Show("Battle finished.  Click OK to continue.", "Battle Finished",
+									MessageBoxButtons.OK);
+
+					ResetDisplay();
+
+					if (!m_battleController.NextBattle())
+					{
+						ClearMessages();
+						m_battleController.CombatComplete();
+						MessageBox.Show("All battles finished");
+						Form parent = (Form)this.Parent;
+						parent.DialogResult = DialogResult.OK;
+					}
+					break;
 				}
 			}
-
-			pud.ShowDisplay();
-		}
-
-		public PlayerUnitDisplay GetPlayerUnitDisplay(Player p, Territory t)
-		{
-			PlayerUnitDisplay pud = null;
-
-			string identifier = p.Name + " - " + t.Name;
-
-			if(m_displays.ContainsKey(identifier))
-			{
-				pud = (PlayerUnitDisplay)m_displays[identifier];
-			}
-			else
-			{
-				if(m_availableDisplays.Count == 0)
-				{
-					// Initialize it with the first player.  Doesn't matter,
-					// cause it'll be replaced soon anyway.
-					CreateDisplay(0);
-				}
-
-				pud = (PlayerUnitDisplay)m_availableDisplays[0];
-				m_availableDisplays.RemoveAt(0);
-
-				pud.Player = p;
-				pud.Territory = t;
-				PointF location;
-
-				if(m_displays.Count >= 6)
-				{
-					int index = (m_displays.Count - 1) % 6;
-					location = m_playerLocationsNormal[index];
-				}
-				else
-				{
-					location = m_playerLocationsNormal[m_displays.Count];
-				}
-
-				pud.Location = location;
-
-				// Only need to display territory names if it's a bombing attack
-				// and this isn't the first player
-				if( (m_battleController.CurrentBattle.Type == BattleType.Bombing)
-					&& m_displays.Count > 0)
-				{
-					pud.UpdatePlayerInfo(t.Name);
-				}
-				else
-				{
-					pud.UpdatePlayerInfo();
-				}
-
-				m_displays.Add(identifier, pud);
-				
-			}
-
-			return pud;
 		}
 
 		private void OnBattleControllerStatusUpdate(object sender, StatusUpdateEventArgs suea)
@@ -1250,7 +1214,8 @@ namespace BuckRogers.Interface
 			{
 				case StatusInfo.FactoryConquered:
 				{
-					string message = suea.Territory.Name + " has been conquered and a factory is about to be captured.  Sabotage the factory?";
+					Territory location = suea.Territories[0];
+					string message = location.Name + " has been conquered and a factory is about to be captured.  Sabotage the factory?";
 					DialogResult dr = MessageBox.Show(message, "Sabotage Factory?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
 					result = (dr == DialogResult.Yes);
@@ -1279,9 +1244,10 @@ namespace BuckRogers.Interface
 					MessageBox.Show(message, "Leader Killed", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 					break;
 				}
+				// TODO Um... why isn't this being used anywhere?
 				case StatusInfo.PlayerKilled:
 				{
-					PlayerUnitDisplay pud = GetPlayerUnitDisplay(suea.Player, suea.Territory);
+					PlayerUnitDisplay pud = GetPlayerUnitDisplay(suea.Player, suea.Territories[0]);
 
 					pud.DimDisplay();
 					break;
@@ -1291,99 +1257,11 @@ namespace BuckRogers.Interface
 			return;
 		}
 
-		public void MouseMoveHandler(object sender, PInputEventArgs e)
-		{
-			UpdateToolTip(e);
-		}
+		#endregion
 
-		public void UpdateToolTip(PInputEventArgs e)
-		{
-			PNode n = (PNode)e.InputManager.MouseOver.PickedNode;
-
-			String tooltipString = null;
-			UnitInfoDisplay info = null;
-
-			if (n.Tag is IconInfo)
-			{
-				//n = e.InputManager.MouseOver.NextPickedNode;//tooltipString = "testing";
-				info = (UnitInfoDisplay)n.Tag ;
-
-				tooltipString = string.Format("Type: {0}\nAlive: {1}\nDead: {2}\nCan shoot: {3}\nTotal: {4}",
-											info.Type, info.NumAlive, info.NumDead, info.NumCanShoot, info.NumTotal);
-			}
-			/*
-			else if (n.Tag is string)
-			{
-				tooltipString = (string)n.Tag;
-			}
-			*/
-			/*
-			if (tooltipString != null)
-			{
-				int idx = tooltipString.IndexOf(':');
-				if (idx != -1)
-				{
-					string[] split = tooltipString.Split(new char[] { ':' });
-					split[1].Trim();
-
-					int orbitIndex = Int32.Parse(split[1]);
-
-					tooltipString = m_controller.Map.GetPlanetTag(split[0], orbitIndex);
-				}
-			}
-			*/
-
-			if (tooltipString == null || info.NumTotal == 0)
-			{
-				m_tooltip.Visible = false;
-				return;
-			}
-			else
-			{
-				PointF p = e.CanvasPosition;
-
-				p = e.Path.CanvasToLocal(p, m_canvas.Camera);
-
-				if (m_tooltip.Text != tooltipString)
-				{
-					m_tooltip.Text = tooltipString;
-
-					if (m_tooltip.Bounds.Width > 350)
-					{
-						RectangleF bounds = m_tooltip.Bounds;
-						bounds.Width = 300;
-						m_tooltip.ConstrainWidthToTextWidth = false;
-						m_tooltip.TextAlignment = StringAlignment.Center;
-						m_tooltip.Bounds = bounds;
-					}
-					else
-					{
-						m_tooltip.ConstrainWidthToTextWidth = true;
-						m_tooltip.TextAlignment = StringAlignment.Near;
-					}
-				}
-
-				/*
-				float x = p.X - (m_tooltip.Width / 2);
-				float y = p.Y - m_tooltip.Height - 8;
-				*/
-
-				float x = info.Icon.X + 60;
-				float y = info.Icon.Y;
-
-				m_tooltip.SetOffset((int)x, (int)y);
-				m_tooltip.Visible = true;
-
-				RectangleF tipBounds = m_tooltip.Bounds;
-				m_tooltip.RepaintFrom(tipBounds, m_tooltip);
-			}
-		}
 	}
 
-	
-	
-	
-
+	#region PulseTarget
 	class PulseTarget : PColorActivity.Target
 	{
 		PPath node;
@@ -1405,7 +1283,9 @@ namespace BuckRogers.Interface
 		}
 	}
 
-	
+	#endregion
+
+
 }
 
 

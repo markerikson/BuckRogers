@@ -1,6 +1,7 @@
 #region using directives
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -1138,8 +1139,8 @@ namespace BuckRogers.Interface
 				return;
 			}
 
-			ArrayList currentMoveTerritories = m_movePanel.CurrentMoveTerritories;
-			Territory startingTerritory = (Territory)currentMoveTerritories[0];
+			List<Territory> currentMoveTerritories = m_movePanel.CurrentMoveTerritories;
+			Territory startingTerritory = currentMoveTerritories[0];
 
 			string territoryName = n.Tag as string;
 
@@ -1158,7 +1159,7 @@ namespace BuckRogers.Interface
 
 			newPathTerritories.AddRange(currentMoveTerritories);
 
-			Territory lastTerritoryAdded = (Territory)currentMoveTerritories[currentMoveTerritories.Count - 1];
+			Territory lastTerritoryAdded = currentMoveTerritories[currentMoveTerritories.Count - 1];
 			Territory hoveredTerritory = m_controller.Map[territoryName];
 
 			ArrayList shortestPathTerritories = m_controller.Map.Graph.ShortestPath(lastTerritoryAdded, hoveredTerritory);

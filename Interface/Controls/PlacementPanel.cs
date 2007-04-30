@@ -1,3 +1,5 @@
+#define DEBUGUNITSELECTION
+
 #region using directives
 using System;
 using System.Collections;
@@ -13,6 +15,8 @@ using BuckRogers.Networking;
 using CommandManagement;
 
 #endregion
+
+
 
 namespace BuckRogers.Interface
 {
@@ -117,8 +121,10 @@ namespace BuckRogers.Interface
 			SendMessage(m_lvAvailableUnits.Handle, LVM_SETICONSPACING, 0, iconSpacing);
 			SendMessage(m_lvUnitsPlaced.Handle, LVM_SETICONSPACING, 0, iconSpacing);
 
-			ClientSideGameManager.CommandManager.RegisterCommandExecutor("System.Windows.Forms.Control", new ControlCommandExecutor());
-			ClientSideGameManager.CommandManager.RegisterCommandExecutor("System.Windows.Forms.ListView", new ListViewCommandExecutor());
+			ClientSideGameManager.CommandManager.RegisterCommandExecutor("System.Windows.Forms.Control", 
+																			new ControlCommandExecutor());
+			ClientSideGameManager.CommandManager.RegisterCommandExecutor("System.Windows.Forms.ListView", 
+																			new ListViewCommandExecutor());
 
 			Command selectUnitsCommand = new Command("PlacementSelectUnits", null,
 							new Command.UpdateHandler(UpdateSelectUnitsCommand));
@@ -131,8 +137,7 @@ namespace BuckRogers.Interface
 
 		private void UpdateSelectUnitsCommand(Command command)
 		{
-			bool isLocalOrActive = (!GameController.Options.IsNetworkGame || ClientSideGameManager.IsActiveClient);
-			command.Enabled = isLocalOrActive;
+			command.Enabled = ClientSideGameManager.IsLocalOrActive;
 		}
 
 
@@ -329,7 +334,7 @@ namespace BuckRogers.Interface
 			if(tcea.Button == MouseButtons.Left)
 			{
 				// User previously placed units, then decided he wasn't finished
-				if (m_lvUnitsPlaced.Items.Count == 3)
+				if (m_ucPlacedUnits.Count >= 3)
 				{
 					goto PlacementCompleted;
 				}
@@ -337,7 +342,7 @@ namespace BuckRogers.Interface
 				ListViewItem selectedItem = m_lvAvailableUnits.SelectedItems[0];
 				UnitType ut = (UnitType)selectedItem.Tag;
 
-				int totalUnitsPlaced = m_lvUnitsPlaced.Items.Count;
+				int totalUnitsPlaced = m_ucPlacedUnits.Count;
 				int numThisTypePlaced = 0;
 
 				if (m_selectedUnitCounts.ContainsKey(ut))
@@ -402,15 +407,18 @@ namespace BuckRogers.Interface
 
 						unitsToRemove.AddAllUnits(uc);
 
-						m_ucPlacedUnits.RemoveAllUnits(uc);
+						
 					}
 
+					m_ucPlacedUnits.Clear();
 					m_lvUnitsPlaced.Items.Clear();
 
 				}
 				// just remove the most recent
 				else
 				{
+					Unit lastPlacedUnit = m_ucPlacedUnits[m_ucPlacedUnits.Count - 1];
+					/*
 					int index = m_lvUnitsPlaced.Items.Count;
 					ListViewItem lvi = m_lvUnitsPlaced.Items[index - 1];
 
@@ -418,15 +426,18 @@ namespace BuckRogers.Interface
 
 					UnitCollection uc = m_activeTerritory.Units.GetUnits(ut, m_controller.CurrentPlayer,
 																		m_activeTerritory, 1);
+					*/
 
-					unitsToRemove.AddAllUnits(uc);
+					unitsToRemove.AddUnit(lastPlacedUnit);
+					m_ucPlacedUnits.RemoveUnit(lastPlacedUnit);
 
-					m_lvUnitsPlaced.Items.Remove(lvi);
+					int index = m_lvUnitsPlaced.Items.Count;
+					m_lvUnitsPlaced.Items.Remove(m_lvUnitsPlaced.Items[index - 1]);
 				}
 
 				m_controller.RemoveUnits(unitsToRemove, m_activeTerritory);
 
-				if(m_lvUnitsPlaced.Items.Count == 0)
+				if(m_ucPlacedUnits.Count == 0)
 				{
 					m_activeTerritory = null;
 					m_lblPlacementTerritory.Text = "None";
@@ -605,7 +616,7 @@ namespace BuckRogers.Interface
 			}
 
 #if DEBUGUNITSELECTION
-			numUnits = 5;
+			numUnits = 3;
 #endif
 
 			UnitSelectionForm usf = new UnitSelectionForm(numUnits);
@@ -694,10 +705,15 @@ namespace BuckRogers.Interface
 					m_lbPlayerOrder.SelectedItem = m_controller.CurrentPlayer;
 					RefreshAvailableUnits();
 
-					goto case GameMessage.PlayerPlacementStarted;
+					goto case GameMessage.PlacementPhaseStarted;
 				}
-				case GameMessage.PlayerPlacementStarted:				
+				case GameMessage.PlacementPhaseStarted:				
 				{
+					bool showChooseUnitsButton = (m_playersSelectUnits &&
+													(m_playersFinishedChoosing.Count < m_controller.Players.Length));
+
+					m_btnChooseUnits.Visible = showChooseUnitsButton;
+
 					if (MoveModeChanged != null)
 					{
 						MoveModeEventArgs mmea = new MoveModeEventArgs();
@@ -720,18 +736,14 @@ namespace BuckRogers.Interface
 				{
 					m_playersFinishedChoosing.Add(e.Players[0]);
 
-					if (m_playersSelectUnits)
-					{
-						if (m_playersFinishedChoosing.Count < m_controller.Players.Length)
-						{
-							m_btnChooseUnits.Enabled = true;
-							m_btnChooseUnits.Visible = true;
-						}
-						else
-						{
-							m_btnChooseUnits.Visible = false;
-						}
-					}
+					RefreshAvailableUnits();
+
+					
+					break;
+				}
+				case GameMessage.PlacementPhaseEnded:
+				{
+					m_csgm.ClientUpdateMessage -= new EventHandler<ClientUpdateEventArgs>(OnClientUpdateMessage);
 					break;
 				}
 			}

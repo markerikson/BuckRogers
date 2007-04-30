@@ -184,4 +184,22 @@ public class ToolbarCommandExecutor : CommandExecutor
 			// ignore
 		}
 	}
+
+	public class CheckBoxCommandExecutor : CommandExecutor
+	{
+		public override void InstanceAdded(object item, Command cmd)
+		{
+			base.InstanceAdded(item, cmd);
+		}
+		public override void Enable(object item, bool bEnable)
+		{
+			CheckBox cb = (CheckBox)item;
+			cb.Enabled = bEnable;
+		}
+
+		public override void Check(object item, bool bCheck)
+		{
+			// ignore
+		}
+	}
 }

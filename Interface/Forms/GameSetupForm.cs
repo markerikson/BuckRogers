@@ -743,9 +743,10 @@ namespace BuckRogers.Interface
 			numberLocation.X = e.Node.Bounds.X + size.Width;
 			numberLocation.Y = e.Node.Bounds.Y;
 			
-			m_nudNodeValue.Value = value;
+			
 			m_nudNodeValue.Minimum = ov.Min;
 			m_nudNodeValue.Maximum = ov.Max;
+			m_nudNodeValue.Value = value;
 			
 			m_nudNodeValue.Height = e.Node.Bounds.Height;	
 			m_nudNodeValue.Location = numberLocation;			

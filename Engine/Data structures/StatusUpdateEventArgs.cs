@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace BuckRogers
 {
@@ -12,6 +13,11 @@ namespace BuckRogers
 		TransportLanded,
 		PlayerKilled,
 		GameOver,
+		ActionAdded,
+		ActionUndone,
+		PlayersCreated,
+		UpdateTerritory,
+		BattleStatusUpdated,
 	};
 	/// <summary>
 	/// Summary description for StatusUpdateEventArgs.
@@ -19,14 +25,18 @@ namespace BuckRogers
 	public class StatusUpdateEventArgs : System.EventArgs
 	{
 		private Player m_player;
-		private Territory m_territory;
+		//private Territory m_territory;
 		private StatusInfo m_statusInfo;
+		private Action m_action;
+		private BattleStatus m_battleStatus;
+		private List<Territory> m_territories;
+
 		private bool m_result;
 		private bool m_isLocal;		
 
 		public StatusUpdateEventArgs()
 		{
-			
+			m_territories = new List<Territory>();	
 		}
 
 		public BuckRogers.Player Player
@@ -41,10 +51,30 @@ namespace BuckRogers
 			set { this.m_statusInfo = value; }
 		}
 
+		/*
 		public BuckRogers.Territory Territory
 		{
 			get { return this.m_territory; }
 			set { this.m_territory = value; }
+		}
+		*/
+
+		public Action Action
+		{
+			get { return m_action; }
+			set { m_action = value; }
+		}
+
+		public BattleStatus BattleStatus
+		{
+			get { return m_battleStatus; }
+			set { m_battleStatus = value; }
+		}
+
+		public List<Territory> Territories
+		{
+			get { return m_territories; }
+			set { m_territories = value; }
 		}
 
 		public bool Result

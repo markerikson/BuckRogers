@@ -1,3 +1,5 @@
+#region using directives
+
 using System;
 using System.Drawing;
 using System.Collections;
@@ -5,22 +7,13 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Text;
 
+#endregion
+
 namespace BuckRogers.Interface
 {
-	/// <summary>
-	/// Summary description for TransportLoadForm.
-	/// </summary>
 	public class TransportLoadForm : System.Windows.Forms.Form
 	{
-		private System.Windows.Forms.ColumnHeader columnHeader4;
-		private System.Windows.Forms.ColumnHeader columnHeader5;
-		private System.Windows.Forms.ColumnHeader columnHeader6;
-		private System.Windows.Forms.ColumnHeader columnHeader1;
-		private System.Windows.Forms.ListView m_lvUnits;
-		private System.Windows.Forms.TreeView m_tvTransports;
-		private System.Windows.Forms.Button m_btnLoadOne;
-		private System.Windows.Forms.Button m_btnUnloadOne;
-		private System.Windows.Forms.Button m_btnUnloadAll;
+		#region private members
 
 		private UnitCollection m_transports;
 		private UnitCollection m_troopers;
@@ -33,10 +26,32 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.Button m_btnLoadMax;
 		private System.Windows.Forms.Button m_btnCancel;
 		private System.Windows.Forms.Button m_btnOK;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
+
+		private System.Windows.Forms.ColumnHeader columnHeader4;
+		private System.Windows.Forms.ColumnHeader columnHeader5;
+		private System.Windows.Forms.ColumnHeader columnHeader6;
+		private System.Windows.Forms.ColumnHeader columnHeader1;
+		private System.Windows.Forms.ListView m_lvUnits;
+		private System.Windows.Forms.TreeView m_tvTransports;
+		private System.Windows.Forms.Button m_btnLoadOne;
+		private System.Windows.Forms.Button m_btnUnloadOne;
+		private System.Windows.Forms.Button m_btnUnloadAll;
+
 		private System.ComponentModel.Container components = null;
+
+		#endregion
+
+		#region Properties
+
+		public System.Collections.Stack TransferInfo
+		{
+			get { return this.m_transferInfo; }
+			set { this.m_transferInfo = value; }
+		}	
+
+		#endregion
+
+		#region constructor
 
 		public TransportLoadForm(GameController gc)
 		{
@@ -50,6 +65,9 @@ namespace BuckRogers.Interface
 			m_controller = gc;
 		}
 
+		#endregion
+
+		#region plumbing
 		/// <summary>
 		/// Clean up any resources being used.
 		/// </summary>
@@ -233,6 +251,10 @@ namespace BuckRogers.Interface
 		}
 		#endregion
 
+		#endregion
+
+		#region initialization
+
 		public void SetupUnits(Territory t, Player p)
 		{
 			m_tvTransports.Nodes.Clear();
@@ -312,8 +334,10 @@ namespace BuckRogers.Interface
 			{
 				m_lvUnits.Items[0].Selected = true;
 			}
-			
+
 		}
+
+		
 
 		private void AddUnit(TreeNode node, Unit u)
 		{
@@ -335,6 +359,7 @@ namespace BuckRogers.Interface
 			node.Nodes.Add(text);
 		}
 
+		#endregion
 
 		private void m_btnLoadOne_Click(object sender, System.EventArgs e)
 		{
@@ -759,7 +784,8 @@ namespace BuckRogers.Interface
 			{
 				TransportAction ta = (TransportAction)m_transferInfo.Pop();
 
-				m_controller.UndoAction();
+				// don't want to allow redoes for these
+				m_controller.UndoAction(false);
 			}
 
 			this.DialogResult = DialogResult.Cancel;
@@ -770,10 +796,6 @@ namespace BuckRogers.Interface
 			this.DialogResult = DialogResult.OK;
 		}
 
-		public System.Collections.Stack TransferInfo
-		{
-			get { return this.m_transferInfo; }
-			set { this.m_transferInfo = value; }
-		}		
+			
 	}
 }

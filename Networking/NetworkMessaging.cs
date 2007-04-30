@@ -34,16 +34,30 @@ namespace BuckRogers.Networking
 
 		GameplayMessagesFirst,
 		InitialSetupInformation = GameplayMessagesFirst,
-		PlayerPlacementStarted,
+
+		PlacementPhaseStarted,		
 		PlayerChoseUnits,
 		PlayerPlacedUnits,
-		PlayerPlacementEnded,
+		PlacementPhaseEnded,
+		
 		NextPlayer,
-		CreateUnits,
-		PlayerTurnStarted,
-		PlayerTurnEnded,
+		//StartFirstTurn,
 
+		MovementPhaseStarted,
+		PlayerTransportedUnits,
+		PlayerMovedUnits,
+		PlayerUndidMove,
+		PlayerRedidMove,
+		PlayerFinishedMoving,
+		MovementPhaseEnded,
 
+		ClientReadyForCombat,
+		ClientReadyForProduction,
+
+		CombatPhaseStarted,
+		CombatPhaseEnded,
+
+		TurnFinished,
 		GameplayMessagesLast,
 
 	}

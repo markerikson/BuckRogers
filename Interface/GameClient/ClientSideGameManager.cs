@@ -24,6 +24,7 @@ namespace BuckRogers.Networking
 	{
 		#region private members
 		public event EventHandler<ClientUpdateEventArgs> ClientUpdateMessage = delegate { };
+		public event EventHandler<StatusUpdateEventArgs> TransportLanded = delegate { };
 
 		private GameController m_controller;
 		private BattleController m_battleController;
@@ -61,6 +62,15 @@ namespace BuckRogers.Networking
 		{
 			get { return m_battleController; }
 			set { m_battleController = value; }
+		}
+
+		public static bool IsLocalOrActive
+		{
+			get
+			{
+				bool isLocalOrActive = (!GameController.Options.IsNetworkGame || ClientSideGameManager.IsActiveClient);
+				return isLocalOrActive;
+			}
 		}
 
 		#endregion
@@ -106,10 +116,10 @@ namespace BuckRogers.Networking
 					m_gameClient.SendMessageToServer(GameMessage.ClientReady, string.Empty);
 					break;
 				}
-				case GameMessage.PlayerPlacementStarted:
+				case GameMessage.PlacementPhaseStarted:
 				{
 					CheckIfActiveClient();
-					RaiseSimpleUpdateEvent(GameMessage.PlayerPlacementStarted, string.Empty, null);
+					RaiseSimpleUpdateEvent(GameMessage.PlacementPhaseStarted, string.Empty, null);
 					break;
 				}
 				case GameMessage.PlayerChoseUnits:
@@ -176,6 +186,106 @@ namespace BuckRogers.Networking
 					
 					break;
 				}
+				case GameMessage.PlacementPhaseEnded:
+				{
+					if(e.MessageText != "GameLoaded")
+					{
+						m_controller.NextPlayer();
+					}
+					
+					RaiseSimpleUpdateEvent(GameMessage.PlacementPhaseEnded, string.Empty, null);
+					break;
+				}
+				case GameMessage.MovementPhaseStarted:
+				{
+					if(e.MessageText != "GameLoaded")
+					{
+						string[] playerOrderNames = e.MessageText.Split('|');
+						List<Player> playerOrder = new List<Player>();
+
+						foreach (string s in playerOrderNames)
+						{
+							Player p = m_controller.GetPlayer(s);
+							playerOrder.Add(p);
+						}
+
+						// if we got this message, we KNOW there will be another turn (the one
+						// we're about to start)
+						m_controller.NextTurn(playerOrder.ToArray());
+						m_battleController.InitGameLog();
+					}
+					
+					CheckIfActiveClient();
+					RaiseSimpleUpdateEvent(GameMessage.MovementPhaseStarted, string.Empty, null);
+					break;
+				}
+				case GameMessage.PlayerTransportedUnits:
+				{
+					ParseUnitTransportMessage(e.MessageText);
+					break;
+				}
+				case GameMessage.PlayerMovedUnits:
+				{
+					ParseUnitMoveMessage(e.MessageText);
+					break;
+				}
+				case GameMessage.PlayerUndidMove:
+				{
+					Player p = m_controller.GetPlayer(e.MessageText);
+
+					if(p.Location == PlayerLocation.Local)
+					{
+						break;
+					}
+
+					m_controller.UndoAction();
+					break;
+				}
+				case GameMessage.PlayerRedidMove:
+				{
+					Player p = m_controller.GetPlayer(e.MessageText);
+
+					if (p.Location == PlayerLocation.Local)
+					{
+						break;
+					}
+
+					m_controller.RedoAction();
+					break;
+				}
+				case GameMessage.PlayerFinishedMoving:
+				{
+					Player p = m_controller.GetPlayer(e.MessageText);
+
+					if (p.Location == PlayerLocation.Local)
+					{
+						break;
+					}
+
+					m_controller.FinalizeCurrentPlayerMoves();
+					break;
+				}
+				case GameMessage.MovementPhaseEnded:
+				{
+					m_controller.StartNextPhase();
+
+					if(m_controller.Battles.Count == 0)
+					{
+						goto case GameMessage.CombatPhaseEnded;
+					}
+					else
+					{
+						RaiseSimpleUpdateEvent(GameMessage.CombatPhaseStarted, string.Empty, null);
+					}
+					break;
+				}
+				case GameMessage.CombatPhaseEnded:
+				{
+					m_controller.StartNextPhase();
+
+
+					break;
+				}
 			}
 		}
 
@@ -218,71 +328,312 @@ namespace BuckRogers.Networking
 
 		#endregion
 
-		#region message parsing
+		#region message parsing / creation
 
 		private void ParseInitialSetupInformation(string messageText)
 		{
 			XmlDocument xd = new XmlDocument();
 			xd.LoadXml(messageText);
 
-			ArrayList initialPlayerOrder = new ArrayList();
+			// Check if loading from saved game
 
-			XmlElement xePlayers = (XmlElement)xd.GetElementsByTagName("Players")[0];
-			XmlNodeList xnlPlayers = xePlayers.GetElementsByTagName("Player");
+			XmlElement xeGameInfo = (XmlElement)xd.GetElementsByTagName("GameInformation")[0];
 
-			foreach (XmlElement xePlayer in xnlPlayers)
+			bool fromSavedGame = bool.Parse(xeGameInfo.Attributes["savedgame"].Value);
+
+			if(fromSavedGame)
 			{
-				string playerName = xePlayer.Attributes["name"].Value;
+				//XmlElement xeGameOptions = (XmlElement)xeGameInfo.GetElementsByTagName("GameOptions");
+				//m_gameClient.ParseGameOptionsMessage(messageText);//xeGameOptions.OuterXml);
+				//GameController.Options = m_gameClient.GameOptions;
 
-				Player p = m_controller.GetPlayer(playerName);
+				XmlDocument savedgame = new XmlDocument();
+				XmlElement xeSavedGame = (XmlElement)xd.GetElementsByTagName("SavedGame")[0];
+				savedgame.LoadXml(xeSavedGame.OuterXml);
 
-				XmlElement xeTerritories = (XmlElement)xePlayer.GetElementsByTagName("Territories")[0];
-				XmlNodeList xnlTerritories = xePlayer.GetElementsByTagName("Territory");
+				m_controller.LoadGame(savedgame);
 
-				List<Territory> territories = new List<Territory>();
+				GameController.Options.IsNetworkGame = true;
 
-				foreach(XmlElement xeTerritory in xnlTerritories)
+				// if loading from save game, do a foreach over the players, create them,
+				// and overwrite the previously set players
+
+				foreach(Player p in m_gameClient.Players)
 				{
-					string territoryName = xeTerritory.Attributes["name"].Value;
+					Player loadedPlayer = m_controller.GetPlayer(p.Name);
+					loadedPlayer.Location = p.Location;
+				}
+			}
+			else
+			{
+				List<Player> initialPlayerOrder = new List<Player>();
 
-					Territory t = m_controller.Map[territoryName];
-					territories.Add(t);
+				XmlElement xePlayers = (XmlElement)xd.GetElementsByTagName("Players")[0];
+				XmlNodeList xnlPlayers = xePlayers.GetElementsByTagName("Player");
+
+
+
+				foreach (XmlElement xePlayer in xnlPlayers)
+				{
+					string playerName = xePlayer.Attributes["name"].Value;
+
+					Player p = m_controller.GetPlayer(playerName);
+
+					XmlElement xeTerritories = (XmlElement)xePlayer.GetElementsByTagName("Territories")[0];
+					XmlNodeList xnlTerritories = xePlayer.GetElementsByTagName("Territory");
+
+					List<Territory> territories = new List<Territory>();
+
+					foreach (XmlElement xeTerritory in xnlTerritories)
+					{
+						string territoryName = xeTerritory.Attributes["name"].Value;
+
+						Territory t = m_controller.Map[territoryName];
+						territories.Add(t);
+					}
+
+					m_controller.SetTerritoriesOwner(p, territories);
+
+					XmlElement xeUnits = (XmlElement)xePlayer.GetElementsByTagName("Units")[0];
+					XmlNodeList xnlUnits = xePlayer.GetElementsByTagName("Unit");
+
+					foreach (XmlElement xeUnit in xnlUnits)
+					{
+						int id = int.Parse(xeUnit.Attributes["id"].Value);
+						UnitType ut = (UnitType)Enum.Parse(typeof(UnitType), xeUnit.Attributes["type"].Value);
+
+						string territoryName = xeUnit.Attributes["territory"].Value;
+
+						Unit u = Unit.CreateNewUnit(p, ut);
+
+						if (territoryName != "None")
+						{
+							Territory t = m_controller.Map[territoryName];
+							u.CurrentTerritory = t;
+						}
+
+					}
 				}
 
-				m_controller.SetTerritoriesOwner(p, territories);
+				XmlElement xePlayerOrder = (XmlElement)xd.GetElementsByTagName("InitialOrder")[0];
+				string playerOrderString = xePlayerOrder.Attributes["order"].Value;
+				string[] playerOrderNames = playerOrderString.Split('|');
 
-				XmlElement xeUnits = (XmlElement)xePlayer.GetElementsByTagName("Units")[0];
-				XmlNodeList xnlUnits = xePlayer.GetElementsByTagName("Unit");
+				foreach (string playerOrderName in playerOrderNames)
+				{
+					Player p = m_controller.GetPlayer(playerOrderName);
+					initialPlayerOrder.Add(p);
+				}
+
+				m_controller.PlayerOrder = initialPlayerOrder;
+			}
+
+			
+		}
+
+		private string CreateTransportMessage(List<TransportAction> actions)
+		{
+			MemoryStream stream = new MemoryStream();
+			XmlWriterSettings xws = new XmlWriterSettings();
+			xws.OmitXmlDeclaration = true;
+			XmlWriter xw = XmlWriter.Create(stream, xws);
+
+			xw.WriteStartElement("TransportActions");
+			
+			Player p = actions[0].Owner;
+
+			xw.WriteAttributeString("player", p.Name);
+			
+			foreach(TransportAction ta in actions)
+			{
+				xw.WriteStartElement("TransportAction");
+
+				xw.WriteAttributeString("territory", ta.StartingTerritory.Name);
+				xw.WriteAttributeString("load", ta.Load.ToString());
+				xw.WriteAttributeString("transport", ta.Transport.ID.ToString());
+
+				xw.WriteStartElement("Units");
+
+				foreach(Unit u in ta.Units)
+				{
+					xw.WriteStartElement("Unit");
+
+					xw.WriteAttributeString("type", u.Type.ToString());
+					xw.WriteAttributeString("id", u.ID.ToString());
+					xw.WriteAttributeString("moves", u.MovesLeft.ToString());
+
+					xw.WriteEndElement();
+				}
+
+				xw.WriteEndElement();
+				xw.WriteEndElement();
+			}
+
+			xw.WriteEndElement();
+
+			xw.WriteEndDocument();
+
+			xw.Flush();
+
+			stream.Position = 0;
+			StreamReader sr = new StreamReader(stream);
+
+			return sr.ReadToEnd();
+		}
+
+		private string CreateMoveMessage(MoveAction ma)
+		{
+			MemoryStream stream = new MemoryStream();
+			XmlWriterSettings xws = new XmlWriterSettings();
+			xws.OmitXmlDeclaration = true;
+			XmlWriter xw = XmlWriter.Create(stream, xws);
+
+			xw.WriteStartElement("MoveAction");
+
+			xw.WriteAttributeString("player", ma.Owner.Name);
+			xw.WriteAttributeString("territory", ma.StartingTerritory.Name);
+
+			xw.WriteStartElement("Territories");
+
+			foreach (Territory t in ma.Territories)
+			{
+				xw.WriteStartElement("Territory");
+				xw.WriteAttributeString("name", t.Name);
+				xw.WriteEndElement();
+			}
+
+			xw.WriteEndElement();
+
+			xw.WriteStartElement("Units");
+
+			foreach (Unit u in ma.Units)
+			{
+				xw.WriteStartElement("Unit");
+
+				xw.WriteAttributeString("type", u.Type.ToString());
+				xw.WriteAttributeString("id", u.ID.ToString());
+				xw.WriteAttributeString("moves", u.MovesLeft.ToString());
+
+				xw.WriteEndElement();
+			}
+
+			xw.WriteEndElement();
+
+			xw.WriteEndElement();
+
+
+			xw.WriteEndDocument();
+
+			xw.Flush();
+
+			stream.Position = 0;
+			StreamReader sr = new StreamReader(stream);
+
+			return sr.ReadToEnd();
+		}
+
+		private void ParseUnitTransportMessage(string xml)
+		{
+			XmlDocument xd = new XmlDocument();
+			xd.LoadXml(xml);
+
+			XmlElement xeTransportActions = (XmlElement)xd.GetElementsByTagName("TransportActions")[0];
+			string playerName = xeTransportActions.Attributes["player"].Value;
+
+			Player p = m_controller.GetPlayer(playerName);
+
+			if(p.Location == PlayerLocation.Local)
+			{
+				return;
+			}
+
+			XmlNodeList xnlActions = xeTransportActions.GetElementsByTagName("TransportAction");
+
+			foreach (XmlElement xeAction in xnlActions)
+			{
+				TransportAction ta = new TransportAction();
+
+				string territoryName = xeAction.Attributes["territory"].Value;
+				Territory t = m_controller.Map[territoryName];
+				ta.StartingTerritory = t;
+
+				ta.Load = bool.Parse(xeAction.Attributes["load"].Value);
+
+				int transportID = int.Parse(xeAction.Attributes["transport"].Value);
+				Transport transport = (Transport)t.Units.GetUnitByID(transportID);
+				ta.Transport = transport;
+
+				XmlElement xeUnits = (XmlElement)xeAction.GetElementsByTagName("Units")[0];
+				XmlNodeList xnlUnits = xeUnits.GetElementsByTagName("Unit");
 
 				foreach (XmlElement xeUnit in xnlUnits)
 				{
-					int id = int.Parse(xeUnit.Attributes["id"].Value);
 					UnitType ut = (UnitType)Enum.Parse(typeof(UnitType), xeUnit.Attributes["type"].Value);
+					int id = int.Parse(xeUnit.Attributes["id"].Value);
+					int movesLeft = int.Parse(xeUnit.Attributes["moves"].Value);
 
-					string territoryName = xeUnit.Attributes["territory"].Value;
+					Unit u = t.Units.GetUnitByID(id);
+					ta.Units.AddUnit(u);
 
-					Unit u = Unit.CreateNewUnit(p, ut);
+					//UnitCollection uc1 = t.Units.GetUnitsWithMoves(movesLeft);
+					//UnitCollection uc2 = uc1.GetUnits(ut, p, t, 1);
 
-					if(territoryName != "None")
-					{
-						Territory t = m_controller.Map[territoryName];
-						u.CurrentTerritory = t;
-					}
-
+					//ta.Units.AddUnit(uc2[0]);
 				}
+
+				m_controller.AddAction(ta);
+
 			}
+		}
 
-			XmlElement xePlayerOrder = (XmlElement)xd.GetElementsByTagName("InitialOrder")[0];
-			string playerOrderString = xePlayerOrder.Attributes["order"].Value;
-			string[] playerOrderNames = playerOrderString.Split('|');
+		private void ParseUnitMoveMessage(string xml)
+		{
+			XmlDocument xd = new XmlDocument();
+			xd.LoadXml(xml);
 
-			foreach(string playerOrderName in playerOrderNames)
+			MoveAction ma = new MoveAction();
+
+			XmlElement xeMoveAction = (XmlElement)xd.GetElementsByTagName("MoveAction")[0];
+			string playerName = xeMoveAction.Attributes["player"].Value;
+			string territoryName = xeMoveAction.Attributes["territory"].Value;
+
+			Player p = m_controller.GetPlayer(playerName);
+
+			if(p.Location == PlayerLocation.Local)
 			{
-				Player p = m_controller.GetPlayer(playerOrderName);
-				initialPlayerOrder.Add(p);
+				return;
 			}
-			
-			m_controller.PlayerOrder = initialPlayerOrder;
+
+			Territory t = m_controller.Map[territoryName];
+			ma.Owner = p;
+			ma.StartingTerritory = t;
+
+			XmlElement xeTerritories = (XmlElement)xeMoveAction.GetElementsByTagName("Territories")[0];
+			XmlNodeList xnlTerritories = xeTerritories.GetElementsByTagName("Territory");
+
+			foreach (XmlElement xeTerritory in xnlTerritories)
+			{
+				string moveTerritoryName = xeTerritory.Attributes["name"].Value;
+
+				Territory moveTerritory = m_controller.Map[moveTerritoryName];
+				ma.Territories.Add(moveTerritory);
+			}
+
+
+			XmlElement xeUnits = (XmlElement)xeMoveAction.GetElementsByTagName("Units")[0];
+			XmlNodeList xnlUnits = xeUnits.GetElementsByTagName("Unit");
+
+			foreach (XmlElement xeUnit in xnlUnits)
+			{
+				UnitType ut = (UnitType)Enum.Parse(typeof(UnitType), xeUnit.Attributes["type"].Value);
+				int id = int.Parse(xeUnit.Attributes["id"].Value);
+				int movesLeft = int.Parse(xeUnit.Attributes["moves"].Value);
+
+				Unit u = t.Units.GetUnitByID(id);
+				ma.Units.AddUnit(u);
+			}
+
+			m_controller.AddAction(ma);
 		}
 
 		#endregion
@@ -295,7 +646,7 @@ namespace BuckRogers.Networking
 			// OnGameMessageReceived once this call stack returns
 			if (!m_isNetworkGame)
 			{
-				RaiseSimpleUpdateEvent(GameMessage.PlayerPlacementStarted, string.Empty, null);
+				RaiseSimpleUpdateEvent(GameMessage.PlacementPhaseStarted, string.Empty, null);
 				//m_gameClient.SendMessageToServer(NetworkMessages.ClientReady, string.Empty);
 			}
 		}
@@ -347,15 +698,145 @@ namespace BuckRogers.Networking
 			}
 			else
 			{
-				RaiseSimpleUpdateEvent(GameMessage.PlayerPlacedUnits, string.Empty, player);
+				bool morePlayersLeft = m_controller.NextPlayer();
+
+				if(!morePlayersLeft)
+				{
+					m_controller.StartNextPhase();
+					RaiseSimpleUpdateEvent(GameMessage.PlacementPhaseEnded, string.Empty, null);
+
+					m_controller.NextTurn();
+					m_battleController.InitGameLog();
+					RaiseSimpleUpdateEvent(GameMessage.MovementPhaseStarted, string.Empty, null);
+				}
+				//RaiseSimpleUpdateEvent(GameMessage.PlayerPlacedUnits, string.Empty, player);
+			}
+		}
+
+		public void PlayerTransportedUnits(List<TransportAction> actions)
+		{
+			if(!m_isNetworkGame)
+			{
+				return;
+			}
+
+			string xml = CreateTransportMessage(actions);
+
+			m_gameClient.SendMessageToServer(GameMessage.PlayerTransportedUnits, xml);
+		}
+
+		public void PlayerMovedUnits(MoveAction ma)
+		{
+			if (m_isNetworkGame)
+			{
+				string xml = CreateMoveMessage(ma);
+
+				m_gameClient.SendMessageToServer(GameMessage.PlayerMovedUnits, xml);
+			}
+
+			Territory destination = (Territory)ma.Territories[ma.Territories.Count - 1];
+			if (destination.Type == TerritoryType.Ground)
+			{
+				bool unloadTransports = false;
+
+				UnitCollection transports = ma.Units.GetUnits(UnitType.Transport);
+				if (transports.Count > 0)
+				{
+					bool askToUnload = false;
+
+					foreach (Transport tr in transports)
+					{
+						if (tr.Transportees.Count > 0)
+						{
+							askToUnload = true;
+							break;
+						}
+					}
+					if (askToUnload)
+					{
+						StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+						suea.Territories.Add(destination);// = destination;//(Player)m_currentPlayerOrder[m_idxCurrentPlayer];
+
+						suea.StatusInfo = StatusInfo.TransportLanded;
+
+						EventsHelper.Fire(TransportLanded, this, suea);
+
+						//unloadTransports = StatusUpdate(this, suea);
+						unloadTransports = suea.Result;
+
+					}
+				}
+
+				if (unloadTransports)
+				{
+					List<TransportAction> actions = new List<TransportAction>();
+					foreach (Transport tr in transports)
+					{
+						TransportAction ta = new TransportAction();
+						ta.Load = false;
+						ta.Owner = tr.Owner;
+						ta.MaxTransfer = tr.Transportees.Count;
+						ta.StartingTerritory = destination;
+						ta.Transport = tr;
+						ta.UnitType = tr.Transportees[0].Type;
+
+						m_controller.AddAction(ta);
+						actions.Add(ta);
+					}
+
+					if(m_isNetworkGame)
+					{
+						string xml = CreateTransportMessage(actions);
+
+						m_gameClient.SendMessageToServer(GameMessage.PlayerTransportedUnits, xml);
+					}
+					
+				}
+			}
+		}
+
+		public void PlayerUndidMove()
+		{
+			Action a = m_controller.UndoAction();
+
+			if(m_isNetworkGame)
+			{
+				m_gameClient.SendMessageToServer(GameMessage.PlayerUndidMove, m_controller.CurrentPlayer.Name);
+			}
+		}
+
+		public void PlayerRedidMove()
+		{
+			Action a = m_controller.RedoAction();
+
+			if (m_isNetworkGame)
+			{
+				m_gameClient.SendMessageToServer(GameMessage.PlayerRedidMove, m_controller.CurrentPlayer.Name);
+			}
+		}
+
+		public void PlayerFinishedMoving()
+		{
+			m_controller.FinalizeCurrentPlayerMoves();
+
+			if(m_isNetworkGame)
+			{
+				m_gameClient.SendMessageToServer(GameMessage.PlayerFinishedMoving, m_controller.CurrentPlayer.Name);
+			}
+			else
+			{
+				m_controller.FinalizeCurrentPlayerMoves();
+
+				bool morePlayers = m_controller.NextPlayer();
+
+				if (!morePlayers)
+				{
+					RaiseLocalLoopbackEvent(GameMessage.MovementPhaseEnded, string.Empty, null);
+				}
 			}
 		}
 
 		#endregion
-
-
-
-
 
 		
 	}

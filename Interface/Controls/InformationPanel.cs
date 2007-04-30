@@ -1,3 +1,4 @@
+#region using directives
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -5,13 +6,23 @@ using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 
+using BuckRogers;
+using BuckRogers.Networking;
+
+#endregion
+
 namespace BuckRogers.Interface
 {
-	/// <summary>
-	/// Summary description for InformationPanel.
-	/// </summary>
 	public class InformationPanel : System.Windows.Forms.UserControl
 	{
+		#region private members
+
+		private GameController m_controller;
+		private ClientSideGameManager m_csgm;
+
+		private System.Windows.Forms.ListView m_lvTerritories;
+		private ListViewColumnSorter[] m_lvcs;
+
 		private System.Windows.Forms.ColumnHeader columnHeader1;
 		private System.Windows.Forms.ColumnHeader columnHeader2;
 		private System.Windows.Forms.ColumnHeader columnHeader3;
@@ -28,13 +39,34 @@ namespace BuckRogers.Interface
 		private System.Windows.Forms.ColumnHeader columnHeader10;
 		private System.Windows.Forms.ColumnHeader columnHeader11;
 		private System.Windows.Forms.Label label3;
-		private GameController m_controller;
-		private System.Windows.Forms.ListView m_lvTerritories;
-		private ListViewColumnSorter[] m_lvcs;
-		/// <summary> 
-		/// Required designer variable.
-		/// </summary>
+
+
 		private System.ComponentModel.Container components = null;
+
+		#endregion
+
+		#region properties
+
+		internal ClientSideGameManager GameManager
+		{
+			get { return m_csgm; }
+			set
+			{
+				m_csgm = value;
+
+				m_csgm.ClientUpdateMessage += new EventHandler<ClientUpdateEventArgs>(OnClientUpdateMessage);
+			}
+		}
+
+		public BuckRogers.GameController Controller
+		{
+			get { return this.m_controller; }
+			set { this.m_controller = value; }
+		}
+
+		#endregion
+
+		#region constructor
 
 		public InformationPanel()
 		{
@@ -52,6 +84,9 @@ namespace BuckRogers.Interface
 			m_lvUnitLocations.ListViewItemSorter = m_lvcs[2];
 		}
 
+		#endregion
+
+		#region plumbing
 		/// <summary> 
 		/// Clean up any resources being used.
 		/// </summary>
@@ -224,6 +259,16 @@ namespace BuckRogers.Interface
 		}
 		#endregion
 
+		#endregion
+
+		#region RefreshXXX
+
+		public void RefreshAllInfo()
+		{
+			RefreshUnitLocations();
+			RefreshTerritoryInfo();
+			RefreshUnitCounts();
+		}
 
 		public void RefreshTerritoryInfo()
 		{
@@ -246,13 +291,6 @@ namespace BuckRogers.Interface
 					m_lvTerritories.Items.Add(lvi);
 				}
 			}
-		}
-
-		public void RefreshAllInfo()
-		{
-			RefreshUnitLocations();
-			RefreshTerritoryInfo();
-			RefreshUnitCounts();
 		}
 
 		public void RefreshUnitLocations()
@@ -394,12 +432,9 @@ namespace BuckRogers.Interface
 			}
 		}
 
-		public BuckRogers.GameController Controller
-		{
-			get { return this.m_controller; }
-			set { this.m_controller = value; }
-		}
+		#endregion
 
+		#region utility
 
 		private void ListViewColumn_Click(object sender, System.Windows.Forms.ColumnClickEventArgs e)
 		{
@@ -428,6 +463,23 @@ namespace BuckRogers.Interface
 
 			lv.Sort();
 		}
+
+		#endregion
+
+		#region event handlers
+		void OnClientUpdateMessage(object sender, ClientUpdateEventArgs e)
+		{
+			switch (e.MessageType)
+			{
+				case GameMessage.MovementPhaseStarted:
+				{
+					RefreshAllInfo();
+					break;
+				}
+			}
+		}
+
+		#endregion
 
 	}
 }

@@ -23,26 +23,14 @@ namespace BuckRogers
 	/// <summary>
 	/// Summary description for Unit.
 	/// </summary>
-	[DebuggerDisplay("Unit: {m_unitType.ToString()}") ]
+	[DebuggerDisplay("Unit: {Info}") ]
 	public class Unit
 	{
-		public int ID
-		{
-			get 
-			{ 
-				return this.m_id; 
-			}
-			set
-			{
-				this.m_id = value;
-			}
-		}
-	
 		public static Unit NONE = new Unit(Player.NONE, UnitType.None);
 
 		private static int m_nextUnitID = 0;
-		
-		
+
+		private static UnitCollection m_allUnits = new UnitCollection();
 
 		private UnitType m_unitType;
 		protected Player m_owner;
@@ -53,7 +41,24 @@ namespace BuckRogers
 		private Unit m_transportingUnit;
 		private int m_id;
 
-		
+
+		public static UnitCollection AllUnits
+		{
+			get { return Unit.m_allUnits; }
+			set { Unit.m_allUnits = value; }
+		}
+
+		public int ID
+		{
+			get
+			{
+				return this.m_id;
+			}
+			set
+			{
+				this.m_id = value;
+			}
+		}
 			
 
 		public Unit(Player owner, UnitType unitType)
@@ -76,15 +81,23 @@ namespace BuckRogers
 
 		public static Unit CreateNewUnit(Player owner, UnitType type)
 		{
+			Unit u;
 			switch(type)
 			{
 				case UnitType.Factory:
-					return new Factory(owner);
+					u = new Factory(owner);
+					break;
 				case UnitType.Transport:
-					return new Transport(owner);
+					u = new Transport(owner);
+					break;
 				default:
-					return new Unit(owner, type);
+					u = new Unit(owner, type);
+					break;
 			}
+
+			Unit.AllUnits.AddUnit(u);
+
+			return u;
 		}
 
 		
@@ -302,6 +315,8 @@ namespace BuckRogers
 			{
 				m_currentTerritory.Units.RemoveUnit(this);
 			}
+
+			Unit.AllUnits.RemoveUnit(this);
 			
 
 			m_currentTerritory = null;

@@ -197,14 +197,12 @@ namespace BuckRogers
 						ov.Min = int.Parse(sMin);
 						ov.Max = int.Parse(sMax);
 						ov.Start = int.Parse(sStart);
-
+						ov.Value = ov.Start;
 
 						option.Values.Add(valueName, ov);
 					}
 				}
 			}
-
-
 		}
 
 

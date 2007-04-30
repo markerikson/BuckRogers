@@ -1,6 +1,7 @@
 #region using directives
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Data;
@@ -14,6 +15,9 @@ using UMD.HCIL.Piccolo.Util;
 
 using BuckRogers;
 using BuckRogers.Interface;
+using BuckRogers.Networking;
+
+using CommandManagement;
 
 #endregion
 
@@ -26,36 +30,42 @@ namespace BuckRogers.Interface
 		#region private members
 		public event MoveModeChangedHandler MoveModeChanged;
 
-		private ArrayList m_currentMoveTerritories;
+		private MoveMode m_moveMode;
+
+		private GameController m_controller;
+		private ClientSideGameManager m_csgm;
+
+		private List<Territory> m_currentMoveTerritories;
 		private UnitCollection m_unitsToMove;
-		private Hashtable m_unitsToMoveCounts;
 		private UnitCollection m_handSelectedUnits;
+		private Hashtable m_unitsToMoveCounts;
+		
+		private MoveListBox m_mlbMoves;
+		private MoveListBox m_mlbTransports;
+		private PlayerListBox m_lbPlayerOrder;
+		private MapControl m_map;
+		private MoveUnitsForm m_muf;
+		
 		private bool m_userChangedOriginalSelection;
 		private bool m_unitTotalsWereChanged;
 		private bool m_stupidCodeGuardFlag;
+		private bool m_showingTransportDialog;
+		private bool m_enabled;
+
 		private System.Windows.Forms.Button m_btnUndoMove;
 		private System.Windows.Forms.Button m_btnRedoMove;
-
-		private MoveListBox m_mlbMoves;
-		private MoveListBox m_mlbTransports;
-		private GameController m_controller;
-		private MoveMode m_moveMode;
-		
+		private System.Windows.Forms.CheckBox m_chkLoadTransports;
+		private System.Windows.Forms.Button m_btnRemoveTerritory;
 		private System.Windows.Forms.Button m_btnCancelMove;
 		private System.Windows.Forms.Button m_btnEndMoves;
+		private System.Windows.Forms.Button m_btnAcceptMoves;
+		
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.ListBox m_lbCurrentMoves;
-		private System.Windows.Forms.Button m_btnAcceptMoves;
 		private System.Windows.Forms.TabControl tabControl1;
 		private System.Windows.Forms.TabPage tabPage1;
-		private System.Windows.Forms.TabPage tabPage2;
-		private PlayerListBox m_lbPlayerOrder;
-		private System.Windows.Forms.Label label2;
-		private MapControl m_map;
-		private MoveUnitsForm m_muf;
-		private CheckBox m_chkLoadTransports;
-		private Button m_btnRemoveTerritory;
-		private bool m_showingTransportDialog;
+		private System.Windows.Forms.TabPage tabPage2;	
+		private System.Windows.Forms.Label label2;		
 
 		private System.ComponentModel.Container components = null;
 
@@ -65,8 +75,8 @@ namespace BuckRogers.Interface
 		public MapControl Map
 		{
 			get { return m_map; }
-			set 
-			{ 
+			set
+			{
 				m_map = value;
 			}
 		}
@@ -77,7 +87,18 @@ namespace BuckRogers.Interface
 			set { this.m_controller = value; }
 		}
 
-		public ArrayList CurrentMoveTerritories
+		internal ClientSideGameManager GameManager
+		{
+			get { return m_csgm; }
+			set
+			{
+				m_csgm = value;
+
+				m_csgm.ClientUpdateMessage += new EventHandler<ClientUpdateEventArgs>(OnClientUpdateMessage);
+			}
+		}
+
+		public List<Territory> CurrentMoveTerritories
 		{
 			get { return m_currentMoveTerritories; }
 			set { m_currentMoveTerritories = value; }
@@ -87,6 +108,24 @@ namespace BuckRogers.Interface
 		{
 			get { return m_moveMode; }
 			set { m_moveMode = value; }
+		}
+
+		public bool PanelEnabled
+		{
+			get
+			{
+				return m_enabled;
+			}
+			set
+			{
+				m_enabled = value;
+
+				if(!m_enabled)
+				{
+					m_mlbMoves.Items.Clear();
+					m_mlbTransports.Items.Clear();
+				}
+			}
 		}
 		#endregion
 
@@ -116,24 +155,63 @@ namespace BuckRogers.Interface
 			m_mlbTransports.Dock = DockStyle.Fill;
 
 			m_lbCurrentMoves.Items.Clear();
-			m_currentMoveTerritories = new ArrayList();
+			m_currentMoveTerritories = new List<Territory>();
 			m_unitsToMove = new UnitCollection();
 			m_handSelectedUnits = new UnitCollection();
 			m_unitsToMoveCounts = new Hashtable();
 			m_moveMode = MoveMode.Finished;
 
+			/*
 			m_btnCancelMove.Enabled = false;
 			m_btnAcceptMoves.Enabled = false;
 			m_btnUndoMove.Enabled = false;
 			m_btnRedoMove.Enabled = false;
+			*/
 
 			m_userChangedOriginalSelection = false;
 
-			if(GameController.Options.IsNetworkGame)
-			{
-				m_lbPlayerOrder.ShowPlayerLocation = true;
-			}
+			
 
+			ClientSideGameManager.CommandManager.RegisterCommandExecutor("System.Windows.Forms.CheckBox", 
+																			new CheckBoxCommandExecutor());
+
+
+			Command endTurnCommand = new Command("MovementTransportOrEndTurn", null,
+							new Command.UpdateHandler(UpdateEndTurnCommand));
+			ClientSideGameManager.CommandManager.Commands.Add(endTurnCommand);
+
+			endTurnCommand.CommandInstances.Add(m_btnEndMoves);
+			endTurnCommand.CommandInstances.Add(m_chkLoadTransports);
+
+			Command moveActiveCommand = new Command("MovementMoveActive", null,
+							new Command.UpdateHandler(UpdateMoveActiveCommand));
+			ClientSideGameManager.CommandManager.Commands.Add(moveActiveCommand);
+
+			moveActiveCommand.CommandInstances.Add(m_btnRemoveTerritory);
+			moveActiveCommand.CommandInstances.Add(m_btnAcceptMoves);
+			moveActiveCommand.CommandInstances.Add(m_btnCancelMove);
+
+
+			Command undoCommand = new Command("MovementUndoMove", null,
+							new Command.UpdateHandler(UpdateUndoCommand));
+			ClientSideGameManager.CommandManager.Commands.Add(undoCommand);
+
+			undoCommand.CommandInstances.Add(m_btnUndoMove);
+
+			Command redoCommand = new Command("MovementRedoMove", null,
+							new Command.UpdateHandler(UpdateRedoCommand));
+			ClientSideGameManager.CommandManager.Commands.Add(redoCommand);
+
+			redoCommand.CommandInstances.Add(m_btnRedoMove);
+
+			/*
+			Command acceptCancelCommand = new Command("MovementAcceptOrCancelMove", null,
+							new Command.UpdateHandler(UpdateAcceptCancelCommand));
+			ClientSideGameManager.CommandManager.Commands.Add(acceptCancelCommand);
+
+			acceptCancelCommand.CommandInstances.Add(m_btnAcceptMoves);
+			acceptCancelCommand.CommandInstances.Add(m_btnCancelMove);
+			*/
 		}
 
 		#endregion
@@ -333,8 +411,44 @@ namespace BuckRogers.Interface
 
 		#endregion
 
+		#region command handlers
+		private void UpdateEndTurnCommand(Command command)
+		{
+			bool noActiveMove = (m_currentMoveTerritories.Count == 0);
+			bool inMovePhase = (m_controller.CurrentPhase == GamePhase.Movement);
+			command.Enabled = m_enabled && ClientSideGameManager.IsLocalOrActive 
+								&& inMovePhase && noActiveMove;
+		}
+
+		private void UpdateMoveActiveCommand(Command command)
+		{
+			bool activeMove = (m_currentMoveTerritories.Count > 0);
+			bool inMovePhase = (m_controller.CurrentPhase == GamePhase.Movement);
+			command.Enabled = m_enabled && ClientSideGameManager.IsLocalOrActive 
+								&& inMovePhase && activeMove;
+		}
+
+		private void UpdateUndoCommand(Command command)
+		{
+			bool noActiveMove = (m_currentMoveTerritories.Count == 0);
+			bool inMovePhase = (m_controller.CurrentPhase == GamePhase.Movement);
+			command.Enabled = m_enabled && ClientSideGameManager.IsLocalOrActive 
+								&& inMovePhase && noActiveMove && m_controller.CanUndo;
+		}
+
+		private void UpdateRedoCommand(Command command)
+		{
+			bool noActiveMove = (m_currentMoveTerritories.Count == 0);
+			bool inMovePhase = (m_controller.CurrentPhase == GamePhase.Movement);
+			command.Enabled = m_enabled && ClientSideGameManager.IsLocalOrActive 
+								&& inMovePhase && noActiveMove && m_controller.CanRedo;
+		}
+
+		#endregion
+
 		#region event handlers
 
+		/*
 		private void m_btnAddMove_Click(object sender, System.EventArgs e)
 		{
 			m_btnCancelMove.Enabled = true;
@@ -355,6 +469,7 @@ namespace BuckRogers.Interface
 				MoveModeChanged(this, mmea);
 			}
 		}
+		*/
 
 		private void m_btnCancelMove_Click(object sender, System.EventArgs e)
 		{
@@ -368,18 +483,16 @@ namespace BuckRogers.Interface
 
 		private void m_btnUndoMove_Click(object sender, System.EventArgs e)
 		{
-			Action a = m_controller.UndoAction();
-
-			m_btnUndoMove.Enabled = m_controller.CanUndo;
-			m_btnRedoMove.Enabled = m_controller.CanRedo;
+			m_csgm.PlayerUndidMove();
+			//m_btnUndoMove.Enabled = m_controller.CanUndo;
+			//m_btnRedoMove.Enabled = m_controller.CanRedo;
 		}
 
 		private void m_btnRedoMove_Click(object sender, System.EventArgs e)
 		{
-			Action a = m_controller.RedoAction();
-
-			m_btnUndoMove.Enabled = m_controller.CanUndo;
-			m_btnRedoMove.Enabled = m_controller.CanRedo;
+			m_csgm.PlayerRedidMove();
+			//m_btnUndoMove.Enabled = m_controller.CanUndo;
+			//m_btnRedoMove.Enabled = m_controller.CanRedo;
 		}
 
 		private void m_btnEndMoves_Click(object sender, System.EventArgs e)
@@ -394,6 +507,13 @@ namespace BuckRogers.Interface
 
 			m_currentMoveTerritories.Clear();
 
+			m_mlbMoves.Items.Clear();
+			m_mlbMoves.Refresh();
+			m_mlbTransports.Items.Clear();
+			m_mlbTransports.Refresh();
+			m_unitsToMove.Clear();
+
+			m_csgm.PlayerFinishedMoving();
 			/*
 			if (MoveModeChanged != null)
 			{
@@ -405,6 +525,7 @@ namespace BuckRogers.Interface
 			}
 			*/
 
+			/*
 			m_controller.FinalizeCurrentPlayerMoves();
 			if (m_controller.NextPlayer())
 			{
@@ -415,16 +536,8 @@ namespace BuckRogers.Interface
 			else
 			{
 				RefreshPlayerOrder();
-			}
-
-			m_btnUndoMove.Enabled = m_controller.CanUndo;
-			m_btnRedoMove.Enabled = m_controller.CanRedo;
-
-			m_mlbMoves.Items.Clear();
-			m_mlbMoves.Refresh();
-			m_mlbTransports.Items.Clear();
-			m_mlbTransports.Refresh();
-			m_unitsToMove.Clear();
+			}	
+			*/
 		}
 
 		private void m_lbCurrentMoves_DoubleClick(object sender, System.EventArgs e)
@@ -463,6 +576,61 @@ namespace BuckRogers.Interface
 		#endregion
 
 		#region external event handlers
+
+		void OnClientUpdateMessage(object sender, ClientUpdateEventArgs e)
+		{
+			switch (e.MessageType)
+			{
+				case GameMessage.PlacementPhaseEnded:
+				{
+					m_chkLoadTransports.Location = new Point(0, 134);
+					break;
+				}
+				case GameMessage.MovementPhaseStarted:
+				{
+					// need to have this at a late stage, since GC.Options isn't
+					// set by the time MP's constructor is called
+					if (GameController.Options.IsNetworkGame)
+					{
+						m_lbPlayerOrder.ShowPlayerLocation = true;
+					}
+
+
+					goto case GameMessage.NextPlayer;
+				}
+				case GameMessage.NextPlayer:
+				{
+					if(m_controller.CurrentPhase != GamePhase.Movement)
+					{
+						return;
+					}
+
+					m_currentMoveTerritories.Clear();
+
+					RefreshPlayerOrder();
+
+					if(ClientSideGameManager.IsLocalOrActive)
+					{
+						m_enabled = true;
+						m_moveMode = MoveMode.StartMove;
+					}
+					else
+					{
+						m_enabled = false;
+						m_moveMode = MoveMode.None;
+					}
+
+					if (MoveModeChanged != null)
+					{
+						MoveModeEventArgs mmea = new MoveModeEventArgs();
+						mmea.MoveMode = m_moveMode;
+
+						MoveModeChanged(this, mmea);
+					}
+					break;
+				}
+			}
+		}
 
 		public void TerritoryClicked(Territory t, TerritoryEventArgs tcea)
 		{
@@ -514,8 +682,23 @@ namespace BuckRogers.Interface
 
 			if (tlf.DialogResult != DialogResult.OK)
 			{
+				// actions were undone and disappeared, so effectively
+				// nothing happened
 				return;
 			}
+
+			List<TransportAction> actions = new List<TransportAction>();
+
+			while(tlf.TransferInfo.Count > 0)
+			{
+				TransportAction ta = (TransportAction)tlf.TransferInfo.Pop();
+				actions.Add(ta);
+			}
+
+			actions.Reverse();
+
+			m_csgm.PlayerTransportedUnits(actions);
+			
 
 			m_mlbMoves.Refresh();
 			m_mlbTransports.Refresh();
@@ -606,8 +789,8 @@ namespace BuckRogers.Interface
 						m_currentMoveTerritories.Add(t);
 						m_lbCurrentMoves.Items.Add(t.Name);
 
-						m_chkLoadTransports.Enabled = false;
-						m_btnEndMoves.Enabled = false;
+						//m_chkLoadTransports.Enabled = false;
+						//m_btnEndMoves.Enabled = false;
 					}
 				}
 				// right mouse button
@@ -706,19 +889,21 @@ namespace BuckRogers.Interface
 				{
 					m_controller.AddAction(ma);
 
-					m_btnUndoMove.Enabled = m_controller.CanUndo;
-					m_btnRedoMove.Enabled = m_controller.CanRedo;
+					m_csgm.PlayerMovedUnits(ma);
+
+					//m_btnUndoMove.Enabled = m_controller.CanUndo;
+					//m_btnRedoMove.Enabled = m_controller.CanRedo;
 
 					m_handSelectedUnits.Clear();
 					m_currentMoveTerritories.Clear();
 					m_lbCurrentMoves.Items.Clear();
 					
 
-					m_btnCancelMove.Enabled = false;
-					m_btnAcceptMoves.Enabled = false;
+					//m_btnCancelMove.Enabled = false;
+					//m_btnAcceptMoves.Enabled = false;
 					
-					m_btnEndMoves.Enabled = true;
-					m_chkLoadTransports.Enabled = true;
+					//m_btnEndMoves.Enabled = true;
+					//m_chkLoadTransports.Enabled = true;
 
 					m_unitsToMoveCounts.Clear();
 
@@ -733,8 +918,8 @@ namespace BuckRogers.Interface
 						m_lbCurrentMoves.Items.Add(terr.Name);
 					}
 
-					m_btnCancelMove.Enabled = true;
-					m_btnAcceptMoves.Enabled = true;
+					//m_btnCancelMove.Enabled = true;
+					//m_btnAcceptMoves.Enabled = true;
 
 					m_btnAcceptMoves.Focus();
 				}
@@ -1074,7 +1259,9 @@ namespace BuckRogers.Interface
 		public void BeginMovement()
 		{
 			m_currentMoveTerritories.Clear();
+			
 
+			/*
 			if (MoveModeChanged != null)
 			{
 				MoveModeEventArgs mmea = new MoveModeEventArgs();
@@ -1083,9 +1270,7 @@ namespace BuckRogers.Interface
 
 				MoveModeChanged(this, mmea);
 			}
-
-			m_chkLoadTransports.Location = new Point(0, 134);
-
+			*/
 		}
 
 		private void RemoveTerritoryFromMove()
@@ -1126,14 +1311,14 @@ namespace BuckRogers.Interface
 			m_lbCurrentMoves.Items.Clear();
 			m_currentMoveTerritories.Clear();
 
-			m_btnCancelMove.Enabled = false;
-			m_btnAcceptMoves.Enabled = false;
-			m_btnEndMoves.Enabled = true;
+			//m_btnCancelMove.Enabled = false;
+			//m_btnAcceptMoves.Enabled = false;
+			//m_btnEndMoves.Enabled = true;
 
-			m_chkLoadTransports.Enabled = true;
+			//m_chkLoadTransports.Enabled = true;
 
-			m_btnUndoMove.Enabled = m_controller.CanUndo;
-			m_btnRedoMove.Enabled = m_controller.CanRedo;
+			//m_btnUndoMove.Enabled = m_controller.CanUndo;
+			//m_btnRedoMove.Enabled = m_controller.CanRedo;
 
 			ResetMovementInfo();
 		}
@@ -1142,8 +1327,10 @@ namespace BuckRogers.Interface
 
 		#region action list functions
 
-		public void RemoveActionFromList(Action a)
+		public void RemoveActionFromList(object sender, StatusUpdateEventArgs suea)//Action a)
 		{
+			Action a = suea.Action;
+
 			if (a is MoveAction)
 			{
 				m_mlbMoves.Items.Remove(0);
@@ -1155,12 +1342,14 @@ namespace BuckRogers.Interface
 				m_mlbTransports.Refresh();
 			}
 
-			m_btnUndoMove.Enabled = m_controller.CanUndo;
-			m_btnRedoMove.Enabled = m_controller.CanRedo;
+			//m_btnUndoMove.Enabled = m_controller.CanUndo;
+			//m_btnRedoMove.Enabled = m_controller.CanRedo;
 		}
 
-		public void AddActionToList(Action a)
+		public void AddActionToList(object sender, StatusUpdateEventArgs suea)//Action a)
 		{
+			Action a = suea.Action;
+
 			if(a is MoveAction)
 			{
 				MoveAction ma = (MoveAction)a;
@@ -1255,14 +1444,13 @@ namespace BuckRogers.Interface
 
 		public void DisableMovePanel()
 		{
-			m_mlbMoves.Items.Clear();
-			m_mlbTransports.Items.Clear();
+			
 
-			m_btnAcceptMoves.Enabled = false;
-			m_btnCancelMove.Enabled = false;
-			m_btnEndMoves.Enabled = false;
-			m_btnRedoMove.Enabled = false;
-			m_btnUndoMove.Enabled = false;
+			//m_btnAcceptMoves.Enabled = false;
+			//m_btnCancelMove.Enabled = false;
+			//m_btnEndMoves.Enabled = false;
+			//m_btnRedoMove.Enabled = false;
+			//m_btnUndoMove.Enabled = false;
 		}
 
 		public void EnableMovePanel()
@@ -1270,7 +1458,8 @@ namespace BuckRogers.Interface
 			// Assume that we're in the middle of a normal turn.  Currently, the active
 			// player's MoveActions from this turn are not saved, just the current position
 			// of his units.  So, we don't need to worry about Undo/Redo.
-			m_btnEndMoves.Enabled = true;
+			//m_btnEndMoves.Enabled = true;
+			//m_chkLoadTransports.Enabled = true;
 		}
 
 		#endregion

@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Text;
 using System.Xml;
 using System.Collections.Generic;
+using System.IO;
 
 using BuckRogers.Networking;
 
@@ -27,7 +28,7 @@ namespace BuckRogers
 	}
 	//public delegate bool StatusUpdateHandler(object sender, StatusUpdateEventArgs suea);
 	public delegate void DisplayActionHandler(Action a);
-	public delegate void TerritoryUnitsChangedHandler(object sender, TerritoryUnitsEventArgs tuea);
+	//public delegate void TerritoryUnitsChangedHandler(object sender, TerritoryUnitsEventArgs tuea);
 	public delegate void PlayersCreatedHandler();
 	
 	public class GameController
@@ -37,16 +38,21 @@ namespace BuckRogers
 		public event EventHandler<TerritoryEventArgs> TerritoryOwnerChanged = delegate { };
 		public event EventHandler<TerritoryUnitsEventArgs> TerritoryUnitsChanged = delegate { };
 
+		public event EventHandler<StatusUpdateEventArgs> ActionAdded = delegate { };
+		public event EventHandler<StatusUpdateEventArgs> ActionUndone = delegate { };
+		public event EventHandler<StatusUpdateEventArgs> PlayersCreated = delegate { };
+		public event EventHandler<StatusUpdateEventArgs> UpdateTerritory = delegate { };
+
 		/*
 		public event TerritoryOwnerChangedHandler TerritoryOwnerChanged;
 		public event TerritoryUnitsChangedHandler TerritoryUnitsChanged;
 		public event StatusUpdateHandler StatusUpdate;
 		*/
 
-		public event DisplayActionHandler ActionAdded;
-		public event DisplayActionHandler ActionUndone;
-		public event PlayersCreatedHandler PlayersCreated;
-		public TerritoryUpdateHandler UpdateTerritory;
+		//public event DisplayActionHandler ActionAdded;
+		//public event DisplayActionHandler ActionUndone;
+		//public event PlayersCreatedHandler PlayersCreated;
+		//public TerritoryUpdateHandler UpdateTerritory;
 
 		#endregion
 
@@ -69,7 +75,7 @@ namespace BuckRogers
 			set { this.m_turnNumber = value; }
 		}
 
-		public System.Collections.ArrayList PlayerOrder
+		public List<Player> PlayerOrder
 		{
 			get { return this.m_currentPlayerOrder; }
 			set { this.m_currentPlayerOrder = value; }
@@ -141,12 +147,13 @@ namespace BuckRogers
 			set { m_options = value; }
 		}
 
+		
 		public System.Xml.XmlDocument Gamelog
 		{
 			get { return this.m_gamelog; }
 			set { this.m_gamelog = value; }
 		}
-
+		
 		public string ValidationMessage
 		{
 			get { return m_validationMessage; }
@@ -162,23 +169,24 @@ namespace BuckRogers
 		// Player list assumes players in clockwise order
 		private Player[] m_players;
 		private Player m_winner;
-		private ArrayList m_currentPlayerOrder;
-		public ArrayList m_rollResults;
-		private ArrayList m_rollList;
-		private ArrayList m_checkedActions;
-		private ArrayList m_undoneActions;
-		private Hashtable m_alteredTerritories;
+		private List<Player> m_currentPlayerOrder;
+		private List<TurnRoll> m_rollResults;
+		private List<TurnRoll> m_rollList;
+		private List<Action> m_checkedActions;
+		private List<Action> m_undoneActions;
+		//private Hashtable m_alteredTerritories;
+		private List<Territory> m_alteredTerritories;
 		private int m_turnNumber;
 		private int m_idxCurrentPlayer;
 		private bool m_redoingAction;
 		private GamePhase m_phase;
 		private static GameOptions m_options = new GameOptions();
 		private XmlDocument m_gamelog;
-		private XmlElement m_rootNode;
-		private XmlElement m_xeTurns;
-		private XmlElement m_xeCurrentTurn;
-		private XmlElement m_xeCurrentMovement;
-		private XmlElement m_xeCurrentPlayer;
+		//private XmlElement m_rootNode;
+		//private XmlElement m_xeTurns;
+		//private XmlElement m_xeCurrentTurn;
+		//private XmlElement m_xeCurrentMovement;
+		//private XmlElement m_xeCurrentPlayer;
 
 		private string m_validationMessage;
 
@@ -217,10 +225,11 @@ namespace BuckRogers
 		{
 			m_map = new GameMap();
 
-			m_checkedActions = new ArrayList();
-			m_undoneActions = new ArrayList();
-			m_alteredTerritories = new Hashtable();
-			m_currentPlayerOrder = new ArrayList();
+			m_checkedActions = new List<Action>();
+			m_undoneActions = new List<Action>();
+			m_alteredTerritories = new List<Territory>();
+			//m_currentPlayerOrder = new ArrayList();
+			m_currentPlayerOrder = new List<Player>();
 			m_winner = Player.NONE;
 			m_turnNumber = 0;	
 
@@ -263,7 +272,11 @@ namespace BuckRogers
 
 			if (PlayersCreated != null)
 			{
-				PlayersCreated();
+				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+				suea.StatusInfo = StatusInfo.PlayersCreated;
+
+				EventsHelper.Fire(PlayersCreated, this, suea);
+				//PlayersCreated();
 			}
 		}
 
@@ -272,6 +285,7 @@ namespace BuckRogers
 		#region Logging functions
 		public void InitGamelog()
 		{
+			/*
 			m_gamelog = new XmlDocument();
 			m_rootNode = m_gamelog.CreateElement("Game");
 			m_gamelog.AppendChild(m_rootNode);
@@ -332,10 +346,13 @@ namespace BuckRogers
 			}
 
 			m_gamelog.Save(@"gamelog.xml");
+			*/
+
 		}
 
 		public void LogInitialPlacements()
 		{
+			/*
 			XmlNode setup = m_rootNode.GetElementsByTagName("Setup")[0];
 
 			XmlElement placement = m_gamelog.CreateElement("Placement");
@@ -368,10 +385,12 @@ namespace BuckRogers
 			m_xeTurns = m_gamelog.CreateElement("Turns");
 			m_rootNode.AppendChild(m_xeTurns);
 			m_gamelog.Save("gamelog.xml");
+			*/
 		}
 
 		public void LogNextTurn()
 		{
+			/*
 			m_xeCurrentTurn = m_gamelog.CreateElement("Turn");
 			XmlAttribute number = m_gamelog.CreateAttribute("number");
 			XmlAttribute order = m_gamelog.CreateAttribute("order");
@@ -381,7 +400,7 @@ namespace BuckRogers
 			for(int i = 0; i < m_currentPlayerOrder.Count; i++)
 				//foreach(Player p in m_currentPlayerOrder)
 			{
-				Player p = (Player)m_currentPlayerOrder[i];
+				Player p = m_currentPlayerOrder[i];
 				int idx = Array.IndexOf(m_players, p);
 				if(i != 0)
 				{
@@ -397,10 +416,12 @@ namespace BuckRogers
 
 			m_xeCurrentMovement = m_gamelog.CreateElement("Movement");
 			m_xeCurrentTurn.AppendChild(m_xeCurrentMovement);
+			*/
 		}
 
 		public void LogNextPlayer()
 		{
+			/*
 			m_xeCurrentPlayer = m_gamelog.CreateElement("Player");
 			XmlAttribute name = m_gamelog.CreateAttribute("name");
 			name.Value = CurrentPlayer.Name;
@@ -414,15 +435,17 @@ namespace BuckRogers
 			{
 
 			}
-			
+			*/
 		}
 
 		public void SaveLog()
 		{
+			/*
 			if(m_gamelog != null)
 			{
 				m_gamelog.Save("gamelog.xml");
 			}
+			*/
 			
 		}
 
@@ -651,9 +674,10 @@ namespace BuckRogers
 		// Handles randomization of player order using rolls
 		public void RollForInitiative(bool checkRollParity)
 		{
-			m_currentPlayerOrder = new ArrayList();
-			m_rollResults = new ArrayList();
-			m_rollList = new ArrayList();
+			//m_currentPlayerOrder = new ArrayList();
+			m_currentPlayerOrder = new List<Player>();
+			m_rollResults = new List<TurnRoll>();
+			m_rollList = new List<TurnRoll>();
 			
 			ArrayList players = new ArrayList();//m_players);
 
@@ -666,7 +690,7 @@ namespace BuckRogers
 			}
 			RollAndCheckForTies(players);
 
-			m_rolls = (TurnRoll[])m_rollList.ToArray(typeof(TurnRoll));
+			m_rolls = m_rollList.ToArray();
 
 			TurnRoll topRoll = (TurnRoll)m_rollResults[0];
 			m_currentPlayerOrder.Add(topRoll.Player);
@@ -950,6 +974,11 @@ namespace BuckRogers
 
 		public Action UndoAction()
 		{
+			return UndoAction(true);
+		}
+
+		public Action UndoAction(bool canRedo)
+		{
 			if(m_checkedActions.Count == 0)
 			{
 				throw new ActionException("No actions to undo");
@@ -971,12 +1000,23 @@ namespace BuckRogers
 			}
 
 			m_checkedActions.Remove(action);
-			m_undoneActions.Add(action);
+
+			if(canRedo)
+			{
+				m_undoneActions.Add(action);
+			}
+			
 			
 
 			if(ActionUndone != null)
 			{
-				ActionUndone(action);
+				//ActionUndone(action);
+
+				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+				suea.StatusInfo = StatusInfo.ActionUndone;
+				suea.Action = action;
+
+				EventsHelper.Fire(ActionUndone, this, suea);
 			}
 			// TODO: Need to refresh the appropriate territories here
 
@@ -1357,9 +1397,15 @@ namespace BuckRogers
 			m_checkedActions.Add(move);
 			if (ActionAdded != null)
 			{
-				ActionAdded(move);
+				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+				suea.StatusInfo = StatusInfo.ActionAdded;
+				suea.Action = move;
+
+				EventsHelper.Fire(ActionAdded, this, suea);
+				//ActionAdded(move);
 			}
 
+			/*
 			XmlElement xeAction = m_gamelog.CreateElement("Action");
 			XmlAttribute xaMoveType = m_gamelog.CreateAttribute("type");
 			xaMoveType.Value = "Movement";
@@ -1398,6 +1444,7 @@ namespace BuckRogers
 			}
 
 			m_xeCurrentPlayer.AppendChild(xeAction);
+			*/
 
 			if (TerritoryUnitsChanged != null)
 			{
@@ -1407,7 +1454,8 @@ namespace BuckRogers
 				tuea.Added = false;
 				tuea.Player = move.Owner;
 
-				m_alteredTerritories[move.StartingTerritory] = null;
+				//m_alteredTerritories[move.StartingTerritory] = null;
+				m_alteredTerritories.Add(move.StartingTerritory);
 
 				EventsHelper.Fire(TerritoryUnitsChanged, this, tuea);
 				//TerritoryUnitsChanged(this, tuea);
@@ -1416,13 +1464,14 @@ namespace BuckRogers
 				tuea.Territory = finalTerritory;
 				tuea.Added = true;
 
-				m_alteredTerritories[finalTerritory] = null;
+				//m_alteredTerritories[finalTerritory] = null;
+				m_alteredTerritories.Add(finalTerritory);
 
 				EventsHelper.Fire(TerritoryUnitsChanged, this, tuea);
 				//TerritoryUnitsChanged(this, tuea);
 			}
 
-
+			/*
 			Territory destination = (Territory)move.Territories[move.Territories.Count - 1];
 			if (destination.Type == TerritoryType.Ground)
 			{
@@ -1474,6 +1523,7 @@ namespace BuckRogers
 					}
 				}
 			}
+			*/
 		}
 
 		private void UndoMoveAction(MoveAction ma)
@@ -1541,12 +1591,20 @@ namespace BuckRogers
 			}
 
 			m_checkedActions.Add(ta);
-			m_alteredTerritories[ta.StartingTerritory] = null;
+			//m_alteredTerritories[ta.StartingTerritory] = null;
+			m_alteredTerritories.Add(ta.StartingTerritory);
+
 			if (ActionAdded != null)
 			{
-				ActionAdded(ta);
+				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+				suea.StatusInfo = StatusInfo.ActionAdded;
+				suea.Action = ta;
+
+				EventsHelper.Fire(ActionAdded, this, suea);
+				//ActionAdded(ta);
 			}
 
+			/*
 			XmlElement xeAction = m_gamelog.CreateElement("Action");
 			XmlAttribute xaType = m_gamelog.CreateAttribute("type");
 			xaType.Value = "Transport";
@@ -1581,7 +1639,7 @@ namespace BuckRogers
 			xeAction.AppendChild(xeUnits);
 
 			m_xeCurrentPlayer.AppendChild(xeAction);
-
+			*/
 
 			if (TerritoryUnitsChanged != null)
 			{
@@ -2015,23 +2073,25 @@ namespace BuckRogers
 
 		public void ExecuteProduction()
 		{
-			XmlElement xeProduction = m_gamelog.CreateElement("Production");
+			//XmlElement xeProduction = m_gamelog.CreateElement("Production");
 
 			foreach(Player p in m_currentPlayerOrder)
 			{
 				if(!p.Disabled)
 				{
+					/*
 					XmlElement xePlayer = m_gamelog.CreateElement("Player");
 					XmlAttribute xaName = m_gamelog.CreateAttribute("name");
 					xaName.Value = p.Name;
 					xePlayer.Attributes.Append(xaName);
-
+					*/
 					UnitCollection factories = p.Units.GetUnits(UnitType.Factory);
 
 					foreach(Factory f in factories)
 					{
 						if(f.CanProduce && f.ProductionType != UnitType.None)
 						{
+							/*
 							XmlElement xeUnit = m_gamelog.CreateElement("Unit");
 							XmlAttribute xaType = m_gamelog.CreateAttribute("type");
 							XmlAttribute xaNumber = m_gamelog.CreateAttribute("number");
@@ -2048,17 +2108,19 @@ namespace BuckRogers
 							xeUnit.Attributes.Append(xaDestination);
 
 							xePlayer.AppendChild(xeUnit);
+							*/
 
-							m_alteredTerritories[f.DestinationTerritory] = null;
+							//m_alteredTerritories[f.DestinationTerritory] = null;
+							m_alteredTerritories.Add(f.DestinationTerritory);
 							f.ExecuteProduction();
 						}
 					}
 					
-					xeProduction.AppendChild(xePlayer);
+					//xeProduction.AppendChild(xePlayer);
 				}
 			}
 
-			m_xeCurrentTurn.AppendChild(xeProduction);
+			//m_xeCurrentTurn.AppendChild(xeProduction);
 		}
 
 		#endregion
@@ -2066,8 +2128,10 @@ namespace BuckRogers
 		// TODO Uncontrolled Killer Satellites become the property of the new planetary owner
 
 		#region Next turn/player functions
-		public void NextTurn()
+		public bool NextTurn(params Player[] nextTurnPlayerOrder)
 		{
+			bool moreTurns = true;
+
 			m_checkedActions.Clear();
 			m_undoneActions.Clear();
 
@@ -2084,9 +2148,14 @@ namespace BuckRogers
 
 			if(UpdateTerritory != null)
 			{
-				foreach(Territory t in m_alteredTerritories.Keys)
+				foreach(Territory t in m_alteredTerritories)
 				{
-					UpdateTerritory(t);
+					//UpdateTerritory(t);
+					StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+					suea.StatusInfo = StatusInfo.UpdateTerritory;
+					suea.Territories.Add(t);
+
+					EventsHelper.Fire(UpdateTerritory, this, suea);
 				}
 
 			}
@@ -2108,8 +2177,19 @@ namespace BuckRogers
 
 			if(!CheckVictory())
 			{
-				RollForInitiative();
-
+				if(m_turnNumber > 0)
+				{
+					if (nextTurnPlayerOrder.Length == 0)
+					{
+						RollForInitiative();
+					}
+					else
+					{
+						m_currentPlayerOrder.Clear();
+						m_currentPlayerOrder.AddRange(nextTurnPlayerOrder);
+					}
+				}
+				
 				m_idxCurrentPlayer = 0;
 				m_turnNumber++;
 
@@ -2117,11 +2197,13 @@ namespace BuckRogers
 
 				
 				LogNextTurn();
-				LogNextPlayer();
-				
+				LogNextPlayer();				
 			}			
 			else
 			{
+				moreTurns = false;
+
+				/*
 				if(StatusUpdate != null)
 				{
 					StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
@@ -2131,8 +2213,12 @@ namespace BuckRogers
 					EventsHelper.Fire(StatusUpdate, this, suea);
 					//StatusUpdate(this, suea);
 				}
+				*/
 			}
-			m_gamelog.Save("gamelog.xml");
+
+			//m_gamelog.Save("gamelog.xml");
+
+			return moreTurns;
 		}
 
 		private bool CheckVictory()
@@ -2344,10 +2430,37 @@ namespace BuckRogers
 			m_checkedActions.Clear();
 			
 			bool morePlayers = true;
+
             if(m_idxCurrentPlayer == m_currentPlayerOrder.Count - 1)
 			{
+				bool isSetupPhase = (m_phase == GamePhase.Setup);
+
+				if(isSetupPhase)
+				{
+					bool allPlayersFinishedPlacing = true;
+					foreach(Player p in m_currentPlayerOrder)
+					{
+						UnitCollection uc = p.Units.GetUnits(Territory.NONE);
+
+						if(uc.Count > 0)
+						{
+							allPlayersFinishedPlacing = false;
+							break;
+						}
+					}
+
+					if(allPlayersFinishedPlacing)
+					{
+						morePlayers = false;
+					}
+				}
+				else
+				{
+					morePlayers = false;
+				}
+
 				m_idxCurrentPlayer = 0;
-				morePlayers = false;
+
 			}
 			else
 			{
@@ -2356,6 +2469,7 @@ namespace BuckRogers
 				LogNextPlayer();
 			}
 
+			/*
 			if(!morePlayers)
 			{
 				// returns false if we don't go to the next phase, so to 
@@ -2363,19 +2477,54 @@ namespace BuckRogers
 				// Makes sense in a twisted way at the moment
 				morePlayers = !CheckNextPhase();
 			}
+			*/
 
-			if(StatusUpdate != null)
+			if(morePlayers)
 			{
 				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
-				suea.Player = (Player)m_currentPlayerOrder[m_idxCurrentPlayer];
+				suea.Player = m_currentPlayerOrder[m_idxCurrentPlayer];
 
-				
-				suea.StatusInfo = morePlayers ? StatusInfo.NextPlayer : StatusInfo.NextPhase;
+				//suea.StatusInfo = morePlayers ? StatusInfo.NextPlayer : StatusInfo.NextPhase;
+				suea.StatusInfo = StatusInfo.NextPlayer;
 				EventsHelper.Fire(StatusUpdate, this, suea);
-				//StatusUpdate(this, suea);
 			}
+			
+			//StatusUpdate(this, suea);
 
 			return morePlayers;
+		}
+
+		public void StartNextPhase()
+		{
+			switch (m_phase)
+			{
+				case GamePhase.Setup:
+				{
+					m_phase = GamePhase.Movement;
+					break;
+				}
+				case GamePhase.Movement:
+				{
+					m_phase = GamePhase.Combat;
+
+					FindBattles();
+					break;
+				}
+				case GamePhase.Combat:
+				{
+					m_phase = GamePhase.Production;
+					break;
+				}
+				case GamePhase.Production:
+				{
+					m_phase = GamePhase.EndTurn;
+					break;
+				}
+			}
+
+			StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+			suea.StatusInfo = StatusInfo.NextPhase;
+			EventsHelper.Fire(StatusUpdate, this, suea);
 		}
 
 		public bool CheckNextPhase()
@@ -2436,18 +2585,98 @@ namespace BuckRogers
 
 		#region savegame functions
 
+		private string CreateGameOptionsMessage()
+		{
+			MemoryStream stream = new MemoryStream();
+			XmlWriterSettings xws = new XmlWriterSettings();
+			xws.OmitXmlDeclaration = true;
+			XmlWriter xw = XmlWriter.Create(stream, xws);
+
+
+
+			//xw.WriteStartDocument();
+			CreateGameOptionsXML(xw);
+
+			xw.WriteEndDocument();
+
+			xw.Flush();
+
+			stream.Position = 0;
+			StreamReader sr = new StreamReader(stream);
+
+			return sr.ReadToEnd();
+		}
+
+		private void CreateGameOptionsXML(XmlWriter xw)
+		{
+			xw.WriteStartElement("GameOptions");
+
+			xw.WriteAttributeString("victoryCondition", m_options.WinningConditions.ToString());
+			xw.WriteAttributeString("numberOfPlayers", this.Players.Length.ToString());
+
+			if (m_options.WinningConditions == VictoryConditions.NumberOfTerritories)
+			{
+				xw.WriteAttributeString("numTerritories", m_options.NumTerritoriesNeeded.ToString());
+			}
+
+			foreach (GameOption option in m_options.OptionalRules)
+			{
+				if (option.Value)
+				{
+					xw.WriteStartElement("OptionalRule");
+
+					xw.WriteAttributeString("name", option.Name);
+					xw.WriteAttributeString("value", option.Value.ToString());
+
+
+					foreach (OptionValue ov in option.Values)
+					{
+						xw.WriteStartElement("Value");
+
+						xw.WriteAttributeString("name", ov.Name);
+						xw.WriteAttributeString("min", ov.Min.ToString());
+						xw.WriteAttributeString("max", ov.Max.ToString());
+						xw.WriteAttributeString("start", ov.Start.ToString());
+						xw.WriteAttributeString("value", ov.Value.ToString());
+
+						xw.WriteEndElement();
+					}
+
+					xw.WriteEndElement();
+				}
+
+			}
+
+			xw.WriteEndElement();
+		}
+
 		public void SaveGame(string filename)
 		{
 			XmlDocument savegame = new XmlDocument();
 
-			XmlElement xeRoot = savegame.CreateElement("Game");
+			XmlElement xeRoot = savegame.CreateElement("SavedGame");
 			savegame.AppendChild(xeRoot);
 
 			XmlElement xeSetup = savegame.CreateElement("Setup");
+			xeRoot.AppendChild(xeSetup);
+
+			XmlElement xeGameOptions = savegame.CreateElement("GameOptions");
+
+
+			XmlDocument optionsDocument = new XmlDocument();
+			string optionsXML = CreateGameOptionsMessage();
+			optionsDocument.LoadXml(optionsXML);
+
+			XmlElement xeOtherGameOptions = (XmlElement)optionsDocument.GetElementsByTagName("GameOptions")[0];
+
+			xeGameOptions = (XmlElement)savegame.ImportNode(xeOtherGameOptions, true);
+			xeSetup.AppendChild(xeGameOptions);
+
+			/*
 			XmlElement xeOptions = savegame.CreateElement("Options");
 
 			xeSetup.AppendChild(xeOptions);
-			xeRoot.AppendChild(xeSetup);
+			
 
 			XmlElement xeRules = savegame.CreateElement("OptionalRules");
 			xeOptions.AppendChild(xeRules);
@@ -2487,6 +2716,7 @@ namespace BuckRogers
 				xaNumTerritories.Value = m_options.NumTerritoriesNeeded.ToString();
 				xeVictory.Attributes.Append(xaNumTerritories);
 			}
+			*/
 
 			/*
 			XmlElement xeStartingScenario = savegame.CreateElement("StartingScenario");
@@ -2598,15 +2828,34 @@ namespace BuckRogers
 			//xeRoot.AppendChild(xeCurrentTurn);
 
 			XmlElement xeCurrentTurn = savegame.CreateElement("CurrentTurn");
-			XmlAttribute xaTurnNumber = (XmlAttribute)savegame.ImportNode(m_xeCurrentTurn.Attributes["number"], false);
-			XmlAttribute xaTurnOrder = (XmlAttribute)savegame.ImportNode(m_xeCurrentTurn.Attributes["order"], false);
+			XmlAttribute xaTurnNumber = savegame.CreateAttribute("number");
+			xaTurnNumber.Value = this.TurnNumber.ToString();
+
+			XmlAttribute xaTurnOrder = savegame.CreateAttribute("order");
+
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < m_currentPlayerOrder.Count; i++)
+			//foreach(Player p in m_currentPlayerOrder)
+			{
+				Player p = m_currentPlayerOrder[i];
+				int idx = Array.IndexOf(m_players, p);
+				if (i != 0)
+				{
+					sb.Append(",");
+				}
+				sb.Append(idx);
+			}
+			xaTurnOrder.Value = sb.ToString();
+
+			//XmlAttribute xaTurnNumber = (XmlAttribute)savegame.ImportNode(m_xeCurrentTurn.Attributes["number"], false);
+			//XmlAttribute xaTurnOrder = (XmlAttribute)savegame.ImportNode(m_xeCurrentTurn.Attributes["order"], false);
 			xeCurrentTurn.Attributes.Append(xaTurnNumber);
 			xeCurrentTurn.Attributes.Append(xaTurnOrder);
 
-			XmlElement xeMostRecentPlayer = (XmlElement)m_xeCurrentMovement.ChildNodes[m_xeCurrentMovement.ChildNodes.Count - 1];
-			XmlAttribute xaPlayerName = xeMostRecentPlayer.Attributes["name"];
+			//XmlElement xeMostRecentPlayer = (XmlElement)m_xeCurrentMovement.ChildNodes[m_xeCurrentMovement.ChildNodes.Count - 1];
+			//XmlAttribute xaPlayerName = xeMostRecentPlayer.Attributes["name"];
 			XmlAttribute xaCurrentPlayer = savegame.CreateAttribute("currentplayer");
-			xaCurrentPlayer.Value = xaPlayerName.Value;
+			xaCurrentPlayer.Value = CurrentPlayer.Name;//xaPlayerName.Value;
 			xeCurrentTurn.Attributes.Append(xaCurrentPlayer);
 
 			xeRoot.AppendChild(xeCurrentTurn);
@@ -2616,12 +2865,17 @@ namespace BuckRogers
 			savegame.Save(filename);
 		}
 
-		
 		public void LoadGame(string filename)
 		{
 			XmlDocument savegame = new XmlDocument();
 			savegame.Load(filename);
 
+			LoadGame(savegame);
+		}
+
+		
+		public void LoadGame(XmlDocument savegame)
+		{
 			m_currentPlayerOrder.Clear();
 
 			foreach(OrbitalSystem os in m_map.Planets)
@@ -2639,7 +2893,64 @@ namespace BuckRogers
 				}
 			}
 
-			GameOptions options = new GameOptions();
+			m_options = new GameOptions();
+
+			XmlElement xeGameOptions = (XmlElement)savegame.GetElementsByTagName("GameOptions")[0];
+
+			string victoryString = xeGameOptions.Attributes["victoryCondition"].Value;
+			string numPlayersString = xeGameOptions.Attributes["numberOfPlayers"].Value;
+
+			VictoryConditions vc = (VictoryConditions)Enum.Parse(typeof(VictoryConditions), victoryString);
+			int numPlayers = int.Parse(numPlayersString);
+
+			m_options.NumPlayers = numPlayers;
+			m_options.WinningConditions = vc;
+
+			if(xeGameOptions.Attributes["numTerritories"] != null)
+			{
+				m_options.NumTerritoriesNeeded = int.Parse(xeGameOptions.Attributes["numTerritories"].Value);
+			}
+
+			XmlNodeList xnlOptions = xeGameOptions.GetElementsByTagName("OptionalRule");
+
+			foreach (XmlElement xeOption in xnlOptions)
+			{
+				string optionName = xeOption.Attributes["name"].Value;
+				//string optionDescription = xeOption.Attributes["description"].Value;
+
+				GameOption currentOption = (GameOption)m_options.OptionalRules.Get(optionName);
+				//m_options.OptionalRules.Add(optionName, currentOption);
+
+				// only receiving enabled options anyway
+				currentOption.Value = true;
+
+				XmlNodeList xnlValues = xeOption.GetElementsByTagName("Value");
+
+				foreach (XmlElement xeValue in xnlValues)
+				{
+					string valueName = xeValue.Attributes["name"].Value;
+					//string valueDescription = xeValue.Attributes["description"].Value;
+
+					string sMin = xeValue.Attributes["min"].Value;
+					string sMax = xeValue.Attributes["max"].Value;
+					string sStart = xeValue.Attributes["start"].Value;
+					string sValue = xeValue.Attributes["value"].Value;
+
+					//OptionValue ov = new OptionValue();
+					OptionValue ov = (OptionValue)currentOption.Values.Get(valueName);
+					ov.Name = valueName;
+					//ov.Description = valueDescription;
+
+					ov.Min = int.Parse(sMin);
+					ov.Max = int.Parse(sMax);
+					ov.Start = int.Parse(sStart);
+					ov.Value = int.Parse(sValue);
+
+					//currentOption.Values.Add(valueName, ov);
+				}
+			}
+
+			/*
 			XmlElement optionalRules = (XmlElement)savegame.GetElementsByTagName("OptionalRules")[0];
 
 			foreach(GameOption option in options.OptionalRules)
@@ -2679,12 +2990,11 @@ namespace BuckRogers
 				XmlAttribute xaNumTerritories = xeVictory.Attributes["territories"];
 				options.NumTerritoriesNeeded = Int32.Parse(xaNumTerritories.Value);
 			}
-
-			m_options = options;
+			*/
 
 			XmlElement xePlayers = (XmlElement)savegame.GetElementsByTagName("Players")[0];
 
-			int numPlayers = xePlayers.ChildNodes.Count;
+			//int numPlayers = xePlayers.ChildNodes.Count;
 			string[] playerNames = new string[numPlayers];
 			Color[] playerColors = new Color[numPlayers];
 
@@ -2849,20 +3159,36 @@ namespace BuckRogers
 
 			if(PlayersCreated != null)
 			{
-				PlayersCreated();
+				//PlayersCreated();
+				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+				suea.StatusInfo = StatusInfo.PlayersCreated;
+
+				EventsHelper.Fire(PlayersCreated, this, suea);
 			}
 
 			if(UpdateTerritory != null)
 			{
+				List<Territory> affectedTerritories = new List<Territory>();
+
+
 				foreach(Player p in m_players)
 				{
 					ArrayList al = p.Units.GetUnitTerritories();
 
 					foreach(Territory t in al)
 					{
-						UpdateTerritory(t);
+						if(!affectedTerritories.Contains(t))
+						{
+							affectedTerritories.Add(t);
+						}
 					}
 				}
+
+				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+				suea.StatusInfo = StatusInfo.UpdateTerritory;
+				suea.Territories = affectedTerritories;
+				EventsHelper.Fire(UpdateTerritory, this, suea);
+
 			}
 
 			InitGamelog();

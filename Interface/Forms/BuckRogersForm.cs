@@ -166,7 +166,6 @@ namespace BuckRogers.Interface
 			}
 
 			m_csgm = new ClientSideGameManager(m_gameClient, m_controller, m_battleController);
-			m_csgm.ClientUpdateMessage += new EventHandler<ClientUpdateEventArgs>(OnClientUpdateMessage);
 
 
 #if DEBUGCOMBAT
@@ -303,6 +302,7 @@ namespace BuckRogers.Interface
 			m_informationPanel.Controller = m_controller;
 
 			m_placementPanel.GameManager = m_csgm;
+			m_movePanel.GameManager = m_csgm;
 
 
 			m_yesno = new YesNoForm();
@@ -319,17 +319,19 @@ namespace BuckRogers.Interface
 			m_controller.StatusUpdate += new EventHandler<StatusUpdateEventArgs>(OnStatusUpdate); //StatusUpdateHandler(OnStatusUpdate);
 			m_battleController.StatusUpdate += new EventHandler<StatusUpdateEventArgs>(OnStatusUpdate);
 
-			m_controller.ActionAdded += new DisplayActionHandler(m_movePanel.AddActionToList);
-			m_controller.ActionUndone += new DisplayActionHandler(m_movePanel.RemoveActionFromList);
+			m_controller.ActionAdded += new EventHandler<StatusUpdateEventArgs>(m_movePanel.AddActionToList);//new DisplayActionHandler(m_movePanel.AddActionToList);
+			m_controller.ActionUndone += new EventHandler<StatusUpdateEventArgs>(m_movePanel.RemoveActionFromList);//new DisplayActionHandler(m_movePanel.RemoveActionFromList);
 			m_controller.TerritoryUnitsChanged += new EventHandler<TerritoryUnitsEventArgs>(m_informationPanel.UpdateUnitInfo);//new TerritoryUnitsChangedHandler(m_informationPanel.UpdateUnitInfo);
 			m_controller.TerritoryUnitsChanged += new EventHandler<TerritoryUnitsEventArgs>(m_map.UpdateUnitInfo);//new TerritoryUnitsChangedHandler(m_map.UpdateUnitInfo);
 
-			m_battleController.UpdateTerritory += new TerritoryUpdateHandler(m_map.IconManager.RefreshIcons);
-			m_controller.UpdateTerritory += new TerritoryUpdateHandler(m_map.IconManager.RefreshIcons);
+			m_battleController.UpdateTerritory += new EventHandler<StatusUpdateEventArgs>(m_map.IconManager.RefreshIcons);//new TerritoryUpdateHandler(m_map.IconManager.RefreshIcons);
+			m_controller.UpdateTerritory += new EventHandler<StatusUpdateEventArgs>(m_map.IconManager.RefreshIcons);//new TerritoryUpdateHandler(m_map.IconManager.RefreshIcons);
 			m_battleController.TerritoryUnitsChanged += new EventHandler<TerritoryUnitsEventArgs>(m_map.UpdateUnitInfo);//new TerritoryUnitsChangedHandler(m_map.UpdateUnitInfo);
 
-			m_controller.PlayersCreated += new PlayersCreatedHandler(m_map.IconManager.CreateIcons);
+			m_controller.PlayersCreated += new EventHandler<StatusUpdateEventArgs>(m_map.IconManager.CreateIcons);//new PlayersCreatedHandler(m_map.IconManager.CreateIcons);
 
+			m_csgm.ClientUpdateMessage += new EventHandler<ClientUpdateEventArgs>(OnClientUpdateMessage);
+			m_csgm.TransportLanded += new EventHandler<StatusUpdateEventArgs>(OnStatusUpdate);
 		}
 
 		#endregion
@@ -697,6 +699,28 @@ namespace BuckRogers.Interface
 					m_placementPanel.Initialize();
 					break;
 				}
+				case GameMessage.PlacementPhaseEnded:
+				{
+					tabControl1.TabPages.Clear();
+					tabControl1.TabPages.Add(m_tpAction);
+					tabControl1.TabPages.Add(m_tpTerritory);
+					tabControl1.TabPages.Add(m_tpInformation);
+
+					break;
+				}
+				case GameMessage.CombatPhaseStarted:
+				{
+					m_menuFileSave.Enabled = false;
+					statusBar1.Panels[0].Text = "Combat phase";
+
+					if (m_combatForm2 == null)
+					{
+						m_combatForm2 = new CombatForm2D(m_controller, m_battleController, m_map.IconManager);
+					}
+
+					m_combatForm2.ShowDialog();
+					break;
+				}
 			}
 		}
 
@@ -901,7 +925,8 @@ namespace BuckRogers.Interface
 				}
 				case StatusInfo.TransportLanded:
 				{
-					string message = "You have loaded transports in " + suea.Territory.Name + ".  Unload them?";
+					Territory location = suea.Territories[0];
+					string message = "You have loaded transports in " + location.Name + ".  Unload them?";
 					DialogResult dr = MessageBox.Show(message, "Unload Transports?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
 					result = (dr == DialogResult.Yes);
