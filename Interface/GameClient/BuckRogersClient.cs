@@ -8,13 +8,17 @@ using System.Drawing;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
-using RedCorona.Net;
-using BuckRogers;
-using BuckRogers.Networking;
 using System.Xml;
 using System.Text.RegularExpressions;
-using Azuria.Controls.ColorPicker;
 using System.IO;
+using System.Diagnostics;
+
+using RedCorona.Net;
+using Azuria.Controls.ColorPicker;
+
+using BuckRogers;
+using BuckRogers.Networking;
+using ISquared.Debugging;
 #endregion
 
 namespace BuckRogers.Networking
@@ -33,12 +37,12 @@ namespace BuckRogers.Networking
 
 		private bool m_connected;
 		private bool m_gameStarted;
-		
 
+		private int m_clientID;
+		
 		private Hashtable m_otherClients;
 		private Hashlist m_players;
 
-		
 		#endregion
 
 		#region properties
@@ -60,8 +64,6 @@ namespace BuckRogers.Networking
 			get { return m_gameStarted; }
 			set { m_gameStarted = value; }
 		}
-
-		
 
 		public GameOptions GameOptions
 		{
@@ -87,7 +89,14 @@ namespace BuckRogers.Networking
 			m_options = new GameOptions();
 			m_options.IsNetworkGame = true;
 
+			m_clientID = 0;
+
 			m_rePrivateMessage = new Regex(@"Private Message\r\nSender: (?<sender>.+)\r\nRecipient: (?<recipient>.+)\r\n(?<messageText>.+)");
+
+			TextTraceListener.Prefix = "Buck Rogers Client";
+			TextTraceListener.FlushType = TextTraceListener.LogFlushType.AutoClose;
+
+			TextTraceListener.InstallListener();
 		}
 
 		#endregion
@@ -134,6 +143,8 @@ namespace BuckRogers.Networking
 			string logMessage = string.Empty;
 			GameMessage netMessage = (GameMessage)code;
 
+			LogNetworkMessage(netMessage, message);
+
 			if (code >= (uint)GameMessage.GameplayMessagesFirst)
 			{
 				ClientUpdateEventArgs cuea = new ClientUpdateEventArgs();
@@ -150,7 +161,7 @@ namespace BuckRogers.Networking
 				{
 					logMessage = "Connection acknowledged.";
 
-					OnConnectionAcknowledged();
+					OnConnectionAcknowledged(message);
 					break;
 				}
 				case GameMessage.PublicChatMessage:
@@ -289,8 +300,21 @@ namespace BuckRogers.Networking
 			
 		}
 
-		private void OnConnectionAcknowledged()
+		private void LogNetworkMessage(GameMessage netMessage, string message)
 		{
+			string logMessage = string.Format("Client ID: {0}, GameMessage: {1}, Message text: {2}", 
+												m_clientID, netMessage.ToString(), message);
+			Debug.WriteLine(logMessage);
+		}
+
+		private void OnConnectionAcknowledged(string message)
+		{
+			int index = message.IndexOf("#");
+			string idString = message.Substring(index + 1);
+			m_clientID = int.Parse(idString);
+
+			
+			TextTraceListener.Prefix = "Buck Rogers Client "  + idString;
 			RaiseSimpleUpdateEvent(string.Empty, GameMessage.ConnectionAcknowledged, null);
 
 			m_connection.SendMessage((uint)GameMessage.ClientListRequested, new byte[0]);

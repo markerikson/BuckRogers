@@ -35,8 +35,10 @@
   <ItemGroup>
     <Compile Include="EventsHelper.cs" />
     <Compile Include="GenericEventHandler.cs" />
+    <Compile Include="HiResDateTime.cs" />
     <Compile Include="NetworkMessaging.cs" />
     <Compile Include="Sockets.cs" />
+    <Compile Include="TextLogger.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
