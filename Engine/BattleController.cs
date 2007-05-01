@@ -69,11 +69,13 @@ namespace BuckRogers
 		private CombatResult m_cumulativeResult;
 		private CombatResult m_lastResult;
 		private BattleStatus m_status;
+
 		private XmlDocument m_gamelog;
 		private XmlNode m_xnTurns;
 		private XmlElement m_xeCurrentTurn;
 		private XmlElement m_xeBattles;
 		private XmlElement m_xeCurrentBattle;
+
 		private int m_numRolls;
 		private bool m_attacksAlwaysHit;
 
@@ -174,16 +176,20 @@ namespace BuckRogers
 		{
 			// also need to update the m_xeCurrentTurn each turn
 
+			/*
 			m_gamelog = m_controller.Gamelog;
 			m_xnTurns = m_gamelog.GetElementsByTagName("Turns")[0];
+			*/
 		}
 
 		public void LogNewTurn()
 		{
+			/*
 			XmlNode lastChild = m_xnTurns.LastChild;
 			m_xeCurrentTurn = (XmlElement)lastChild;
 			m_xeBattles = m_gamelog.CreateElement("Battles");
 			m_xeCurrentTurn.AppendChild(m_xeBattles);
+			*/
 		}
 
 		#endregion
@@ -323,13 +329,7 @@ namespace BuckRogers
 					}
 				}
 
-				
-
-				/*
-				
-				*/
-
-				XmlElement xeUnits = m_gamelog.CreateElement("Casualties");
+				//XmlElement xeUnits = m_gamelog.CreateElement("Casualties");
 
 				ArrayList players = m_cumulativeResult.Casualties.GetPlayersWithUnits();
 
@@ -337,13 +337,16 @@ namespace BuckRogers
 				{
 					UnitCollection playerCasualties = m_cumulativeResult.Casualties.GetUnits(p);
 
+					/*
 					XmlElement xePlayer = m_gamelog.CreateElement("Player");
 					XmlAttribute xaPlayerName = m_gamelog.CreateAttribute("name");
 					xaPlayerName.Value = p.Name;
 					xePlayer.Attributes.Append(xaPlayerName);
+					*/
 
 					foreach(Unit u in playerCasualties)
 					{
+						/*
 						XmlElement xeUnit = m_gamelog.CreateElement("Unit");
 						XmlAttribute xaType = m_gamelog.CreateAttribute("type");
 						XmlAttribute xaUnitID = m_gamelog.CreateAttribute("id");
@@ -354,21 +357,24 @@ namespace BuckRogers
 						xeUnit.Attributes.Append(xaUnitID);
 						
 						xePlayer.AppendChild(xeUnit);
+						*/
 
 						u.Destroy();
 					}
 
-					xeUnits.AppendChild(xePlayer);
+					//xeUnits.AppendChild(xePlayer);
 				}
 
-				m_xeCurrentBattle.AppendChild(xeUnits);
+				//m_xeCurrentBattle.AppendChild(xeUnits);
 			}
 
 			if(m_currentBattle != null)
 			{
+				/*
 				XmlAttribute xaNumRolls = m_gamelog.CreateAttribute("rolls");
 				xaNumRolls.Value = m_numRolls.ToString();
 				m_xeCurrentBattle.Attributes.Append(xaNumRolls);
+				*/
 			}
 
 			// if this is not the first battle, check to see if the territory changed owners
@@ -486,6 +492,7 @@ namespace BuckRogers
 				m_turnResult = new CombatResult();				
 				m_survivingUnits = new UnitCollection();
 				
+				/*
 				m_xeCurrentBattle = m_gamelog.CreateElement("Battle");
 				m_xeBattles.AppendChild(m_xeCurrentBattle);
 
@@ -495,6 +502,7 @@ namespace BuckRogers
 				xaLocation.Value = m_currentBattle.Territory.Name;
 				m_xeCurrentBattle.Attributes.Append(xaBattleType);
 				m_xeCurrentBattle.Attributes.Append(xaLocation);
+				*/
 
 				m_status = BattleStatus.Setup;
 

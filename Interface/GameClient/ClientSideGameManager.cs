@@ -154,9 +154,9 @@ namespace BuckRogers.Networking
 				case GameMessage.PlayerPlacedUnits:
 				{
 					string[] messageInfo = e.MessageText.Split('|');
+					
 					Player p = m_controller.GetPlayer(messageInfo[0]);
-
-					if(p.Location == PlayerLocation.Local)
+					if(p.IsLocal)
 					{
 						break;
 					}
@@ -231,9 +231,7 @@ namespace BuckRogers.Networking
 				}
 				case GameMessage.PlayerUndidMove:
 				{
-					Player p = m_controller.GetPlayer(e.MessageText);
-
-					if(p.Location == PlayerLocation.Local)
+					if (m_controller.GetPlayer(e.MessageText).IsLocal)
 					{
 						break;
 					}
@@ -243,9 +241,7 @@ namespace BuckRogers.Networking
 				}
 				case GameMessage.PlayerRedidMove:
 				{
-					Player p = m_controller.GetPlayer(e.MessageText);
-
-					if (p.Location == PlayerLocation.Local)
+					if (m_controller.GetPlayer(e.MessageText).IsLocal)
 					{
 						break;
 					}
@@ -255,9 +251,7 @@ namespace BuckRogers.Networking
 				}
 				case GameMessage.PlayerFinishedMoving:
 				{
-					Player p = m_controller.GetPlayer(e.MessageText);
-
-					if (p.Location == PlayerLocation.Local)
+					if (m_controller.GetPlayer(e.MessageText).IsLocal)
 					{
 						break;
 					}
@@ -295,7 +289,7 @@ namespace BuckRogers.Networking
 
 		private void CheckIfActiveClient()
 		{
-			m_isActiveClient = (m_controller.CurrentPlayer.Location == PlayerLocation.Local);
+			m_isActiveClient = m_controller.CurrentPlayer.IsLocal;
 		}
 
 		private void RaiseSimpleUpdateEvent(GameMessage message, string text, Player p)
@@ -540,9 +534,7 @@ namespace BuckRogers.Networking
 			XmlElement xeTransportActions = (XmlElement)xd.GetElementsByTagName("TransportActions")[0];
 			string playerName = xeTransportActions.Attributes["player"].Value;
 
-			Player p = m_controller.GetPlayer(playerName);
-
-			if(p.Location == PlayerLocation.Local)
+			if (m_controller.GetPlayer(playerName).IsLocal)
 			{
 				return;
 			}
@@ -598,8 +590,7 @@ namespace BuckRogers.Networking
 			string territoryName = xeMoveAction.Attributes["territory"].Value;
 
 			Player p = m_controller.GetPlayer(playerName);
-
-			if(p.Location == PlayerLocation.Local)
+			if (p.IsLocal)
 			{
 				return;
 			}
@@ -699,6 +690,8 @@ namespace BuckRogers.Networking
 			else
 			{
 				bool morePlayersLeft = m_controller.NextPlayer();
+				RaiseSimpleUpdateEvent(GameMessage.NextPlayer, string.Empty, null);
+				CheckIfActiveClient();
 
 				if(!morePlayersLeft)
 				{
@@ -828,6 +821,7 @@ namespace BuckRogers.Networking
 				m_controller.FinalizeCurrentPlayerMoves();
 
 				bool morePlayers = m_controller.NextPlayer();
+				RaiseSimpleUpdateEvent(GameMessage.NextPlayer, string.Empty, null);
 
 				if (!morePlayers)
 				{

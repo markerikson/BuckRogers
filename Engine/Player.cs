@@ -53,6 +53,14 @@ namespace BuckRogers
 			set { m_location = value; }
 		}
 
+		public bool IsLocal
+		{
+			get
+			{
+				return m_location == PlayerLocation.Local;
+			}
+		}
+
 		public Player(string name, Color color)
 		{
 			Init(name, color);

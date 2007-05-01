@@ -23,12 +23,13 @@ using CommandManagement;
 
 namespace BuckRogers.Interface
 {
-	public delegate void MoveModeChangedHandler(object sender, MoveModeEventArgs mmea);
+	//public delegate void MoveModeChangedHandler(object sender, MoveModeEventArgs mmea);
 
 	public class MovePanel : System.Windows.Forms.UserControl
 	{
 		#region private members
-		public event MoveModeChangedHandler MoveModeChanged;
+		//public event MoveModeChangedHandler MoveModeChanged;
+		public event EventHandler<MoveModeEventArgs> MoveModeChanged;
 
 		private MoveMode m_moveMode;
 
@@ -553,23 +554,23 @@ namespace BuckRogers.Interface
 
 		private void m_chkLoadTransports_CheckedChanged(object sender, EventArgs e)
 		{
-			if (MoveModeChanged != null)
+			//if (MoveModeChanged != null)
+			//{
+			MoveModeEventArgs mmea = new MoveModeEventArgs();
+
+			if (m_chkLoadTransports.Checked)
 			{
-				MoveModeEventArgs mmea = new MoveModeEventArgs();
-
-				if (m_chkLoadTransports.Checked)
-				{
-					mmea.MoveMode = MoveMode.StartTransport;
-					m_moveMode = MoveMode.StartTransport;
-				}
-				else
-				{
-					mmea.MoveMode = MoveMode.StartMove;
-					m_moveMode = MoveMode.StartMove;
-				}
-
-				MoveModeChanged(this, mmea);
+				mmea.MoveMode = MoveMode.StartTransport;
+				m_moveMode = MoveMode.StartTransport;
 			}
+			else
+			{
+				mmea.MoveMode = MoveMode.StartMove;
+				m_moveMode = MoveMode.StartMove;
+			}
+			EventsHelper.Fire(MoveModeChanged, this, mmea);
+				//MoveModeChanged(this, mmea);
+			//}
 		}	
 
 
@@ -620,13 +621,14 @@ namespace BuckRogers.Interface
 						m_moveMode = MoveMode.None;
 					}
 
-					if (MoveModeChanged != null)
-					{
+					//if (MoveModeChanged != null)
+					//{
 						MoveModeEventArgs mmea = new MoveModeEventArgs();
 						mmea.MoveMode = m_moveMode;
 
-						MoveModeChanged(this, mmea);
-					}
+						EventsHelper.Fire(MoveModeChanged, this, mmea);
+						//MoveModeChanged(this, mmea);
+					//}
 					break;
 				}
 			}

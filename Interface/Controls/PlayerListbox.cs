@@ -68,7 +68,7 @@ namespace BuckRogers.Interface
 				{
 					string extraText;
 
-					if (p.Location == PlayerLocation.Local)
+					if (p.IsLocal)
 					{
 						extraText = " (L)";
 					}

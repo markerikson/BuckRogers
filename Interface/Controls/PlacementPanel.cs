@@ -23,7 +23,8 @@ namespace BuckRogers.Interface
 	public class PlacementPanel : System.Windows.Forms.UserControl
 	{
 		#region private members
-		public event MoveModeChangedHandler MoveModeChanged;
+		//public event MoveModeChangedHandler MoveModeChanged;
+		public event EventHandler<MoveModeEventArgs> MoveModeChanged;
 
 		private System.ComponentModel.Container components = null;
 
@@ -714,21 +715,21 @@ namespace BuckRogers.Interface
 
 					m_btnChooseUnits.Visible = showChooseUnitsButton;
 
-					if (MoveModeChanged != null)
-					{
-						MoveModeEventArgs mmea = new MoveModeEventArgs();
 
-						if(m_controller.CurrentPlayer.Location == PlayerLocation.Local)
-						{
-							mmea.MoveMode = MoveMode.StartPlacement;
-						}
-						else
-						{
-							mmea.MoveMode = MoveMode.None;
-						}
-						
-						MoveModeChanged(this, mmea);
+					MoveModeEventArgs mmea = new MoveModeEventArgs();
+
+					if(m_controller.CurrentPlayer.Location == PlayerLocation.Local)
+					{
+						mmea.MoveMode = MoveMode.StartPlacement;
 					}
+					else
+					{
+						mmea.MoveMode = MoveMode.None;
+					}
+
+					EventsHelper.Fire(MoveModeChanged, this, mmea);
+					//MoveModeChanged(this, mmea);
+
 
 					break;
 				}

@@ -222,9 +222,10 @@ namespace BuckRogers.Interface
 						//m_placementPanel.RefreshAvailableUnits();
 						m_controller.InitGamelog();
 
+						m_clickMode = MapClickMode.Normal;
 						m_placementPanel.Initialize();
 
-						m_clickMode = MapClickMode.Normal;
+						
 
 						statusBar1.Panels[0].Text = "Current player: " + m_controller.CurrentPlayer.Name;
 					}
@@ -291,8 +292,8 @@ namespace BuckRogers.Interface
 			m_map.ScrollControl.ViewPosition = ulCorner;
 			m_cbCenterLocations.SelectedIndex = 0;
 
-			m_movePanel.MoveModeChanged += new MoveModeChangedHandler(OnMoveModeChanged);
-			m_placementPanel.MoveModeChanged += new MoveModeChangedHandler(OnMoveModeChanged);
+			m_movePanel.MoveModeChanged += new EventHandler<MoveModeEventArgs>(OnMoveModeChanged);//new MoveModeChangedHandler(OnMoveModeChanged);
+			m_placementPanel.MoveModeChanged += new EventHandler<MoveModeEventArgs>(OnMoveModeChanged);//new MoveModeChangedHandler(OnMoveModeChanged);
 
 			m_movePanel.Map = m_map;
 
@@ -718,6 +719,10 @@ namespace BuckRogers.Interface
 						m_combatForm2 = new CombatForm2D(m_controller, m_battleController, m_map.IconManager);
 					}
 
+					CombatPreviewForm cpf = new CombatPreviewForm();
+					cpf.DisplayBattles(m_controller.Battles);
+					cpf.ShowDialog();
+
 					m_combatForm2.ShowDialog();
 					break;
 				}
@@ -1104,6 +1109,8 @@ namespace BuckRogers.Interface
 			tabControl1.TabPages.Add(m_tpAction);
 			tabControl1.TabPages.Add(m_tpTerritory);
 			tabControl1.TabPages.Add(m_tpInformation);
+
+			m_movePanel.PanelEnabled= true;
 
 			m_menuFileSave.Enabled = true;
 

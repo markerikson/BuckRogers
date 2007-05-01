@@ -55,6 +55,9 @@
       <DependentUpon>CombatControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\CustomColorCollection.cs" />
+    <Compile Include="Controls\EmptyMessageListview.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\InformationPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -96,6 +99,12 @@
     </Compile>
     <Compile Include="Forms\CombatForm2D.Designer.cs">
       <DependentUpon>CombatForm2D.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\CombatPreviewForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\CombatPreviewForm.Designer.cs">
+      <DependentUpon>CombatPreviewForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\GameLobbyForm.cs">
       <SubType>Form</SubType>
@@ -239,6 +248,10 @@
     <EmbeddedResource Include="Controls\ClientLobbyPanel.resx">
       <DependentUpon>ClientLobbyPanel.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\CombatPreviewForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CombatPreviewForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\UnitIconLegendForm.resx">
       <SubType>Designer</SubType>

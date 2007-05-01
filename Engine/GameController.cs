@@ -2522,9 +2522,11 @@ namespace BuckRogers
 				}
 			}
 
+			/*
 			StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
 			suea.StatusInfo = StatusInfo.NextPhase;
 			EventsHelper.Fire(StatusUpdate, this, suea);
+			*/
 		}
 
 		public bool CheckNextPhase()

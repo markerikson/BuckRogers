@@ -496,10 +496,14 @@ namespace BuckRogers.Interface
 				ClearIcons(t);
 			}
 
-			m_map.Canvas.Invoke((MethodInvoker)delegate
+			if(m_map.Canvas.Handle != IntPtr.Zero)
 			{
-				m_map.Canvas.Refresh();
-			});
+				m_map.Canvas.Invoke((MethodInvoker)delegate
+				{
+					m_map.Canvas.Refresh();
+				});
+			}
+			
 		}
 
 		public void ClearIcons(Territory t)
