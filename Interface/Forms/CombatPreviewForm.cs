@@ -29,6 +29,7 @@ namespace BuckRogers.Interface
 		
 		private void m_btnOK_Click(object sender, EventArgs e)
 		{
+			m_timer.Stop();
 			this.DialogResult = DialogResult.OK;
 			this.Close();
 		}

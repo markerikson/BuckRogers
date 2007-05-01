@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using BuckRogers.Networking;
 
 namespace BuckRogers.Interface
 {
@@ -21,7 +22,7 @@ namespace BuckRogers.Interface
 		private GameController m_controller;
 		private BattleController m_battleController;
 
-		public CombatForm2D(GameController gc, BattleController bc, IconManager im)
+		public CombatForm2D(ClientSideGameManager csgm, GameController gc, BattleController bc, IconManager im)
 		{
 			InitializeComponent();
 
@@ -30,7 +31,7 @@ namespace BuckRogers.Interface
 			m_controller = gc;
 			m_battleController = bc;
 
-			m_combat = new CombatControl(gc, bc, im);
+			m_combat = new CombatControl(csgm, gc, bc, im);
 
 			m_combat.Anchor =
 				AnchorStyles.Bottom |

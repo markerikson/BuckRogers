@@ -19,6 +19,7 @@ using UMD.HCIL.PiccoloX.Components;
 using UMD.HCIL.Piccolo.Event;
 
 using BuckRogers;
+using BuckRogers.Networking;
 
 #endregion
 
@@ -68,6 +69,7 @@ namespace BuckRogers.Interface
 	{
 		#region private members
 
+		private ClientSideGameManager m_csgm;
 		private GameController m_controller;
 		private BattleController m_battleController;
 		private IconManager m_iconManager;
@@ -113,9 +115,16 @@ namespace BuckRogers.Interface
 
 		#region constructor
 
-		public CombatControl(GameController gc, BattleController bc, IconManager im)
+		public CombatControl(ClientSideGameManager csgm, GameController gc, BattleController bc, IconManager im)
 		{
 			InitializeComponent();
+
+			m_csgm = csgm;
+			m_controller = gc;
+			m_battleController = bc;
+			m_iconManager = im;
+
+			m_csgm.ClientUpdateMessage += new EventHandler<ClientUpdateEventArgs>(OnClientUpdateMessage);
 
 			m_combatMessages = new ArrayList();
 
@@ -157,10 +166,6 @@ namespace BuckRogers.Interface
 			Font font = m_tooltip.Font;
 			m_tooltip.Font = new Font(font.Name, font.SizeInPoints - 2, FontStyle.Bold);
 			c.AddChild(m_tooltip);
-
-			m_controller = gc;
-			m_battleController = bc;
-			m_iconManager = im;
 
 			PlayerUnitDisplay.IconManager = im;
 
@@ -279,9 +284,20 @@ namespace BuckRogers.Interface
 			m_battleController.BattleStatusUpdated += new EventHandler<StatusUpdateEventArgs>(OnBattleStatusUpdated);//new BattleStatusUpdateHandler(OnBattleStatusUpdated);
 		}
 
+		
+
 		#endregion
 
 		#region event handlers
+
+		void OnClientUpdateMessage(object sender, ClientUpdateEventArgs e)
+		{
+			switch(e.MessageType)
+			{
+				default:
+					break;
+			}
+		}
 
 		private void OnLabelMouseEnter(object sender, PInputEventArgs e)
 		{
@@ -1060,6 +1076,9 @@ namespace BuckRogers.Interface
 			m_displayedPage = 0;
 
 			m_battleController.LogNewTurn();
+
+			m_csgm.ReadyToBeginCombat();
+
 			m_battleController.NextBattle();
 		}
 

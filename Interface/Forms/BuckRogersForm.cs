@@ -1,3 +1,5 @@
+#define DEBUGCOMBAT
+
 #region using directives
 using System;
 using System.Drawing;
@@ -716,7 +718,7 @@ namespace BuckRogers.Interface
 
 					if (m_combatForm2 == null)
 					{
-						m_combatForm2 = new CombatForm2D(m_controller, m_battleController, m_map.IconManager);
+						m_combatForm2 = new CombatForm2D(m_csgm, m_controller, m_battleController, m_map.IconManager);
 					}
 
 					CombatPreviewForm cpf = new CombatPreviewForm();
@@ -852,7 +854,7 @@ namespace BuckRogers.Interface
 
 							if (m_combatForm2 == null)
 							{
-								m_combatForm2 = new CombatForm2D(m_controller, m_battleController, m_map.IconManager);
+								m_combatForm2 = new CombatForm2D(m_csgm, m_controller, m_battleController, m_map.IconManager);
 							}
 
 							m_controller.FindBattles();

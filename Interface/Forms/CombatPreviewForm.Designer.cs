@@ -92,8 +92,11 @@ namespace BuckRogers.Interface
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(466, 235);
+			this.ControlBox = false;
 			this.Controls.Add(this.m_btnOK);
 			this.Controls.Add(this.m_lvBattles);
+			this.MaximizeBox = false;
+			this.MinimizeBox = false;
 			this.Name = "CombatPreviewForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Battles";

@@ -20,7 +20,7 @@ using CommandManagement;
 
 namespace BuckRogers.Networking
 {
-	class ClientSideGameManager
+	public class ClientSideGameManager
 	{
 		#region private members
 		public event EventHandler<ClientUpdateEventArgs> ClientUpdateMessage = delegate { };
@@ -830,7 +830,17 @@ namespace BuckRogers.Networking
 			}
 		}
 
+		public void ReadyToBeginCombat()
+		{
+			if(m_isNetworkGame)
+			{
+				m_gameClient.SendMessageToServer(GameMessage.ClientReadyForCombat, string.Empty);
+			}
+		}
+
 		#endregion
+
+
 
 		
 	}
