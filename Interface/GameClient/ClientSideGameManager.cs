@@ -269,15 +269,21 @@ namespace BuckRogers.Networking
 					}
 					else
 					{
+						m_battleController.Battles = m_controller.Battles;
 						RaiseSimpleUpdateEvent(GameMessage.CombatPhaseStarted, string.Empty, null);
 					}
+					break;
+				}
+				case GameMessage.NextBattle:
+				{
+					m_battleController.NextBattle();
 					break;
 				}
 				case GameMessage.CombatPhaseEnded:
 				{
 					m_controller.StartNextPhase();
 
-
+					RaiseSimpleUpdateEvent(GameMessage.CombatPhaseEnded, string.Empty, null);
 					break;
 				}
 			}
@@ -627,6 +633,11 @@ namespace BuckRogers.Networking
 			m_controller.AddAction(ma);
 		}
 
+		private string CreateCombatAttackMessage(CombatInfo ci)
+		{
+			throw new Exception("The method or operation is not implemented.");
+		}
+
 		#endregion
 
 		#region external API
@@ -836,9 +847,32 @@ namespace BuckRogers.Networking
 			{
 				m_gameClient.SendMessageToServer(GameMessage.ClientReadyForCombat, string.Empty);
 			}
+			else
+			{
+				RaiseLocalLoopbackEvent(GameMessage.NextBattle, string.Empty, null);
+			}
 		}
 
+		public void ExecuteCombatAttack(CombatInfo ci)
+		{
+			m_battleController.DoCombat(ci);
+
+			if(m_isNetworkGame)
+			{
+				string message = CreateCombatAttackMessage(ci);
+				m_gameClient.SendMessageToServer(GameMessage.CombatAttack, message);
+			}
+			else
+			{
+			}
+
+		}
+
+	
+
 		#endregion
+
+
 
 
 

@@ -71,10 +71,13 @@ namespace BuckRogers
 		private BattleStatus m_status;
 
 		private XmlDocument m_gamelog;
+
+		/*
 		private XmlNode m_xnTurns;
 		private XmlElement m_xeCurrentTurn;
 		private XmlElement m_xeBattles;
 		private XmlElement m_xeCurrentBattle;
+		*/
 
 		private int m_numRolls;
 		private bool m_attacksAlwaysHit;
@@ -252,20 +255,6 @@ namespace BuckRogers
 				m_status = BattleStatus.BattleComplete;
 				return;
 			}
-
-			/*
-			switch(m_currentBattle.Type)
-			{
-				case BattleType.KillerSatellite:
-				case BattleType.Bombing:
-				{
-					Player p = m_currentBattle.Player;
-					m_playerOrder.Remove(p);
-					m_playerOrder.Insert(0, p);
-					break;
-				}
-			}
-			*/
 		}
 
 		#endregion
@@ -559,10 +548,6 @@ namespace BuckRogers
 				// In that case, we need to remove the current battle and start the process over.
 				if (m_status == BattleStatus.BattleComplete)
 				{
-					//m_status = BattleStatus.BattleComplete;
-
-
-					//return true;
 					startedNextBattle = true;
 				}
 				else
@@ -576,103 +561,53 @@ namespace BuckRogers
 					switch (m_currentBattle.Type)
 					{
 						case BattleType.Normal:
-							{
-								/*
-								foreach(Player p in m_playerOrder)
-								{
-									UnitCollection uc = (UnitCollection)m_survivingUnits[p];
-									UnitCollection playerUnits = t.Units.GetUnits(p);
-									uc.AddAllUnits(playerUnits.GetCombatUnits());
-								}
-								*/
+						{
+							UnitCollection combatUnits = t.Units.GetCombatUnits();
+							m_survivingUnits.AddAllUnits(combatUnits);
 
-								UnitCollection combatUnits = t.Units.GetCombatUnits();
-								m_survivingUnits.AddAllUnits(combatUnits);
+							UpdateUnusedUnits();
+							DisplayUnitsByTerritory(m_survivingUnits);
 
-								UpdateUnusedUnits();
-								DisplayUnitsByTerritory(m_survivingUnits);
+							UnitCollection nonCombatUnits = new UnitCollection();
+							UnitCollection leaders = t.Units.GetUnits(UnitType.Leader);
+							UnitCollection factories = t.Units.GetUnits(UnitType.Factory);
 
-								UnitCollection nonCombatUnits = new UnitCollection();
-								UnitCollection leaders = t.Units.GetUnits(UnitType.Leader);
-								UnitCollection factories = t.Units.GetUnits(UnitType.Factory);
+							nonCombatUnits.AddAllUnits(leaders);
+							nonCombatUnits.AddAllUnits(factories);
 
-								nonCombatUnits.AddAllUnits(leaders);
-								nonCombatUnits.AddAllUnits(factories);
+							DisplayUnitsByTerritory(nonCombatUnits, DisplayCategory.NonCombatUnits);
 
-								DisplayUnitsByTerritory(nonCombatUnits, DisplayCategory.NonCombatUnits);
-
-								break;
-							}
+							break;
+						}
 						case BattleType.KillerSatellite:
-							{
-								UnitCollection satellites = t.Units.GetUnits(UnitType.KillerSatellite);
-								m_currentUnused.AddAllUnits(satellites);
-								UnitCollection defenders = t.Units.GetNonMatchingUnits(m_currentBattle.Player);
+						{
+							UnitCollection satellites = t.Units.GetUnits(UnitType.KillerSatellite);
+							m_currentUnused.AddAllUnits(satellites);
+							UnitCollection defenders = t.Units.GetNonMatchingUnits(m_currentBattle.Player);
 
-								//UnitCollection uc = null;
+							m_survivingUnits.AddAllUnits(satellites);
+							m_survivingUnits.AddAllUnits(defenders);
 
-								//uc = (UnitCollection)m_survivingUnits[m_currentPlayer];
-								//uc.AddAllUnits(satellites);
-								m_survivingUnits.AddAllUnits(satellites);
-								m_survivingUnits.AddAllUnits(defenders);
+							DisplayUnitsByTerritory(satellites);
+							DisplayUnitsByTerritory(defenders);
 
-								/*
-								foreach(Player p in defenders.GetPlayersWithUnits())
-								{
-									//uc = (UnitCollection)m_survivingUnits[p];
-									//uc.AddAllUnits(defenders.GetUnits(p));
-									m_survivingUnits.AddAllUnits(defenders)
-								}
-								*/
-								DisplayUnitsByTerritory(satellites);
-								DisplayUnitsByTerritory(defenders);
-
-								/*
-								if(UnitsToDisplay != null)
-								{
-									DisplayUnitsEventArgs duea = new DisplayUnitsEventArgs();
-									duea.Category = DisplayCategory.Attackers;
-									duea.Units = satellites;
-									UnitsToDisplay(this, duea);
-
-									duea = new DisplayUnitsEventArgs();
-									duea.Category = DisplayCategory.Defenders;
-									duea.Units = defenders;
-									UnitsToDisplay(this, duea);
-								}
-								*/
-								break;
-							}
+							break;
+						}
 						case BattleType.Bombing:
-							{
-								UnitCollection attackers = t.Units.GetUnits(UnitType.Battler, m_currentPlayer, null);//).GetUnits(UnitType.Battler);
-								UnitCollection defenders = m_controller.GetBombingTargets(t, m_currentPlayer);
+						{
+							UnitCollection attackers = t.Units.GetUnits(UnitType.Battler, m_currentPlayer, null);//).GetUnits(UnitType.Battler);
+							UnitCollection defenders = m_controller.GetBombingTargets(t, m_currentPlayer);
 
-								m_currentUnused.AddAllUnits(attackers);
+							m_currentUnused.AddAllUnits(attackers);
 
-								m_survivingUnits.AddAllUnits(attackers);
-								m_survivingUnits.AddAllUnits(defenders);
+							m_survivingUnits.AddAllUnits(attackers);
+							m_survivingUnits.AddAllUnits(defenders);
 
-								DisplayUnitsByTerritory(attackers);
-								DisplayUnitsByTerritory(defenders);
+							DisplayUnitsByTerritory(attackers);
+							DisplayUnitsByTerritory(defenders);
 
-								/*
-								if(UnitsToDisplay != null)
-								{
-									DisplayUnitsEventArgs duea = new DisplayUnitsEventArgs();
-									duea.Category = DisplayCategory.UnusedAttackers;
-									duea.Units = attackers;
-									UnitsToDisplay(this, duea);
-
-									duea = new DisplayUnitsEventArgs();
-									duea.Category = DisplayCategory.SurvivingDefenders;
-									duea.Units = defenders;
-									UnitsToDisplay(this, duea);
-								}
-								*/
-
-								break;
-							}
+							break;
+						}
 
 					}
 
@@ -685,14 +620,10 @@ namespace BuckRogers
 						suea.BattleStatus = m_status;
 
 						EventsHelper.Fire(BattleStatusUpdated, this, suea);
-						//BattleStatusUpdated(m_status);
 					}
 
-
-					//return true;
 					startedNextBattle = true;
 				}
-
 			}
 
 			if (!startedNextBattle)
@@ -712,16 +643,7 @@ namespace BuckRogers
 		public void ProcessAttackResults()
 		{
 			TurnResult.Casualties.AddAllUnits(LastResult.Casualties);
-			
-			/*
-			UnitCollection totalSurvivors = new UnitCollection();
-			foreach(Player p in LastResult.Casualties.GetPlayersWithUnits())
-			{
-				UnitCollection uc = (UnitCollection)SurvivingUnits[p];
-				uc.RemoveAllUnits(LastResult.Casualties.GetUnits(p));
-				totalSurvivors.AddAllUnits(uc);
-			}
-			*/
+
 			m_survivingUnits.RemoveAllUnits(LastResult.Casualties);
 
 			CurrentUnused.AddAllUnits(LastResult.UnusedAttackers);
@@ -735,12 +657,10 @@ namespace BuckRogers
 				{
 					ProcessTurnResults();
 					m_status = BattleStatus.BattleComplete;
-					//BattleStatusUpdated(m_status);
 				}
 				else
 				{
 					m_status = BattleStatus.RoundComplete;
-					//BattleStatusUpdated(m_status);
 				}
 
 				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
@@ -752,7 +672,6 @@ namespace BuckRogers
 			else if(CurrentUnused.Count == 0)
 			{
 				m_status = BattleStatus.RoundComplete;
-				//BattleStatusUpdated(m_status);
 
 				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
 				suea.StatusInfo = StatusInfo.BattleStatusUpdated;
@@ -763,7 +682,6 @@ namespace BuckRogers
 			else
 			{
 				m_status = BattleStatus.AttackComplete;
-				//DisplayUnits();
 			}
 		}
 
@@ -772,12 +690,11 @@ namespace BuckRogers
 			bool anotherPlayer = false;
 			switch(CurrentBattle.Type)
 			{
-					// only one turn / player for these types
+				// only one turn / player for these types
 				case BattleType.KillerSatellite:
 				case BattleType.Bombing:
 				{
 					NextTurn();
-					//DisplaySurvivingEnemies();
 					m_status = BattleStatus.BattleComplete;
 					break;
 				}
@@ -807,9 +724,6 @@ namespace BuckRogers
 						anotherPlayer = true;
 					}
 
-					//anotherPlayer = anotherTurn;
-
-					//DisplayUnits();
 					break;
 				}
 
@@ -887,27 +801,6 @@ namespace BuckRogers
 
 		public void DisplaySurvivingEnemies()
 		{
-			/*
-			foreach(Player p in m_playerOrder)
-			{
-				if(p == m_currentPlayer)
-				{
-					continue;
-				}
-
-				UnitCollection enemySurvivors = (UnitCollection)m_survivingUnits[p];
-
-				if(UnitsToDisplay != null)
-				{
-					DisplayUnitsEventArgs duea = new DisplayUnitsEventArgs();
-					duea.Category = DisplayCategory.SurvivingDefenders;
-					duea.Units = enemySurvivors;
-					
-					UnitsToDisplay(this, duea);
-				}
-			}
-			*/
-
 			UnitCollection enemySurvivors = m_survivingUnits.GetNonMatchingUnits(m_currentPlayer);
 
 			if(UnitsToDisplay != null)
@@ -1036,6 +929,18 @@ namespace BuckRogers
 
 		#region Combat functions
 
+		public void DoCombat(CombatInfo ci)
+		{
+			CombatResult cr = ExecuteCombat(ci);
+
+			StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+			suea.StatusInfo = StatusInfo.BattleStatusUpdated;
+			suea.BattleStatus = BattleStatus.AttackComplete;
+			suea.CombatResult = cr;
+
+			EventsHelper.Fire(BattleStatusUpdated, this, suea);
+		}
+
 		public CombatResult ExecuteCombat(CombatInfo ci)
 		{
 			CombatResult cr = new CombatResult();
@@ -1043,7 +948,6 @@ namespace BuckRogers
 			// it's basically a while loop - no incrementing of i, since this
 			// needs to go until all attackers are done or all defenders are destroyed, 
 			// and one unit will be removed from ci.Attackers each time through
-			//for(int i = 0; i < ci.Attackers.Count;)
 			while(ci.Attackers.Count > 0)
 			{
 				Unit attacker = (Unit)ci.Attackers[0];
@@ -1077,15 +981,6 @@ namespace BuckRogers
 					roll = 10;
 				}
 
-				ci.Attackers.RemoveUnit(attacker);
-
-				if(m_currentUnused.ContainsUnit(attacker))
-				{
-					m_currentUnused.RemoveUnit(attacker);
-				}
-
-				cr.UsedAttackers.AddUnit(attacker);
-
 				bool attackHit = (roll >= toHit);
 
 				if(m_attacksAlwaysHit)
@@ -1099,152 +994,66 @@ namespace BuckRogers
 				ar.Roll = roll;
 				ar.Hit = attackHit;
 				ar.Leader = ci.AttackingLeader;
+
 				cr.AttackResults.Add(ar);
 
-				//Console.WriteLine("To hit: " + toHit + ", roll: " + roll);
-				if(attackHit)
+				if(ci.Type == BattleType.KillerSatellite)
 				{
 					ci.Defenders.RemoveUnit(defender);
-					cr.Casualties.AddUnit(defender);
+
+					if(attackHit)
+					{
+						cr.Casualties.AddUnit(defender);
+					}
+					else
+					{
+						cr.Survivors.AddUnit(defender);
+					}
 
 					if(ci.Defenders.Count == 0)
 					{
-						break;
+						ci.Attackers.RemoveUnit(attacker);
+
+						if (m_currentUnused.ContainsUnit(attacker))
+						{
+							m_currentUnused.RemoveUnit(attacker);
+						}
+
+						cr.UsedAttackers.AddUnit(attacker);
 					}
 				}
+				else
+				{
+					ci.Attackers.RemoveUnit(attacker);
+
+					if (m_currentUnused.ContainsUnit(attacker))
+					{
+						m_currentUnused.RemoveUnit(attacker);
+					}
+
+					cr.UsedAttackers.AddUnit(attacker);
+
+					if (attackHit)
+					{
+						ci.Defenders.RemoveUnit(defender);
+						cr.Casualties.AddUnit(defender);
+
+						if (ci.Defenders.Count == 0)
+						{
+							break;
+						}
+					}
+				}				
 			}
 
-			cr.UnusedAttackers.AddAllUnits(ci.Attackers);
 			cr.Survivors.AddAllUnits(ci.Defenders);
+			cr.UnusedAttackers.AddAllUnits(ci.Attackers);
+			
 			
 			m_status = BattleStatus.AttackComplete;
 			return cr;
 		}
-
-		public CombatResult DoKillerSatelliteCombat(BattleInfo bi)
-		{
-			CombatResult cr = new CombatResult();
-
-			UnitCollection units = bi.Territory.Units;
-			UnitCollection satellites = units.GetUnits(UnitType.KillerSatellite);
-			Unit satellite = satellites[0];
-
-			UnitCollection targets = units.GetNonMatchingUnits(satellite.Owner);
-			UnitCollection leaders = units.GetUnits(UnitType.Leader);
-			UnitCollection attackerLeaders = leaders.GetUnits(satellite.Owner);
-
-			cr = new CombatResult();
-			UnitCollection individualTarget = new UnitCollection();
-			CombatInfo ci;
-
-			// Since ExecuteCombat() ends when all attacking units have fired, and there's
-			// only one attacking unit, we need to do a separate combat for each
-			// defending unit
-			for(int i = 0; i < targets.Count; i++)
-			{
-				ci = new CombatInfo();
-				individualTarget.Clear();
-				individualTarget.AddUnit(targets[i]);
-				ci.Defenders.AddAllUnits(individualTarget);
-				ci.Attackers.AddAllUnits(satellites);
-				ci.AttackingLeader = !attackerLeaders.Empty;
-						
-				CombatResult individualCR = ExecuteCombat(ci);
-
-				cr.AttackResults.AddRange(individualCR.AttackResults);
-				if(!individualCR.Casualties.Empty)
-				{
-					cr.Casualties.AddAllUnits(individualCR.Casualties);
-				}
-
-				if(!individualCR.Survivors.Empty)
-				{
-					cr.Survivors.AddAllUnits(individualCR.Survivors);
-				}
-
-			}
-
-			cr.UsedAttackers.AddAllUnits(satellites);
-
-			return cr;
-		}
-
-		public CombatResult DoBombingCombat(CombatInfo ci)
-		{
-			//CombatResult cr = new CombatResult();
-
-			
-
-			return ExecuteCombat(ci);
-
-
-			//return cr;
-		}
-
-
-		public CombatResult DoCombat(BattleInfo bi)
-		{
-			CombatResult cr = null;
-			switch(bi.Type)
-			{
-				case BattleType.KillerSatellite:
-				{
-					UnitCollection units = bi.Territory.Units;
-					UnitCollection satellites = units.GetUnits(UnitType.KillerSatellite);
-					Unit satellite = satellites[0];
-
-					UnitCollection targets = units.GetNonMatchingUnits(satellite.Owner);
-					UnitCollection leaders = units.GetUnits(UnitType.Leader);
-					UnitCollection attackerLeaders = leaders.GetUnits(satellite.Owner);
-
-					cr = new CombatResult();
-					UnitCollection individualTarget = new UnitCollection();
-					CombatInfo ci;
-
-					// Since ExecuteCombat() ends when all attacking units have fired, and there's
-					// only one attacking unit, we need to do a separate combat for each
-					// defending unit
-					for(int i = 0; i < targets.Count; i++)
-					{
-						ci = new CombatInfo();
-						individualTarget.Clear();
-						individualTarget.AddUnit(targets[i]);
-						ci.Defenders.AddAllUnits(individualTarget);
-						ci.Attackers.AddAllUnits(satellites);
-						ci.AttackingLeader = !attackerLeaders.Empty;
-						
-						CombatResult individualCR = ExecuteCombat(ci);
-
-						if(!individualCR.Casualties.Empty)
-						{
-							cr.Casualties.AddAllUnits(individualCR.Casualties);
-						}
-
-						if(!individualCR.Survivors.Empty)
-						{
-							cr.Survivors.AddAllUnits(individualCR.Survivors);
-						}
-
-					}
-
-					cr.UsedAttackers.AddAllUnits(satellites);
-
-					break;
-				}
-				case BattleType.Bombing:
-				{
-					// TODO Need to make sure this is still valid, since it's possible that a 
-					// killer satellite wiped out all battlers in the territory
-
-					break;
-				}
-			}
-
-			return cr;
-		}
-
 		#endregion
-
 
 	}
 }

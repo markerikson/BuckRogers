@@ -55,6 +55,9 @@ namespace BuckRogers.Networking
 		ClientReadyForProduction,
 
 		CombatPhaseStarted,
+		BeginCombat,
+		NextBattle,
+		CombatAttack,
 		CombatPhaseEnded,
 
 		TurnFinished,

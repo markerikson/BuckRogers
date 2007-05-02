@@ -30,6 +30,7 @@ namespace BuckRogers
 		private Action m_action;
 		private BattleStatus m_battleStatus;
 		private List<Territory> m_territories;
+		private CombatResult m_combatResult;
 
 		private bool m_result;
 		private bool m_isLocal;		
@@ -75,6 +76,12 @@ namespace BuckRogers
 		{
 			get { return m_territories; }
 			set { m_territories = value; }
+		}
+
+		public CombatResult CombatResult
+		{
+			get { return m_combatResult; }
+			set { m_combatResult = value; }
 		}
 
 		public bool Result

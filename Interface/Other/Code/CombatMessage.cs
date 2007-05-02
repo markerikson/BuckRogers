@@ -81,15 +81,14 @@ namespace BuckRogers.Interface
 			m_nodes.Add(m_lblHit);
 		}
 
-		public void SetDetails(Player attacker, Player defender, UnitType attackType,
-							UnitType defendType, int roll, bool hit)
+		public void SetDetails(AttackResult ar)
 		{
-			m_attacker = attacker;
-			m_defender = defender;
-			m_attackingType = attackType;
-			m_defendingType = defendType;
-			m_roll = roll;
-			m_hit = hit;
+			m_attacker = ar.Attacker.Owner;
+			m_defender = ar.Defender.Owner;
+			m_attackingType = ar.Attacker.Type;
+			m_defendingType = ar.Defender.Type;
+			m_roll = ar.Roll;
+			m_hit = ar.Hit;
 		}
 
 		public void DisplayMessage(PointF location)

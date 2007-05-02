@@ -1,4 +1,4 @@
-#define DEBUGCOMBAT
+//#define DEBUGCOMBAT
 
 #region using directives
 using System;

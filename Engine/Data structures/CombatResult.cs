@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace BuckRogers
 {
@@ -8,7 +9,36 @@ namespace BuckRogers
 	/// </summary>
 	public class CombatResult
 	{
-		public System.Collections.ArrayList AttackResults
+		private UnitCollection m_survivors;
+		private UnitCollection m_casualties;
+		private UnitCollection m_usedAttackers;
+		private UnitCollection m_unusedAttackers;
+		//private ArrayList m_attackResults;
+		private List<AttackResult> m_attackResults;
+
+		private Player m_attacker;
+		private Player m_defender;
+		private Territory m_attackLocation;
+
+		public Player Attacker
+		{
+			get { return m_attacker; }
+			set { m_attacker = value; }
+		}
+		
+		public Player Defender
+		{
+			get { return m_defender; }
+			set { m_defender = value; }
+		}
+
+		public Territory AttackLocation
+		{
+			get { return m_attackLocation; }
+			set { m_attackLocation = value; }
+		}
+
+		public List<AttackResult> AttackResults
 		{
 			get { return this.m_attackResults; }
 			set { this.m_attackResults = value; }
@@ -38,19 +68,13 @@ namespace BuckRogers
 			set { this.m_casualties = value; }
 		}
 	
-		private UnitCollection m_survivors;
-		private UnitCollection m_casualties;
-		private UnitCollection m_usedAttackers;
-		private UnitCollection m_unusedAttackers;
-		private ArrayList m_attackResults;
-
 		public CombatResult()
 		{
 			m_survivors = new UnitCollection();
 			m_casualties = new UnitCollection();
 			m_usedAttackers = new UnitCollection();
 			m_unusedAttackers = new UnitCollection();
-			m_attackResults = new ArrayList();
+			m_attackResults = new List<AttackResult>();
 		}
 	}
 }
