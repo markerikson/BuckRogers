@@ -221,42 +221,43 @@ namespace BuckRogers.Networking
 				}
 				case GameMessage.PlayerTransportedUnits:
 				{
-					ParseUnitTransportMessage(e.MessageText);
+					if(!m_controller.CurrentPlayer.IsLocal)
+					{
+						ParseUnitTransportMessage(e.MessageText);
+					}
+					
 					break;
 				}
 				case GameMessage.PlayerMovedUnits:
 				{
-					ParseUnitMoveMessage(e.MessageText);
+					if (!m_controller.CurrentPlayer.IsLocal)
+					{
+						ParseUnitMoveMessage(e.MessageText);
+					}
 					break;
 				}
 				case GameMessage.PlayerUndidMove:
 				{
-					if (m_controller.GetPlayer(e.MessageText).IsLocal)
+					if (!m_controller.CurrentPlayer.IsLocal)
 					{
-						break;
+						m_controller.UndoAction();
 					}
-
-					m_controller.UndoAction();
 					break;
 				}
 				case GameMessage.PlayerRedidMove:
 				{
-					if (m_controller.GetPlayer(e.MessageText).IsLocal)
+					if (!m_controller.CurrentPlayer.IsLocal)
 					{
-						break;
+						m_controller.RedoAction();
 					}
-
-					m_controller.RedoAction();
 					break;
 				}
 				case GameMessage.PlayerFinishedMoving:
 				{
-					if (m_controller.GetPlayer(e.MessageText).IsLocal)
+					if (!m_controller.CurrentPlayer.IsLocal)
 					{
-						break;
+						m_controller.FinalizeCurrentPlayerMoves();
 					}
-
-					m_controller.FinalizeCurrentPlayerMoves();
 					break;
 				}
 				case GameMessage.MovementPhaseEnded:
@@ -276,7 +277,11 @@ namespace BuckRogers.Networking
 				}
 				case GameMessage.NextBattle:
 				{
-					m_battleController.NextBattle();
+					if(!m_battleController.NextBattle())
+					{
+						RaiseSimpleUpdateEvent(GameMessage.CombatPhaseEnded, string.Empty, null);
+					}
+					
 					break;
 				}
 				case GameMessage.CombatPhaseEnded:
@@ -284,6 +289,14 @@ namespace BuckRogers.Networking
 					m_controller.StartNextPhase();
 
 					RaiseSimpleUpdateEvent(GameMessage.CombatPhaseEnded, string.Empty, null);
+					break;
+				}
+				case GameMessage.CombatAttack:
+				{
+					if(!m_battleController.CurrentPlayer.IsLocal)
+					{
+						ParseCombatAttackMessage(e.MessageText);
+					}
 					break;
 				}
 			}
@@ -538,12 +551,15 @@ namespace BuckRogers.Networking
 			xd.LoadXml(xml);
 
 			XmlElement xeTransportActions = (XmlElement)xd.GetElementsByTagName("TransportActions")[0];
+
+			/*
 			string playerName = xeTransportActions.Attributes["player"].Value;
 
 			if (m_controller.GetPlayer(playerName).IsLocal)
 			{
 				return;
 			}
+			*/
 
 			XmlNodeList xnlActions = xeTransportActions.GetElementsByTagName("TransportAction");
 
@@ -596,10 +612,13 @@ namespace BuckRogers.Networking
 			string territoryName = xeMoveAction.Attributes["territory"].Value;
 
 			Player p = m_controller.GetPlayer(playerName);
+
+			/*
 			if (p.IsLocal)
 			{
 				return;
 			}
+			*/
 
 			Territory t = m_controller.Map[territoryName];
 			ma.Owner = p;
@@ -635,7 +654,89 @@ namespace BuckRogers.Networking
 
 		private string CreateCombatAttackMessage(CombatInfo ci)
 		{
-			throw new Exception("The method or operation is not implemented.");
+			MemoryStream stream = new MemoryStream();
+			XmlWriterSettings xws = new XmlWriterSettings();
+			xws.OmitXmlDeclaration = true;
+			XmlWriter xw = XmlWriter.Create(stream, xws);
+
+			xw.WriteStartElement("CombatInfo");
+			xw.WriteAttributeString("type", ci.Type.ToString());
+			xw.WriteAttributeString("attackingLeader", ci.AttackingLeader.ToString());
+
+			xw.WriteStartElement("Attackers");
+
+			foreach(Unit u in ci.Attackers)
+			{
+				xw.WriteStartElement("Unit");
+
+				xw.WriteAttributeString("type", u.Type.ToString());
+				xw.WriteAttributeString("id", u.ID.ToString());
+
+				xw.WriteEndElement();
+			}
+
+			xw.WriteEndElement();
+
+			xw.WriteStartElement("Defenders");
+
+			foreach (Unit u in ci.Defenders)
+			{
+				xw.WriteStartElement("Unit");
+
+				xw.WriteAttributeString("type", u.Type.ToString());
+				xw.WriteAttributeString("id", u.ID.ToString());
+
+				xw.WriteEndElement();
+			}
+
+			xw.WriteEndElement();
+
+			xw.WriteEndDocument();
+
+			xw.Flush();
+
+			stream.Position = 0;
+			StreamReader sr = new StreamReader(stream);
+
+			return sr.ReadToEnd();
+		}
+
+		private CombatInfo ParseCombatAttackMessage(string xml)
+		{
+			XmlDocument xd = new XmlDocument();
+			xd.LoadXml(xml);
+
+			XmlElement xeCombatInfo = (XmlElement)xd.GetElementsByTagName("CombatInfo")[0];
+
+			CombatInfo ci = new CombatInfo();
+			ci.Type = (BattleType)Enum.Parse(typeof(BattleType), xeCombatInfo.Attributes["type"].Value);
+			ci.AttackingLeader = bool.Parse(xeCombatInfo.Attributes["attackingLeader"].Value);
+
+			XmlElement xeAttackers = (XmlElement)xeCombatInfo.GetElementsByTagName("Attackers")[0];
+			XmlNodeList xnlAttackers = xeAttackers.GetElementsByTagName("Unit");
+
+			foreach (XmlElement xeUnit in xnlAttackers)
+			{
+				UnitType ut = (UnitType)Enum.Parse(typeof(UnitType), xeUnit.Attributes["type"].Value);
+				int id = int.Parse(xeUnit.Attributes["id"].Value);
+
+				Unit u = Unit.AllUnits.GetUnitByID(id);
+				ci.Attackers.AddUnit(u);
+			}
+
+			XmlElement xeDefenders = (XmlElement)xeCombatInfo.GetElementsByTagName("Defenders")[0];
+			XmlNodeList xnlDefenders = xeDefenders.GetElementsByTagName("Unit");
+
+			foreach (XmlElement xeUnit in xnlDefenders)
+			{
+				UnitType ut = (UnitType)Enum.Parse(typeof(UnitType), xeUnit.Attributes["type"].Value);
+				int id = int.Parse(xeUnit.Attributes["id"].Value);
+
+				Unit u = Unit.AllUnits.GetUnitByID(id);
+				ci.Defenders.AddUnit(u);
+			}
+
+			return ci;
 		}
 
 		#endregion
@@ -862,20 +963,14 @@ namespace BuckRogers.Networking
 				string message = CreateCombatAttackMessage(ci);
 				m_gameClient.SendMessageToServer(GameMessage.CombatAttack, message);
 			}
-			else
-			{
-			}
-
 		}
 
-	
+		public void CombatCompleted()
+		{
+			throw new Exception("The method or operation is not implemented.");
+		}
 
 		#endregion
 
-
-
-
-
-		
 	}
 }

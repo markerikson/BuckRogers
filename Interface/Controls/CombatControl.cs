@@ -870,8 +870,8 @@ namespace BuckRogers.Interface
 					uid.UpdateUnitStatistics();
 				}
 
-				m_battleController.LastResult = cr;
-				m_battleController.ProcessAttackResults();
+				//m_battleController.LastResult = cr;
+				m_battleController.ProcessAttackResults(cr);
 			}
 		}
 
@@ -1102,6 +1102,18 @@ namespace BuckRogers.Interface
 
 					break;
 				}
+				case GameMessage.CombatPhaseEnded:
+				{
+					ClearMessages();
+					m_battleController.CombatComplete();
+					MessageBox.Show("All battles finished");
+
+					m_csgm.CombatCompleted();
+
+					Form parent = (Form)this.Parent;
+					parent.DialogResult = DialogResult.OK;
+					break;
+				}
 			}
 		}
 
@@ -1259,6 +1271,9 @@ namespace BuckRogers.Interface
 
 					ResetDisplay();
 
+					m_csgm.ReadyToBeginCombat();
+
+					/*
 					if (!m_battleController.NextBattle())
 					{
 						ClearMessages();
@@ -1267,6 +1282,8 @@ namespace BuckRogers.Interface
 						Form parent = (Form)this.Parent;
 						parent.DialogResult = DialogResult.OK;
 					}
+					*/
+
 					break;
 				}
 			}
@@ -1274,18 +1291,20 @@ namespace BuckRogers.Interface
 
 		private void OnBattleControllerStatusUpdate(object sender, StatusUpdateEventArgs suea)
 		{
-			bool result = true;
-
 			switch (suea.StatusInfo)
 			{
 				case StatusInfo.FactoryConquered:
 				{
+					if(!m_battleController.CurrentPlayer.IsLocal)
+					{
+						return;
+					}
+
 					Territory location = suea.Territories[0];
 					string message = location.Name + " has been conquered and a factory is about to be captured.  Sabotage the factory?";
 					DialogResult dr = MessageBox.Show(message, "Sabotage Factory?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-					result = (dr == DialogResult.Yes);
-					suea.Result = result;
+					suea.Result = (dr == DialogResult.Yes); ;
 					break;
 				}
 				case StatusInfo.SabotageResult:

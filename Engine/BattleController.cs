@@ -58,16 +58,24 @@ namespace BuckRogers
 													};
 
 		private const int NOTPOSSIBLE = 99;
-		private Hashlist m_battles;
+
 		private GameController m_controller;
-		private ArrayList m_playerOrder;
-		private BattleInfo m_currentBattle;
+
+		private Hashlist m_battles;
+
 		private UnitCollection m_survivingUnits;
-		private Player m_currentPlayer;
 		private UnitCollection m_currentUnused;
+		private UnitCollection m_capturedFactories;
+
+		private ArrayList m_playerOrder;
+
+		private BattleInfo m_currentBattle;
+		
+		private Player m_currentPlayer;
+		
 		private CombatResult m_turnResult;
 		private CombatResult m_cumulativeResult;
-		private CombatResult m_lastResult;
+		//private CombatResult m_lastResult;
 		private BattleStatus m_status;
 
 		private XmlDocument m_gamelog;
@@ -128,11 +136,19 @@ namespace BuckRogers
 			set { this.m_currentUnused = value; }
 		}
 
+		public UnitCollection CapturedFactories
+		{
+			get { return m_capturedFactories; }
+			set { m_capturedFactories = value; }
+		}
+
+		/*
 		public BuckRogers.CombatResult LastResult
 		{
 			get { return this.m_lastResult; }
 			set { this.m_lastResult = value; }
 		}
+		*/
 
 		public BuckRogers.CombatResult TurnResult
 		{
@@ -262,27 +278,204 @@ namespace BuckRogers
 		#region NextBattle
 		public bool NextBattle()
 		{
-			FinalizeCurrentBattle();
+			FinalizeCurrentBattle1();
 
 			return StartNextBattle();
 		}
 
-		private void FinalizeCurrentBattle()
+		public void FinalizeCurrentBattle1()
 		{
-			if (m_cumulativeResult.Casualties.Count > 0)
+			CleanUpCasualties();
+
+			if (m_currentBattle != null)
 			{
-				if (CurrentBattle.Type == BattleType.Bombing)
+				/*
+				XmlAttribute xaNumRolls = m_gamelog.CreateAttribute("rolls");
+				xaNumRolls.Value = m_numRolls.ToString();
+				m_xeCurrentBattle.Attributes.Append(xaNumRolls);
+				*/
+			}
+
+			// if this is not the first battle, check to see if the territory changed owners
+			if (m_currentBattle != null && m_currentBattle.Territory.Type != TerritoryType.Space)
+			{
+				CheckForCapturedFactories();
+			}
+		}
+
+		public void FinalizeCurrentBattle2()
+		{
+			// if this is not the first battle, check to see if the territory changed owners
+			if(m_currentBattle != null && m_currentBattle.Territory.Type != TerritoryType.Space)
+			{
+				UpdateTerritoryOwnership();
+
+			}
+
+			RemoveUnneededBattles();
+		}
+
+		public void RemoveUnneededBattles()
+		{
+			bool activeBattle = (m_currentBattle != null);
+			bool satelliteBattle = false;
+			if(activeBattle)
+			{
+				satelliteBattle = (m_currentBattle.Type == BattleType.KillerSatellite);
+			}
+
+			//if(m_currentBattle != null && m_currentBattle.Type == BattleType.KillerSatellite)
+			if(satelliteBattle)
+			{
+				List<BattleInfo> otherBattles = new List<BattleInfo>();
+
+				foreach(BattleInfo bi in m_battles)
 				{
-					if (TerritoryUnitsChanged != null)
+					if(bi.Territory == m_currentBattle.Territory)
+					{
+						otherBattles.Add(bi);
+					}
+				}
+
+				foreach(BattleInfo bi in otherBattles)
+				{
+					ArrayList playersLeftInTerritory = bi.Territory.Units.GetPlayersWithUnits();
+
+					if(playersLeftInTerritory.Count == 1)
+					{
+						m_battles.Remove(bi.ToString());
+					}
+				}
+			}
+		}
+
+		public void UpdateTerritoryOwnership()
+		{
+			ArrayList playersLeft = m_currentBattle.Territory.Units.GetPlayersWithUnits();
+
+			if(playersLeft.Count > 1)
+			{
+				throw new Exception("Shouldn't be more than one player left after a battle");
+			}
+
+			if(playersLeft.Count == 1)
+			{
+				Player p = (Player)playersLeft[0];
+				Player owner = m_currentBattle.Territory.Owner;
+
+				if(p != owner)
+				{
+					m_currentBattle.Territory.Owner = p;
+
+					if(TerritoryOwnerChanged != null)
+					{
+						TerritoryEventArgs tea = new TerritoryEventArgs();
+						tea.Name = m_currentBattle.Territory.Name;
+						tea.Owner = p;
+
+						TerritoryOwnerChanged(this, tea);
+					}
+				}
+			}
+
+
+
+			if(UpdateTerritory != null)
+			{
+				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+				suea.StatusInfo = StatusInfo.UpdateTerritory;
+				//suea.Territory = m_currentBattle.Territory;
+				suea.Territories.Add(m_currentBattle.Territory);
+
+				EventsHelper.Fire(UpdateTerritory, this, suea);
+				//UpdateTerritory(m_currentBattle.Territory);
+			}
+		}
+
+		public void CheckForCapturedFactories()
+		{
+			m_capturedFactories.Clear();
+
+			ArrayList playersLeft = m_currentBattle.Territory.Units.GetPlayersWithUnits();
+
+			// Check for captured factories
+
+			if(playersLeft.Count == 2)
+			{
+				if(StatusUpdate != null)
+				{
+					StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+					suea.Territories.Add(m_currentBattle.Territory);
+
+
+					UnitCollection factories = m_currentBattle.Territory.Units.GetUnits(UnitType.Factory);
+
+					UnitCollection destroyedFactories = new UnitCollection();
+
+					// Possible to have one producing and another just built - unlikely, but possible
+					foreach(Factory f in factories)
+					{
+						suea.StatusInfo = StatusInfo.FactoryConquered;
+						EventsHelper.Fire(StatusUpdate, this, suea);
+						//bool destroyFactory = StatusUpdate(this, suea);
+						bool destroyFactory = suea.Result;
+
+						// Either the factory will be destroyed or it will be captured.
+						playersLeft.Remove(f.Owner);
+
+						if(destroyFactory)
+						{
+							int roll = Utility.RollD10();
+							bool factoryDestroyed = (roll >= 7);
+
+							if(factoryDestroyed)
+							{
+								destroyedFactories.AddUnit(f);
+							}
+
+							suea.StatusInfo = StatusInfo.SabotageResult;
+							suea.Result = factoryDestroyed;
+
+							StatusUpdate(this, suea);
+						}
+					}
+
+					foreach(Unit u in destroyedFactories)
+					{
+						factories.RemoveUnit(u);
+
+						u.Destroy();
+					}
+
+					// presumably, at this point, there's only one player left listed in the 
+					// territory, and that should be the new owner.
+
+					Player newOwner = (Player)playersLeft[0];
+
+					foreach(Factory f in factories)
+					{
+						f.Owner = newOwner;
+					}
+				}
+			}
+		}
+
+		public void CleanUpCasualties()
+		{
+			if(m_cumulativeResult.Casualties.Count > 0)
+			{
+				if(CurrentBattle.Type == BattleType.Bombing)
+				{
+					if(TerritoryUnitsChanged != null)
 					{
 						ArrayList hurtPlayers = m_cumulativeResult.Casualties.GetPlayersWithUnits();
 
-						foreach (Player p in hurtPlayers)
+						foreach(Player p in hurtPlayers)
 						{
 							UnitCollection playerUnits = m_cumulativeResult.Casualties.GetUnits(p);
 							ArrayList territories = playerUnits.GetUnitTerritories();
 
-							foreach (Territory t in territories)
+							foreach(Territory t in territories)
 							{
 								UnitCollection territoryUnits = playerUnits.GetUnits(t);
 
@@ -293,7 +486,7 @@ namespace BuckRogers
 								tuea.Added = false;
 								tuea.Player = p;
 
-								foreach (Unit u in territoryUnits)
+								foreach(Unit u in territoryUnits)
 								{
 									u.CurrentTerritory = Territory.NONE;
 								}
@@ -305,14 +498,14 @@ namespace BuckRogers
 				}
 				else
 				{
-					foreach (Unit u in m_cumulativeResult.Casualties)
+					foreach(Unit u in m_cumulativeResult.Casualties)
 					{
 						u.CurrentTerritory = Territory.NONE;
 					}
 
 					// FIXME This doesn't work right with bombing!
 
-					if (TerritoryUnitsChanged != null)
+					if(TerritoryUnitsChanged != null)
 					{
 						TerritoryUnitsEventArgs tuea = new TerritoryUnitsEventArgs();
 						tuea.Units = new UnitCollection();
@@ -329,7 +522,7 @@ namespace BuckRogers
 
 				ArrayList players = m_cumulativeResult.Casualties.GetPlayersWithUnits();
 
-				foreach (Player p in players)
+				foreach(Player p in players)
 				{
 					UnitCollection playerCasualties = m_cumulativeResult.Casualties.GetUnits(p);
 
@@ -340,7 +533,7 @@ namespace BuckRogers
 					xePlayer.Attributes.Append(xaPlayerName);
 					*/
 
-					foreach (Unit u in playerCasualties)
+					foreach(Unit u in playerCasualties)
 					{
 						/*
 						XmlElement xeUnit = m_gamelog.CreateElement("Unit");
@@ -362,153 +555,6 @@ namespace BuckRogers
 				}
 
 				//m_xeCurrentBattle.AppendChild(xeUnits);
-			}
-
-			if (m_currentBattle != null)
-			{
-				/*
-				XmlAttribute xaNumRolls = m_gamelog.CreateAttribute("rolls");
-				xaNumRolls.Value = m_numRolls.ToString();
-				m_xeCurrentBattle.Attributes.Append(xaNumRolls);
-				*/
-			}
-
-			// if this is not the first battle, check to see if the territory changed owners
-			if (m_currentBattle != null && m_currentBattle.Territory.Type != TerritoryType.Space)
-			{
-				ArrayList playersLeft = m_currentBattle.Territory.Units.GetPlayersWithUnits();
-
-				// Check for captured factories
-
-				if (playersLeft.Count == 2)
-				{
-					if (StatusUpdate != null)
-					{
-						StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
-						suea.Territories.Add(m_currentBattle.Territory);
-
-
-						UnitCollection factories = m_currentBattle.Territory.Units.GetUnits(UnitType.Factory);
-
-						UnitCollection destroyedFactories = new UnitCollection();
-						// Possible to have one producing and another just built - unlikely, but possible
-						foreach (Factory f in factories)
-						{
-							suea.StatusInfo = StatusInfo.FactoryConquered;
-							EventsHelper.Fire(StatusUpdate, this, suea);
-							//bool destroyFactory = StatusUpdate(this, suea);
-							bool destroyFactory = suea.Result;
-
-							// Either the factory will be destroyed or it will be captured.
-							playersLeft.Remove(f.Owner);
-
-							if (destroyFactory)
-							{
-								int roll = Utility.RollD10();
-								bool factoryDestroyed = (roll >= 7);
-
-								if (factoryDestroyed)
-								{
-									destroyedFactories.AddUnit(f);
-								}
-
-								suea.StatusInfo = StatusInfo.SabotageResult;
-								suea.Result = factoryDestroyed;
-
-								StatusUpdate(this, suea);
-							}
-						}
-
-						foreach (Unit u in destroyedFactories)
-						{
-							factories.RemoveUnit(u);
-
-							u.Destroy();
-						}
-
-						// presumably, at this point, there's only one player left listed in the 
-						// territory, and that should be the new owner.
-
-						Player newOwner = (Player)playersLeft[0];
-
-						foreach (Factory f in factories)
-						{
-							f.Owner = newOwner;
-						}
-					}
-				}
-
-				playersLeft = m_currentBattle.Territory.Units.GetPlayersWithUnits();
-
-				if (playersLeft.Count > 1)
-				{
-					throw new Exception("Shouldn't be more than one player left after a battle");
-				}
-
-				if (playersLeft.Count == 1)
-				{
-					Player p = (Player)playersLeft[0];
-					Player owner = m_currentBattle.Territory.Owner;
-
-					if (p != owner)
-					{
-						m_currentBattle.Territory.Owner = p;
-
-						if (TerritoryOwnerChanged != null)
-						{
-							TerritoryEventArgs tea = new TerritoryEventArgs();
-							tea.Name = m_currentBattle.Territory.Name;
-							tea.Owner = p;
-
-							TerritoryOwnerChanged(this, tea);
-						}
-					}
-				}
-
-
-
-				if (UpdateTerritory != null)
-				{
-					StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
-					suea.StatusInfo = StatusInfo.UpdateTerritory;
-					//suea.Territory = m_currentBattle.Territory;
-					suea.Territories.Add(m_currentBattle.Territory);
-
-					EventsHelper.Fire(UpdateTerritory, this, suea);
-					//UpdateTerritory(m_currentBattle.Territory);
-				}
-
-			}
-
-			bool activeBattle = (m_currentBattle != null);
-			bool satelliteBattle = false;
-			if (activeBattle)
-			{
-				satelliteBattle = (m_currentBattle.Type == BattleType.KillerSatellite);
-			}
-
-			//if(m_currentBattle != null && m_currentBattle.Type == BattleType.KillerSatellite)
-			if (satelliteBattle)
-			{
-				List<BattleInfo> otherBattles = new List<BattleInfo>();
-
-				foreach (BattleInfo bi in m_battles)
-				{
-					if (bi.Territory == m_currentBattle.Territory)
-					{
-						otherBattles.Add(bi);
-					}
-				}
-
-				foreach (BattleInfo bi in otherBattles)
-				{
-					ArrayList playersLeftInTerritory = bi.Territory.Units.GetPlayersWithUnits();
-
-					if (playersLeftInTerritory.Count == 1)
-					{
-						m_battles.Remove(bi.ToString());
-					}
-				}
 			}
 		}
 
@@ -640,14 +686,14 @@ namespace BuckRogers
 
 		#region round functions
 
-		public void ProcessAttackResults()
+		public void ProcessAttackResults(CombatResult cr)
 		{
-			TurnResult.Casualties.AddAllUnits(LastResult.Casualties);
+			TurnResult.Casualties.AddAllUnits(cr.Casualties);
 
-			m_survivingUnits.RemoveAllUnits(LastResult.Casualties);
+			m_survivingUnits.RemoveAllUnits(cr.Casualties);
 
-			CurrentUnused.AddAllUnits(LastResult.UnusedAttackers);
-			CurrentUnused.RemoveAllUnits(LastResult.UsedAttackers);
+			CurrentUnused.AddAllUnits(cr.UnusedAttackers);
+			CurrentUnused.RemoveAllUnits(cr.UsedAttackers);
 
 			UnitCollection nonPlayerSurvivors = m_survivingUnits.GetNonMatchingUnits(m_currentPlayer);
 
