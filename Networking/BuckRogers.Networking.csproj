@@ -36,7 +36,13 @@
     <Compile Include="EventsHelper.cs" />
     <Compile Include="GenericEventHandler.cs" />
     <Compile Include="HiResDateTime.cs" />
+    <Compile Include="IOrderedDictionary.cs" />
+    <Compile Include="NetworkMessageInfo.cs" />
     <Compile Include="NetworkMessaging.cs" />
+    <Compile Include="OrderedDictionary.cs" />
+    <Compile Include="Set.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Sockets.cs" />
     <Compile Include="TextLogger.cs" />
   </ItemGroup>

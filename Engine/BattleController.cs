@@ -19,7 +19,7 @@ namespace BuckRogers
 		None,
 		Setup,
 		AttackComplete,
-		RoundComplete,
+		PlayerTurnFinished,
 		BattleComplete,
 		BattleReady,
 	}
@@ -278,13 +278,15 @@ namespace BuckRogers
 		#region NextBattle
 		public bool NextBattle()
 		{
-			FinalizeCurrentBattle1();
+			FinalizeCurrentBattle();
 
 			return StartNextBattle();
 		}
 
-		public void FinalizeCurrentBattle1()
+		public bool FinalizeCurrentBattle()
 		{
+			bool sabotagedFactories = false;
+
 			CleanUpCasualties();
 
 			if (m_currentBattle != null)
@@ -299,16 +301,23 @@ namespace BuckRogers
 			// if this is not the first battle, check to see if the territory changed owners
 			if (m_currentBattle != null && m_currentBattle.Territory.Type != TerritoryType.Space)
 			{
-				CheckForCapturedFactories();
+				sabotagedFactories = CheckForCapturedFactories();
 			}
+
+			return sabotagedFactories;
 		}
 
 		public void FinalizeCurrentBattle2()
 		{
+			FinalizeCurrentBattle2(null);
+		}
+
+		public void FinalizeCurrentBattle2(Dictionary<Factory, bool> sabotageResults)
+		{
 			// if this is not the first battle, check to see if the territory changed owners
 			if(m_currentBattle != null && m_currentBattle.Territory.Type != TerritoryType.Space)
 			{
-				UpdateTerritoryOwnership();
+				UpdateTerritoryOwnership(sabotageResults);
 
 			}
 
@@ -349,8 +358,40 @@ namespace BuckRogers
 			}
 		}
 
-		public void UpdateTerritoryOwnership()
+		public void UpdateTerritoryOwnership(Dictionary<Factory, bool> sabotageResults)
 		{
+			if(m_currentBattle == null || m_currentBattle.Territory.Type != TerritoryType.Ground)
+			{
+				return;
+			}
+
+			if(sabotageResults != null)
+			{
+				ArrayList remainingPlayers = m_currentBattle.Territory.Units.GetPlayersWithUnits();
+
+				Player factoryOwner = m_capturedFactories[0].Owner;
+				remainingPlayers.Remove(factoryOwner);
+
+				// should only be one remaining player at this point
+				Player territoryOwner = (Player)remainingPlayers[0];
+
+				foreach(Factory f in m_capturedFactories)
+				{
+					bool factoryDestroyed = sabotageResults[f];
+
+					if(factoryDestroyed)
+					{
+						f.Destroy();
+					}
+					else
+					{
+						f.Owner = territoryOwner;
+					}
+				}
+
+			}
+
+
 			ArrayList playersLeft = m_currentBattle.Territory.Units.GetPlayersWithUnits();
 
 			if(playersLeft.Count > 1)
@@ -392,8 +433,10 @@ namespace BuckRogers
 			}
 		}
 
-		public void CheckForCapturedFactories()
+		public bool CheckForCapturedFactories()
 		{
+			bool sabotagedFactories = false;
+
 			m_capturedFactories.Clear();
 
 			ArrayList playersLeft = m_currentBattle.Territory.Units.GetPlayersWithUnits();
@@ -402,63 +445,42 @@ namespace BuckRogers
 
 			if(playersLeft.Count == 2)
 			{
-				if(StatusUpdate != null)
+				UnitCollection factories = m_currentBattle.Territory.Units.GetUnits(UnitType.Factory);
+
+				if(factories.Count > 0)
 				{
+					m_capturedFactories.AddAllUnits(factories);
+
 					StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
 					suea.Territories.Add(m_currentBattle.Territory);
 
+					suea.StatusInfo = StatusInfo.FactoryConquered;
+					suea.Units.AddAllUnits(factories);
 
-					UnitCollection factories = m_currentBattle.Territory.Units.GetUnits(UnitType.Factory);
+					EventsHelper.Fire(StatusUpdate, this, suea);
 
-					UnitCollection destroyedFactories = new UnitCollection();
-
-					// Possible to have one producing and another just built - unlikely, but possible
-					foreach(Factory f in factories)
-					{
-						suea.StatusInfo = StatusInfo.FactoryConquered;
-						EventsHelper.Fire(StatusUpdate, this, suea);
-						//bool destroyFactory = StatusUpdate(this, suea);
-						bool destroyFactory = suea.Result;
-
-						// Either the factory will be destroyed or it will be captured.
-						playersLeft.Remove(f.Owner);
-
-						if(destroyFactory)
-						{
-							int roll = Utility.RollD10();
-							bool factoryDestroyed = (roll >= 7);
-
-							if(factoryDestroyed)
-							{
-								destroyedFactories.AddUnit(f);
-							}
-
-							suea.StatusInfo = StatusInfo.SabotageResult;
-							suea.Result = factoryDestroyed;
-
-							StatusUpdate(this, suea);
-						}
-					}
-
-					foreach(Unit u in destroyedFactories)
-					{
-						factories.RemoveUnit(u);
-
-						u.Destroy();
-					}
-
-					// presumably, at this point, there's only one player left listed in the 
-					// territory, and that should be the new owner.
-
-					Player newOwner = (Player)playersLeft[0];
-
-					foreach(Factory f in factories)
-					{
-						f.Owner = newOwner;
-					}
+					sabotagedFactories = suea.Result;
 				}
 			}
+
+			return sabotagedFactories;
 		}
+
+		public Dictionary<Factory, bool> SabotageCapturedFactories()
+		{
+			Dictionary<Factory, bool> sabotageResults = new Dictionary<Factory, bool>();
+
+			foreach(Factory f in m_capturedFactories)
+			{
+				int roll = Utility.RollD10();
+				bool factoryDestroyed = (roll >= 7);
+
+				sabotageResults[f] = factoryDestroyed;
+			}
+
+			return sabotageResults;
+		}
+		
 
 		public void CleanUpCasualties()
 		{
@@ -558,7 +580,7 @@ namespace BuckRogers
 			}
 		}
 
-		private bool StartNextBattle()
+		public bool StartNextBattle()
 		{
 			bool startedNextBattle = false;
 
@@ -695,6 +717,14 @@ namespace BuckRogers
 			CurrentUnused.AddAllUnits(cr.UnusedAttackers);
 			CurrentUnused.RemoveAllUnits(cr.UsedAttackers);
 
+			StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
+			suea.StatusInfo = StatusInfo.BattleStatusUpdated;
+			suea.BattleStatus = BattleStatus.AttackComplete;
+			suea.CombatResult = cr;
+
+			EventsHelper.Fire(BattleStatusUpdated, this, suea);
+
+
 			UnitCollection nonPlayerSurvivors = m_survivingUnits.GetNonMatchingUnits(m_currentPlayer);
 
 			if(nonPlayerSurvivors.Count == 0)
@@ -706,28 +736,25 @@ namespace BuckRogers
 				}
 				else
 				{
-					m_status = BattleStatus.RoundComplete;
+					m_status = BattleStatus.PlayerTurnFinished;
 				}
-
-				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
-				suea.StatusInfo = StatusInfo.BattleStatusUpdated;
-				suea.BattleStatus = m_status;
-
-				EventsHelper.Fire(BattleStatusUpdated, this, suea);
 			}
 			else if(CurrentUnused.Count == 0)
 			{
-				m_status = BattleStatus.RoundComplete;
-
-				StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
-				suea.StatusInfo = StatusInfo.BattleStatusUpdated;
-				suea.BattleStatus = m_status;
-
-				EventsHelper.Fire(BattleStatusUpdated, this, suea);
+				m_status = BattleStatus.PlayerTurnFinished;
 			}
 			else
 			{
 				m_status = BattleStatus.AttackComplete;
+			}
+
+			if(m_status != BattleStatus.AttackComplete)
+			{
+				suea.StatusInfo = StatusInfo.BattleStatusUpdated;
+				suea.BattleStatus = m_status;
+				suea.CombatResult = cr;
+
+				EventsHelper.Fire(BattleStatusUpdated, this, suea);
 			}
 		}
 
@@ -746,7 +773,7 @@ namespace BuckRogers
 				}
 				case BattleType.Normal:
 				{
-					int index = BattleOrder.IndexOf(CurrentPlayer);
+					int index = BattleOrder.IndexOf(m_currentPlayer);
 
 					bool anotherTurn = false;
 
@@ -755,7 +782,7 @@ namespace BuckRogers
 						anotherTurn = NextTurn();
 						if(anotherTurn)
 						{
-							CurrentPlayer = (Player)BattleOrder[0];
+							m_currentPlayer = (Player)BattleOrder[0];
 							UpdateUnusedUnits();
 							DisplayUnitsByTerritory(m_survivingUnits);
 							m_status = BattleStatus.Setup;
@@ -764,7 +791,7 @@ namespace BuckRogers
 					}
 					else
 					{
-						CurrentPlayer = (Player)BattleOrder[index + 1];
+						m_currentPlayer = (Player)BattleOrder[index + 1];
 						UpdateUnusedUnits();
 						m_status = BattleStatus.Setup;
 						anotherPlayer = true;
@@ -953,7 +980,7 @@ namespace BuckRogers
 
 			if(anotherTurn)
 			{
-				m_status = BattleStatus.RoundComplete;
+				m_status = BattleStatus.PlayerTurnFinished;
 			}
 			else
 			{
@@ -975,19 +1002,21 @@ namespace BuckRogers
 
 		#region Combat functions
 
-		public void DoCombat(CombatInfo ci)
+		public CombatResult DoCombat(CombatInfo ci)
 		{
-			CombatResult cr = ExecuteCombat(ci);
+			return ExecuteCombat(ci);
 
+			/*
 			StatusUpdateEventArgs suea = new StatusUpdateEventArgs();
 			suea.StatusInfo = StatusInfo.BattleStatusUpdated;
 			suea.BattleStatus = BattleStatus.AttackComplete;
 			suea.CombatResult = cr;
 
 			EventsHelper.Fire(BattleStatusUpdated, this, suea);
+			*/
 		}
 
-		public CombatResult ExecuteCombat(CombatInfo ci)
+		private CombatResult ExecuteCombat(CombatInfo ci)
 		{
 			CombatResult cr = new CombatResult();
 

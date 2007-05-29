@@ -14,7 +14,8 @@ using System.IO;
 using System.Diagnostics;
 
 using RedCorona.Net;
-using Azuria.Controls.ColorPicker;
+using Lambda.Collections.Generic;
+using CommonGenius.Collections;
 
 using BuckRogers;
 using BuckRogers.Networking;
@@ -42,6 +43,8 @@ namespace BuckRogers.Networking
 		
 		private Hashtable m_otherClients;
 		private Hashlist m_players;
+		private Set<int> m_acknowledgedMessages;
+		private OrderedDictionary<int, NetworkMessageInfo> m_sentMessages;
 
 		#endregion
 
@@ -85,6 +88,8 @@ namespace BuckRogers.Networking
 		{
 			m_otherClients = new Hashtable();
 			m_players = new Hashlist();
+			m_acknowledgedMessages = new Set<int>();
+			m_sentMessages = new OrderedDictionary<int, NetworkMessageInfo>();
 
 			m_options = new GameOptions();
 			m_options.IsNetworkGame = true;
@@ -141,11 +146,24 @@ namespace BuckRogers.Networking
 
 			string message = Encoding.UTF8.GetString(bytes);
 			string logMessage = string.Empty;
-			GameMessage netMessage = (GameMessage)code;
 
-			LogNetworkMessage(netMessage, message);
+			int messageID = Utility.High24Bits((int)code);
+			int messageCode = Utility.Low8Bits((int)code);
+			GameMessage netMessage = (GameMessage)messageCode;
 
-			if (code >= (uint)GameMessage.GameplayMessagesFirst)
+			LogNetworkMessage(netMessage, messageID, message);
+
+			if(netMessage == GameMessage.MessageAcknowledged)
+			{
+				m_acknowledgedMessages.Add(messageID);
+				return;
+			}
+			else
+			{
+				AcknowledgeMessage(messageID, netMessage);
+			}
+
+			if(messageCode >= (int)GameMessage.GameplayMessagesFirst)
 			{
 				ClientUpdateEventArgs cuea = new ClientUpdateEventArgs();
 				cuea.MessageType = netMessage;
@@ -206,7 +224,8 @@ namespace BuckRogers.Networking
 				{
 					string messageName = Enum.GetName(typeof(GameMessage), code);
 					logMessage = string.Format("Received message ({0}) causing client list request", messageName);
-					m_connection.SendMessage((uint)GameMessage.ClientListRequested, new byte[0]);
+					//m_connection.SendMessage((uint)GameMessage.ClientListRequested, new byte[0]);
+					SendMessageToServer(GameMessage.ClientListRequested, string.Empty);
 					break;
 				}
 				case GameMessage.PlayerAdded:
@@ -300,10 +319,12 @@ namespace BuckRogers.Networking
 			
 		}
 
-		private void LogNetworkMessage(GameMessage netMessage, string message)
+		
+
+		private void LogNetworkMessage(GameMessage netMessage, int messageID, string message)
 		{
-			string logMessage = string.Format("Client ID: {0}, GameMessage: {1}, Message text: {2}", 
-												m_clientID, netMessage.ToString(), message);
+			string logMessage = string.Format("Client ID: {0}, GameMessage: {1}, Message ID: {2}, Message text: {3}", 
+												m_clientID, netMessage.ToString(), messageID, message);
 			Debug.WriteLine(logMessage);
 		}
 
@@ -317,8 +338,10 @@ namespace BuckRogers.Networking
 			TextTraceListener.Prefix = "Buck Rogers Client "  + idString;
 			RaiseSimpleUpdateEvent(string.Empty, GameMessage.ConnectionAcknowledged, null);
 
-			m_connection.SendMessage((uint)GameMessage.ClientListRequested, new byte[0]);
-			m_connection.SendMessage((uint)GameMessage.GameSettings, new byte[0]);
+			//m_connection.SendMessage((uint)GameMessage.ClientListRequested, new byte[0]);
+			//m_connection.SendMessage((uint)GameMessage.GameSettings, new byte[0]);
+			SendMessageToServer(GameMessage.ClientListRequested, string.Empty);
+			SendMessageToServer(GameMessage.GameSettings, string.Empty);
 		}
 
 		private void ParseGameInformation(string message)
@@ -444,7 +467,18 @@ namespace BuckRogers.Networking
 		{
 			byte[] messageBytes = Encoding.UTF8.GetBytes(messageText);
 
-			m_connection.SendMessage((uint)messageType, messageBytes);
+			int encodedMessage = Utility.MakeReallyLong((int)messageType, 0);
+
+			m_connection.SendMessage((uint)encodedMessage, messageBytes);
+		}
+
+		private void AcknowledgeMessage( int messageID, GameMessage netMessage )
+		{
+			int encodedMessage = Utility.MakeReallyLong((int)GameMessage.MessageAcknowledged, messageID);
+
+			string message = string.Format("{0} (message ID: {1})", netMessage.ToString(), messageID);
+			byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+			m_connection.SendMessage((uint)encodedMessage, messageBytes);
 		}
 
 		#endregion

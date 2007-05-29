@@ -8,6 +8,7 @@ namespace BuckRogers.Networking
 		ServerStarted,
 		ServerDisconnected,
 		ServerStatus,
+		MessageAcknowledged,
 		PlayerNameRequested,
 		PlayerNameUpdated,
 		PlayerColorRequested,
@@ -58,6 +59,9 @@ namespace BuckRogers.Networking
 		BeginCombat,
 		NextBattle,
 		CombatAttack,
+		BattleFinished,
+		FactoriesCaptured,
+		SabotageResults,
 		CombatPhaseEnded,
 
 		TurnFinished,

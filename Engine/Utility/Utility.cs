@@ -199,7 +199,33 @@ namespace BuckRogers
 		public static int MakeLong(int LoWord, int HiWord)
 		{
 			return (HiWord << 16) | (LoWord & 0xffff);
-		} 
+		}
+
+		public static int HiWord(int Number)
+		{
+			return (Number >> 16) & 0xffff;
+		}
+
+		public static int LoWord(int Number)
+		{
+			return Number & 0xffff;
+		}
+
+
+		public static int MakeReallyLong(int loWord, int hiWord)
+		{
+			return (hiWord << 8) | (loWord & 0xff);
+		}
+
+		public static int High24Bits(int Number)
+		{
+			return (Number >> 8) & 0xffffff;
+		}
+
+		public static int Low8Bits(int Number)
+		{
+			return Number & 0xff;
+		}
     }
 }
 

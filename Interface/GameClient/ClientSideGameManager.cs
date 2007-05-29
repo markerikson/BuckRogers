@@ -30,6 +30,9 @@ namespace BuckRogers.Networking
 		private BattleController m_battleController;
 		private BuckRogersClient m_gameClient;
 		private GameOptions m_options;
+
+		private Dictionary<Factory, bool> m_sabotageResults;
+
 		private bool m_isNetworkGame;
 
 		private static bool m_isActiveClient;
@@ -91,9 +94,12 @@ namespace BuckRogers.Networking
 			{
 				m_gameClient.GameMessageReceived += new EventHandler<ClientUpdateEventArgs>(OnGameMessageReceived);
 			}
-			
+
+			m_battleController.BattleStatusUpdated += new EventHandler<StatusUpdateEventArgs>(OnBattleStatusUpdated);
 
 		}
+
+		
 
 		#endregion
 
@@ -277,11 +283,22 @@ namespace BuckRogers.Networking
 				}
 				case GameMessage.NextBattle:
 				{
-					if(!m_battleController.NextBattle())
+					m_battleController.UpdateTerritoryOwnership(m_sabotageResults);
+					m_battleController.RemoveUnneededBattles();
+
+					bool startedNextBattle = m_battleController.StartNextBattle();
+					m_sabotageResults = null;
+
+					if(startedNextBattle)
 					{
-						RaiseSimpleUpdateEvent(GameMessage.CombatPhaseEnded, string.Empty, null);
+						CheckIfActiveClient();
 					}
-					
+					else
+					{
+						//RaiseSimpleUpdateEvent(GameMessage.CombatPhaseEnded, string.Empty, null);
+						goto case GameMessage.CombatPhaseEnded;
+					}
+
 					break;
 				}
 				case GameMessage.CombatPhaseEnded:
@@ -293,14 +310,61 @@ namespace BuckRogers.Networking
 				}
 				case GameMessage.CombatAttack:
 				{
-					if(!m_battleController.CurrentPlayer.IsLocal)
+					CombatResult cr = ParseCombatMessage(e.MessageText);
+					HandleCombatResults(cr);
+
+					CheckIfActiveClient();
+					break;
+				}
+				case GameMessage.BattleFinished:
+				{
+					bool sabotagedFactories = m_battleController.FinalizeCurrentBattle();
+
+					if(sabotagedFactories)
 					{
-						ParseCombatAttackMessage(e.MessageText);
+						m_sabotageResults = m_battleController.SabotageCapturedFactories();
+
+						if(m_isNetworkGame)
+						{
+							string xml = CreateSabotageMessage(m_sabotageResults);
+							m_gameClient.SendMessageToServer(GameMessage.SabotageResults, xml);
+						}
 					}
+					else
+					{
+						m_sabotageResults = null;
+					}
+
+					/*
+					if(m_battleController.CapturedFactories.Count > 0)
+					{
+						Factory f = (Factory)m_battleController.CapturedFactories[0];
+						Player p = f.Owner;
+
+						if(p.IsLocal)
+						{
+							//
+							RaiseSimpleUpdateEvent(GameMessage.FactoriesCaptured, string.Empty, p);
+						}
+					}
+					*/
+
 					break;
 				}
 			}
 		}
+
+		void OnBattleStatusUpdated(object sender, StatusUpdateEventArgs e)
+		{
+			switch(e.BattleStatus)
+			{
+				case BattleStatus.AttackComplete:
+				{
+					break;
+				}
+			}
+		}
+		
 
 		#endregion
 
@@ -308,7 +372,18 @@ namespace BuckRogers.Networking
 
 		private void CheckIfActiveClient()
 		{
-			m_isActiveClient = m_controller.CurrentPlayer.IsLocal;
+			Player currentPlayer = null;
+
+			if(m_controller.CurrentPhase == GamePhase.Combat)
+			{
+				currentPlayer = m_battleController.CurrentPlayer;
+			}
+			else
+			{
+				currentPlayer = m_controller.CurrentPlayer;
+			}
+
+			m_isActiveClient = currentPlayer.IsLocal;
 		}
 
 		private void RaiseSimpleUpdateEvent(GameMessage message, string text, Player p)
@@ -465,20 +540,8 @@ namespace BuckRogers.Networking
 				xw.WriteAttributeString("load", ta.Load.ToString());
 				xw.WriteAttributeString("transport", ta.Transport.ID.ToString());
 
-				xw.WriteStartElement("Units");
+				WriteUnits(xw, "Units", ta.Units);
 
-				foreach(Unit u in ta.Units)
-				{
-					xw.WriteStartElement("Unit");
-
-					xw.WriteAttributeString("type", u.Type.ToString());
-					xw.WriteAttributeString("id", u.ID.ToString());
-					xw.WriteAttributeString("moves", u.MovesLeft.ToString());
-
-					xw.WriteEndElement();
-				}
-
-				xw.WriteEndElement();
 				xw.WriteEndElement();
 			}
 
@@ -517,23 +580,9 @@ namespace BuckRogers.Networking
 
 			xw.WriteEndElement();
 
-			xw.WriteStartElement("Units");
-
-			foreach (Unit u in ma.Units)
-			{
-				xw.WriteStartElement("Unit");
-
-				xw.WriteAttributeString("type", u.Type.ToString());
-				xw.WriteAttributeString("id", u.ID.ToString());
-				xw.WriteAttributeString("moves", u.MovesLeft.ToString());
-
-				xw.WriteEndElement();
-			}
+			WriteUnits(xw, "Units", ma.Units);
 
 			xw.WriteEndElement();
-
-			xw.WriteEndElement();
-
 
 			xw.WriteEndDocument();
 
@@ -580,6 +629,9 @@ namespace BuckRogers.Networking
 				XmlElement xeUnits = (XmlElement)xeAction.GetElementsByTagName("Units")[0];
 				XmlNodeList xnlUnits = xeUnits.GetElementsByTagName("Unit");
 
+				UnitCollection transportedUnits = ParseUnits(xnlUnits);
+				ta.Units.AddAllUnits(transportedUnits);
+				/*
 				foreach (XmlElement xeUnit in xnlUnits)
 				{
 					UnitType ut = (UnitType)Enum.Parse(typeof(UnitType), xeUnit.Attributes["type"].Value);
@@ -594,7 +646,7 @@ namespace BuckRogers.Networking
 
 					//ta.Units.AddUnit(uc2[0]);
 				}
-
+				*/
 				m_controller.AddAction(ta);
 
 			}
@@ -635,10 +687,13 @@ namespace BuckRogers.Networking
 				ma.Territories.Add(moveTerritory);
 			}
 
-
 			XmlElement xeUnits = (XmlElement)xeMoveAction.GetElementsByTagName("Units")[0];
 			XmlNodeList xnlUnits = xeUnits.GetElementsByTagName("Unit");
 
+			UnitCollection transportedUnits = ParseUnits(xnlUnits);
+			ma.Units.AddAllUnits(transportedUnits);
+
+			/*
 			foreach (XmlElement xeUnit in xnlUnits)
 			{
 				UnitType ut = (UnitType)Enum.Parse(typeof(UnitType), xeUnit.Attributes["type"].Value);
@@ -648,6 +703,8 @@ namespace BuckRogers.Networking
 				Unit u = t.Units.GetUnitByID(id);
 				ma.Units.AddUnit(u);
 			}
+			*/
+
 
 			m_controller.AddAction(ma);
 		}
@@ -663,28 +720,47 @@ namespace BuckRogers.Networking
 			xw.WriteAttributeString("type", ci.Type.ToString());
 			xw.WriteAttributeString("attackingLeader", ci.AttackingLeader.ToString());
 
-			xw.WriteStartElement("Attackers");
+			WriteUnits(xw, "Attackers", ci.Attackers);
+			WriteUnits(xw, "Defenders", ci.Defenders);
 
-			foreach(Unit u in ci.Attackers)
+			xw.WriteEndDocument();
+
+			xw.Flush();
+
+			stream.Position = 0;
+			StreamReader sr = new StreamReader(stream);
+
+			return sr.ReadToEnd();
+		}
+
+		public string CreateCombatMessage(CombatResult cr)
+		{
+			MemoryStream stream = new MemoryStream();
+			XmlWriterSettings xws = new XmlWriterSettings();
+			xws.OmitXmlDeclaration = true;
+			XmlWriter xw = XmlWriter.Create(stream, xws);
+
+			xw.WriteStartElement("CombatResult");
+			xw.WriteAttributeString("attacker", cr.Attacker.Name);
+			xw.WriteAttributeString("defender", cr.Defender.Name);
+			xw.WriteAttributeString("location", cr.AttackLocation.Name);
+
+			WriteUnits(xw, "UsedAttackers", cr.UsedAttackers);
+			WriteUnits(xw, "UnusedAttackers", cr.UnusedAttackers);
+			WriteUnits(xw, "Casualties", cr.Casualties);
+			WriteUnits(xw, "Survivors", cr.Survivors);
+
+			xw.WriteStartElement("AttackResults");
+
+			foreach(AttackResult ar in cr.AttackResults)
 			{
-				xw.WriteStartElement("Unit");
+				xw.WriteStartElement("AttackResult");
 
-				xw.WriteAttributeString("type", u.Type.ToString());
-				xw.WriteAttributeString("id", u.ID.ToString());
-
-				xw.WriteEndElement();
-			}
-
-			xw.WriteEndElement();
-
-			xw.WriteStartElement("Defenders");
-
-			foreach (Unit u in ci.Defenders)
-			{
-				xw.WriteStartElement("Unit");
-
-				xw.WriteAttributeString("type", u.Type.ToString());
-				xw.WriteAttributeString("id", u.ID.ToString());
+				xw.WriteAttributeString("attacker", ar.Attacker.ID.ToString());
+				xw.WriteAttributeString("defender", ar.Defender.ID.ToString());
+				xw.WriteAttributeString("leader", ar.Leader.ToString());
+				xw.WriteAttributeString("roll", ar.Roll.ToString());
+				xw.WriteAttributeString("hit", ar.Hit.ToString());
 
 				xw.WriteEndElement();
 			}
@@ -701,6 +777,7 @@ namespace BuckRogers.Networking
 			return sr.ReadToEnd();
 		}
 
+		/*
 		private CombatInfo ParseCombatAttackMessage(string xml)
 		{
 			XmlDocument xd = new XmlDocument();
@@ -737,6 +814,123 @@ namespace BuckRogers.Networking
 			}
 
 			return ci;
+		}
+		*/
+
+		private CombatResult ParseCombatMessage(string xml)
+		{
+			XmlDocument xd = new XmlDocument();
+			xd.LoadXml(xml);
+
+			XmlElement xeCombatResult = (XmlElement)xd.GetElementsByTagName("CombatResult")[0];
+
+			CombatResult cr = new CombatResult();
+
+			cr.Attacker = m_controller.GetPlayer(xeCombatResult.Attributes["attacker"].Value);
+			cr.Defender = m_controller.GetPlayer(xeCombatResult.Attributes["defender"].Value);
+			cr.AttackLocation = m_controller.Map[xeCombatResult.Attributes["location"].Value];
+
+			XmlElement xeUnits = (XmlElement)xd.GetElementsByTagName("UsedAttackers")[0];
+			cr.UsedAttackers = ParseUnits(xeUnits.GetElementsByTagName("Unit"));
+
+			xeUnits = (XmlElement)xd.GetElementsByTagName("UnusedAttackers")[0];
+			cr.UnusedAttackers = ParseUnits(xeUnits.GetElementsByTagName("Unit"));
+
+			xeUnits = (XmlElement)xd.GetElementsByTagName("Casualties")[0];
+			cr.Casualties = ParseUnits(xeUnits.GetElementsByTagName("Unit"));
+
+			xeUnits = (XmlElement)xd.GetElementsByTagName("Survivors")[0];
+			cr.Survivors = ParseUnits(xeUnits.GetElementsByTagName("Unit"));
+
+			XmlElement xeAttackResults = (XmlElement)xd.GetElementsByTagName("AttackResults")[0];
+			XmlNodeList xnlAttackResults = xeAttackResults.GetElementsByTagName("AttackResult");
+
+			foreach(XmlElement xeAttackResult in xnlAttackResults)
+			{
+				AttackResult ar = new AttackResult();
+
+				int attackerID = int.Parse(xeAttackResult.Attributes["attacker"].Value);
+				int defenderID = int.Parse(xeAttackResult.Attributes["defender"].Value);
+
+				ar.Attacker = Unit.AllUnits.GetUnitByID(attackerID);
+				ar.Defender = Unit.AllUnits.GetUnitByID(defenderID);
+
+				ar.Roll = int.Parse(xeAttackResult.Attributes["roll"].Value);
+
+				ar.Hit = bool.Parse(xeAttackResult.Attributes["hit"].Value);
+				ar.Leader = bool.Parse(xeAttackResult.Attributes["leader"].Value);
+
+				cr.AttackResults.Add(ar);
+			}
+
+			return cr;
+		}
+
+		private string CreateSabotageMessage(Dictionary<Factory, bool> sabotageResults)
+		{
+			MemoryStream stream = new MemoryStream();
+			XmlWriterSettings xws = new XmlWriterSettings();
+			xws.OmitXmlDeclaration = true;
+			XmlWriter xw = XmlWriter.Create(stream, xws);
+
+			xw.WriteStartElement("SabotageResults");
+
+			foreach(KeyValuePair<Factory, bool> kvp in sabotageResults)
+			{
+				Factory f = kvp.Key;
+				bool result = kvp.Value;
+
+				xw.WriteStartElement("Factory");
+
+				xw.WriteAttributeString("id", f.ID.ToString());
+				xw.WriteAttributeString("result", result.ToString());
+
+				xw.WriteEndElement();
+			}
+
+			xw.WriteEndDocument();
+
+			xw.Flush();
+
+			stream.Position = 0;
+			StreamReader sr = new StreamReader(stream);
+
+			return sr.ReadToEnd();
+		}
+
+		private UnitCollection ParseUnits(XmlNodeList xnlUnits)
+		{
+			UnitCollection uc = new UnitCollection();
+
+			foreach(XmlElement xeUnit in xnlUnits)
+			{
+				UnitType ut = (UnitType)Enum.Parse(typeof(UnitType), xeUnit.Attributes["type"].Value);
+				int id = int.Parse(xeUnit.Attributes["id"].Value);
+
+				Unit u = Unit.AllUnits.GetUnitByID(id);
+
+				uc.AddUnit(u);
+			}
+
+			return uc;
+		}
+
+		private void WriteUnits(XmlWriter xw, string elementName, UnitCollection uc)
+		{
+			xw.WriteStartElement(elementName);
+
+			foreach(Unit u in uc)
+			{
+				xw.WriteStartElement("Unit");
+
+				xw.WriteAttributeString("type", u.Type.ToString());
+				xw.WriteAttributeString("id", u.ID.ToString());
+				xw.WriteAttributeString("moves", u.MovesLeft.ToString());
+
+				xw.WriteEndElement();
+			}
+
+			xw.WriteEndElement();
 		}
 
 		#endregion
@@ -956,21 +1150,33 @@ namespace BuckRogers.Networking
 
 		public void ExecuteCombatAttack(CombatInfo ci)
 		{
-			m_battleController.DoCombat(ci);
+			CombatResult cr = m_battleController.DoCombat(ci);
 
 			if(m_isNetworkGame)
 			{
-				string message = CreateCombatAttackMessage(ci);
+				// TODO Change this to a CombatResult
+				string message = CreateCombatMessage(cr);//CreateCombatAttackMessage(ci);
 				m_gameClient.SendMessageToServer(GameMessage.CombatAttack, message);
+			}
+			else
+			{
+				HandleCombatResults(cr);
 			}
 		}
 
 		public void CombatCompleted()
 		{
-			throw new Exception("The method or operation is not implemented.");
+			RaiseLocalLoopbackEvent(GameMessage.BattleFinished, string.Empty, null);
+
+			ReadyToBeginCombat();
 		}
 
 		#endregion
+
+		private void HandleCombatResults(CombatResult cr)
+		{
+			m_battleController.ProcessAttackResults(cr);
+		}
 
 	}
 }

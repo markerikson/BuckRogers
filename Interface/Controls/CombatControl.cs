@@ -774,53 +774,53 @@ namespace BuckRogers.Interface
 			switch (m_battleController.CurrentBattle.Type)
 			{
 				case BattleType.KillerSatellite:
+				{
+					ci = SetUpCombat(attackingUID, null, 1);
+
+					if (ci == null)
 					{
-						ci = SetUpCombat(attackingUID, null, 1);
-
-						if (ci == null)
-						{
-							return;
-						}
-
-						break;
+						return;
 					}
+
+					break;
+				}
 				case BattleType.Bombing:
+				{
+					ci = SetUpCombat(attackingUID, defendingUID, numAttacks);
+
+					if (ci == null)
+					{
+						return;
+					}
+
+					break;
+				}
+				case BattleType.Normal:
+				{
+					ci = null;
+					try
 					{
 						ci = SetUpCombat(attackingUID, defendingUID, numAttacks);
 
 						if (ci == null)
 						{
-							return;
-						}
-
-						break;
-					}
-				case BattleType.Normal:
-					{
-						ci = null;
-						try
-						{
-							ci = SetUpCombat(attackingUID, defendingUID, numAttacks);
-
-							if (ci == null)
+							if (defendingUID.NumAlive == 0)
 							{
-								if (defendingUID.NumAlive == 0)
-								{
-									MessageBox.Show("All units of this type are dead!", "I See Dead Units",
-													MessageBoxButtons.OK, MessageBoxIcon.Information);
-								}
-								return;
+								MessageBox.Show("All units of this type are dead!", "I See Dead Units",
+												MessageBoxButtons.OK, MessageBoxIcon.Information);
 							}
-
-						}
-						catch (Exception ex)
-						{
-							MessageBox.Show(ex.Message);
 							return;
 						}
 
-						break;
 					}
+					catch (Exception ex)
+					{
+						MessageBox.Show(ex.Message);
+						return;
+					}
+
+					break;
+				}
 			}
 
 			UnitCollection leaders = m_battleController.CurrentBattle.Territory.Units.GetUnits(UnitType.Leader);
@@ -871,7 +871,7 @@ namespace BuckRogers.Interface
 				}
 
 				//m_battleController.LastResult = cr;
-				m_battleController.ProcessAttackResults(cr);
+				//m_battleController.ProcessAttackResults(cr);
 			}
 		}
 
@@ -1102,6 +1102,10 @@ namespace BuckRogers.Interface
 
 					break;
 				}
+				case GameMessage.FactoriesCaptured:
+				{
+					break;
+				}
 				case GameMessage.CombatPhaseEnded:
 				{
 					ClearMessages();
@@ -1233,21 +1237,26 @@ namespace BuckRogers.Interface
 					}
 					break;
 				}
+				
 				case BattleStatus.AttackComplete:
 				{
 					ProcessCombatResults(suea.CombatResult);
 					break;
 				}
-				case BattleStatus.RoundComplete:
+				
+				case BattleStatus.PlayerTurnFinished:
 				{
 					m_currentPUD.ClearUnitSelection();
 					m_currentPUD.Selected = false;
 					m_selectedUID = null;
 
-					MessageBox.Show("Combat round complete.  Click OK to continue.", "Round Finished",
+					string message = string.Format("{0}'s turn is finished.", m_battleController.CurrentPlayer.Name);
+					MessageBox.Show(message, "Player Finished",
 									MessageBoxButtons.OK);
 					ClearMessages();
 
+
+					// TODO This probably should be moved out into CSGM somehow...
 					if (m_battleController.NextPlayer())
 					{
 						m_player = m_battleController.CurrentPlayer;

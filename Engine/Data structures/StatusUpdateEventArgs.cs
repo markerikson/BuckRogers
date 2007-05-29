@@ -31,13 +31,17 @@ namespace BuckRogers
 		private BattleStatus m_battleStatus;
 		private List<Territory> m_territories;
 		private CombatResult m_combatResult;
+		private UnitCollection m_units;
+
+		
 
 		private bool m_result;
 		private bool m_isLocal;		
 
 		public StatusUpdateEventArgs()
 		{
-			m_territories = new List<Territory>();	
+			m_territories = new List<Territory>();
+			m_units = new UnitCollection();
 		}
 
 		public BuckRogers.Player Player
@@ -82,6 +86,12 @@ namespace BuckRogers
 		{
 			get { return m_combatResult; }
 			set { m_combatResult = value; }
+		}
+
+		public UnitCollection Units
+		{
+			get { return m_units; }
+			set { m_units = value; }
 		}
 
 		public bool Result
